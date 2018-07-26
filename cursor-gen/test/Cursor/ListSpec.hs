@@ -84,8 +84,9 @@ spec = do
             forAllValid $ \d ->
                 producesValidsOnValids (listCursorAppend @Double d)
         it "inserts an item after the cursor" $ pending
-    describe "listCursorRemove" $ do
-        it "produces valids" $ validIfSucceedsOnValid (listCursorRemove @Double)
+    describe "listCursorBackspace" $ do
+        it "produces valids" $
+            validIfSucceedsOnValid (listCursorBackspace @Double)
         it "removes an item before the cursor" $ pending
     describe "listCursorDelete" $ do
         it "produces valids" $ validIfSucceedsOnValid (listCursorDelete @Double)

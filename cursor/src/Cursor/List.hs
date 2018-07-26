@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.List
     ( ListCursor(..)
@@ -19,7 +20,7 @@ module Cursor.List
     , listCursorNextItem
     , listCursorInsert
     , listCursorAppend
-    , listCursorRemove
+    , listCursorBackspace
     , listCursorDelete
     , listCursorSplit
     , listCursorCombine
@@ -31,12 +32,9 @@ import GHC.Generics (Generic)
 data ListCursor a = ListCursor
     { listCursorPrev :: [a] -- ^ In reverse order
     , listCursorNext :: [a]
-    } deriving (Show, Eq, Generic)
+    } deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (ListCursor a)
-
-instance Functor ListCursor where
-    fmap f lc = ListCursor{listCursorPrev = map f $ listCursorPrev lc, listCursorNext = map f $ listCursorNext lc}
 
 emptyListCursor :: ListCursor a
 emptyListCursor = ListCursor {listCursorPrev = [], listCursorNext = []}
@@ -112,8 +110,8 @@ listCursorInsert c lc = lc {listCursorPrev = c : listCursorPrev lc}
 listCursorAppend :: a -> ListCursor a -> ListCursor a
 listCursorAppend c lc = lc {listCursorNext = c : listCursorNext lc}
 
-listCursorRemove :: ListCursor a -> Maybe (ListCursor a)
-listCursorRemove tc =
+listCursorBackspace :: ListCursor a -> Maybe (ListCursor a)
+listCursorBackspace tc =
     case listCursorPrev tc of
         [] -> Nothing
         (_:prev) -> Just $ tc {listCursorPrev = prev}
