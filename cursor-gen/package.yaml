@@ -1,0 +1,36 @@
+name: cursor-gen
+version: '0.0.0.0'
+author: Tom Sydney Kerckhove
+maintainer: syd@cs-syd.eu
+copyright: ! 'Copyright: (c) 2018 Tom Sydney Kerckhove'
+license: AllRightsReserved
+homepage: https://github.com/NorfairKing/cursor
+
+
+library:
+  source-dirs: src/
+  ghc-options: -Wall
+  exposed-modules:
+  - Cursor.List.Gen
+  dependencies:
+  - QuickCheck 
+  - base 
+  - cursor 
+  - genvalidity
+
+tests:
+  cursor-test:
+    main: Spec.hs
+    source-dirs: test/
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -Wall
+    dependencies:
+    - QuickCheck
+    - base
+    - cursor
+    - cursor-gen
+    - genvalidity-hspec
+    - hspec

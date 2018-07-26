@@ -1,0 +1,55 @@
+language: c
+sudo: false
+
+cache:
+  directories:
+  - $HOME/.stack
+
+matrix:
+  include:
+  - env:
+      - RESOLVER_FLAG="--stack-yaml stack.yaml"
+      - BUILD_PKGS=""
+      - TEST_PKGS=""
+    addons: {apt: {packages: [libgmp-dev]}}
+
+  - env:
+      - RESOLVER_FLAG="--stack-yaml lts-11.yaml"
+      - BUILD_PKGS=""
+      - TEST_PKGS=""
+    addons: {apt: {packages: [libgmp-dev]}}
+
+  - env:
+      - RESOLVER_FLAG="--stack-yaml lts-10.yaml"
+      - BUILD_PKGS=""
+      - TEST_PKGS=""
+    addons: {apt: {packages: [libgmp-dev]}}
+
+  # Nightly builds are allowed to fail
+  - env: 
+      - RESOLVER_FLAG="--resolver nightly"
+      - BUILD_PKGS=""
+      - TEST_PKGS=""
+    addons: {apt: {packages: [libgmp-dev]}}
+
+  allow_failures:
+    - env:
+      - RESOLVER_FLAG="--resolver nightly"
+      - BUILD_PKGS=""
+      - TEST_PKGS=""
+
+before_install:
+  - mkdir -p ~/.local/bin
+  - export PATH=$HOME/.local/bin:$PATH
+  - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+  - chmod a+x ~/.local/bin/stack
+
+install:
+- stack setup $RESOLVER_FLAG
+- stack build --only-snapshot $RESOLVER_FLAG
+
+script:
+- git --version
+- stack --version
+- travis_wait 45 stack --no-terminal $RESOLVER_FLAG build --haddock --pedantic $BUILD_PKGS
+- travis_wait 45 stack --no-terminal $RESOLVER_FLAG test --pedantic $TEST_PKGS

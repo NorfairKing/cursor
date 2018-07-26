@@ -1,0 +1,8 @@
+resolver: lts-12.2
+packages:
+- cursor
+- cursor-gen
+extra-deps:
+- Cabal-2.0.1.1
+- hlint-2.0.15
+- extra-1.6.5
