@@ -12,6 +12,8 @@ library:
   ghc-options: -Wall
   exposed-modules:
   - Cursor.List
+  - Cursor.NonEmpty
   dependencies:
   - base 
   - validity
+  - microlens
