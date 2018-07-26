@@ -13,11 +13,14 @@ library:
   exposed-modules:
   - Cursor.List.Gen
   - Cursor.NonEmpty.Gen
+  - Cursor.Tree.Gen
   dependencies:
   - QuickCheck 
   - base 
+  - containers
   - cursor 
   - genvalidity
+  - genvalidity-containers
 
 tests:
   cursor-test:

@@ -13,7 +13,10 @@ library:
   exposed-modules:
   - Cursor.List
   - Cursor.NonEmpty
+  - Cursor.Tree
   dependencies:
   - base 
-  - validity
+  - containers
   - microlens
+  - validity
+  - validity-containers
