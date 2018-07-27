@@ -20,7 +20,7 @@ module Cursor.List
     , listCursorNextItem
     , listCursorInsert
     , listCursorAppend
-    , listCursorBackspace
+    , listCursorRemove
     , listCursorDelete
     , listCursorSplit
     , listCursorCombine
@@ -110,8 +110,8 @@ listCursorInsert c lc = lc {listCursorPrev = c : listCursorPrev lc}
 listCursorAppend :: a -> ListCursor a -> ListCursor a
 listCursorAppend c lc = lc {listCursorNext = c : listCursorNext lc}
 
-listCursorBackspace :: ListCursor a -> Maybe (ListCursor a)
-listCursorBackspace tc =
+listCursorRemove :: ListCursor a -> Maybe (ListCursor a)
+listCursorRemove tc =
     case listCursorPrev tc of
         [] -> Nothing
         (_:prev) -> Just $ tc {listCursorPrev = prev}
