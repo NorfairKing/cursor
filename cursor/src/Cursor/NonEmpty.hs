@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.NonEmpty
     ( NonEmptyCursor(..)
@@ -38,17 +39,9 @@ data NonEmptyCursor a = NonEmptyCursor
     { nonEmptyCursorPrev :: [a] -- In reverse order
     , nonEmptyCursorCurrent :: a
     , nonEmptyCursorNext :: [a]
-    } deriving (Show, Eq, Generic)
+    } deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (NonEmptyCursor a)
-
-instance Functor NonEmptyCursor where
-    fmap f nec =
-        NonEmptyCursor
-            { nonEmptyCursorPrev = map f $ nonEmptyCursorPrev nec
-            , nonEmptyCursorCurrent = f $ nonEmptyCursorCurrent nec
-            , nonEmptyCursorNext = map f $ nonEmptyCursorNext nec
-            }
 
 makeNonEmptyCursor :: NonEmpty a -> NonEmptyCursor a
 makeNonEmptyCursor = makeNonEmptyCursorWithSelection 0
@@ -111,20 +104,16 @@ nonEmptyCursorSelectNext lec =
                 }
 
 nonEmptyCursorSelectFirst :: NonEmptyCursor a -> NonEmptyCursor a
-nonEmptyCursorSelectFirst = go
-  where
-    go lec =
-        case nonEmptyCursorSelectPrev lec of
-            Nothing -> lec
-            Just lec' -> go lec'
+nonEmptyCursorSelectFirst lec =
+    case nonEmptyCursorSelectPrev lec of
+        Nothing -> lec
+        Just lec' -> nonEmptyCursorSelectFirst lec'
 
 nonEmptyCursorSelectLast :: NonEmptyCursor a -> NonEmptyCursor a
-nonEmptyCursorSelectLast = go
-  where
-    go lec =
-        case nonEmptyCursorSelectNext lec of
-            Nothing -> lec
-            Just lec' -> go lec'
+nonEmptyCursorSelectLast lec =
+    case nonEmptyCursorSelectNext lec of
+        Nothing -> lec
+        Just lec' -> nonEmptyCursorSelectLast lec'
 
 nonEmptyCursorInsert :: a -> NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorInsert c lec =

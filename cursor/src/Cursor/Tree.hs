@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.Tree where
 
@@ -13,35 +14,18 @@ data TreeCursor a = TreeCursor
     { treeAbove :: Maybe (TreeAbove a)
     , treeCurrent :: a
     , treeBelow :: Forest a
-    } deriving (Show, Eq, Generic)
+    } deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (TreeCursor a)
-
-instance Functor TreeCursor where
-    fmap f tc =
-        TreeCursor
-            { treeAbove = fmap (fmap f) $ treeAbove tc
-            , treeCurrent = f $ treeCurrent tc
-            , treeBelow = map (fmap f) $ treeBelow tc
-            }
 
 data TreeAbove a = TreeAbove
     { treeAboveLefts :: [Tree a]
     , treeAboveAbove :: Maybe (TreeAbove a)
     , treeAboveNode :: a
     , treeAboveRights :: [Tree a]
-    } deriving (Show, Eq, Generic)
+    } deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (TreeAbove a)
-
-instance Functor TreeAbove where
-    fmap f ta =
-        TreeAbove
-            { treeAboveLefts = map (fmap f) $ treeAboveLefts ta
-            , treeAboveAbove = fmap (fmap f) $ treeAboveAbove ta
-            , treeAboveNode = f $ treeAboveNode ta
-            , treeAboveRights = map (fmap f) $ treeAboveRights ta
-            }
 
 makeTreeCursor :: Tree a -> TreeCursor a
 makeTreeCursor (Node v fs) =
