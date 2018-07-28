@@ -11,6 +11,7 @@ module Cursor.NonEmptySpec
 import Test.Hspec
 import Test.QuickCheck
 import Test.Validity
+import Test.Validity.Optics
 
 import Control.Monad
 
@@ -28,9 +29,16 @@ spec = do
     describe "makeNonEmptyCursor" $
         it "produces valid cursors" $
         producesValidsOnValids (makeNonEmptyCursor @Double)
-    describe "makeNonEmptyCursorWithSelection" $
+    describe "makeNonEmptyCursorWithSelection" $ do
         it "produces valid cursors" $
-        producesValidsOnValids2 (makeNonEmptyCursorWithSelection @Double)
+            producesValidsOnValids2 (makeNonEmptyCursorWithSelection @Double)
+        it
+            "is the inverse of rebuildNonEmptyCursor when using the current selection" $
+            forAllValid $ \lec ->
+                makeNonEmptyCursorWithSelection
+                    (nonEmptyCursorSelection @Double lec)
+                    (rebuildNonEmptyCursor lec) `shouldBe`
+                lec
     describe "singletonNonEmptyCursor" $
         it "produces valid cursors" $
         producesValidsOnValids (singletonNonEmptyCursor @Double)
@@ -45,6 +53,11 @@ spec = do
                 inverseFunctions
                     (makeNonEmptyCursorWithSelection @Int i)
                     rebuildNonEmptyCursor
+    describe "nonEmptyCursorSelection" $
+        it "produces valid ints" $
+        producesValidsOnValids (nonEmptyCursorSelection @Double)
+    describe "nonEmptyCursorElemL" $
+        lensSpecOnValid (nonEmptyCursorElemL @Double)
     describe "nonEmptyCursorSelectPrev" $ do
         it "produces valid cursors" $
             producesValidsOnValids (nonEmptyCursorSelectPrev @Double)

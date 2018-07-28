@@ -13,6 +13,7 @@ library:
   exposed-modules:
   - Cursor.List
   - Cursor.Map
+  - Cursor.Map.KeyValue
   - Cursor.NonEmpty
   - Cursor.Tree
   dependencies:

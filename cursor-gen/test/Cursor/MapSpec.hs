@@ -10,6 +10,7 @@ import Test.Hspec
 
 -- import Test.QuickCheck
 import Test.Validity
+import Test.Validity.Optics
 
 -- import Control.Monad
 import Cursor.Map
@@ -34,12 +35,17 @@ spec = do
         producesValidsOnValids2 (makeKeyValueCursor @Double @Double)
     describe "singletonKeyValueCursor" $
         it "produces valid cursors" $
-        producesValidsOnValids2 (singletonKeyValueCursor @Double @Double)
+        producesValidsOnValids2 (singletonMapCursor @Double @Double)
     describe "rebuildMapCursor" $ do
         it "produces valid Nonempty lists" $
             producesValidsOnValids (rebuildMapCursor @Double @Double)
         it "is the inverse of makeMapCursor for integers" $
             inverseFunctions (makeMapCursor @Int @Int) rebuildMapCursor
+    describe "mapCursorNonEmptyCursorL" $
+        lensSpecOnValid (mapCursorNonEmptyCursorL @Double @Double)
+    describe "mapCursorElemL" $ lensSpecOnValid (mapCursorElemL @Double @Double)
+    describe "mapCursorElemKeyL" $ lensSpecOnValid (mapCursorElemKeyL @Double @Double)
+    describe "mapCursorElemValueL" $ lensSpecOnValid (mapCursorElemValueL @Double @Double)
 -- isMovementM :: (forall k v. MapCursor k v -> Maybe (MapCursor k v)) -> Property
 -- isMovementM func =
 --     forAllValid $ \lec ->

@@ -9,6 +9,7 @@ module Cursor.NonEmpty
     , makeNonEmptyCursorWithSelection
     , singletonNonEmptyCursor
     , rebuildNonEmptyCursor
+    , nonEmptyCursorSelection
     , nonEmptyCursorElemL
     , nonEmptyCursorSelectPrev
     , nonEmptyCursorSelectNext
@@ -72,6 +73,9 @@ rebuildNonEmptyCursor :: NonEmptyCursor a -> NonEmpty a
 rebuildNonEmptyCursor NonEmptyCursor {..} =
     nonemptyPrepend (reverse nonEmptyCursorPrev) $
     nonEmptyCursorCurrent :| nonEmptyCursorNext
+
+nonEmptyCursorSelection :: NonEmptyCursor a -> Int
+nonEmptyCursorSelection = length . nonEmptyCursorPrev
 
 nonEmptyCursorElemL :: Lens' (NonEmptyCursor a) a
 nonEmptyCursorElemL =

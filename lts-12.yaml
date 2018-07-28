@@ -1,0 +1,8 @@
+resolver: lts-12.2
+packages:
+- cursor
+- cursor-gen
+extra-deps:
+  - genvalidity-hspec-optics-0.0.0.0
+nix:
+  path: [ "nixpkgs=https://github.com/NixOS/nixpkgs/archive/886871538c15681575925a990a3f1b68ed9d5477.tar.gz" ]
