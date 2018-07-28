@@ -12,6 +12,7 @@ library:
   ghc-options: -Wall
   exposed-modules:
   - Cursor.List.Gen
+  - Cursor.Map.Gen
   - Cursor.NonEmpty.Gen
   - Cursor.Tree.Gen
   dependencies:
