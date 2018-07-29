@@ -1,5 +1,5 @@
-language: c
-sudo: false
+language: nix
+sudo: true
 
 cache:
   directories:
@@ -8,54 +8,31 @@ cache:
 matrix:
   include:
   - env:
+      - BUILD_KIND="stack"
       - RESOLVER_FLAG="--stack-yaml stack.yaml"
-      - BUILD_PKGS=""
-      - TEST_PKGS=""
     addons: {apt: {packages: [libgmp-dev]}}
 
   - env:
+      - BUILD_KIND="stack"
       - RESOLVER_FLAG="--stack-yaml lts-12.yaml"
-      - BUILD_PKGS=""
-      - TEST_PKGS=""
     addons: {apt: {packages: [libgmp-dev]}}
-
+    
   - env:
-      - RESOLVER_FLAG="--stack-yaml lts-11.yaml"
-      - BUILD_PKGS=""
-      - TEST_PKGS=""
-    addons: {apt: {packages: [libgmp-dev]}}
-
-  - env:
-      - RESOLVER_FLAG="--stack-yaml lts-10.yaml"
-      - BUILD_PKGS=""
-      - TEST_PKGS=""
-    addons: {apt: {packages: [libgmp-dev]}}
+      - BUILD_KIND="nix"
 
   # Nightly builds are allowed to fail
   - env: 
+      - BUILD_KIND="stack"
       - RESOLVER_FLAG="--resolver nightly"
-      - BUILD_PKGS=""
-      - TEST_PKGS=""
     addons: {apt: {packages: [libgmp-dev]}}
 
   allow_failures:
     - env:
+      - BUILD_KIND="stack"
       - RESOLVER_FLAG="--resolver nightly"
-      - BUILD_PKGS=""
-      - TEST_PKGS=""
 
-before_install:
-  - mkdir -p ~/.local/bin
-  - export PATH=$HOME/.local/bin:$PATH
-  - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
-  - chmod a+x ~/.local/bin/stack
+before_install: ./scripts/ci/before_install.sh
 
-install:
-- stack setup $RESOLVER_FLAG
-- stack build --only-snapshot $RESOLVER_FLAG
+install: ./scripts/ci/install.sh
 
-script:
-- git --version
-- stack --version
-- travis_wait 45 stack --no-terminal $RESOLVER_FLAG build --haddock --pedantic $BUILD_PKGS
-- travis_wait 45 stack --no-terminal $RESOLVER_FLAG test --pedantic $TEST_PKGS
+script: ./scripts/ci/script.sh
