@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.NonEmpty.Gen
-    ( nonEmptyElemOf
+    ( nonEmptyElemOf, nonEmptyWithIndex0
     ) where
 
 import Data.GenValidity
@@ -12,7 +12,6 @@ import qualified Data.List.NonEmpty as NE
 
 import Cursor.NonEmpty
 
-
 instance GenUnchecked a => GenUnchecked (NonEmptyCursor a)
 
 instance GenValid a => GenValid (NonEmptyCursor a) where
@@ -20,3 +19,6 @@ instance GenValid a => GenValid (NonEmptyCursor a) where
 
 nonEmptyElemOf :: NonEmptyCursor a -> Gen a
 nonEmptyElemOf = elements . NE.toList . rebuildNonEmptyCursor
+
+nonEmptyWithIndex0 :: Gen a -> Gen (NonEmptyCursor a)
+nonEmptyWithIndex0 g = NonEmptyCursor [] <$> g <*> genListOf g

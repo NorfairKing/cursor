@@ -15,6 +15,8 @@ library:
   - Cursor.Map
   - Cursor.Map.KeyValue
   - Cursor.NonEmpty
+  - Cursor.Text
+  - Cursor.TextField
   - Cursor.Tree
   dependencies:
   - base 
@@ -22,3 +24,4 @@ library:
   - microlens
   - validity
   - validity-containers
+  - text

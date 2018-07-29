@@ -10,6 +10,7 @@ module Cursor.List
     , makeListCursorWithSelection
     , rebuildListCursor
     , listCursorNull
+    , listCursorLength
     , listCursorIndex
     , listCursorSelectPrev
     , listCursorSelectNext
@@ -53,6 +54,9 @@ rebuildListCursor ListCursor {..} = reverse listCursorPrev ++ listCursorNext
 
 listCursorNull :: ListCursor a -> Bool
 listCursorNull ListCursor {..} = null listCursorPrev && null listCursorNext
+
+listCursorLength :: ListCursor a ->Int
+listCursorLength = length . rebuildListCursor
 
 listCursorIndex :: ListCursor a -> Int
 listCursorIndex = length . listCursorPrev

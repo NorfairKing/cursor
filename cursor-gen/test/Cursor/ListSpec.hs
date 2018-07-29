@@ -38,6 +38,13 @@ spec = do
                 inverseFunctions
                     (makeListCursorWithSelection @Int i)
                     rebuildListCursor
+    describe "listCursorNull" $
+        it "produces valid bools" $ producesValidsOnValids (listCursorNull @Double)
+    describe "listCursorLength" $
+        it "produces valid bools" $ producesValidsOnValids (listCursorLength @Double)
+    describe "listCursorIndex" $
+        it "produces valid indices" $ producesValidsOnValids (listCursorIndex @Double)
+
     describe "listCursorSelectPrev" $ do
         it "produces valid cursors" $
             producesValidsOnValids (listCursorSelectPrev @Double)
