@@ -1,5 +1,7 @@
 set -ex
 
+source /lib/travis/build/script/templates/header.sh
+
 case $BUILD_KIND in
   stack)
     mkdir -p ~/.local/bin
