@@ -19,7 +19,6 @@ matrix:
     
   - env:
       - BUILD_KIND="nix"
-    addons: {apt: {packages: [libgmp-dev]}}
 
   # Nightly builds are allowed to fail
   - env: 
