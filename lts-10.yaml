@@ -1,7 +1,0 @@
-resolver: lts-10.10
-packages:
-- cursor
-- cursor-gen
-extra-deps:
-- genvalidity-hspec-optics-0.0.0.0
-
