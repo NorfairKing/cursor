@@ -8,15 +8,13 @@ cache:
 matrix:
   include:
   - env:
+      - BUILD_KIND="stack"
       - RESOLVER_FLAG="--stack-yaml stack.yaml"
-      - BUILD_PKGS=""
-      - TEST_PKGS=""
     addons: {apt: {packages: [libgmp-dev]}}
 
   - env:
+      - BUILD_KIND="stack"
       - RESOLVER_FLAG="--stack-yaml lts-12.yaml"
-      - BUILD_PKGS=""
-      - TEST_PKGS=""
     addons: {apt: {packages: [libgmp-dev]}}
     
   - env:
@@ -25,16 +23,14 @@ matrix:
 
   # Nightly builds are allowed to fail
   - env: 
+      - BUILD_KIND="stack"
       - RESOLVER_FLAG="--resolver nightly"
-      - BUILD_PKGS=""
-      - TEST_PKGS=""
     addons: {apt: {packages: [libgmp-dev]}}
 
   allow_failures:
     - env:
+      - BUILD_KIND="stack"
       - RESOLVER_FLAG="--resolver nightly"
-      - BUILD_PKGS=""
-      - TEST_PKGS=""
 
 before_install: ./scripts/ci/before_install.sh
 
