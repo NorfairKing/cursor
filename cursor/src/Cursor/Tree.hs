@@ -155,7 +155,7 @@ treeCursorAppendAndSelect tree tc@TreeCursor {..} =
              in Just . makeTreeCursorWithAbove tree $ Just newTreeAbove
 
 treeCursorDeleteElemAndSelectPrevious :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorDeleteElemAndSelectPrevious tc@TreeCursor {..} =
+treeCursorDeleteElemAndSelectPrevious TreeCursor {..} =
     case treeAbove of
         Nothing -> Nothing
         Just ta ->
@@ -166,7 +166,7 @@ treeCursorDeleteElemAndSelectPrevious tc@TreeCursor {..} =
                     Just ta {treeAboveLefts = xs}
 
 treeCursorDeleteElemAndSelectNext :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorDeleteElemAndSelectNext tc@TreeCursor {..} =
+treeCursorDeleteElemAndSelectNext TreeCursor {..} =
     case treeAbove of
         Nothing -> Nothing
         Just ta ->
@@ -188,7 +188,7 @@ treeCursorSelectAbove tc@TreeCursor {..} =
              in Just $ makeTreeCursorWithAbove newTree treeAboveAbove
 
 treeCursorSelectBelowAtPos :: Int -> TreeCursor a -> Maybe (TreeCursor a)
-treeCursorSelectBelowAtPos pos tc@TreeCursor {..} =
+treeCursorSelectBelowAtPos pos TreeCursor {..} =
     case splitAt pos treeBelow of
         (_, []) -> Nothing
         (lefts, current:rights) ->

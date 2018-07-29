@@ -37,14 +37,14 @@ spec = do
         testMovementM treeCursorSelectPrev
         it "selects the previous element" pending
         it "after treeCursorSelectNext is identity if they don't fail" $ do
-            inverseIfPasses (treeCursorSelectPrev @Double) $
-                treeCursorSelectNext @Double
+            inverseFunctionsIfSucceedOnValid (treeCursorSelectNext @Double) $
+                treeCursorSelectPrev @Double
     describe "treeCursorSelectNext" $ do
         testMovementM treeCursorSelectNext
         it "selects the next element" pending
         it "after treeCursorSelectPrev is identity if they don't fail" $ do
-            inverseIfPasses (treeCursorSelectNext @Double) $
-                treeCursorSelectPrev @Double
+            inverseFunctionsIfSucceedOnValid (treeCursorSelectPrev @Double) $
+                treeCursorSelectNext @Double
     describe "treeCursorSelectFirst" $ do
         testMovement treeCursorSelectFirst
         it "selects the first element" pending
@@ -57,8 +57,8 @@ spec = do
         testMovementM treeCursorSelectAbove
         it "selects the element above" pending
         it "after treeCursorSelectBelow is identity if they don't fail" $ do
-            inverseIfPasses (treeCursorSelectAbove @Double) $
-                treeCursorSelectBelow @Double
+            inverseFunctionsIfSucceedOnValid (treeCursorSelectBelow @Double) $
+                treeCursorSelectAbove @Double
     describe "treeCursorSelectBelow" $ do
         testMovementM treeCursorSelectBelow
         it "selects the element below" pending
@@ -89,16 +89,18 @@ spec = do
             producesValidsOnValids $ treeCursorRemoveElem @Double
         it "after treeCursorAppendAndSelect is identity if they don't fail" $
             forAllValid $ \tree ->
-                inverseIfPasses (treeCursorRemoveElem @Double) $
-                (treeCursorAppendAndSelect @Double) tree
+                inverseFunctionsIfSucceedOnValid
+                    ((treeCursorAppendAndSelect @Double) tree) $
+                treeCursorRemoveElem @Double
         it "removes elements and select the former" pending
     describe "treeCursorDeleteElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDeleteElem @Double
         it "after treeCursorInsertAndSelect is identity if they don't fail" $
             forAllValid $ \tree ->
-                inverseIfPasses (treeCursorDeleteElem @Double) $
-                (treeCursorInsertAndSelect @Double) tree
+                inverseFunctionsIfSucceedOnValid
+                    ((treeCursorInsertAndSelect @Double) tree) $
+                (treeCursorDeleteElem @Double)
         it "removes elements and select the next" pending
 
 testMovement :: (forall a. TreeCursor a -> TreeCursor a) -> Spec
@@ -110,17 +112,6 @@ testMovementM :: (forall a. TreeCursor a -> Maybe (TreeCursor a)) -> Spec
 testMovementM func = do
     it "produces valids on valids" $ producesValidsOnValids $ func @Double
     it "is a movement" $ isMovementM func
-
-inverseIfPasses ::
-       forall a b. (GenValid a, GenValid b, Show a, Show b, Eq a, Eq b)
-    => (a -> Maybe b)
-    -> (b -> Maybe a)
-    -> Property
-inverseIfPasses f g =
-    forAllValid @b $ \x ->
-        case f =<< g x of
-            Nothing -> pure ()
-            Just x' -> x `shouldBe` x'
 
 isMovementM :: (forall a. TreeCursor a -> Maybe (TreeCursor a)) -> Property
 isMovementM func =
