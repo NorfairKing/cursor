@@ -14,6 +14,20 @@ module Cursor.Map
     , mapCursorElemL
     , mapCursorElemKeyL
     , mapCursorElemValueL
+    , mapCursorSelectPrev
+    , mapCursorSelectNext
+    , mapCursorSelectFirst
+    , mapCursorSelectLast
+    , mapCursorSelection
+    , mapCursorSelectIndex
+    , mapCursorInsert
+    , mapCursorAppend
+    , mapCursorInsertAndSelect
+    , mapCursorAppendAndSelect
+    , mapCursorRemoveElemAndSelectPrev
+    , mapCursorDeleteElemAndSelectNext
+    , mapCursorRemoveElem
+    , mapCursorDeleteElem
     , module Cursor.Map.KeyValue
     ) where
 
@@ -67,3 +81,53 @@ mapCursorElemKeyL = mapCursorElemL . keyValueCursorKeyL
 
 mapCursorElemValueL :: Lens' (MapCursor k v) v
 mapCursorElemValueL = mapCursorElemL . keyValueCursorValueL
+
+mapCursorSelectPrev :: MapCursor k v -> Maybe (MapCursor k v)
+mapCursorSelectPrev = mapCursorNonEmptyCursorL nonEmptyCursorSelectPrev
+
+mapCursorSelectNext :: MapCursor k v -> Maybe (MapCursor k v)
+mapCursorSelectNext = mapCursorNonEmptyCursorL nonEmptyCursorSelectNext
+
+mapCursorSelectFirst :: MapCursor k v -> MapCursor k v
+mapCursorSelectFirst = mapCursorNonEmptyCursorL %~ nonEmptyCursorSelectFirst
+
+mapCursorSelectLast :: MapCursor k v -> MapCursor k v
+mapCursorSelectLast = mapCursorNonEmptyCursorL %~ nonEmptyCursorSelectLast
+
+mapCursorSelection :: MapCursor k v -> Int
+mapCursorSelection = nonEmptyCursorSelection . mapCursorList
+
+mapCursorSelectIndex :: MapCursor k v -> Int -> Maybe (MapCursor k v)
+mapCursorSelectIndex mc i =
+    mc & mapCursorNonEmptyCursorL (`nonEmptyCursorSelectIndex` i)
+
+mapCursorInsert :: k -> v -> MapCursor k v -> MapCursor k v
+mapCursorInsert k v =
+    mapCursorNonEmptyCursorL %~ (nonEmptyCursorInsert $ makeKeyValueCursor k v)
+
+mapCursorAppend :: k -> v -> MapCursor k v -> MapCursor k v
+mapCursorAppend k v =
+    mapCursorNonEmptyCursorL %~ (nonEmptyCursorAppend $ makeKeyValueCursor k v)
+
+mapCursorInsertAndSelect :: k -> v -> MapCursor k v -> MapCursor k v
+mapCursorInsertAndSelect k v =
+    mapCursorNonEmptyCursorL %~
+    (nonEmptyCursorInsertAndSelect $ makeKeyValueCursor k v)
+
+mapCursorAppendAndSelect :: k -> v -> MapCursor k v -> MapCursor k v
+mapCursorAppendAndSelect k v =
+    mapCursorNonEmptyCursorL %~ (nonEmptyCursorAppendAndSelect $ makeKeyValueCursor k v)
+
+mapCursorRemoveElemAndSelectPrev :: MapCursor k v -> Maybe (MapCursor k v)
+mapCursorRemoveElemAndSelectPrev =
+    mapCursorNonEmptyCursorL nonEmptyCursorRemoveElemAndSelectPrev
+
+mapCursorDeleteElemAndSelectNext :: MapCursor k v -> Maybe (MapCursor k v)
+mapCursorDeleteElemAndSelectNext =
+    mapCursorNonEmptyCursorL nonEmptyCursorDeleteElemAndSelectNext
+
+mapCursorRemoveElem :: MapCursor k v -> Maybe (MapCursor k v)
+mapCursorRemoveElem = mapCursorNonEmptyCursorL nonEmptyCursorRemoveElem
+
+mapCursorDeleteElem :: MapCursor k v -> Maybe (MapCursor k v)
+mapCursorDeleteElem = mapCursorNonEmptyCursorL nonEmptyCursorDeleteElem
