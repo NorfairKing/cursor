@@ -102,6 +102,14 @@ spec = do
                     ((treeCursorInsertAndSelect @Double) tree) $
                 (treeCursorDeleteElem @Double)
         it "removes elements and select the next" pending
+    describe "treeCursorSwapPrev" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ treeCursorSwapPrev @Double
+        it "swaps the current node with the previous node" pending
+    describe "treeCursorSwapNext" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ treeCursorSwapNext @Double
+        it "swaps the current node with the next node" pending
 
 testMovement :: (forall a. TreeCursor a -> TreeCursor a) -> Spec
 testMovement func = do
@@ -121,14 +129,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildTreeCursor lec
                     ne' = rebuildTreeCursor lec'
-                 in unless (ne == ne') $
-                    expectationFailure $
-                    unlines
-                        [ "Cursor before:\n" ++ show lec
-                        , "Tree before:  \n" ++ show ne
-                        , "Cursor after: \n" ++ show lec'
-                        , "Tree after:   \n" ++ show ne'
-                        ]
+                in unless (ne == ne') $
+                   expectationFailure $
+                   unlines
+                       [ "Cursor before:\n" ++ show lec
+                       , "Tree before:  \n" ++ show ne
+                       , "Cursor after: \n" ++ show lec'
+                       , "Tree after:   \n" ++ show ne'
+                       ]
 
 isMovement :: (forall a. TreeCursor a -> TreeCursor a) -> Property
 isMovement func =
