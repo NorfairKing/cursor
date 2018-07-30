@@ -53,9 +53,6 @@ spec = do
                 inverseFunctions
                     (makeNonEmptyCursorWithSelection @Int i)
                     rebuildNonEmptyCursor
-    describe "nonEmptyCursorSelection" $
-        it "produces valid ints" $
-        producesValidsOnValids (nonEmptyCursorSelection @Double)
     describe "nonEmptyCursorElemL" $
         lensSpecOnValid (nonEmptyCursorElemL @Double)
     describe "nonEmptyCursorSelectPrev" $ do
@@ -80,6 +77,18 @@ spec = do
         it "is a movement" $ isMovement nonEmptyCursorSelectLast
         it "is idempotent" $ idempotent (nonEmptyCursorSelectLast @Double)
         it "selects the last element" pending
+    describe "nonEmptyCursorSelection" $ do
+        it "produces valid ints" $
+            producesValidsOnValids (nonEmptyCursorSelection @Double)
+        it "returns the index of the currently selected element" pending
+    describe "nonEmptyCursorSelectIndex" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (nonEmptyCursorSelectIndex @Double)
+        it "is the identity function when given the current selection" $
+            forAllValid $ \nec ->
+                nonEmptyCursorSelectIndex nec (nonEmptyCursorSelection nec) `shouldBe`
+                Just (nec :: NonEmptyCursor Double)
+        it "returns selects the element at the given index" pending
     describe "nonEmptyCursorInsert" $ do
         it "produces valid cursors" $
             forAllValid $ \d ->
@@ -130,14 +139,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildNonEmptyCursor lec
                     ne' = rebuildNonEmptyCursor lec'
-                 in unless (ne == ne') $
-                    expectationFailure $
-                    unlines
-                        [ "Cursor before:\n" ++ show lec
-                        , "List before:  \n" ++ show ne
-                        , "Cursor after: \n" ++ show lec'
-                        , "List after:   \n" ++ show ne'
-                        ]
+                in unless (ne == ne') $
+                   expectationFailure $
+                   unlines
+                       [ "Cursor before:\n" ++ show lec
+                       , "List before:  \n" ++ show ne
+                       , "Cursor after: \n" ++ show lec'
+                       , "List after:   \n" ++ show ne'
+                       ]
 
 isMovement :: (forall a. NonEmptyCursor a -> NonEmptyCursor a) -> Property
 isMovement func =

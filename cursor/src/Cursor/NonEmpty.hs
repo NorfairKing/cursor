@@ -9,12 +9,13 @@ module Cursor.NonEmpty
     , makeNonEmptyCursorWithSelection
     , singletonNonEmptyCursor
     , rebuildNonEmptyCursor
-    , nonEmptyCursorSelection
     , nonEmptyCursorElemL
     , nonEmptyCursorSelectPrev
     , nonEmptyCursorSelectNext
     , nonEmptyCursorSelectFirst
     , nonEmptyCursorSelectLast
+    , nonEmptyCursorSelection
+    , nonEmptyCursorSelectIndex
     , nonEmptyCursorInsert
     , nonEmptyCursorAppend
     , nonEmptyCursorInsertAndSelect
@@ -50,11 +51,11 @@ makeNonEmptyCursor = makeNonEmptyCursorWithSelection 0
 makeNonEmptyCursorWithSelection :: Int -> NonEmpty a -> NonEmptyCursor a
 makeNonEmptyCursorWithSelection i ne =
     let (l, m, r) = applyNonEmptySelection ne i
-     in NonEmptyCursor
-            { nonEmptyCursorPrev = reverse l
-            , nonEmptyCursorCurrent = m
-            , nonEmptyCursorNext = r
-            }
+    in NonEmptyCursor
+       { nonEmptyCursorPrev = reverse l
+       , nonEmptyCursorCurrent = m
+       , nonEmptyCursorNext = r
+       }
   where
     applyNonEmptySelection :: NonEmpty a -> Int -> ([a], a, [a])
     applyNonEmptySelection (c :| rest) i_
@@ -64,7 +65,7 @@ makeNonEmptyCursorWithSelection i ne =
                 Nothing -> ([], c, [])
                 Just ne_ ->
                     let (l, m, r) = applyNonEmptySelection ne_ (i_ - 1)
-                     in (c : l, m, r)
+                    in (c : l, m, r)
 
 singletonNonEmptyCursor :: a -> NonEmptyCursor a
 singletonNonEmptyCursor a = makeNonEmptyCursor $ a :| []
@@ -73,9 +74,6 @@ rebuildNonEmptyCursor :: NonEmptyCursor a -> NonEmpty a
 rebuildNonEmptyCursor NonEmptyCursor {..} =
     nonemptyPrepend (reverse nonEmptyCursorPrev) $
     nonEmptyCursorCurrent :| nonEmptyCursorNext
-
-nonEmptyCursorSelection :: NonEmptyCursor a -> Int
-nonEmptyCursorSelection = length . nonEmptyCursorPrev
 
 nonEmptyCursorElemL :: Lens' (NonEmptyCursor a) a
 nonEmptyCursorElemL =
@@ -88,11 +86,11 @@ nonEmptyCursorSelectPrev lec =
         (e:rest) ->
             Just $
             lec
-                { nonEmptyCursorPrev = rest
-                , nonEmptyCursorCurrent = e
-                , nonEmptyCursorNext =
-                      nonEmptyCursorCurrent lec : nonEmptyCursorNext lec
-                }
+            { nonEmptyCursorPrev = rest
+            , nonEmptyCursorCurrent = e
+            , nonEmptyCursorNext =
+                  nonEmptyCursorCurrent lec : nonEmptyCursorNext lec
+            }
 
 nonEmptyCursorSelectNext :: NonEmptyCursor a -> Maybe (NonEmptyCursor a)
 nonEmptyCursorSelectNext lec =
@@ -101,11 +99,11 @@ nonEmptyCursorSelectNext lec =
         (e:rest) ->
             Just $
             lec
-                { nonEmptyCursorPrev =
-                      nonEmptyCursorCurrent lec : nonEmptyCursorPrev lec
-                , nonEmptyCursorCurrent = e
-                , nonEmptyCursorNext = rest
-                }
+            { nonEmptyCursorPrev =
+                  nonEmptyCursorCurrent lec : nonEmptyCursorPrev lec
+            , nonEmptyCursorCurrent = e
+            , nonEmptyCursorNext = rest
+            }
 
 nonEmptyCursorSelectFirst :: NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorSelectFirst lec =
@@ -119,6 +117,19 @@ nonEmptyCursorSelectLast lec =
         Nothing -> lec
         Just lec' -> nonEmptyCursorSelectLast lec'
 
+nonEmptyCursorSelection :: NonEmptyCursor a -> Int
+nonEmptyCursorSelection = length . nonEmptyCursorPrev
+
+nonEmptyCursorSelectIndex :: NonEmptyCursor a -> Int -> Maybe (NonEmptyCursor a)
+nonEmptyCursorSelectIndex nec i
+    | i < nonEmptyCursorSelection nec = do
+        nec' <- nonEmptyCursorSelectPrev nec
+        nonEmptyCursorSelectIndex nec' i
+    | i > nonEmptyCursorSelection nec = do
+        nec' <- nonEmptyCursorSelectNext nec
+        nonEmptyCursorSelectIndex nec' i
+    | otherwise = Just nec
+
 nonEmptyCursorInsert :: a -> NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorInsert c lec =
     lec {nonEmptyCursorPrev = c : nonEmptyCursorPrev lec}
@@ -130,18 +141,16 @@ nonEmptyCursorAppend c lec =
 nonEmptyCursorInsertAndSelect :: a -> NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorInsertAndSelect c lec =
     lec
-        { nonEmptyCursorCurrent = c
-        , nonEmptyCursorNext =
-              nonEmptyCursorCurrent lec : nonEmptyCursorNext lec
-        }
+    { nonEmptyCursorCurrent = c
+    , nonEmptyCursorNext = nonEmptyCursorCurrent lec : nonEmptyCursorNext lec
+    }
 
 nonEmptyCursorAppendAndSelect :: a -> NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorAppendAndSelect c lec =
     lec
-        { nonEmptyCursorCurrent = c
-        , nonEmptyCursorPrev =
-              nonEmptyCursorCurrent lec : nonEmptyCursorPrev lec
-        }
+    { nonEmptyCursorCurrent = c
+    , nonEmptyCursorPrev = nonEmptyCursorCurrent lec : nonEmptyCursorPrev lec
+    }
 
 nonEmptyCursorRemoveElemAndSelectPrev ::
        NonEmptyCursor a -> Maybe (NonEmptyCursor a)

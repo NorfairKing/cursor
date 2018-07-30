@@ -11,6 +11,7 @@ library:
   source-dirs: src/
   ghc-options: -Wall
   exposed-modules:
+  - Cursor.Forest
   - Cursor.List
   - Cursor.Map
   - Cursor.Map.KeyValue
