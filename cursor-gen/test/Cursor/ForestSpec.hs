@@ -47,6 +47,18 @@ spec = do
     describe "forestCursorSelectLastTree" $ do
         testMovement forestCursorSelectLastTree
         it "selects the last tree" pending
+    describe "forestCursorSelection" $ do
+        it "produces valid ints" $
+            producesValidsOnValids (forestCursorSelection @Double)
+        it "returns the index of the currently selected element" pending
+    describe "forestCursorSelectIndex" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorSelectIndex @Double)
+        it "is the identity function when given the current selection" $
+            forAllValid $ \fc ->
+                forestCursorSelectIndex fc (forestCursorSelection fc) `shouldBe`
+                Just (fc :: ForestCursor Double)
+        it "returns selects the element at the given index" pending
     describe "forestCursorInsert" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorInsert @Double)

@@ -13,6 +13,8 @@ module Cursor.Forest
     , forestCursorSelectNextTree
     , forestCursorSelectFirstTree
     , forestCursorSelectLastTree
+    , forestCursorSelection
+    , forestCursorSelectIndex
     , forestCursorInsert
     , forestCursorAppend
     , forestCursorInsertAndSelect
@@ -72,6 +74,14 @@ forestCursorSelectFirstTree =
 forestCursorSelectLastTree :: ForestCursor a -> ForestCursor a
 forestCursorSelectLastTree = forestCursorListCursorL %~ nonEmptyCursorSelectLast
 
+forestCursorSelection :: ForestCursor a -> Int
+forestCursorSelection fc =
+    nonEmptyCursorSelection $ fc ^. forestCursorListCursorL
+
+forestCursorSelectIndex :: ForestCursor a -> Int -> Maybe (ForestCursor a)
+forestCursorSelectIndex fc i =
+    fc & forestCursorListCursorL (`nonEmptyCursorSelectIndex` i)
+
 forestCursorInsert :: ForestCursor a -> TreeCursor a -> ForestCursor a
 forestCursorInsert fc tc =
     fc & forestCursorListCursorL %~ nonEmptyCursorInsert tc
@@ -103,5 +113,5 @@ forestCursorDeleteTree :: ForestCursor a -> Maybe (ForestCursor a)
 forestCursorDeleteTree = forestCursorListCursorL nonEmptyCursorDeleteElem
 
 forestCursorAddRoot :: ForestCursor a -> a -> TreeCursor a
-forestCursorAddRoot fc v = makeTreeCursor $ Node v $ NE.toList  $ rebuildForestCursor fc
-
+forestCursorAddRoot fc v =
+    makeTreeCursor $ Node v $ NE.toList $ rebuildForestCursor fc
