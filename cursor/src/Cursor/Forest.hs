@@ -17,6 +17,11 @@ module Cursor.Forest
     , forestCursorAppend
     , forestCursorInsertAndSelect
     , forestCursorAppendAndSelect
+    , forestCursorRemoveTreeAndSelectPrev
+    , forestCursorDeleteTreeAndSelectNext
+    , forestCursorRemoveTree
+    , forestCursorDeleteTree
+    , forestCursorAddRoot
     ) where
 
 import GHC.Generics (Generic)
@@ -82,3 +87,21 @@ forestCursorInsertAndSelect fc tc =
 forestCursorAppendAndSelect :: ForestCursor a -> TreeCursor a -> ForestCursor a
 forestCursorAppendAndSelect fc tc =
     fc & forestCursorListCursorL %~ nonEmptyCursorAppendAndSelect tc
+
+forestCursorRemoveTreeAndSelectPrev :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorRemoveTreeAndSelectPrev =
+    forestCursorListCursorL nonEmptyCursorRemoveElemAndSelectPrev
+
+forestCursorDeleteTreeAndSelectNext :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorDeleteTreeAndSelectNext =
+    forestCursorListCursorL nonEmptyCursorDeleteElemAndSelectNext
+
+forestCursorRemoveTree :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorRemoveTree = forestCursorListCursorL nonEmptyCursorRemoveElem
+
+forestCursorDeleteTree :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorDeleteTree = forestCursorListCursorL nonEmptyCursorDeleteElem
+
+forestCursorAddRoot :: ForestCursor a -> a -> TreeCursor a
+forestCursorAddRoot fc v = makeTreeCursor $ Node v $ NE.toList  $ rebuildForestCursor fc
+

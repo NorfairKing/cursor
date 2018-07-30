@@ -58,11 +58,35 @@ spec = do
     describe "forestCursorInsertAndSelect" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorInsertAndSelect @Double)
-        it "inserts a tree before the currently selected tree and selects it" pending
+        it
+            "inserts a tree before the currently selected tree and selects it"
+            pending
     describe "forestCursorAppendAndSelect" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorAppendAndSelect @Double)
-        it "appends a tree after the currently selected tree and selects it" pending
+        it
+            "appends a tree after the currently selected tree and selects it"
+            pending
+    describe "forestCursorRemoveTreeAndSelectPrev" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids (forestCursorRemoveTreeAndSelectPrev @Double)
+        it "removes the selected tree and selects the previous tree" pending
+    describe "forestCursorDeleteTreeAndSelectNext" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids (forestCursorDeleteTreeAndSelectNext @Double)
+        it "deletes the selected tree and selects the next tree" pending
+    describe "forestCursorRemoveTree" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids (forestCursorRemoveTree @Double)
+        it "removes the selected tree" pending
+    describe "forestCursorDeleteTree" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids (forestCursorDeleteTree @Double)
+        it "deletes the selected tree" pending
+    describe "forestCursorAddRoot" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorAddRoot @Double)
+        it "houses the entire forest under the given node" pending
 
 testMovement :: (forall a. ForestCursor a -> ForestCursor a) -> Spec
 testMovement func = do
