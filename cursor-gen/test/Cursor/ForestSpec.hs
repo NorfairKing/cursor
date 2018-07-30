@@ -47,6 +47,22 @@ spec = do
     describe "forestCursorSelectLastTree" $ do
         testMovement forestCursorSelectLastTree
         it "selects the last tree" pending
+    describe "forestCursorInsert" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorInsert @Double)
+        it "inserts a tree before the currently selected tree" pending
+    describe "forestCursorAppend" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorAppend @Double)
+        it "appends a tree after the currently selected tree" pending
+    describe "forestCursorInsertAndSelect" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorInsertAndSelect @Double)
+        it "inserts a tree before the currently selected tree and selects it" pending
+    describe "forestCursorAppendAndSelect" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorAppendAndSelect @Double)
+        it "appends a tree after the currently selected tree and selects it" pending
 
 testMovement :: (forall a. ForestCursor a -> ForestCursor a) -> Spec
 testMovement func = do

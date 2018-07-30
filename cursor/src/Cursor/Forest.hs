@@ -13,6 +13,10 @@ module Cursor.Forest
     , forestCursorSelectNextTree
     , forestCursorSelectFirstTree
     , forestCursorSelectLastTree
+    , forestCursorInsert
+    , forestCursorAppend
+    , forestCursorInsertAndSelect
+    , forestCursorAppendAndSelect
     ) where
 
 import GHC.Generics (Generic)
@@ -62,3 +66,19 @@ forestCursorSelectFirstTree =
 
 forestCursorSelectLastTree :: ForestCursor a -> ForestCursor a
 forestCursorSelectLastTree = forestCursorListCursorL %~ nonEmptyCursorSelectLast
+
+forestCursorInsert :: ForestCursor a -> TreeCursor a -> ForestCursor a
+forestCursorInsert fc tc =
+    fc & forestCursorListCursorL %~ nonEmptyCursorInsert tc
+
+forestCursorAppend :: ForestCursor a -> TreeCursor a -> ForestCursor a
+forestCursorAppend fc tc =
+    fc & forestCursorListCursorL %~ nonEmptyCursorAppend tc
+
+forestCursorInsertAndSelect :: ForestCursor a -> TreeCursor a -> ForestCursor a
+forestCursorInsertAndSelect fc tc =
+    fc & forestCursorListCursorL %~ nonEmptyCursorInsertAndSelect tc
+
+forestCursorAppendAndSelect :: ForestCursor a -> TreeCursor a -> ForestCursor a
+forestCursorAppendAndSelect fc tc =
+    fc & forestCursorListCursorL %~ nonEmptyCursorAppendAndSelect tc
