@@ -24,6 +24,13 @@ module Cursor.Tree
     , treeCursorDeleteElem
     , treeCursorSwapPrev
     , treeCursorSwapNext
+    , treeCursorAboveLens
+    , treeCursorCurrentLens
+    , treeCursorBelowLens
+    , treeAboveLeftsLens
+    , treeAboveAboveLens
+    , treeAboveNodeLens
+    , treeAboveRightsLens
     ) where
 
 import Control.Applicative
@@ -31,6 +38,8 @@ import Data.Tree
 import Data.Validity
 import Data.Validity.Tree ()
 import GHC.Generics (Generic)
+
+import Lens.Micro
 
 data TreeCursor a = TreeCursor
     { treeAbove :: Maybe (TreeAbove a)
@@ -40,6 +49,15 @@ data TreeCursor a = TreeCursor
 
 currentTree :: TreeCursor a -> Tree a
 currentTree TreeCursor {..} = Node treeCurrent treeBelow
+
+treeCursorAboveLens :: Lens' (TreeCursor a) (Maybe (TreeAbove a))
+treeCursorAboveLens = lens treeAbove $ \tc ta -> tc {treeAbove = ta}
+
+treeCursorCurrentLens :: Lens' (TreeCursor a) a
+treeCursorCurrentLens = lens treeCurrent $ \tc a -> tc {treeCurrent = a}
+
+treeCursorBelowLens :: Lens' (TreeCursor a) (Forest a)
+treeCursorBelowLens = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
 
 instance Validity a => Validity (TreeCursor a)
 
@@ -51,6 +69,19 @@ data TreeAbove a = TreeAbove
     } deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (TreeAbove a)
+
+treeAboveLeftsLens :: Lens' (TreeAbove a) [Tree a]
+treeAboveLeftsLens = lens treeAboveLefts $ \ta tal -> ta {treeAboveLefts = tal}
+
+treeAboveAboveLens :: Lens' (TreeAbove a) (Maybe (TreeAbove a))
+treeAboveAboveLens = lens treeAboveAbove $ \ta taa -> ta {treeAboveAbove = taa}
+
+treeAboveNodeLens :: Lens' (TreeAbove a) a
+treeAboveNodeLens = lens treeAboveNode $ \ta a -> ta {treeAboveNode = a}
+
+treeAboveRightsLens :: Lens' (TreeAbove a) [Tree a]
+treeAboveRightsLens =
+    lens treeAboveRights $ \ta tar -> ta {treeAboveRights = tar}
 
 makeTreeCursor :: Tree a -> TreeCursor a
 makeTreeCursor (Node v fs) =
