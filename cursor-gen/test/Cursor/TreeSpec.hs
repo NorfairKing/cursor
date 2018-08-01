@@ -111,20 +111,20 @@ spec = do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorSwapNext @Double
         it "swaps the current node with the next node" pending
-    describe "treeCursorAboveLens" $
-        lensSpecOnValid (treeCursorAboveLens @Double)
-    describe "treeCursorCurrentLens" $
-        lensSpecOnValid (treeCursorCurrentLens @Double)
-    describe "treeCursorBelowLens" $
-        lensSpecOnValid (treeCursorBelowLens @Double)
-    describe "treeAboveLeftsLens" $
-        lensSpecOnValid (treeAboveLeftsLens @Double)
-    describe "treeAboveAboveLens" $
-        lensSpecOnValid (treeAboveAboveLens @Double)
-    describe "treeAboveNodeLens" $
-        lensSpecOnValid (treeAboveNodeLens @Double)
-    describe "treeAboveRightsLens" $
-        lensSpecOnValid (treeAboveRightsLens @Double)
+    describe "treeCursorAboveL" $
+        lensSpecOnValid (treeCursorAboveL @Double)
+    describe "treeCursorCurrentL" $
+        lensSpecOnValid (treeCursorCurrentL @Double)
+    describe "treeCursorBelowL" $
+        lensSpecOnValid (treeCursorBelowL @Double)
+    describe "treeAboveLeftsL" $
+        lensSpecOnValid (treeAboveLeftsL @Double)
+    describe "treeAboveAboveL" $
+        lensSpecOnValid (treeAboveAboveL @Double)
+    describe "treeAboveNodeL" $
+        lensSpecOnValid (treeAboveNodeL @Double)
+    describe "treeAboveRightsL" $
+        lensSpecOnValid (treeAboveRightsL @Double)
 
 testMovement :: (forall a. TreeCursor a -> TreeCursor a) -> Spec
 testMovement func = do

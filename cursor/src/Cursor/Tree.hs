@@ -24,13 +24,13 @@ module Cursor.Tree
     , treeCursorDeleteElem
     , treeCursorSwapPrev
     , treeCursorSwapNext
-    , treeCursorAboveLens
-    , treeCursorCurrentLens
-    , treeCursorBelowLens
-    , treeAboveLeftsLens
-    , treeAboveAboveLens
-    , treeAboveNodeLens
-    , treeAboveRightsLens
+    , treeCursorAboveL
+    , treeCursorCurrentL
+    , treeCursorBelowL
+    , treeAboveLeftsL
+    , treeAboveAboveL
+    , treeAboveNodeL
+    , treeAboveRightsL
     ) where
 
 import Control.Applicative
@@ -50,14 +50,14 @@ data TreeCursor a = TreeCursor
 currentTree :: TreeCursor a -> Tree a
 currentTree TreeCursor {..} = Node treeCurrent treeBelow
 
-treeCursorAboveLens :: Lens' (TreeCursor a) (Maybe (TreeAbove a))
-treeCursorAboveLens = lens treeAbove $ \tc ta -> tc {treeAbove = ta}
+treeCursorAboveL :: Lens' (TreeCursor a) (Maybe (TreeAbove a))
+treeCursorAboveL = lens treeAbove $ \tc ta -> tc {treeAbove = ta}
 
-treeCursorCurrentLens :: Lens' (TreeCursor a) a
-treeCursorCurrentLens = lens treeCurrent $ \tc a -> tc {treeCurrent = a}
+treeCursorCurrentL :: Lens' (TreeCursor a) a
+treeCursorCurrentL = lens treeCurrent $ \tc a -> tc {treeCurrent = a}
 
-treeCursorBelowLens :: Lens' (TreeCursor a) (Forest a)
-treeCursorBelowLens = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
+treeCursorBelowL :: Lens' (TreeCursor a) (Forest a)
+treeCursorBelowL = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
 
 instance Validity a => Validity (TreeCursor a)
 
@@ -70,18 +70,17 @@ data TreeAbove a = TreeAbove
 
 instance Validity a => Validity (TreeAbove a)
 
-treeAboveLeftsLens :: Lens' (TreeAbove a) [Tree a]
-treeAboveLeftsLens = lens treeAboveLefts $ \ta tal -> ta {treeAboveLefts = tal}
+treeAboveLeftsL :: Lens' (TreeAbove a) [Tree a]
+treeAboveLeftsL = lens treeAboveLefts $ \ta tal -> ta {treeAboveLefts = tal}
 
-treeAboveAboveLens :: Lens' (TreeAbove a) (Maybe (TreeAbove a))
-treeAboveAboveLens = lens treeAboveAbove $ \ta taa -> ta {treeAboveAbove = taa}
+treeAboveAboveL :: Lens' (TreeAbove a) (Maybe (TreeAbove a))
+treeAboveAboveL = lens treeAboveAbove $ \ta taa -> ta {treeAboveAbove = taa}
 
-treeAboveNodeLens :: Lens' (TreeAbove a) a
-treeAboveNodeLens = lens treeAboveNode $ \ta a -> ta {treeAboveNode = a}
+treeAboveNodeL :: Lens' (TreeAbove a) a
+treeAboveNodeL = lens treeAboveNode $ \ta a -> ta {treeAboveNode = a}
 
-treeAboveRightsLens :: Lens' (TreeAbove a) [Tree a]
-treeAboveRightsLens =
-    lens treeAboveRights $ \ta tar -> ta {treeAboveRights = tar}
+treeAboveRightsL :: Lens' (TreeAbove a) [Tree a]
+treeAboveRightsL = lens treeAboveRights $ \ta tar -> ta {treeAboveRights = tar}
 
 makeTreeCursor :: Tree a -> TreeCursor a
 makeTreeCursor (Node v fs) =
@@ -122,9 +121,10 @@ treeCursorSelectPrev tc@TreeCursor {..} =
                     Just . makeTreeCursorWithAbove tree $
                     Just
                         ta
-                        { treeAboveLefts = xs
-                        , treeAboveRights = currentTree tc : treeAboveRights ta
-                        }
+                            { treeAboveLefts = xs
+                            , treeAboveRights =
+                                  currentTree tc : treeAboveRights ta
+                            }
 
 treeCursorSelectNext :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectNext tc@TreeCursor {..} =
@@ -136,9 +136,9 @@ treeCursorSelectNext tc@TreeCursor {..} =
                 tree:xs ->
                     Just . makeTreeCursorWithAbove tree . Just $
                     ta
-                    { treeAboveLefts = currentTree tc : treeAboveLefts ta
-                    , treeAboveRights = xs
-                    }
+                        { treeAboveLefts = currentTree tc : treeAboveLefts ta
+                        , treeAboveRights = xs
+                        }
 
 treeCursorSelectFirst :: TreeCursor a -> TreeCursor a
 treeCursorSelectFirst tc =
@@ -158,7 +158,7 @@ treeCursorInsert tree tc@TreeCursor {..} =
         Nothing -> Nothing
         Just ta ->
             let newTreeAbove = ta {treeAboveLefts = tree : treeAboveLefts ta}
-            in Just tc {treeAbove = Just newTreeAbove}
+             in Just tc {treeAbove = Just newTreeAbove}
 
 treeCursorAppend :: Tree a -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorAppend tree tc@TreeCursor {..} =
@@ -166,7 +166,7 @@ treeCursorAppend tree tc@TreeCursor {..} =
         Nothing -> Nothing
         Just ta ->
             let newTreeAbove = ta {treeAboveRights = tree : treeAboveRights ta}
-            in Just tc {treeAbove = Just newTreeAbove}
+             in Just tc {treeAbove = Just newTreeAbove}
 
 treeCursorInsertAndSelect :: Tree a -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorInsertAndSelect tree tc@TreeCursor {..} =
@@ -175,7 +175,7 @@ treeCursorInsertAndSelect tree tc@TreeCursor {..} =
         Just ta ->
             let newTreeAbove =
                     ta {treeAboveRights = currentTree tc : treeAboveRights ta}
-            in Just . makeTreeCursorWithAbove tree $ Just newTreeAbove
+             in Just . makeTreeCursorWithAbove tree $ Just newTreeAbove
 
 treeCursorAppendAndSelect :: Tree a -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorAppendAndSelect tree tc@TreeCursor {..} =
@@ -184,7 +184,7 @@ treeCursorAppendAndSelect tree tc@TreeCursor {..} =
         Just ta ->
             let newTreeAbove =
                     ta {treeAboveLefts = currentTree tc : treeAboveLefts ta}
-            in Just . makeTreeCursorWithAbove tree $ Just newTreeAbove
+             in Just . makeTreeCursorWithAbove tree $ Just newTreeAbove
 
 treeCursorDeleteElemAndSelectPrevious :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorDeleteElemAndSelectPrevious TreeCursor {..} =
@@ -217,7 +217,7 @@ treeCursorSelectAbove tc@TreeCursor {..} =
                     reverse treeAboveLefts ++
                     [currentTree tc] ++ treeAboveRights
                 newTree = Node treeAboveNode newForrest
-            in Just $ makeTreeCursorWithAbove newTree treeAboveAbove
+             in Just $ makeTreeCursorWithAbove newTree treeAboveAbove
 
 treeCursorSelectBelowAtPos :: Int -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectBelowAtPos pos TreeCursor {..} =
@@ -228,11 +228,11 @@ treeCursorSelectBelowAtPos pos TreeCursor {..} =
             makeTreeCursorWithAbove current $
             Just $
             TreeAbove
-            { treeAboveLefts = reverse lefts
-            , treeAboveAbove = treeAbove
-            , treeAboveNode = treeCurrent
-            , treeAboveRights = rights
-            }
+                { treeAboveLefts = reverse lefts
+                , treeAboveAbove = treeAbove
+                , treeAboveNode = treeCurrent
+                , treeAboveRights = rights
+                }
 
 treeCursorSelectBelow :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectBelow = treeCursorSelectBelowAtPos 0
