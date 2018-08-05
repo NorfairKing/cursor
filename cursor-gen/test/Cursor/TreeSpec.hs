@@ -11,6 +11,7 @@ import Test.Hspec
 
 import Test.QuickCheck
 import Test.Validity
+import Test.Validity.Optics
 
 import Control.Monad (unless)
 
@@ -110,6 +111,20 @@ spec = do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorSwapNext @Double
         it "swaps the current node with the next node" pending
+    describe "treeCursorAboveL" $
+        lensSpecOnValid (treeCursorAboveL @Double)
+    describe "treeCursorCurrentL" $
+        lensSpecOnValid (treeCursorCurrentL @Double)
+    describe "treeCursorBelowL" $
+        lensSpecOnValid (treeCursorBelowL @Double)
+    describe "treeAboveLeftsL" $
+        lensSpecOnValid (treeAboveLeftsL @Double)
+    describe "treeAboveAboveL" $
+        lensSpecOnValid (treeAboveAboveL @Double)
+    describe "treeAboveNodeL" $
+        lensSpecOnValid (treeAboveNodeL @Double)
+    describe "treeAboveRightsL" $
+        lensSpecOnValid (treeAboveRightsL @Double)
 
 testMovement :: (forall a. TreeCursor a -> TreeCursor a) -> Spec
 testMovement func = do
