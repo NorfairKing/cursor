@@ -6,7 +6,7 @@ final:
         overrides = final.lib.composeExtensions (old.overrides or (_: _: {})) (
           self: super:
             let cursorPkg = name:
-                (self.callCabal2nix name (../. + "/${name}") {});
+                (buildStrictly (self.callCabal2nix name (../. + "/${name}") {}));
             in final.lib.genAttrs [
               "cursor"
               "cursor-gen"
