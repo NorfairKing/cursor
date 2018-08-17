@@ -69,13 +69,15 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids (nonEmptyCursorSelectFirst @Double)
         it "is a movement" $ isMovement nonEmptyCursorSelectFirst
-        it "is idempotent" $ idempotent (nonEmptyCursorSelectFirst @Double)
+        it "is idempotent" $
+            idempotentOnValid (nonEmptyCursorSelectFirst @Double)
         it "selects the first element" pending
     describe "nonEmptyCursorSelectLast" $ do
         it "produces valid cursors" $
             producesValidsOnValids (nonEmptyCursorSelectLast @Double)
         it "is a movement" $ isMovement nonEmptyCursorSelectLast
-        it "is idempotent" $ idempotent (nonEmptyCursorSelectLast @Double)
+        it "is idempotent" $
+            idempotentOnValid (nonEmptyCursorSelectLast @Double)
         it "selects the last element" pending
     describe "nonEmptyCursorSelection" $ do
         it "produces valid ints" $
@@ -139,14 +141,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildNonEmptyCursor lec
                     ne' = rebuildNonEmptyCursor lec'
-                in unless (ne == ne') $
-                   expectationFailure $
-                   unlines
-                       [ "Cursor before:\n" ++ show lec
-                       , "List before:  \n" ++ show ne
-                       , "Cursor after: \n" ++ show lec'
-                       , "List after:   \n" ++ show ne'
-                       ]
+                 in unless (ne == ne') $
+                    expectationFailure $
+                    unlines
+                        [ "Cursor before:\n" ++ show lec
+                        , "List before:  \n" ++ show ne
+                        , "Cursor after: \n" ++ show lec'
+                        , "List after:   \n" ++ show ne'
+                        ]
 
 isMovement :: (forall a. NonEmptyCursor a -> NonEmptyCursor a) -> Property
 isMovement func =

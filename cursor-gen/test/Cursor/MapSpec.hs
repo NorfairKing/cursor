@@ -62,13 +62,15 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids (mapCursorSelectFirst @Double @Rational)
         it "is a movement" $ isMovement mapCursorSelectFirst
-        it "is idempotent" $ idempotent (mapCursorSelectFirst @Double @Rational)
+        it "is idempotent" $
+            idempotentOnValid (mapCursorSelectFirst @Double @Rational)
         it "selects the first element" pending
     describe "mapCursorSelectLast" $ do
         it "produces valid cursors" $
             producesValidsOnValids (mapCursorSelectLast @Double @Rational)
         it "is a movement" $ isMovement mapCursorSelectLast
-        it "is idempotent" $ idempotent (mapCursorSelectLast @Double @Rational)
+        it "is idempotent" $
+            idempotentOnValid (mapCursorSelectLast @Double @Rational)
         it "selects the last element" pending
     describe "mapCursorSelection" $ do
         it "produces valid ints" $
@@ -84,18 +86,15 @@ spec = do
         it "returns selects the element at the given index" pending
     describe "mapCursorInsert" $ do
         it "produces valid cursors" $
-                    producesValidsOnValids3
-                        (mapCursorInsert @Double @Rational )
+            producesValidsOnValids3 (mapCursorInsert @Double @Rational)
         it "inserts a character before the cursor" pending
     describe "mapCursorAppend" $ do
         it "produces valid cursors" $
-                    producesValidsOnValids3
-                        (mapCursorAppend @Double @Rational )
+            producesValidsOnValids3 (mapCursorAppend @Double @Rational)
         it "inserts a character after the cursor" pending
     describe "mapCursorInsertAndSelect" $ do
         it "produces valid cursors" $
-                    producesValidsOnValids3
-                        (mapCursorInsertAndSelect @Double @Rational)
+            producesValidsOnValids3 (mapCursorInsertAndSelect @Double @Rational)
         it "inserts a character before the cursor and selects it" pending
     describe "mapCursorAppendAndSelect" $ do
         it "produces valid cursors" $

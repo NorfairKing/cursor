@@ -2,15 +2,16 @@ final:
   previous:
     with final.haskell.lib;
     {
-      haskellPackages = previous.haskellPackages.override (old: {
-        overrides = final.lib.composeExtensions (old.overrides or (_: _: {})) (
-          self: super:
+      cursorPackages = 
             let cursorPkg = name:
-                (buildStrictly (self.callCabal2nix name (../. + "/${name}") {}));
+                (failOnAllWarnings (final.haskellPackages.callCabal2nix name (../. + "/${name}") {}));
             in final.lib.genAttrs [
               "cursor"
               "cursor-gen"
-            ] cursorPkg
+            ] cursorPkg;
+      haskellPackages = previous.haskellPackages.override (old: {
+        overrides = final.lib.composeExtensions (old.overrides or (_: _: {})) (
+          self: super: final.cursorPackages
         );
       });
     }

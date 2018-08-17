@@ -49,11 +49,11 @@ spec = do
     describe "treeCursorSelectFirst" $ do
         testMovement treeCursorSelectFirst
         it "selects the first element" pending
-        it "is idempotent" $ idempotent $ treeCursorSelectFirst @Double
+        it "is idempotent" $ idempotentOnValid $ treeCursorSelectFirst @Double
     describe "treeCursorSelectLast" $ do
         testMovement treeCursorSelectLast
         it "selects the last element" pending
-        it "is idempotent" $ idempotent $ treeCursorSelectLast @Double
+        it "is idempotent" $ idempotentOnValid $ treeCursorSelectLast @Double
     describe "treeCursorSelectAbove" $ do
         testMovementM treeCursorSelectAbove
         it "selects the element above" pending
