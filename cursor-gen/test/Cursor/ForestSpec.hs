@@ -129,6 +129,27 @@ spec = do
         it
             "appends a node after the currently selected node and selects it"
             pending
+    describe "forestCursorAddChildTreeToNodeAtPos" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids3 $
+            forestCursorAddChildTreeToNodeAtPos @Double
+        it
+            "adds a child tree to a node at the given position in the children of that node"
+            pending
+    describe "forestCursorAddChildTreeToNodeAtStart" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 $
+            forestCursorAddChildTreeToNodeAtStart @Double
+        it
+            "adds a child tree to a node at the start the children of that node"
+            pending
+    describe "forestCursorAddChildTreeToNodeAtEnd" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 $
+            forestCursorAddChildTreeToNodeAtEnd @Double
+        it
+            "adds a child tree to a node at the end the children of that node"
+            pending
     describe "forestCursorAddChildToNodeAtPos" $ do
         it "produces valid cursors" $
             producesValidsOnValids3 $ forestCursorAddChildToNodeAtPos @Double

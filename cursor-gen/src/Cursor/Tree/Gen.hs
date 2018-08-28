@@ -19,7 +19,7 @@ instance GenUnchecked a => GenUnchecked (TreeCursor a) where
             (a, b, c, d) <- genSplit4 n
             treeAbove <- resize (a + b) genUnchecked
             treeCurrent <- resize c genUnchecked
-            treeBelow <- resize c genUnchecked
+            treeBelow <- resize d genUnchecked
             pure TreeCursor {..}
 
 instance GenValid a => GenValid (TreeCursor a) where
@@ -28,7 +28,7 @@ instance GenValid a => GenValid (TreeCursor a) where
             (a, b, c, d) <- genSplit4 n
             treeAbove <- resize (a + b) genValid
             treeCurrent <- resize c genValid
-            treeBelow <- resize c genValid
+            treeBelow <- resize d genValid
             pure TreeCursor {..}
 
 instance GenUnchecked a => GenUnchecked (TreeAbove a) where
