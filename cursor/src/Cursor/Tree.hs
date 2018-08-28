@@ -23,6 +23,8 @@ module Cursor.Tree
     , treeCursorAddChildAtPos
     , treeCursorAddChildAtStart
     , treeCursorAddChildAtEnd
+    , treeCursorDeleteElemAndSelectPrevious
+    , treeCursorDeleteElemAndSelectNext
     , treeCursorRemoveElem
     , treeCursorDeleteElem
     , treeCursorSwapPrev

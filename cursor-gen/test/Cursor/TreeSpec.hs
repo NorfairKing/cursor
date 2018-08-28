@@ -101,6 +101,19 @@ spec = do
         it "produces valid cursors " $
             producesValidsOnValids2 $ treeCursorAddChildAtEnd @Double
         it "adds a tree at the end of the children of the current node" pending
+    describe "treeCursorDeleteElemAndSelectPrevious" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $
+            treeCursorDeleteElemAndSelectPrevious @Double
+        it
+            "deletes the current node and children and selects the previous tree"
+            pending
+    describe "treeCursorDeleteElemAndSelectNext" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ treeCursorDeleteElemAndSelectNext @Double
+        it
+            "deletes the current node and children and selects the next tree"
+            pending
     describe "treeCursorRemoveElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorRemoveElem @Double

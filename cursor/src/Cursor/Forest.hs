@@ -112,7 +112,8 @@ forestCursorSelectBelow :: ForestCursor a -> Maybe (ForestCursor a)
 forestCursorSelectBelow = forestCursorSelectedTreeL treeCursorSelectBelow
 
 forestCursorSelectBelowAtPos :: Int -> ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectBelowAtPos i = forestCursorSelectedTreeL $ treeCursorSelectBelowAtPos i
+forestCursorSelectBelowAtPos i =
+    forestCursorSelectedTreeL $ treeCursorSelectBelowAtPos i
 
 forestCursorSelection :: ForestCursor a -> Int
 forestCursorSelection fc =
@@ -200,18 +201,24 @@ forestCursorAddChildToNodeAtEnd a =
     forestCursorAddChildTreeToNodeAtEnd $ Node a []
 
 forestCursorRemoveTreeAndSelectPrev :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorRemoveTreeAndSelectPrev =
-    forestCursorListCursorL nonEmptyCursorRemoveElemAndSelectPrev
+forestCursorRemoveTreeAndSelectPrev fc =
+    (fc & forestCursorSelectedTreeL treeCursorDeleteElemAndSelectPrevious) <|>
+    (fc & forestCursorListCursorL nonEmptyCursorRemoveElemAndSelectPrev)
 
 forestCursorDeleteTreeAndSelectNext :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorDeleteTreeAndSelectNext =
-    forestCursorListCursorL nonEmptyCursorDeleteElemAndSelectNext
+forestCursorDeleteTreeAndSelectNext fc =
+    (fc & forestCursorSelectedTreeL treeCursorDeleteElemAndSelectNext) <|>
+    (fc & forestCursorListCursorL nonEmptyCursorDeleteElemAndSelectNext)
 
 forestCursorRemoveTree :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorRemoveTree = forestCursorListCursorL nonEmptyCursorRemoveElem
+forestCursorRemoveTree fc =
+    (fc & forestCursorSelectedTreeL treeCursorRemoveElem) <|>
+    (fc & forestCursorListCursorL nonEmptyCursorRemoveElem)
 
 forestCursorDeleteTree :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorDeleteTree = forestCursorListCursorL nonEmptyCursorDeleteElem
+forestCursorDeleteTree fc =
+    (fc & forestCursorSelectedTreeL treeCursorDeleteElem) <|>
+    (fc & forestCursorListCursorL nonEmptyCursorDeleteElem)
 
 forestCursorAddRoot :: ForestCursor a -> a -> TreeCursor a
 forestCursorAddRoot fc v =
