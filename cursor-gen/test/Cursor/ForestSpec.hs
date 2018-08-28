@@ -36,23 +36,48 @@ spec = do
     describe "forestCursorSelectedTreeL" $
         lensSpecOnValid (forestCursorSelectedTreeL @Double)
     describe "forestCursorSelectPrevTreeCursor" $ do
-        movementSpecM forestCursorSelectPrevTreeCursor
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectPrevTreeCursor @Double
+        it "is a movement" $ isMovementM forestCursorSelectPrevTreeCursor
         it "selects the previous tree cursor" pending
     describe "forestCursorSelectNextTreeCursor" $ do
-        movementSpecM forestCursorSelectNextTreeCursor
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectNextTreeCursor @Double
+        it "is a movement" $ isMovementM forestCursorSelectNextTreeCursor
         it "selects the next tree" pending
     describe "forestCursorSelectFirstTreeCursor" $ do
-        movementSpec forestCursorSelectFirstTreeCursor
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectFirstTreeCursor @Double
+        it "is a movement" $ isMovement forestCursorSelectFirstTreeCursor
         it "selects the first tree" pending
     describe "forestCursorSelectLastTreeCursor" $ do
-        movementSpec forestCursorSelectLastTreeCursor
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectLastTreeCursor @Double
+        it "is a movement" $ isMovement forestCursorSelectLastTreeCursor
         it "selects the last tree" pending
     describe "forestCursorSelectPrev" $ do
-        movementSpecM forestCursorSelectPrev
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectPrev @Double
+        it "is a movement" $ isMovementM forestCursorSelectPrev
         it "selects the previous node" pending
     describe "forestCursorSelectNext" $ do
-        movementSpecM forestCursorSelectNext
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectNext @Double
+        it "is a movement" $ isMovementM forestCursorSelectNext
         it "selects the next node" pending
+    describe "forestCursorSelectBelow" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectBelow @Double
+        it "is a movement" $ isMovementM forestCursorSelectBelow
+        it "selects the first child of the selected node" pending
+    describe "forestCursorSelectBelowAtPos" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 $ forestCursorSelectBelowAtPos @Double
+        it "is a movement for any index" $
+            forAllValid $ \i -> isMovementM $ forestCursorSelectBelowAtPos i
+        it
+            "selects the child of the selected node at the given position"
+            pending
     describe "forestCursorSelection" $ do
         it "produces valid ints" $
             producesValidsOnValids (forestCursorSelection @Double)
@@ -186,16 +211,6 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorAddRoot @Double)
         it "houses the entire forest under the given node" pending
-
-movementSpec :: (forall a. ForestCursor a -> ForestCursor a) -> Spec
-movementSpec func = do
-    it "produces valid cursors" $ producesValidsOnValids $ func @Double
-    it "is a movement" $ isMovement func
-
-movementSpecM :: (forall a. ForestCursor a -> Maybe (ForestCursor a)) -> Spec
-movementSpecM func = do
-    it "produces valid cursors" $ producesValidsOnValids $ func @Double
-    it "is a movement" $ isMovementM func
 
 isMovementM :: (forall a. ForestCursor a -> Maybe (ForestCursor a)) -> Property
 isMovementM func =

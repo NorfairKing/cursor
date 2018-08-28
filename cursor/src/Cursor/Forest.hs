@@ -15,6 +15,8 @@ module Cursor.Forest
     , forestCursorSelectLastTreeCursor
     , forestCursorSelectPrev
     , forestCursorSelectNext
+    , forestCursorSelectBelow
+    , forestCursorSelectBelowAtPos
     , forestCursorSelection
     , forestCursorSelectIndex
     , forestCursorInsertTreeCursor
@@ -106,6 +108,12 @@ forestCursorSelectPrev fc =
     (fc & forestCursorSelectedTreeL treeCursorSelectPrev) <|>
     forestCursorSelectPrevTreeCursor fc
 
+forestCursorSelectBelow :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorSelectBelow = forestCursorSelectedTreeL treeCursorSelectBelow
+
+forestCursorSelectBelowAtPos :: Int -> ForestCursor a -> Maybe (ForestCursor a)
+forestCursorSelectBelowAtPos i = forestCursorSelectedTreeL $ treeCursorSelectBelowAtPos i
+
 forestCursorSelection :: ForestCursor a -> Int
 forestCursorSelection fc =
     nonEmptyCursorSelection $ fc ^. forestCursorListCursorL
@@ -169,23 +177,27 @@ forestCursorAddChildTreeToNodeAtPos ::
 forestCursorAddChildTreeToNodeAtPos i t fc =
     fc & forestCursorSelectedTreeL %~ treeCursorAddChildAtPos i t
 
-forestCursorAddChildTreeToNodeAtStart :: Tree a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildTreeToNodeAtStart ::
+       Tree a -> ForestCursor a -> ForestCursor a
 forestCursorAddChildTreeToNodeAtStart t fc =
     fc & forestCursorSelectedTreeL %~ treeCursorAddChildAtStart t
 
-forestCursorAddChildTreeToNodeAtEnd :: Tree a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildTreeToNodeAtEnd ::
+       Tree a -> ForestCursor a -> ForestCursor a
 forestCursorAddChildTreeToNodeAtEnd t fc =
     fc & forestCursorSelectedTreeL %~ treeCursorAddChildAtEnd t
 
-forestCursorAddChildToNodeAtPos ::
-       Int -> a -> ForestCursor a -> ForestCursor a
-forestCursorAddChildToNodeAtPos i a = forestCursorAddChildTreeToNodeAtPos i $ Node a []
+forestCursorAddChildToNodeAtPos :: Int -> a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildToNodeAtPos i a =
+    forestCursorAddChildTreeToNodeAtPos i $ Node a []
 
 forestCursorAddChildToNodeAtStart :: a -> ForestCursor a -> ForestCursor a
-forestCursorAddChildToNodeAtStart a  = forestCursorAddChildTreeToNodeAtStart  $ Node a []
+forestCursorAddChildToNodeAtStart a =
+    forestCursorAddChildTreeToNodeAtStart $ Node a []
 
 forestCursorAddChildToNodeAtEnd :: a -> ForestCursor a -> ForestCursor a
-forestCursorAddChildToNodeAtEnd a  = forestCursorAddChildTreeToNodeAtEnd $ Node a []
+forestCursorAddChildToNodeAtEnd a =
+    forestCursorAddChildTreeToNodeAtEnd $ Node a []
 
 forestCursorRemoveTreeAndSelectPrev :: ForestCursor a -> Maybe (ForestCursor a)
 forestCursorRemoveTreeAndSelectPrev =
