@@ -9,10 +9,12 @@ module Cursor.Forest
     , rebuildForestCursor
     , forestCursorListCursorL
     , forestCursorSelectedTreeL
-    , forestCursorSelectPrevTree
-    , forestCursorSelectNextTree
-    , forestCursorSelectFirstTree
-    , forestCursorSelectLastTree
+    , forestCursorSelectPrevTreeCursor
+    , forestCursorSelectNextTreeCursor
+    , forestCursorSelectFirstTreeCursor
+    , forestCursorSelectLastTreeCursor
+    , forestCursorSelectPrev
+    , forestCursorSelectNext
     , forestCursorSelection
     , forestCursorSelectIndex
     , forestCursorInsertTreeCursor
@@ -47,6 +49,8 @@ import Data.List.NonEmpty (NonEmpty)
 import Data.Maybe
 import Data.Tree
 
+import Control.Applicative
+
 import Lens.Micro
 
 import Cursor.NonEmpty
@@ -73,18 +77,31 @@ forestCursorListCursorL =
 forestCursorSelectedTreeL :: Lens' (ForestCursor a) (TreeCursor a)
 forestCursorSelectedTreeL = forestCursorListCursorL . nonEmptyCursorElemL
 
-forestCursorSelectPrevTree :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectPrevTree = forestCursorListCursorL nonEmptyCursorSelectPrev
+forestCursorSelectPrevTreeCursor :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorSelectPrevTreeCursor =
+    forestCursorListCursorL nonEmptyCursorSelectPrev
 
-forestCursorSelectNextTree :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectNextTree = forestCursorListCursorL nonEmptyCursorSelectNext
+forestCursorSelectNextTreeCursor :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorSelectNextTreeCursor =
+    forestCursorListCursorL nonEmptyCursorSelectNext
 
-forestCursorSelectFirstTree :: ForestCursor a -> ForestCursor a
-forestCursorSelectFirstTree =
+forestCursorSelectFirstTreeCursor :: ForestCursor a -> ForestCursor a
+forestCursorSelectFirstTreeCursor =
     forestCursorListCursorL %~ nonEmptyCursorSelectFirst
 
-forestCursorSelectLastTree :: ForestCursor a -> ForestCursor a
-forestCursorSelectLastTree = forestCursorListCursorL %~ nonEmptyCursorSelectLast
+forestCursorSelectLastTreeCursor :: ForestCursor a -> ForestCursor a
+forestCursorSelectLastTreeCursor =
+    forestCursorListCursorL %~ nonEmptyCursorSelectLast
+
+forestCursorSelectNext :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorSelectNext fc =
+    (fc & forestCursorSelectedTreeL treeCursorSelectNext) <|>
+    forestCursorSelectNextTreeCursor fc
+
+forestCursorSelectPrev :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorSelectPrev fc =
+    (fc & forestCursorSelectedTreeL treeCursorSelectPrev) <|>
+    forestCursorSelectPrevTreeCursor fc
 
 forestCursorSelection :: ForestCursor a -> Int
 forestCursorSelection fc =

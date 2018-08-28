@@ -35,18 +35,24 @@ spec = do
         lensSpecOnValid (forestCursorListCursorL @Double)
     describe "forestCursorSelectedTreeL" $
         lensSpecOnValid (forestCursorSelectedTreeL @Double)
-    describe "forestCursorSelectPrevTree" $ do
-        testMovementM forestCursorSelectPrevTree
-        it "selects the previous tree" pending
-    describe "forestCursorSelectNextTree" $ do
-        testMovementM forestCursorSelectNextTree
+    describe "forestCursorSelectPrevTreeCursor" $ do
+        movementSpecM forestCursorSelectPrevTreeCursor
+        it "selects the previous tree cursor" pending
+    describe "forestCursorSelectNextTreeCursor" $ do
+        movementSpecM forestCursorSelectNextTreeCursor
         it "selects the next tree" pending
-    describe "forestCursorSelectFirstTree" $ do
-        testMovement forestCursorSelectFirstTree
+    describe "forestCursorSelectFirstTreeCursor" $ do
+        movementSpec forestCursorSelectFirstTreeCursor
         it "selects the first tree" pending
-    describe "forestCursorSelectLastTree" $ do
-        testMovement forestCursorSelectLastTree
+    describe "forestCursorSelectLastTreeCursor" $ do
+        movementSpec forestCursorSelectLastTreeCursor
         it "selects the last tree" pending
+    describe "forestCursorSelectPrev" $ do
+        movementSpecM forestCursorSelectPrev
+        it "selects the previous node" pending
+    describe "forestCursorSelectNext" $ do
+        movementSpecM forestCursorSelectNext
+        it "selects the next node" pending
     describe "forestCursorSelection" $ do
         it "produces valid ints" $
             producesValidsOnValids (forestCursorSelection @Double)
@@ -160,14 +166,14 @@ spec = do
             producesValidsOnValids2 (forestCursorAddRoot @Double)
         it "houses the entire forest under the given node" pending
 
-testMovement :: (forall a. ForestCursor a -> ForestCursor a) -> Spec
-testMovement func = do
-    it "produces valids on valids" $ producesValidsOnValids $ func @Double
+movementSpec :: (forall a. ForestCursor a -> ForestCursor a) -> Spec
+movementSpec func = do
+    it "produces valid cursors" $ producesValidsOnValids $ func @Double
     it "is a movement" $ isMovement func
 
-testMovementM :: (forall a. ForestCursor a -> Maybe (ForestCursor a)) -> Spec
-testMovementM func = do
-    it "produces valids on valids" $ producesValidsOnValids $ func @Double
+movementSpecM :: (forall a. ForestCursor a -> Maybe (ForestCursor a)) -> Spec
+movementSpecM func = do
+    it "produces valid cursors" $ producesValidsOnValids $ func @Double
     it "is a movement" $ isMovementM func
 
 isMovementM :: (forall a. ForestCursor a -> Maybe (ForestCursor a)) -> Property
