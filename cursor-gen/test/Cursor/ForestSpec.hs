@@ -63,16 +63,32 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorInsert @Double)
         it "inserts a tree before the currently selected tree" pending
-    describe "forestCursorAppend" $ do
-        it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAppend @Double)
-        it "appends a tree after the currently selected tree" pending
     describe "forestCursorInsertAndSelect" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorInsertAndSelect @Double)
         it
             "inserts a tree before the currently selected tree and selects it"
             pending
+    describe "forestCursorAppend" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorAppend @Double)
+        it "appends a tree after the currently selected tree" pending
+    describe "forestCursorAddChildToNodeAtPos" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids3 $ forestCursorAddChildToNodeAtPos @Double
+        it
+            "adds a child to a node at the given position in the children of that node"
+            pending
+    describe "forestCursorAddChildToNodeAtStart" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 $ forestCursorAddChildToNodeAtStart @Double
+        it
+            "adds a child to a node at the start the children of that node"
+            pending
+    describe "forestCursorAddChildToNodeAtEnd" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 $ forestCursorAddChildToNodeAtEnd @Double
+        it "adds a child to a node at the end the children of that node" pending
     describe "forestCursorAppendAndSelect" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorAppendAndSelect @Double)

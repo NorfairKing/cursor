@@ -85,6 +85,22 @@ spec = do
         it "produces valids on valids" $
             producesValidsOnValids2 $ treeCursorAppendAndSelect @Double
         it "appends and select the element" pending
+    describe "treeCursorAddChildAtPos" $ do
+        it "produces valid cursors " $
+            producesValidsOnValids3 $ treeCursorAddChildAtPos @Double
+        it
+            "adds a tree at the given index in the children of the current node"
+            pending
+    describe "treeCursorAddChildAtStart" $ do
+        it "produces valid cursors " $
+            producesValidsOnValids2 $ treeCursorAddChildAtStart @Double
+        it
+            "adds a tree at the start of the children of the current node"
+            pending
+    describe "treeCursorAddChildAtEnd" $ do
+        it "produces valid cursors " $
+            producesValidsOnValids2 $ treeCursorAddChildAtEnd @Double
+        it "adds a tree at the end of the children of the current node" pending
     describe "treeCursorRemoveElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorRemoveElem @Double
@@ -111,20 +127,13 @@ spec = do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorSwapNext @Double
         it "swaps the current node with the next node" pending
-    describe "treeCursorAboveL" $
-        lensSpecOnValid (treeCursorAboveL @Double)
-    describe "treeCursorCurrentL" $
-        lensSpecOnValid (treeCursorCurrentL @Double)
-    describe "treeCursorBelowL" $
-        lensSpecOnValid (treeCursorBelowL @Double)
-    describe "treeAboveLeftsL" $
-        lensSpecOnValid (treeAboveLeftsL @Double)
-    describe "treeAboveAboveL" $
-        lensSpecOnValid (treeAboveAboveL @Double)
-    describe "treeAboveNodeL" $
-        lensSpecOnValid (treeAboveNodeL @Double)
-    describe "treeAboveRightsL" $
-        lensSpecOnValid (treeAboveRightsL @Double)
+    describe "treeCursorAboveL" $ lensSpecOnValid (treeCursorAboveL @Double)
+    describe "treeCursorCurrentL" $ lensSpecOnValid (treeCursorCurrentL @Double)
+    describe "treeCursorBelowL" $ lensSpecOnValid (treeCursorBelowL @Double)
+    describe "treeAboveLeftsL" $ lensSpecOnValid (treeAboveLeftsL @Double)
+    describe "treeAboveAboveL" $ lensSpecOnValid (treeAboveAboveL @Double)
+    describe "treeAboveNodeL" $ lensSpecOnValid (treeAboveNodeL @Double)
+    describe "treeAboveRightsL" $ lensSpecOnValid (treeAboveRightsL @Double)
 
 testMovement :: (forall a. TreeCursor a -> TreeCursor a) -> Spec
 testMovement func = do

@@ -19,6 +19,9 @@ module Cursor.Forest
     , forestCursorAppend
     , forestCursorInsertAndSelect
     , forestCursorAppendAndSelect
+    , forestCursorAddChildToNodeAtPos
+    , forestCursorAddChildToNodeAtStart
+    , forestCursorAddChildToNodeAtEnd
     , forestCursorRemoveTreeAndSelectPrev
     , forestCursorDeleteTreeAndSelectNext
     , forestCursorRemoveTree
@@ -86,17 +89,30 @@ forestCursorInsert :: ForestCursor a -> TreeCursor a -> ForestCursor a
 forestCursorInsert fc tc =
     fc & forestCursorListCursorL %~ nonEmptyCursorInsert tc
 
-forestCursorAppend :: ForestCursor a -> TreeCursor a -> ForestCursor a
-forestCursorAppend fc tc =
-    fc & forestCursorListCursorL %~ nonEmptyCursorAppend tc
-
 forestCursorInsertAndSelect :: ForestCursor a -> TreeCursor a -> ForestCursor a
 forestCursorInsertAndSelect fc tc =
     fc & forestCursorListCursorL %~ nonEmptyCursorInsertAndSelect tc
 
+forestCursorAppend :: ForestCursor a -> TreeCursor a -> ForestCursor a
+forestCursorAppend fc tc =
+    fc & forestCursorListCursorL %~ nonEmptyCursorAppend tc
+
 forestCursorAppendAndSelect :: ForestCursor a -> TreeCursor a -> ForestCursor a
 forestCursorAppendAndSelect fc tc =
     fc & forestCursorListCursorL %~ nonEmptyCursorAppendAndSelect tc
+
+forestCursorAddChildToNodeAtPos ::
+       Int -> Tree a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildToNodeAtPos i t fc =
+    fc & forestCursorSelectedTreeL %~ treeCursorAddChildAtPos i t
+
+forestCursorAddChildToNodeAtStart :: Tree a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildToNodeAtStart t fc =
+    fc & forestCursorSelectedTreeL %~ treeCursorAddChildAtStart t
+
+forestCursorAddChildToNodeAtEnd :: Tree a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildToNodeAtEnd t fc =
+    fc & forestCursorSelectedTreeL %~ treeCursorAddChildAtEnd t
 
 forestCursorRemoveTreeAndSelectPrev :: ForestCursor a -> Maybe (ForestCursor a)
 forestCursorRemoveTreeAndSelectPrev =
