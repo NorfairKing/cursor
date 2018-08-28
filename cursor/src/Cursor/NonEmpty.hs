@@ -28,13 +28,16 @@ module Cursor.NonEmpty
     , nonemptyAppend
     ) where
 
-import Control.Applicative
-import Data.Validity
 import GHC.Generics (Generic)
+
+import Data.Validity
+
 import Lens.Micro
 
 import Data.List.NonEmpty (NonEmpty(..), (<|))
 import qualified Data.List.NonEmpty as NE
+
+import Cursor.Types
 
 -- | A 'nonempty list' cursor
 data NonEmptyCursor a = NonEmptyCursor
@@ -153,30 +156,44 @@ nonEmptyCursorAppendAndSelect c lec =
     }
 
 nonEmptyCursorRemoveElemAndSelectPrev ::
-       NonEmptyCursor a -> Maybe (NonEmptyCursor a)
+       NonEmptyCursor a -> Maybe (DeleteOrUpdate (NonEmptyCursor a))
 nonEmptyCursorRemoveElemAndSelectPrev lec =
     case nonEmptyCursorPrev lec of
-        [] -> Nothing
+        [] ->
+            case nonEmptyCursorNext lec of
+                [] -> Just Deleted
+                _ -> Nothing
         (e:rest) ->
-            Just $ lec {nonEmptyCursorPrev = rest, nonEmptyCursorCurrent = e}
+            Just $
+            Updated $ lec {nonEmptyCursorPrev = rest, nonEmptyCursorCurrent = e}
 
+-- the first maybe: whether the operation succeeded
+-- the second maybe: whether the list is still nonempty
 nonEmptyCursorDeleteElemAndSelectNext ::
-       NonEmptyCursor a -> Maybe (NonEmptyCursor a)
+       NonEmptyCursor a -> Maybe (DeleteOrUpdate (NonEmptyCursor a))
 nonEmptyCursorDeleteElemAndSelectNext lec =
     case nonEmptyCursorNext lec of
-        [] -> Nothing
+        [] ->
+            case nonEmptyCursorPrev lec of
+                [] -> Just Deleted
+                _ -> Nothing
         (e:rest) ->
-            Just $ lec {nonEmptyCursorCurrent = e, nonEmptyCursorNext = rest}
+            Just $
+            Updated $ lec {nonEmptyCursorCurrent = e, nonEmptyCursorNext = rest}
 
-nonEmptyCursorRemoveElem :: NonEmptyCursor a -> Maybe (NonEmptyCursor a)
+nonEmptyCursorRemoveElem ::
+       NonEmptyCursor a -> DeleteOrUpdate (NonEmptyCursor a)
 nonEmptyCursorRemoveElem lec =
-    nonEmptyCursorRemoveElemAndSelectPrev lec <|>
-    nonEmptyCursorDeleteElemAndSelectNext lec
+    joinDeletes
+        (nonEmptyCursorRemoveElemAndSelectPrev lec)
+        (nonEmptyCursorDeleteElemAndSelectNext lec)
 
-nonEmptyCursorDeleteElem :: NonEmptyCursor a -> Maybe (NonEmptyCursor a)
+nonEmptyCursorDeleteElem ::
+       NonEmptyCursor a -> DeleteOrUpdate (NonEmptyCursor a)
 nonEmptyCursorDeleteElem lec =
-    nonEmptyCursorDeleteElemAndSelectNext lec <|>
-    nonEmptyCursorRemoveElemAndSelectPrev lec
+    joinDeletes
+        (nonEmptyCursorDeleteElemAndSelectNext lec)
+        (nonEmptyCursorRemoveElemAndSelectPrev lec)
 
 nonemptyPrepend :: [a] -> NonEmpty a -> NonEmpty a
 nonemptyPrepend ls ne = foldr (<|) ne ls

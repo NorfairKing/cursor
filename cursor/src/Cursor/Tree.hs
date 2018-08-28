@@ -38,13 +38,15 @@ module Cursor.Tree
     , treeAboveRightsL
     ) where
 
-import Control.Applicative
 import Data.Tree
 import Data.Validity
 import Data.Validity.Tree ()
+
 import GHC.Generics (Generic)
 
 import Lens.Micro
+
+import Cursor.Types
 
 data TreeCursor a = TreeCursor
     { treeAbove :: Maybe (TreeAbove a)
@@ -201,28 +203,6 @@ treeCursorAddChildAtStart t tc = tc {treeBelow = t : treeBelow tc}
 treeCursorAddChildAtEnd :: Tree a -> TreeCursor a -> TreeCursor a
 treeCursorAddChildAtEnd t tc = tc {treeBelow = treeBelow tc ++ [t]}
 
-treeCursorDeleteElemAndSelectPrevious :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorDeleteElemAndSelectPrevious TreeCursor {..} =
-    case treeAbove of
-        Nothing -> Nothing
-        Just ta ->
-            case treeAboveLefts ta of
-                [] -> Nothing
-                tree:xs ->
-                    Just . makeTreeCursorWithAbove tree $
-                    Just ta {treeAboveLefts = xs}
-
-treeCursorDeleteElemAndSelectNext :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorDeleteElemAndSelectNext TreeCursor {..} =
-    case treeAbove of
-        Nothing -> Nothing
-        Just ta ->
-            case treeAboveRights ta of
-                [] -> Nothing
-                tree:xs ->
-                    Just . makeTreeCursorWithAbove tree $
-                    Just ta {treeAboveRights = xs}
-
 treeCursorSelectAbove :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectAbove tc@TreeCursor {..} =
     case treeAbove of
@@ -252,15 +232,45 @@ treeCursorSelectBelowAtPos pos TreeCursor {..} =
 treeCursorSelectBelow :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectBelow = treeCursorSelectBelowAtPos 0
 
-treeCursorRemoveElem :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorRemoveElem tc =
-    treeCursorDeleteElemAndSelectPrevious tc <|>
-    treeCursorDeleteElemAndSelectNext tc
+-- The first maybe: Whether the operation succeeded
+-- The second maybe: whether or not the tree cursor still exists
+treeCursorDeleteElemAndSelectPrevious ::
+       TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
+treeCursorDeleteElemAndSelectPrevious TreeCursor {..} =
+    case treeAbove of
+        Nothing -> Just Deleted
+        Just ta ->
+            case treeAboveLefts ta of
+                [] -> Nothing
+                tree:xs ->
+                    Just . Updated . makeTreeCursorWithAbove tree $
+                    Just ta {treeAboveLefts = xs}
 
-treeCursorDeleteElem :: TreeCursor a -> Maybe (TreeCursor a)
+-- The first maybe: Whether the operation succeeded
+-- The second maybe: whether or not the tree cursor still exists
+treeCursorDeleteElemAndSelectNext ::
+       TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
+treeCursorDeleteElemAndSelectNext TreeCursor {..} =
+    case treeAbove of
+        Nothing -> Just Deleted
+        Just ta ->
+            case treeAboveRights ta of
+                [] -> Nothing
+                tree:xs ->
+                    Just . Updated . makeTreeCursorWithAbove tree $
+                    Just ta {treeAboveRights = xs}
+
+treeCursorRemoveElem :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)
+treeCursorRemoveElem tc =
+    joinDeletes
+        (treeCursorDeleteElemAndSelectPrevious tc)
+        (treeCursorDeleteElemAndSelectNext tc)
+
+treeCursorDeleteElem :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)
 treeCursorDeleteElem tc =
-    treeCursorDeleteElemAndSelectNext tc <|>
-    treeCursorDeleteElemAndSelectPrevious tc
+    joinDeletes
+        (treeCursorDeleteElemAndSelectNext tc)
+        (treeCursorDeleteElemAndSelectPrevious tc)
 
 treeCursorSwapPrev :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSwapPrev tc = do

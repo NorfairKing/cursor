@@ -43,6 +43,7 @@ import Lens.Micro
 
 import Cursor.Map.KeyValue
 import Cursor.NonEmpty
+import Cursor.Types
 
 newtype MapCursor k v = MapCursor
     { mapCursorList :: NonEmptyCursor (KeyValueCursor k v)
@@ -56,10 +57,10 @@ makeMapCursor = makeMapCursorWithSelection 0
 makeMapCursorWithSelection :: Int -> NonEmpty (k, v) -> MapCursor k v
 makeMapCursorWithSelection i ne =
     MapCursor
-        { mapCursorList =
-              makeNonEmptyCursorWithSelection i $
-              NE.map (uncurry makeKeyValueCursor) ne
-        }
+    { mapCursorList =
+          makeNonEmptyCursorWithSelection i $
+          NE.map (uncurry makeKeyValueCursor) ne
+    }
 
 singletonMapCursor :: k -> v -> MapCursor k v
 singletonMapCursor k v = makeMapCursor $ (k, v) :| []
@@ -116,18 +117,25 @@ mapCursorInsertAndSelect k v =
 
 mapCursorAppendAndSelect :: k -> v -> MapCursor k v -> MapCursor k v
 mapCursorAppendAndSelect k v =
-    mapCursorNonEmptyCursorL %~ (nonEmptyCursorAppendAndSelect $ makeKeyValueCursor k v)
+    mapCursorNonEmptyCursorL %~
+    (nonEmptyCursorAppendAndSelect $ makeKeyValueCursor k v)
 
-mapCursorRemoveElemAndSelectPrev :: MapCursor k v -> Maybe (MapCursor k v)
+mapCursorRemoveElemAndSelectPrev ::
+       MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
 mapCursorRemoveElemAndSelectPrev =
-    mapCursorNonEmptyCursorL nonEmptyCursorRemoveElemAndSelectPrev
+    focusPossibleDeleteOrUpdate
+        mapCursorNonEmptyCursorL
+        nonEmptyCursorRemoveElemAndSelectPrev
 
-mapCursorDeleteElemAndSelectNext :: MapCursor k v -> Maybe (MapCursor k v)
+mapCursorDeleteElemAndSelectNext ::
+       MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
 mapCursorDeleteElemAndSelectNext =
-    mapCursorNonEmptyCursorL nonEmptyCursorDeleteElemAndSelectNext
+    focusPossibleDeleteOrUpdate
+        mapCursorNonEmptyCursorL
+        nonEmptyCursorDeleteElemAndSelectNext
 
-mapCursorRemoveElem :: MapCursor k v -> Maybe (MapCursor k v)
+mapCursorRemoveElem :: MapCursor k v -> DeleteOrUpdate (MapCursor k v)
 mapCursorRemoveElem = mapCursorNonEmptyCursorL nonEmptyCursorRemoveElem
 
-mapCursorDeleteElem :: MapCursor k v -> Maybe (MapCursor k v)
+mapCursorDeleteElem :: MapCursor k v -> DeleteOrUpdate (MapCursor k v)
 mapCursorDeleteElem = mapCursorNonEmptyCursorL nonEmptyCursorDeleteElem
