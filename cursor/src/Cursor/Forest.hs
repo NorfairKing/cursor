@@ -19,6 +19,10 @@ module Cursor.Forest
     , forestCursorAppendTreeCursor
     , forestCursorInsertAndSelectTreeCursor
     , forestCursorAppendAndSelectTreeCursor
+    , forestCursorInsertTree
+    , forestCursorAppendTree
+    , forestCursorInsertAndSelectTree
+    , forestCursorAppendAndSelectTree
     , forestCursorAddChildToNodeAtPos
     , forestCursorAddChildToNodeAtStart
     , forestCursorAddChildToNodeAtEnd
@@ -36,6 +40,7 @@ import Data.Validity.Tree ()
 
 import qualified Data.List.NonEmpty as NE
 import Data.List.NonEmpty (NonEmpty)
+import Data.Maybe
 import Data.Tree
 
 import Lens.Micro
@@ -102,6 +107,26 @@ forestCursorAppendAndSelectTreeCursor ::
        ForestCursor a -> TreeCursor a -> ForestCursor a
 forestCursorAppendAndSelectTreeCursor fc tc =
     fc & forestCursorListCursorL %~ nonEmptyCursorAppendAndSelect tc
+
+forestCursorInsertTree :: ForestCursor a -> Tree a -> ForestCursor a
+forestCursorInsertTree fc t =
+    fromMaybe (forestCursorInsertTreeCursor fc $ makeTreeCursor t) $
+    fc & forestCursorSelectedTreeL (treeCursorInsert t)
+
+forestCursorInsertAndSelectTree :: ForestCursor a -> Tree a -> ForestCursor a
+forestCursorInsertAndSelectTree fc t =
+    fromMaybe (forestCursorInsertAndSelectTreeCursor fc $ makeTreeCursor t) $
+    fc & forestCursorSelectedTreeL (treeCursorInsertAndSelect t)
+
+forestCursorAppendTree :: ForestCursor a -> Tree a -> ForestCursor a
+forestCursorAppendTree fc t =
+    fromMaybe (forestCursorAppendTreeCursor fc $ makeTreeCursor t) $
+    fc & forestCursorSelectedTreeL (treeCursorAppend t)
+
+forestCursorAppendAndSelectTree :: ForestCursor a -> Tree a -> ForestCursor a
+forestCursorAppendAndSelectTree fc t =
+    fromMaybe (forestCursorAppendAndSelectTreeCursor fc $ makeTreeCursor t) $
+    fc & forestCursorSelectedTreeL (treeCursorAppendAndSelect t)
 
 forestCursorAddChildToNodeAtPos ::
        Int -> Tree a -> ForestCursor a -> ForestCursor a

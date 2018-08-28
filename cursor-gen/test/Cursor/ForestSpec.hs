@@ -62,21 +62,44 @@ spec = do
     describe "forestCursorInsertTreeCursor" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorInsertTreeCursor @Double)
-        it "inserts a tree before the currently selected tree" pending
+        it
+            "inserts a tree cursor before the currently selected tree cursor"
+            pending
     describe "forestCursorInsertAndSelectTreeCursor" $ do
         it "produces valid cursors" $
             producesValidsOnValids2
                 (forestCursorInsertAndSelectTreeCursor @Double)
         it
-            "inserts a tree before the currently selected tree and selects it"
+            "inserts a tree cursor before the currently selected tree cursor and selects it"
             pending
     describe "forestCursorAppendTreeCursor" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorAppendTreeCursor @Double)
-        it "appends a tree after the currently selected tree" pending
+        it "appends a tree after the currently selected tree cursor" pending
     describe "forestCursorAppendAndSelectTreeCursor" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAppendAndSelectTreeCursor @Double)
+            producesValidsOnValids2
+                (forestCursorAppendAndSelectTreeCursor @Double)
+        it
+            "appends a tree cursor after the currently selected tree cursor and selects it"
+            pending
+    describe "forestCursorInsertTree" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorInsertTree @Double)
+        it "inserts a tree before the currently selected tree" pending
+    describe "forestCursorInsertAndSelectTree" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorInsertAndSelectTree @Double)
+        it
+            "inserts a tree before the currently selected tree and selects it"
+            pending
+    describe "forestCursorAppendTree" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorAppendTree @Double)
+        it "appends a tree after the currently selected tree " pending
+    describe "forestCursorAppendAndSelectTree" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorAppendAndSelectTree @Double)
         it
             "appends a tree after the currently selected tree and selects it"
             pending
