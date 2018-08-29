@@ -69,17 +69,14 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids $ forestCursorSelectPrevOnSameLevel @Double
         it "is a movement" $ isMovementM forestCursorSelectPrevOnSameLevel
-        it "selects the previous node on the same level as the current node" pending
+        it
+            "selects the previous node on the same level as the current node"
+            pending
     describe "forestCursorSelectNextOnSameLevel" $ do
         it "produces valid cursors" $
             producesValidsOnValids $ forestCursorSelectNextOnSameLevel @Double
         it "is a movement" $ isMovementM forestCursorSelectNextOnSameLevel
         it "selects the next node on the same level as the current node" pending
-    describe "forestCursorSelectBelow" $ do
-        it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectBelow @Double
-        it "is a movement" $ isMovementM forestCursorSelectBelow
-        it "selects the first child of the selected node" pending
     describe "forestCursorSelectBelowAtPos" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 $ forestCursorSelectBelowAtPos @Double
@@ -88,6 +85,16 @@ spec = do
         it
             "selects the child of the selected node at the given position"
             pending
+    describe "forestCursorSelectBelowAtStart" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectBelowAtStart @Double
+        it "is a movement" $ isMovementM forestCursorSelectBelowAtStart
+        it "selects the first child of the selected node" pending
+    describe "forestCursorSelectBelowAtEnd" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectBelowAtEnd @Double
+        it "is a movement" $ isMovementM forestCursorSelectBelowAtEnd
+        it "selects the first child of the selected node" pending
     describe "forestCursorSelection" $ do
         it "produces valid ints" $
             producesValidsOnValids (forestCursorSelection @Double)

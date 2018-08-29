@@ -14,7 +14,8 @@ module Cursor.Tree
     , treeCursorSelectFirst
     , treeCursorSelectLast
     , treeCursorSelectAbove
-    , treeCursorSelectBelow
+    , treeCursorSelectBelowAtStart
+    , treeCursorSelectBelowAtEnd
     , treeCursorSelectBelowAtPos
     , treeCursorSelectPrevOnSameLevel
     , treeCursorSelectNextOnSameLevel
@@ -123,11 +124,13 @@ rebuildTreeCursor TreeCursor {..} =
 
 treeCursorSelectPrev :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectPrev tc =
-    treeCursorSelectPrevOnSameLevel tc <|> treeCursorSelectAbove tc
+    (treeCursorSelectPrevOnSameLevel tc >>= treeCursorSelectBelowAtEnd) <|>
+    treeCursorSelectPrevOnSameLevel tc <|>
+    treeCursorSelectAbove tc
 
 treeCursorSelectNext :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectNext tc =
-    treeCursorSelectBelow tc <|> treeCursorSelectNextOnSameLevel tc <|>
+    treeCursorSelectBelowAtStart tc <|> treeCursorSelectNextOnSameLevel tc <|>
     (treeCursorSelectAbove tc >>= treeCursorSelectNextOnSameLevel)
 
 treeCursorSelectFirst :: TreeCursor a -> TreeCursor a
@@ -168,6 +171,13 @@ treeCursorSelectBelowAtPos pos TreeCursor {..} =
             , treeAboveRights = rights
             }
 
+treeCursorSelectBelowAtStart :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorSelectBelowAtStart = treeCursorSelectBelowAtPos 0
+
+treeCursorSelectBelowAtEnd :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorSelectBelowAtEnd tc =
+    treeCursorSelectBelowAtPos (length $ treeBelow tc) tc
+
 treeCursorSelectPrevOnSameLevel :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectPrevOnSameLevel tc@TreeCursor {..} =
     case treeAbove of
@@ -196,9 +206,6 @@ treeCursorSelectNextOnSameLevel tc@TreeCursor {..} =
                     { treeAboveLefts = currentTree tc : treeAboveLefts ta
                     , treeAboveRights = xs
                     }
-
-treeCursorSelectBelow :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorSelectBelow = treeCursorSelectBelowAtPos 0
 
 treeCursorInsert :: Tree a -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorInsert tree tc@TreeCursor {..} =

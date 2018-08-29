@@ -17,8 +17,9 @@ module Cursor.Forest
     , forestCursorSelectNext
     , forestCursorSelectPrevOnSameLevel
     , forestCursorSelectNextOnSameLevel
-    , forestCursorSelectBelow
     , forestCursorSelectBelowAtPos
+    , forestCursorSelectBelowAtStart
+    , forestCursorSelectBelowAtEnd
     , forestCursorSelection
     , forestCursorSelectIndex
     , forestCursorInsertTreeCursor
@@ -121,12 +122,17 @@ forestCursorSelectPrevOnSameLevel fc =
     (fc & forestCursorSelectedTreeL treeCursorSelectPrevOnSameLevel) <|>
     forestCursorSelectPrevTreeCursor fc
 
-forestCursorSelectBelow :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectBelow = forestCursorSelectedTreeL treeCursorSelectBelow
-
 forestCursorSelectBelowAtPos :: Int -> ForestCursor a -> Maybe (ForestCursor a)
 forestCursorSelectBelowAtPos i =
     forestCursorSelectedTreeL $ treeCursorSelectBelowAtPos i
+
+forestCursorSelectBelowAtStart :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorSelectBelowAtStart =
+    forestCursorSelectedTreeL treeCursorSelectBelowAtStart
+
+forestCursorSelectBelowAtEnd :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorSelectBelowAtEnd =
+    forestCursorSelectedTreeL treeCursorSelectBelowAtEnd
 
 forestCursorSelection :: ForestCursor a -> Int
 forestCursorSelection fc =
