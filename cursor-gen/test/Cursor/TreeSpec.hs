@@ -117,20 +117,10 @@ spec = do
     describe "treeCursorRemoveElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorRemoveElem @Double
-        it "after treeCursorAppendAndSelect is identity if they don't fail" $
-            forAllValid $ \tree ->
-                inverseFunctionsIfSucceedOnValid
-                    ((treeCursorAppendAndSelect @Double) tree) $
-                treeCursorRemoveElem @Double
         it "removes elements and select the former" pending
     describe "treeCursorDeleteElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDeleteElem @Double
-        it "after treeCursorInsertAndSelect is identity if they don't fail" $
-            forAllValid $ \tree ->
-                inverseFunctionsIfSucceedOnValid
-                    ((treeCursorInsertAndSelect @Double) tree) $
-                (treeCursorDeleteElem @Double)
         it "removes elements and select the next" pending
     describe "treeCursorSwapPrev" $ do
         it "produces valids on valids" $
