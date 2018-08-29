@@ -177,7 +177,7 @@ treeCursorSelectBelowAtStart = treeCursorSelectBelowAtPos 0
 
 treeCursorSelectBelowAtEnd :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectBelowAtEnd tc =
-    treeCursorSelectBelowAtPos (length $ treeBelow tc) tc
+    treeCursorSelectBelowAtPos (length (treeBelow tc) - 1) tc
 
 treeCursorSelectPrevOnSameLevel :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectPrevOnSameLevel tc@TreeCursor {..} =
@@ -214,17 +214,17 @@ treeCursorSelectAbovePrev tc = treeCursorSelectPrevOnSameLevel tc >>= go
   where
     go :: TreeCursor a -> Maybe (TreeCursor a)
     go tc_ =
-        case treeBelow tc_ of
-            [] -> pure tc_
-            _ -> treeCursorSelectBelowAtEnd tc_ >>= go
+        case treeCursorSelectBelowAtEnd tc_ of
+            Nothing -> pure tc_
+            Just tc_' -> go tc_'
 
 -- | Go up as far as necessary to find a next element on a level above and forward
 treeCursorSelectAboveNext :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorSelectAboveNext tc@TreeCursor {..} = do
-    ta  <- treeAbove
-    case treeAboveRights ta of
-        [] -> treeCursorSelectAbove tc >>= treeCursorSelectAboveNext
-        _ -> treeCursorSelectAbove tc >>= treeCursorSelectNextOnSameLevel
+treeCursorSelectAboveNext tc = do
+    tc' <- treeCursorSelectAbove tc
+    case treeCursorSelectNextOnSameLevel tc' of
+        Nothing -> treeCursorSelectAboveNext tc'
+        Just tc'' -> pure tc''
 
 treeCursorInsert :: Tree a -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorInsert tree tc@TreeCursor {..} =

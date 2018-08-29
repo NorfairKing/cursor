@@ -7,7 +7,6 @@ module Cursor.TreeSpec
     ( spec
     ) where
 
-
 import Data.Tree
 
 import Test.Hspec
@@ -152,6 +151,55 @@ spec = do
                 (treeCursorSelectAbovePrev @Double)
     describe "treeCursorSelectAboveNext" $ do
         testMovementM treeCursorSelectAboveNext
+        it "Works for this classic example" $
+            -- > 0
+            --   > 1
+            --     > 2
+            --       > 3 <- start cursor
+            --   > 4 <- expected end cursor
+         do
+            let start =
+                    TreeCursor
+                    { treeAbove =
+                          Just
+                              (TreeAbove
+                               { treeAboveLefts = []
+                               , treeAboveAbove =
+                                     Just
+                                         (TreeAbove
+                                          { treeAboveLefts = []
+                                          , treeAboveAbove =
+                                                Just
+                                                    (TreeAbove
+                                                     { treeAboveLefts = []
+                                                     , treeAboveAbove = Nothing
+                                                     , treeAboveNode = 0
+                                                     , treeAboveRights =
+                                                           [Node 4 []]
+                                                     })
+                                          , treeAboveNode = 1
+                                          , treeAboveRights = []
+                                          })
+                               , treeAboveNode = 2
+                               , treeAboveRights = []
+                               })
+                    , treeCurrent = 3
+                    , treeBelow = []
+                    }
+                expected =
+                    TreeCursor
+                    { treeAbove =
+                          Just
+                              (TreeAbove
+                               { treeAboveLefts = [Node 1 [Node 2 [Node 3 []]]]
+                               , treeAboveAbove = Nothing
+                               , treeAboveNode = 0
+                               , treeAboveRights = []
+                               })
+                    , treeCurrent = 4 :: Int
+                    , treeBelow = []
+                    }
+            treeCursorSelectAboveNext start `shouldBe` Just expected
         it "selects the next element" pending
         it "after treeCursorSelectAbovePrev is identity if they don't fail" $ do
             inverseFunctionsIfSucceedOnValid
