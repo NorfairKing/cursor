@@ -19,6 +19,8 @@ module Cursor.Tree
     , treeCursorSelectBelowAtPos
     , treeCursorSelectPrevOnSameLevel
     , treeCursorSelectNextOnSameLevel
+    , treeCursorSelectAbovePrev
+    , treeCursorSelectAboveNext
     , treeCursorInsert
     , treeCursorInsertAndSelect
     , treeCursorAppend
@@ -124,14 +126,13 @@ rebuildTreeCursor TreeCursor {..} =
 
 treeCursorSelectPrev :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectPrev tc =
-    (treeCursorSelectPrevOnSameLevel tc >>= treeCursorSelectBelowAtEnd) <|>
-    treeCursorSelectPrevOnSameLevel tc <|>
+    treeCursorSelectAbovePrev tc <|> treeCursorSelectPrevOnSameLevel tc <|>
     treeCursorSelectAbove tc
 
 treeCursorSelectNext :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectNext tc =
     treeCursorSelectBelowAtStart tc <|> treeCursorSelectNextOnSameLevel tc <|>
-    (treeCursorSelectAbove tc >>= treeCursorSelectNextOnSameLevel)
+    treeCursorSelectAboveNext tc
 
 treeCursorSelectFirst :: TreeCursor a -> TreeCursor a
 treeCursorSelectFirst tc =
@@ -206,6 +207,24 @@ treeCursorSelectNextOnSameLevel tc@TreeCursor {..} =
                     { treeAboveLefts = currentTree tc : treeAboveLefts ta
                     , treeAboveRights = xs
                     }
+
+-- | Go back and down as far as necessary to find a previous element on a level below
+treeCursorSelectAbovePrev :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorSelectAbovePrev tc = treeCursorSelectPrevOnSameLevel tc >>= go
+  where
+    go :: TreeCursor a -> Maybe (TreeCursor a)
+    go tc_ =
+        case treeBelow tc_ of
+            [] -> pure tc_
+            _ -> treeCursorSelectBelowAtEnd tc_ >>= go
+
+-- | Go up as far as necessary to find a next element on a level above and forward
+treeCursorSelectAboveNext :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorSelectAboveNext tc@TreeCursor {..} = do
+    ta  <- treeAbove
+    case treeAboveRights ta of
+        [] -> treeCursorSelectAbove tc >>= treeCursorSelectAboveNext
+        _ -> treeCursorSelectAbove tc >>= treeCursorSelectNextOnSameLevel
 
 treeCursorInsert :: Tree a -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorInsert tree tc@TreeCursor {..} =

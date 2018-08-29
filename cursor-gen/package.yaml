@@ -40,10 +40,11 @@ tests:
     dependencies:
     - QuickCheck
     - base
+    - containers
     - cursor
     - cursor-gen
     - genvalidity-hspec
     - genvalidity-hspec-optics
     - hspec
-    - text
     - pretty-show
+    - text

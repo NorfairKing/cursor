@@ -7,6 +7,9 @@ module Cursor.TreeSpec
     ( spec
     ) where
 
+
+import Data.Tree
+
 import Test.Hspec
 
 import Test.QuickCheck
@@ -38,14 +41,16 @@ spec = do
         testMovementM treeCursorSelectPrev
         it "selects the previous element" pending
         it "after treeCursorSelectNext is identity if they don't fail" $ do
-            inverseFunctionsIfSucceedOnValid (treeCursorSelectNext @Double) $
-                treeCursorSelectPrev @Double
+            inverseFunctionsIfSucceedOnValid
+                (treeCursorSelectNext @Double)
+                (treeCursorSelectPrev @Double)
     describe "treeCursorSelectNext" $ do
         testMovementM treeCursorSelectNext
         it "selects the next element" pending
         it "after treeCursorSelectPrev is identity if they don't fail" $ do
-            inverseFunctionsIfSucceedOnValid (treeCursorSelectPrev @Double) $
-                treeCursorSelectNext @Double
+            inverseFunctionsIfSucceedOnValid
+                (treeCursorSelectPrev @Double)
+                (treeCursorSelectNext @Double)
     describe "treeCursorSelectFirst" $ do
         testMovement treeCursorSelectFirst
         it "selects the first element" pending
@@ -79,16 +84,79 @@ spec = do
         it
             "after treeCursorSelectNextOnSameLevel is identity if they don't fail" $ do
             inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectNextOnSameLevel @Double) $
-                treeCursorSelectPrevOnSameLevel @Double
+                (treeCursorSelectNextOnSameLevel @Double)
+                (treeCursorSelectPrevOnSameLevel @Double)
     describe "treeCursorSelectNextOnSameLevel" $ do
         testMovementM treeCursorSelectNextOnSameLevel
         it "selects the next element" pending
         it
             "after treeCursorSelectPrevOnSameLevel is identity if they don't fail" $ do
             inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectPrevOnSameLevel @Double) $
-                treeCursorSelectNextOnSameLevel @Double
+                (treeCursorSelectPrevOnSameLevel @Double)
+                (treeCursorSelectNextOnSameLevel @Double)
+    describe "treeCursorSelectAbovePrev" $ do
+        testMovementM treeCursorSelectAbovePrev
+        it "Works for this classic example" $
+            -- > 0
+            --   > 1
+            --     > 2
+            --       > 3 <- expected end cursor
+            --   > 4 <- start cursor
+         do
+            let start =
+                    TreeCursor
+                    { treeAbove =
+                          Just
+                              (TreeAbove
+                               { treeAboveLefts = [Node 1 [Node 2 [Node 3 []]]]
+                               , treeAboveAbove = Nothing
+                               , treeAboveNode = 0
+                               , treeAboveRights = []
+                               })
+                    , treeCurrent = 4 :: Int
+                    , treeBelow = []
+                    }
+                expected =
+                    TreeCursor
+                    { treeAbove =
+                          Just
+                              (TreeAbove
+                               { treeAboveLefts = []
+                               , treeAboveAbove =
+                                     Just
+                                         (TreeAbove
+                                          { treeAboveLefts = []
+                                          , treeAboveAbove =
+                                                Just
+                                                    (TreeAbove
+                                                     { treeAboveLefts = []
+                                                     , treeAboveAbove = Nothing
+                                                     , treeAboveNode = 0
+                                                     , treeAboveRights =
+                                                           [Node 4 []]
+                                                     })
+                                          , treeAboveNode = 1
+                                          , treeAboveRights = []
+                                          })
+                               , treeAboveNode = 2
+                               , treeAboveRights = []
+                               })
+                    , treeCurrent = 3
+                    , treeBelow = []
+                    }
+            treeCursorSelectAbovePrev start `shouldBe` Just expected
+        it "selects the previous element" pending
+        it "after treeCursorSelectAboveNext is identity if they don't fail" $ do
+            inverseFunctionsIfSucceedOnValid
+                (treeCursorSelectAboveNext @Double)
+                (treeCursorSelectAbovePrev @Double)
+    describe "treeCursorSelectAboveNext" $ do
+        testMovementM treeCursorSelectAboveNext
+        it "selects the next element" pending
+        it "after treeCursorSelectAbovePrev is identity if they don't fail" $ do
+            inverseFunctionsIfSucceedOnValid
+                (treeCursorSelectAbovePrev @Double)
+                (treeCursorSelectAboveNext @Double)
     describe "treeCursorInsert" $ do
         it "produces valids on valids" $
             producesValidsOnValids2 $ treeCursorInsert @Double
