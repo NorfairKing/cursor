@@ -65,6 +65,16 @@ spec = do
             producesValidsOnValids $ forestCursorSelectNext @Double
         it "is a movement" $ isMovementM forestCursorSelectNext
         it "selects the next node" pending
+    describe "forestCursorSelectPrevOnSameLevel" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectPrevOnSameLevel @Double
+        it "is a movement" $ isMovementM forestCursorSelectPrevOnSameLevel
+        it "selects the previous node on the same level as the current node" pending
+    describe "forestCursorSelectNextOnSameLevel" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectNextOnSameLevel @Double
+        it "is a movement" $ isMovementM forestCursorSelectNextOnSameLevel
+        it "selects the next node on the same level as the current node" pending
     describe "forestCursorSelectBelow" $ do
         it "produces valid cursors" $
             producesValidsOnValids $ forestCursorSelectBelow @Double
