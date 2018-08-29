@@ -19,6 +19,7 @@ library:
   - Cursor.Text
   - Cursor.TextField
   - Cursor.Tree
+  - Cursor.Types
   dependencies:
   - base 
   - containers

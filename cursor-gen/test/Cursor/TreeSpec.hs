@@ -69,6 +69,22 @@ spec = do
         it "is a movement" $
             forAllValid $ \n -> isMovementM $ treeCursorSelectBelowAtPos n
         it "selects the element n-th below" pending
+    describe "treeCursorSelectPrevOnSameLevel" $ do
+        testMovementM treeCursorSelectPrevOnSameLevel
+        it "selects the previous element" pending
+        it
+            "after treeCursorSelectNextOnSameLevel is identity if they don't fail" $ do
+            inverseFunctionsIfSucceedOnValid
+                (treeCursorSelectNextOnSameLevel @Double) $
+                treeCursorSelectPrevOnSameLevel @Double
+    describe "treeCursorSelectNextOnSameLevel" $ do
+        testMovementM treeCursorSelectNextOnSameLevel
+        it "selects the next element" pending
+        it
+            "after treeCursorSelectPrevOnSameLevel is identity if they don't fail" $ do
+            inverseFunctionsIfSucceedOnValid
+                (treeCursorSelectPrevOnSameLevel @Double) $
+                treeCursorSelectNextOnSameLevel @Double
     describe "treeCursorInsert" $ do
         it "produces valids on valids" $
             producesValidsOnValids2 $ treeCursorInsert @Double
