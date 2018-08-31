@@ -62,7 +62,7 @@ import Control.Applicative
 
 import Lens.Micro
 
-import Cursor.NonEmpty
+import Cursor.List.NonEmpty
 import Cursor.Tree
 import Cursor.Types
 
@@ -82,9 +82,11 @@ rebuildForestCursor =
 drawForestCursor :: Show a => ForestCursor a -> String
 drawForestCursor ForestCursor {..} =
     drawForest $
-    (map (fmap show . rebuildTreeCursor) $ reverse $ nonEmptyCursorPrev forestCursorListCursor) ++
+    (map (fmap show . rebuildTreeCursor) $
+     reverse $ nonEmptyCursorPrev forestCursorListCursor) ++
     [treeCursorWithPointer $ nonEmptyCursorCurrent forestCursorListCursor] ++
-    (map (fmap show . rebuildTreeCursor) $ nonEmptyCursorNext forestCursorListCursor)
+    (map (fmap show . rebuildTreeCursor) $
+     nonEmptyCursorNext forestCursorListCursor)
 
 forestCursorListCursorL ::
        Lens' (ForestCursor a) (NonEmptyCursor (TreeCursor a))

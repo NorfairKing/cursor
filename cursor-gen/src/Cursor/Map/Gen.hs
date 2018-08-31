@@ -10,8 +10,8 @@ import Data.GenValidity.Containers ()
 
 import Cursor.Map
 
+import Cursor.List.NonEmpty.Gen ()
 import Cursor.Map.KeyValue.Gen ()
-import Cursor.NonEmpty.Gen ()
 
 instance (GenUnchecked k, GenUnchecked v) => GenUnchecked (MapCursor k v)
 

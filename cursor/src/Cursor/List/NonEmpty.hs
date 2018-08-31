@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DeriveFunctor #-}
 
-module Cursor.NonEmpty
+module Cursor.List.NonEmpty
     ( NonEmptyCursor(..)
     , makeNonEmptyCursor
     , makeNonEmptyCursorWithSelection

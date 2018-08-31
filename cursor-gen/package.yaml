@@ -13,9 +13,9 @@ library:
   exposed-modules:
   - Cursor.Forest.Gen
   - Cursor.List.Gen
+  - Cursor.List.NonEmpty.Gen
   - Cursor.Map.Gen
   - Cursor.Map.KeyValue.Gen
-  - Cursor.NonEmpty.Gen
   - Cursor.Text.Gen
   - Cursor.TextField.Gen
   - Cursor.Tree.Gen

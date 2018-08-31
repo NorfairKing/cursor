@@ -10,10 +10,10 @@ import Data.GenValidity.Containers ()
 
 import Cursor.Forest
 
-import Cursor.NonEmpty.Gen ()
+import Cursor.List.NonEmpty.Gen ()
 import Cursor.Tree.Gen ()
 
 instance GenUnchecked a => GenUnchecked (ForestCursor a)
 
 instance GenValid a => GenValid (ForestCursor a) where
-    genValid = ForestCursor <$> genValid
+    genValid = genValidStructurally

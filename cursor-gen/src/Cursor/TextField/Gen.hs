@@ -6,10 +6,10 @@ import Test.QuickCheck
 
 import Data.GenValidity
 
-import Cursor.NonEmpty
+import Cursor.List.NonEmpty
 import Cursor.TextField
 
-import Cursor.NonEmpty.Gen ()
+import Cursor.List.NonEmpty.Gen ()
 import Cursor.Text.Gen
 
 instance GenUnchecked TextFieldCursor

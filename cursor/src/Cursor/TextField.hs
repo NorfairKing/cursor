@@ -43,7 +43,7 @@ import Data.Text (Text)
 
 import Lens.Micro
 
-import Cursor.NonEmpty
+import Cursor.List.NonEmpty
 import Cursor.Text
 
 newtype TextFieldCursor = TextFieldCursor
@@ -105,12 +105,12 @@ makeTextFieldCursorWithSelection :: Int -> Int -> Text -> TextFieldCursor
 makeTextFieldCursorWithSelection x y t =
     (\tfc -> tfc & textFieldCursorSelectedL %~ textCursorSelectIndex y) $
     TextFieldCursor
-        { textFieldCursorNonEmpty =
-              makeNonEmptyCursorWithSelection x $
-              let ls = T.splitOn "\n" t
+    { textFieldCursorNonEmpty =
+          makeNonEmptyCursorWithSelection x $
+          let ls = T.splitOn "\n" t
                 -- This is safe because 'splitOn' always returns a nonempty list.
-               in fromJust $ NE.nonEmpty $ map makeTextCursor ls
-        }
+          in fromJust $ NE.nonEmpty $ map makeTextCursor ls
+    }
 
 rebuildTextFieldCursorLines :: TextFieldCursor -> NonEmpty Text
 rebuildTextFieldCursorLines =
@@ -128,7 +128,7 @@ textFieldCursorSelection tfc =
 emptyTextFieldCursor :: TextFieldCursor
 emptyTextFieldCursor =
     TextFieldCursor
-        {textFieldCursorNonEmpty = singletonNonEmptyCursor $ makeTextCursor ""}
+    {textFieldCursorNonEmpty = singletonNonEmptyCursor $ makeTextCursor ""}
 
 textFieldCursorNonEmptyCursorL ::
        Lens' TextFieldCursor (NonEmptyCursor TextCursor)
@@ -173,7 +173,7 @@ moveWhileKeepingSelection movement tfc =
     let i = textFieldCursorIndexOnLine tfc
         tfc' = textFieldCursorSelectIndexOnLine 0 tfc
         tfc'' = tfc' & textFieldCursorNonEmptyCursorL %~ movement
-     in textFieldCursorSelectIndexOnLine i tfc''
+    in textFieldCursorSelectIndexOnLine i tfc''
 
 textFieldCursorSelectPrevChar :: TextFieldCursor -> Maybe TextFieldCursor
 textFieldCursorSelectPrevChar = textFieldCursorSelectedL textCursorSelectPrev
@@ -206,21 +206,22 @@ textFieldCursorInsertNewline =
     textFieldCursorNonEmptyCursorL %~
     (\lec@NonEmptyCursor {..} ->
          let (tc1, tc2) = textCursorSplit nonEmptyCursorCurrent
-          in lec
-                 { nonEmptyCursorPrev =
-                       textCursorSelectIndex 0 tc1 : nonEmptyCursorPrev
-                 , nonEmptyCursorCurrent = tc2
-                 })
+         in lec
+            { nonEmptyCursorPrev =
+                  textCursorSelectIndex 0 tc1 : nonEmptyCursorPrev
+            , nonEmptyCursorCurrent = tc2
+            })
 
 textFieldCursorAppendNewline :: TextFieldCursor -> TextFieldCursor
 textFieldCursorAppendNewline =
     textFieldCursorNonEmptyCursorL %~
     (\lec@NonEmptyCursor {..} ->
          let (tc1, tc2) = textCursorSplit nonEmptyCursorCurrent
-          in lec
-                 { nonEmptyCursorCurrent = tc1
-                 , nonEmptyCursorNext = textCursorSelectIndex 0 tc2 : nonEmptyCursorNext
-                 })
+         in lec
+            { nonEmptyCursorCurrent = tc1
+            , nonEmptyCursorNext =
+                  textCursorSelectIndex 0 tc2 : nonEmptyCursorNext
+            })
 
 textFieldCursorRemove :: TextFieldCursor -> Maybe TextFieldCursor
 textFieldCursorRemove =
@@ -233,12 +234,10 @@ textFieldCursorRemove =
                          (pl:pls) ->
                              Just $
                              lec
-                                 { nonEmptyCursorPrev = pls
-                                 , nonEmptyCursorCurrent =
-                                       textCursorCombine
-                                           pl
-                                           nonEmptyCursorCurrent
-                                 }
+                             { nonEmptyCursorPrev = pls
+                             , nonEmptyCursorCurrent =
+                                   textCursorCombine pl nonEmptyCursorCurrent
+                             }
                  Just ctc -> Just $ lec & nonEmptyCursorElemL .~ ctc)
 
 textFieldCursorDelete :: TextFieldCursor -> Maybe TextFieldCursor
@@ -252,12 +251,10 @@ textFieldCursorDelete =
                          (pl:pls) ->
                              Just $
                              lec
-                                 { nonEmptyCursorCurrent =
-                                       textCursorCombine
-                                           nonEmptyCursorCurrent
-                                           pl
-                                 , nonEmptyCursorNext = pls
-                                 }
+                             { nonEmptyCursorCurrent =
+                                   textCursorCombine nonEmptyCursorCurrent pl
+                             , nonEmptyCursorNext = pls
+                             }
                  Just ctc -> Just $ lec & nonEmptyCursorElemL .~ ctc)
 
 textFieldCursorSelectStartOfLine :: TextFieldCursor -> TextFieldCursor

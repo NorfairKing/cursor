@@ -13,9 +13,9 @@ library:
   exposed-modules:
   - Cursor.Forest
   - Cursor.List
+  - Cursor.List.NonEmpty
   - Cursor.Map
   - Cursor.Map.KeyValue
-  - Cursor.NonEmpty
   - Cursor.Text
   - Cursor.TextField
   - Cursor.Tree

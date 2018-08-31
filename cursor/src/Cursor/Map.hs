@@ -41,8 +41,8 @@ import qualified Data.List.NonEmpty as NE
 
 import Lens.Micro
 
+import Cursor.List.NonEmpty
 import Cursor.Map.KeyValue
-import Cursor.NonEmpty
 import Cursor.Types
 
 newtype MapCursor k v = MapCursor

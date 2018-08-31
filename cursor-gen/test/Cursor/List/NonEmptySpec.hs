@@ -4,7 +4,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Cursor.NonEmptySpec
+module Cursor.List.NonEmptySpec
     ( spec
     ) where
 
@@ -17,9 +17,8 @@ import Control.Monad
 
 import qualified Data.List.NonEmpty as NE
 
--- import Data.List.NonEmpty (NonEmpty)
-import Cursor.NonEmpty
-import Cursor.NonEmpty.Gen ()
+import Cursor.List.NonEmpty
+import Cursor.List.NonEmpty.Gen ()
 
 spec :: Spec
 spec = do
@@ -141,14 +140,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildNonEmptyCursor lec
                     ne' = rebuildNonEmptyCursor lec'
-                 in unless (ne == ne') $
-                    expectationFailure $
-                    unlines
-                        [ "Cursor before:\n" ++ show lec
-                        , "List before:  \n" ++ show ne
-                        , "Cursor after: \n" ++ show lec'
-                        , "List after:   \n" ++ show ne'
-                        ]
+                in unless (ne == ne') $
+                   expectationFailure $
+                   unlines
+                       [ "Cursor before:\n" ++ show lec
+                       , "List before:  \n" ++ show ne
+                       , "Cursor after: \n" ++ show lec'
+                       , "List after:   \n" ++ show ne'
+                       ]
 
 isMovement :: (forall a. NonEmptyCursor a -> NonEmptyCursor a) -> Property
 isMovement func =

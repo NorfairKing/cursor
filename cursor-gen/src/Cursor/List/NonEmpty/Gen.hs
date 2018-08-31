@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Cursor.NonEmpty.Gen
+module Cursor.List.NonEmpty.Gen
     ( nonEmptyElemOf
     , nonEmptyWithIndex0
     ) where
@@ -14,7 +14,7 @@ import Test.QuickCheck
 
 import qualified Data.List.NonEmpty as NE
 
-import Cursor.NonEmpty
+import Cursor.List.NonEmpty
 
 instance GenUnchecked a => GenUnchecked (NonEmptyCursor a) where
     genUnchecked =
@@ -25,9 +25,11 @@ instance GenUnchecked a => GenUnchecked (NonEmptyCursor a) where
                 (s:ss) -> do
                     i <- choose (0, length ss)
                     let (as, bs) = splitAt i ss
-                    nonEmptyCursorPrev <- forM as $ \s_ -> resize s_ genUnchecked
+                    nonEmptyCursorPrev <-
+                        forM as $ \s_ -> resize s_ genUnchecked
                     nonEmptyCursorCurrent <- resize s genUnchecked
-                    nonEmptyCursorNext <- forM bs $ \s_ -> resize s_ genUnchecked
+                    nonEmptyCursorNext <-
+                        forM bs $ \s_ -> resize s_ genUnchecked
                     pure NonEmptyCursor {..}
 
 instance GenValid a => GenValid (NonEmptyCursor a) where
