@@ -146,9 +146,28 @@ spec = do
             treeCursorSelectAbovePrev start `shouldBe` Just expected
         it "selects the previous element" pending
         it "after treeCursorSelectAboveNext is identity if they don't fail" $ do
-            inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectAboveNext @Double)
-                (treeCursorSelectAbovePrev @Double)
+            forAllValid $ \tc ->
+                case treeCursorSelectAboveNext @Double tc of
+                    Nothing -> pure ()
+                    Just tc' ->
+                        case treeCursorSelectAbovePrev tc' of
+                            Nothing ->
+                                expectationFailure
+                                    "treeCursorSelectAbovePrev should not have failed."
+                            Just tc'' ->
+                                unless (tc == tc'') $
+                                expectationFailure $
+                                unlines
+                                    [ "treeCursorSelectAboveNext and treeCursorSelectAbovePrev should have round-tripped."
+                                    , "Started with:"
+                                    , drawTreeCursor tc
+                                    , "after treeCursorSelectAboveNext"
+                                    , drawTreeCursor tc'
+                                    , "after treeCursorSelectAbovePrev"
+                                    , drawTreeCursor tc''
+                                    , "instead of"
+                                    , drawTreeCursor tc
+                                    ]
     describe "treeCursorSelectAboveNext" $ do
         testMovementM treeCursorSelectAboveNext
         it "Works for this classic example" $
@@ -202,9 +221,26 @@ spec = do
             treeCursorSelectAboveNext start `shouldBe` Just expected
         it "selects the next element" pending
         it "after treeCursorSelectAbovePrev is identity if they don't fail" $ do
-            inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectAbovePrev @Double)
-                (treeCursorSelectAboveNext @Double)
+            forAllValid $ \tc ->
+                case treeCursorSelectAbovePrev @Double tc of
+                    Nothing -> pure ()
+                    Just tc' ->
+                        case treeCursorSelectAboveNext tc' of
+                            Nothing -> pure ()
+                            Just tc'' ->
+                                unless (tc == tc'') $
+                                expectationFailure $
+                                unlines
+                                    [ "treeCursorSelectAbovePrev and treeCursorSelectAboveNext should have round-tripped."
+                                    , "Started with:"
+                                    , drawTreeCursor tc
+                                    , "after treeCursorSelectAbovePrev"
+                                    , drawTreeCursor tc'
+                                    , "after treeCursorSelectAboveNext"
+                                    , drawTreeCursor tc''
+                                    , "instead of"
+                                    , drawTreeCursor tc
+                                    ]
     describe "treeCursorInsert" $ do
         it "produces valids on valids" $
             producesValidsOnValids2 $ treeCursorInsert @Double

@@ -7,6 +7,7 @@ module Cursor.Forest
     ( ForestCursor(..)
     , makeForestCursor
     , rebuildForestCursor
+    , drawForestCursor
     , forestCursorListCursorL
     , forestCursorSelectedTreeL
     , forestCursorSelectPrevTreeCursor
@@ -77,6 +78,13 @@ makeForestCursor = ForestCursor . makeNonEmptyCursor . NE.map makeTreeCursor
 rebuildForestCursor :: ForestCursor a -> NonEmpty (Tree a)
 rebuildForestCursor =
     NE.map rebuildTreeCursor . rebuildNonEmptyCursor . forestCursorListCursor
+
+drawForestCursor :: Show a => ForestCursor a -> String
+drawForestCursor ForestCursor {..} =
+    drawForest $
+    (map (fmap show . rebuildTreeCursor) $ reverse $ nonEmptyCursorPrev forestCursorListCursor) ++
+    [treeCursorWithPointer $ nonEmptyCursorCurrent forestCursorListCursor] ++
+    (map (fmap show . rebuildTreeCursor) $ nonEmptyCursorNext forestCursorListCursor)
 
 forestCursorListCursorL ::
        Lens' (ForestCursor a) (NonEmptyCursor (TreeCursor a))

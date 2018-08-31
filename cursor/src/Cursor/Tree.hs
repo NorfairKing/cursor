@@ -9,6 +9,8 @@ module Cursor.Tree
     , singletonTreeCursor
     , makeTreeCursor
     , rebuildTreeCursor
+    , drawTreeCursor
+    , treeCursorWithPointer
     , treeCursorSelectPrev
     , treeCursorSelectNext
     , treeCursorSelectFirst
@@ -76,7 +78,7 @@ treeCursorBelowL = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
 instance Validity a => Validity (TreeCursor a)
 
 data TreeAbove a = TreeAbove
-    { treeAboveLefts :: [Tree a]
+    { treeAboveLefts :: [Tree a] -- In reverse order
     , treeAboveAbove :: Maybe (TreeAbove a)
     , treeAboveNode :: a
     , treeAboveRights :: [Tree a]
@@ -110,19 +112,34 @@ singletonTreeCursor v =
 
 rebuildTreeCursor :: TreeCursor a -> Tree a
 rebuildTreeCursor TreeCursor {..} =
-    (case treeAbove of
-         Nothing -> id
-         Just ta -> (\n -> go n ta))
-        (Node treeCurrent treeBelow)
+    wrapAbove treeAbove $ Node treeCurrent treeBelow
   where
-    go :: Tree a -> TreeAbove a -> Tree a
-    go t TreeAbove {..} =
-        (case treeAboveAbove of
-             Nothing -> id
-             Just ta -> (\n -> go n ta))
-            (Node
-                 treeAboveNode
-                 (reverse treeAboveLefts ++ [t] ++ treeAboveRights))
+    wrapAbove Nothing t = t
+    wrapAbove (Just TreeAbove {..}) t =
+        wrapAbove treeAboveAbove $
+        Node treeAboveNode $
+        concat [reverse treeAboveLefts, [t], treeAboveRights]
+
+drawTreeCursor :: Show a => TreeCursor a -> String
+drawTreeCursor = drawTree . treeCursorWithPointer
+
+treeCursorWithPointer :: Show a => TreeCursor a -> Tree String
+treeCursorWithPointer TreeCursor {..} =
+    wrapAbove treeAbove $
+    Node (show treeCurrent ++ " <---") $ showForest treeBelow
+  where
+    wrapAbove :: Show a => Maybe (TreeAbove a) -> Tree String -> Tree String
+    wrapAbove Nothing t = t
+    wrapAbove (Just TreeAbove {..}) t =
+        wrapAbove treeAboveAbove $
+        Node (show treeAboveNode) $
+        concat
+            [ showForest $ reverse treeAboveLefts
+            , [t]
+            , showForest treeAboveRights
+            ]
+    showForest :: Show a => Forest a -> Forest String
+    showForest = map $ fmap show
 
 treeCursorSelectPrev :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectPrev tc =
@@ -219,12 +236,22 @@ treeCursorSelectAbovePrev tc = treeCursorSelectPrevOnSameLevel tc >>= go
             Just tc_' -> go tc_'
 
 -- | Go up as far as necessary to find a next element on a level above and forward
+--
+-- Note: This will fail if there is a next node on the same level or any node below the current node
 treeCursorSelectAboveNext :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorSelectAboveNext tc = do
-    tc' <- treeCursorSelectAbove tc
-    case treeCursorSelectNextOnSameLevel tc' of
-        Nothing -> treeCursorSelectAboveNext tc'
-        Just tc'' -> pure tc''
+treeCursorSelectAboveNext tc =
+    case treeCursorSelectNextOnSameLevel tc of
+        Just _ -> Nothing
+        Nothing ->
+            if (null $ treeBelow tc)
+                then go tc
+                else Nothing
+  where
+    go tc_ = do
+        tc' <- treeCursorSelectAbove tc_
+        case treeCursorSelectNextOnSameLevel tc' of
+            Nothing -> go tc'
+            Just tc'' -> pure tc''
 
 treeCursorInsert :: Tree a -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorInsert tree tc@TreeCursor {..} =
