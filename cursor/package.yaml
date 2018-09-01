@@ -16,6 +16,7 @@ library:
   - Cursor.List.NonEmpty
   - Cursor.Map
   - Cursor.Map.KeyValue
+  - Cursor.Simple.List.NonEmpty
   - Cursor.Text
   - Cursor.TextField
   - Cursor.Tree
@@ -26,4 +27,5 @@ library:
   - microlens
   - validity
   - validity-containers
+  - validity-text
   - text

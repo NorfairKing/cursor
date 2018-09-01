@@ -10,6 +10,7 @@ module Cursor.List.NonEmpty
     , singletonNonEmptyCursor
     , rebuildNonEmptyCursor
     , nonEmptyCursorElemL
+    , mapNonEmptyCursor
     , nonEmptyCursorSelectPrev
     , nonEmptyCursorSelectNext
     , nonEmptyCursorSelectFirst
@@ -84,6 +85,15 @@ rebuildNonEmptyCursor f NonEmptyCursor {..} =
     nonemptyPrepend (reverse nonEmptyCursorPrev) $
     f nonEmptyCursorCurrent :| nonEmptyCursorNext
 
+mapNonEmptyCursor ::
+       (a -> c) -> (b -> d) -> NonEmptyCursor a b -> NonEmptyCursor c d
+mapNonEmptyCursor f g NonEmptyCursor {..} =
+    NonEmptyCursor
+    { nonEmptyCursorPrev = map g nonEmptyCursorPrev
+    , nonEmptyCursorCurrent = f nonEmptyCursorCurrent
+    , nonEmptyCursorNext = map g nonEmptyCursorNext
+    }
+
 nonEmptyCursorElemL :: Lens' (NonEmptyCursor a b) a
 nonEmptyCursorElemL =
     lens nonEmptyCursorCurrent $ \lec le -> lec {nonEmptyCursorCurrent = le}
@@ -136,16 +146,14 @@ nonEmptyCursorSelection = length . nonEmptyCursorPrev
 nonEmptyCursorSelectIndex ::
        (a -> b)
     -> (b -> a)
-    -> NonEmptyCursor a b
     -> Int
+    -> NonEmptyCursor a b
     -> Maybe (NonEmptyCursor a b)
-nonEmptyCursorSelectIndex f g nec i
-    | i < nonEmptyCursorSelection nec = do
-        nec' <- nonEmptyCursorSelectPrev f g nec
-        nonEmptyCursorSelectIndex f g nec' i
-    | i > nonEmptyCursorSelection nec = do
-        nec' <- nonEmptyCursorSelectNext f g nec
-        nonEmptyCursorSelectIndex f g nec' i
+nonEmptyCursorSelectIndex f g i nec
+    | i < nonEmptyCursorSelection nec =
+        nonEmptyCursorSelectPrev f g nec >>= nonEmptyCursorSelectIndex f g i
+    | i > nonEmptyCursorSelection nec =
+        nonEmptyCursorSelectNext f g nec >>= nonEmptyCursorSelectIndex f g i
     | otherwise = Just nec
 
 nonEmptyCursorInsert :: b -> NonEmptyCursor a b -> NonEmptyCursor a b
@@ -214,7 +222,7 @@ nonEmptyCursorRemoveElem g lec =
         (nonEmptyCursorDeleteElemAndSelectNext g lec)
 
 nonEmptyCursorDeleteElem ::
-       (b->a)->NonEmptyCursor a b -> DeleteOrUpdate (NonEmptyCursor a b)
+       (b -> a) -> NonEmptyCursor a b -> DeleteOrUpdate (NonEmptyCursor a b)
 nonEmptyCursorDeleteElem g lec =
     joinDeletes
         (nonEmptyCursorDeleteElemAndSelectNext g lec)

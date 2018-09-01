@@ -41,15 +41,18 @@ import qualified Data.List.NonEmpty as NE
 
 import Lens.Micro
 
-import Cursor.List.NonEmpty
 import Cursor.Map.KeyValue
+import Cursor.Simple.List.NonEmpty
 import Cursor.Types
 
 newtype MapCursor k v = MapCursor
     { mapCursorList :: NonEmptyCursor (KeyValueCursor k v)
-    } deriving (Show, Eq, Generic, Functor)
+    } deriving (Show, Eq, Generic)
 
 instance (Validity k, Validity v) => Validity (MapCursor k v)
+
+instance Functor (MapCursor k) where
+    fmap f = mapCursorNonEmptyCursorL %~ mapNonEmptyCursor (fmap f)
 
 makeMapCursor :: NonEmpty (k, v) -> MapCursor k v
 makeMapCursor = makeMapCursorWithSelection 0
@@ -70,7 +73,7 @@ rebuildMapCursor =
     NE.map rebuildKeyValueCursor . rebuildNonEmptyCursor . mapCursorList
 
 mapCursorNonEmptyCursorL ::
-       Lens' (MapCursor k v) (NonEmptyCursor (KeyValueCursor k v))
+       Lens (MapCursor k v) (MapCursor l w) (NonEmptyCursor (KeyValueCursor k v)) (NonEmptyCursor (KeyValueCursor l w))
 mapCursorNonEmptyCursorL =
     lens mapCursorList $ \mc ne -> mc {mapCursorList = ne}
 
@@ -98,9 +101,8 @@ mapCursorSelectLast = mapCursorNonEmptyCursorL %~ nonEmptyCursorSelectLast
 mapCursorSelection :: MapCursor k v -> Int
 mapCursorSelection = nonEmptyCursorSelection . mapCursorList
 
-mapCursorSelectIndex :: MapCursor k v -> Int -> Maybe (MapCursor k v)
-mapCursorSelectIndex mc i =
-    mc & mapCursorNonEmptyCursorL (`nonEmptyCursorSelectIndex` i)
+mapCursorSelectIndex :: Int -> MapCursor k v -> Maybe (MapCursor k v)
+mapCursorSelectIndex i = mapCursorNonEmptyCursorL (nonEmptyCursorSelectIndex i)
 
 mapCursorInsert :: k -> v -> MapCursor k v -> MapCursor k v
 mapCursorInsert k v =
