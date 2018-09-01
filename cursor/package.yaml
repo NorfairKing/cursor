@@ -17,6 +17,7 @@ library:
   - Cursor.Map
   - Cursor.Map.KeyValue
   - Cursor.Simple.List.NonEmpty
+  - Cursor.Simple.Tree
   - Cursor.Text
   - Cursor.TextField
   - Cursor.Tree

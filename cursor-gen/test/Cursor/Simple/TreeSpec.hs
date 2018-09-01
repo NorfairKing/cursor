@@ -3,7 +3,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Cursor.TreeSpec
+module Cursor.Simple.TreeSpec
     ( spec
     ) where
 
@@ -17,14 +17,15 @@ import Test.Validity.Optics
 
 import Control.Monad (unless)
 
-import Cursor.Tree
-import Cursor.Tree.Gen ()
+import Cursor.Simple.Tree hiding (TreeCursor)
+import qualified Cursor.Simple.Tree as STC (TreeCursor)
+import Cursor.Simple.Tree.Gen ()
+import Cursor.Tree (TreeCursor(..))
 
 spec :: Spec
 spec = do
-    eqSpec @(TreeCursor Int)
-    functorSpec @TreeCursor
-    genValidSpec @(TreeCursor Double)
+    eqSpec @(STC.TreeCursor Int)
+    genValidSpec @(STC.TreeCursor Double)
     describe "makeTreeCursor" $
         it "produces valid cursors" $
         producesValidsOnValids (makeTreeCursor @Double)
@@ -310,19 +311,21 @@ spec = do
     describe "treeAboveNodeL" $ lensSpecOnValid (treeAboveNodeL @Double)
     describe "treeAboveRightsL" $ lensSpecOnValid (treeAboveRightsL @Double)
 
-testMovement :: (forall a. TreeCursor a -> TreeCursor a) -> Spec
+testMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Spec
 testMovement func = do
     it "produces valids on valids" $ producesValidsOnValids $ func @Double
     it "is a movement" $ isMovement func
 
-testMovementM :: (forall a. TreeCursor a -> Maybe (TreeCursor a)) -> Spec
+testMovementM ::
+       (forall a. STC.TreeCursor a -> Maybe (STC.TreeCursor a)) -> Spec
 testMovementM func = do
     it "produces valids on valids" $ producesValidsOnValids $ func @Double
     it "is a movement" $ isMovementM func
 
-isMovementM :: (forall a. TreeCursor a -> Maybe (TreeCursor a)) -> Property
+isMovementM ::
+       (forall a. STC.TreeCursor a -> Maybe (STC.TreeCursor a)) -> Property
 isMovementM func =
-    forAllValid @(TreeCursor Int) $ \lec ->
+    forAllValid @(STC.TreeCursor Int) $ \lec ->
         case func lec of
             Nothing -> pure () -- Fine
             Just lec' ->
@@ -337,8 +340,8 @@ isMovementM func =
                        , "Tree after:   \n" ++ show ne'
                        ]
 
-isMovement :: (forall a. TreeCursor a -> TreeCursor a) -> Property
+isMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Property
 isMovement func =
     forAllValid $ \lec ->
-        rebuildTreeCursor (lec :: TreeCursor Int) `shouldBe`
+        rebuildTreeCursor (lec :: STC.TreeCursor Int) `shouldBe`
         rebuildTreeCursor (func lec)

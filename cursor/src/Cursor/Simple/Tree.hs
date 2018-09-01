@@ -5,6 +5,7 @@
 
 module Cursor.Simple.Tree
     ( TreeCursor
+    , TreeAbove(..)
     , singletonTreeCursor
     , makeTreeCursor
     , rebuildTreeCursor

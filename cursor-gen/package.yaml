@@ -17,6 +17,7 @@ library:
   - Cursor.Map.Gen
   - Cursor.Map.KeyValue.Gen
   - Cursor.Simple.List.NonEmpty.Gen
+  - Cursor.Simple.Tree.Gen
   - Cursor.Text.Gen
   - Cursor.TextField.Gen
   - Cursor.Tree.Gen
