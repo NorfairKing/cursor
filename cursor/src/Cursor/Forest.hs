@@ -64,7 +64,7 @@ import Control.Applicative
 import Lens.Micro
 
 import Cursor.List.NonEmpty
-import Cursor.Tree
+import Cursor.Simple.Tree
 import Cursor.Types
 
 newtype ForestCursor a = ForestCursor
@@ -89,7 +89,7 @@ drawForestCursor ForestCursor {..} =
 
 mapForestCursor :: (a -> b) -> ForestCursor a -> ForestCursor b
 mapForestCursor f =
-    forestCursorListCursorL %~ mapNonEmptyCursor (fmap f) (fmap f)
+    forestCursorListCursorL %~ mapNonEmptyCursor (mapTreeCursor f) (fmap f)
 
 forestCursorListCursorL ::
        Lens (ForestCursor a) (ForestCursor b) (NonEmptyCursor (TreeCursor a) (Tree a)) (NonEmptyCursor (TreeCursor b) (Tree b))

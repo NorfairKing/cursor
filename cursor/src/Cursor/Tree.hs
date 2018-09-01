@@ -10,6 +10,7 @@ module Cursor.Tree
     , makeTreeCursor
     , rebuildTreeCursor
     , drawTreeCursor
+    , mapTreeCursor
     , treeCursorWithPointer
     , treeCursorSelectPrev
     , treeCursorSelectNext
@@ -61,7 +62,7 @@ data TreeCursor a b = TreeCursor
     { treeAbove :: Maybe (TreeAbove b)
     , treeCurrent :: a
     , treeBelow :: Forest b
-    } deriving (Show, Eq, Generic, Functor)
+    } deriving (Show, Eq, Generic)
 
 currentTree :: (a -> b) -> TreeCursor a b -> Tree b
 currentTree f TreeCursor {..} = Node (f treeCurrent) treeBelow
@@ -141,6 +142,14 @@ treeCursorWithPointer TreeCursor {..} =
             ]
     showForest :: Show a => Forest a -> Forest String
     showForest = map $ fmap show
+
+mapTreeCursor :: (a -> c) -> (b -> d) -> TreeCursor a b -> TreeCursor c d
+mapTreeCursor f g TreeCursor {..} =
+    TreeCursor
+    { treeAbove = fmap g <$> treeAbove
+    , treeCurrent = f treeCurrent
+    , treeBelow = map (fmap g) treeBelow
+    }
 
 treeCursorSelectPrev ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
