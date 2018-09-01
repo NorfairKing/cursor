@@ -37,7 +37,6 @@ import Data.Validity
 import Data.Validity.Tree ()
 
 import Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NE
 
 import Lens.Micro
 
@@ -150,7 +149,11 @@ mapCursorDeleteElemAndSelectNext =
     nonEmptyCursorDeleteElemAndSelectNext (uncurry makeKeyValueCursor)
 
 mapCursorRemoveElem :: MapCursor k v -> DeleteOrUpdate (MapCursor k v)
-mapCursorRemoveElem = mapCursorNonEmptyCursorL $ nonEmptyCursorRemoveElem (uncurry makeKeyValueCursor)
+mapCursorRemoveElem =
+    mapCursorNonEmptyCursorL $
+    nonEmptyCursorRemoveElem (uncurry makeKeyValueCursor)
 
 mapCursorDeleteElem :: MapCursor k v -> DeleteOrUpdate (MapCursor k v)
-mapCursorDeleteElem = mapCursorNonEmptyCursorL $ nonEmptyCursorDeleteElem (uncurry makeKeyValueCursor)
+mapCursorDeleteElem =
+    mapCursorNonEmptyCursorL $
+    nonEmptyCursorDeleteElem (uncurry makeKeyValueCursor)
