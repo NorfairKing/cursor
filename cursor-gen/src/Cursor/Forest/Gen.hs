@@ -13,7 +13,8 @@ import Cursor.Forest
 import Cursor.List.NonEmpty.Gen ()
 import Cursor.Tree.Gen ()
 
-instance GenUnchecked a => GenUnchecked (ForestCursor a)
+instance (GenUnchecked a, GenUnchecked b) =>
+         GenUnchecked (ForestCursor a b)
 
-instance GenValid a => GenValid (ForestCursor a) where
+instance (GenValid a, GenValid b) => GenValid (ForestCursor a b) where
     genValid = genValidStructurally

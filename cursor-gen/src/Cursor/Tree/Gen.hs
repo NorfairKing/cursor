@@ -13,7 +13,7 @@ import Data.GenValidity.Containers ()
 
 import Cursor.Tree
 
-instance GenUnchecked a => GenUnchecked (TreeCursor a) where
+instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (TreeCursor a b) where
     genUnchecked =
         sized $ \n -> do
             (a, b, c, d) <- genSplit4 n
@@ -22,7 +22,7 @@ instance GenUnchecked a => GenUnchecked (TreeCursor a) where
             treeBelow <- resize d genUnchecked
             pure TreeCursor {..}
 
-instance GenValid a => GenValid (TreeCursor a) where
+instance (GenValid a, GenValid b) => GenValid (TreeCursor a b) where
     genValid =
         sized $ \n -> do
             (a, b, c, d) <- genSplit4 n
@@ -31,7 +31,7 @@ instance GenValid a => GenValid (TreeCursor a) where
             treeBelow <- resize d genValid
             pure TreeCursor {..}
 
-instance GenUnchecked a => GenUnchecked (TreeAbove a) where
+instance GenUnchecked b => GenUnchecked (TreeAbove b) where
     genUnchecked =
         sized $ \n -> do
             (a, b, c, d) <- genSplit4 n
@@ -41,7 +41,7 @@ instance GenUnchecked a => GenUnchecked (TreeAbove a) where
             treeAboveRights <- resize d genUnchecked
             pure TreeAbove {..}
 
-instance GenValid a => GenValid (TreeAbove a) where
+instance GenValid b => GenValid (TreeAbove b) where
     genValid =
         sized $ \n -> do
             (a, b, c, d) <- genSplit4 n

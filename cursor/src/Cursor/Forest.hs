@@ -8,6 +8,7 @@ module Cursor.Forest
     , makeForestCursor
     , rebuildForestCursor
     , drawForestCursor
+    , mapForestCursor
     , forestCursorListCursorL
     , forestCursorSelectedTreeL
     , forestCursorSelectPrevTreeCursor
@@ -23,8 +24,8 @@ module Cursor.Forest
     , forestCursorSelectBelowAtEnd
     , forestCursorSelection
     , forestCursorSelectIndex
-    , forestCursorInsertTreeCursor
-    , forestCursorAppendTreeCursor
+    , forestCursorInsertEntireTree
+    , forestCursorAppendEntireTree
     , forestCursorInsertAndSelectTreeCursor
     , forestCursorAppendAndSelectTreeCursor
     , forestCursorInsertTree
@@ -66,205 +67,244 @@ import Cursor.List.NonEmpty
 import Cursor.Tree
 import Cursor.Types
 
-newtype ForestCursor a = ForestCursor
-    { forestCursorListCursor :: NonEmptyCursor (TreeCursor a)
-    } deriving (Show, Eq, Generic, Functor)
+newtype ForestCursor a b = ForestCursor
+    { forestCursorListCursor :: NonEmptyCursor (TreeCursor a b) (Tree b)
+    } deriving (Show, Eq, Generic)
 
-instance Validity a => Validity (ForestCursor a)
+instance (Validity a, Validity b) => Validity (ForestCursor a b)
 
-makeForestCursor :: NonEmpty (Tree a) -> ForestCursor a
-makeForestCursor = ForestCursor . makeNonEmptyCursor . NE.map makeTreeCursor
+makeForestCursor :: (b -> a) -> NonEmpty (Tree b) -> ForestCursor a b
+makeForestCursor g = ForestCursor . makeNonEmptyCursor (makeTreeCursor g)
 
-rebuildForestCursor :: ForestCursor a -> NonEmpty (Tree a)
-rebuildForestCursor =
-    NE.map rebuildTreeCursor . rebuildNonEmptyCursor . forestCursorListCursor
+rebuildForestCursor :: (a -> b) -> ForestCursor a b -> NonEmpty (Tree b)
+rebuildForestCursor f =
+    rebuildNonEmptyCursor (rebuildTreeCursor f) . forestCursorListCursor
 
-drawForestCursor :: Show a => ForestCursor a -> String
+drawForestCursor :: (Show a, Show b) => ForestCursor a b -> String
 drawForestCursor ForestCursor {..} =
     drawForest $
-    (map (fmap show . rebuildTreeCursor) $
-     reverse $ nonEmptyCursorPrev forestCursorListCursor) ++
+    (map (fmap show) $ reverse $ nonEmptyCursorPrev forestCursorListCursor) ++
     [treeCursorWithPointer $ nonEmptyCursorCurrent forestCursorListCursor] ++
-    (map (fmap show . rebuildTreeCursor) $
-     nonEmptyCursorNext forestCursorListCursor)
+    (map (fmap show) $ nonEmptyCursorNext forestCursorListCursor)
+
+mapForestCursor :: (a -> c) -> (b -> d) -> ForestCursor a b -> ForestCursor c d
+mapForestCursor f g =
+    forestCursorListCursorL %~ mapNonEmptyCursor (mapTreeCursor f g) (fmap g)
 
 forestCursorListCursorL ::
-       Lens' (ForestCursor a) (NonEmptyCursor (TreeCursor a))
+       Lens (ForestCursor a b) (ForestCursor c d) (NonEmptyCursor (TreeCursor a b) (Tree b)) (NonEmptyCursor (TreeCursor c d) (Tree d))
 forestCursorListCursorL =
     lens forestCursorListCursor $ \fc lc -> fc {forestCursorListCursor = lc}
 
-forestCursorSelectedTreeL :: Lens' (ForestCursor a) (TreeCursor a)
+forestCursorSelectedTreeL :: Lens' (ForestCursor a b) (TreeCursor a b)
 forestCursorSelectedTreeL = forestCursorListCursorL . nonEmptyCursorElemL
 
-forestCursorSelectPrevTreeCursor :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectPrevTreeCursor =
-    forestCursorListCursorL nonEmptyCursorSelectPrev
+forestCursorSelectPrevTreeCursor ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSelectPrevTreeCursor f g =
+    forestCursorListCursorL $
+    nonEmptyCursorSelectPrev (rebuildTreeCursor f) (makeTreeCursor g)
 
-forestCursorSelectNextTreeCursor :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectNextTreeCursor =
-    forestCursorListCursorL nonEmptyCursorSelectNext
+forestCursorSelectNextTreeCursor ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSelectNextTreeCursor f g =
+    forestCursorListCursorL $
+    nonEmptyCursorSelectNext (rebuildTreeCursor f) (makeTreeCursor g)
 
-forestCursorSelectFirstTreeCursor :: ForestCursor a -> ForestCursor a
-forestCursorSelectFirstTreeCursor =
-    forestCursorListCursorL %~ nonEmptyCursorSelectFirst
+forestCursorSelectFirstTreeCursor ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> ForestCursor a b
+forestCursorSelectFirstTreeCursor f g =
+    forestCursorListCursorL %~
+    (nonEmptyCursorSelectFirst (rebuildTreeCursor f) (makeTreeCursor g))
 
-forestCursorSelectLastTreeCursor :: ForestCursor a -> ForestCursor a
-forestCursorSelectLastTreeCursor =
-    forestCursorListCursorL %~ nonEmptyCursorSelectLast
+forestCursorSelectLastTreeCursor ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> ForestCursor a b
+forestCursorSelectLastTreeCursor f g =
+    forestCursorListCursorL %~
+    (nonEmptyCursorSelectLast (rebuildTreeCursor f) (makeTreeCursor g))
 
-forestCursorSelectNext :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectNext fc =
-    (fc & forestCursorSelectedTreeL treeCursorSelectNext) <|>
-    forestCursorSelectNextTreeCursor fc
+forestCursorSelectNext ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSelectNext f g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorSelectNext f g)) <|>
+    forestCursorSelectNextTreeCursor f g fc
 
-forestCursorSelectPrev :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectPrev fc =
-    (fc & forestCursorSelectedTreeL treeCursorSelectPrev) <|>
-    forestCursorSelectPrevTreeCursor fc
+forestCursorSelectPrev ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSelectPrev f g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorSelectPrev f g)) <|>
+    forestCursorSelectPrevTreeCursor f g fc
 
-forestCursorSelectNextOnSameLevel :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectNextOnSameLevel fc =
-    (fc & forestCursorSelectedTreeL treeCursorSelectNextOnSameLevel) <|>
-    forestCursorSelectNextTreeCursor fc
+forestCursorSelectNextOnSameLevel ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSelectNextOnSameLevel f g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorSelectNextOnSameLevel f g)) <|>
+    forestCursorSelectNextTreeCursor f g fc
 
-forestCursorSelectPrevOnSameLevel :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectPrevOnSameLevel fc =
-    (fc & forestCursorSelectedTreeL treeCursorSelectPrevOnSameLevel) <|>
-    forestCursorSelectPrevTreeCursor fc
+forestCursorSelectPrevOnSameLevel ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSelectPrevOnSameLevel f g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorSelectPrevOnSameLevel f g)) <|>
+    forestCursorSelectPrevTreeCursor f g fc
 
-forestCursorSelectBelowAtPos :: Int -> ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectBelowAtPos i =
-    forestCursorSelectedTreeL $ treeCursorSelectBelowAtPos i
+forestCursorSelectBelowAtPos ::
+       (a -> b)
+    -> (b -> a)
+    -> Int
+    -> ForestCursor a b
+    -> Maybe (ForestCursor a b)
+forestCursorSelectBelowAtPos f g i =
+    forestCursorSelectedTreeL $ treeCursorSelectBelowAtPos f g i
 
-forestCursorSelectBelowAtStart :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectBelowAtStart =
-    forestCursorSelectedTreeL treeCursorSelectBelowAtStart
+forestCursorSelectBelowAtStart ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSelectBelowAtStart f g =
+    forestCursorSelectedTreeL $ treeCursorSelectBelowAtStart f g
 
-forestCursorSelectBelowAtEnd :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSelectBelowAtEnd =
-    forestCursorSelectedTreeL treeCursorSelectBelowAtEnd
+forestCursorSelectBelowAtEnd ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSelectBelowAtEnd f g =
+    forestCursorSelectedTreeL $ treeCursorSelectBelowAtEnd f g
 
-forestCursorSelection :: ForestCursor a -> Int
+forestCursorSelection :: ForestCursor a b -> Int
 forestCursorSelection fc =
     nonEmptyCursorSelection $ fc ^. forestCursorListCursorL
 
-forestCursorSelectIndex :: ForestCursor a -> Int -> Maybe (ForestCursor a)
-forestCursorSelectIndex fc i =
-    fc & forestCursorListCursorL (`nonEmptyCursorSelectIndex` i)
+forestCursorSelectIndex ::
+       (a -> b)
+    -> (b -> a)
+    -> Int
+    -> ForestCursor a b
+    -> Maybe (ForestCursor a b)
+forestCursorSelectIndex f g i =
+    forestCursorListCursorL
+        (nonEmptyCursorSelectIndex (rebuildTreeCursor f) (makeTreeCursor g) i)
 
-forestCursorInsertTreeCursor :: TreeCursor a -> ForestCursor a -> ForestCursor a
-forestCursorInsertTreeCursor tc fc =
-    fc & forestCursorListCursorL %~ nonEmptyCursorInsert tc
+forestCursorInsertEntireTree :: Tree b -> ForestCursor a b -> ForestCursor a b
+forestCursorInsertEntireTree t =
+    forestCursorListCursorL %~ nonEmptyCursorInsert t
 
 forestCursorInsertAndSelectTreeCursor ::
-       TreeCursor a -> ForestCursor a -> ForestCursor a
-forestCursorInsertAndSelectTreeCursor tc fc =
-    fc & forestCursorListCursorL %~ nonEmptyCursorInsertAndSelect tc
+       (a -> b) -> TreeCursor a b -> ForestCursor a b -> ForestCursor a b
+forestCursorInsertAndSelectTreeCursor f tc =
+    forestCursorListCursorL %~
+    nonEmptyCursorInsertAndSelect (rebuildTreeCursor f) tc
 
-forestCursorAppendTreeCursor :: TreeCursor a -> ForestCursor a -> ForestCursor a
-forestCursorAppendTreeCursor tc fc =
-    fc & forestCursorListCursorL %~ nonEmptyCursorAppend tc
+forestCursorAppendEntireTree :: Tree b -> ForestCursor a b -> ForestCursor a b
+forestCursorAppendEntireTree t =
+    forestCursorListCursorL %~ nonEmptyCursorAppend t
 
 forestCursorAppendAndSelectTreeCursor ::
-       TreeCursor a -> ForestCursor a -> ForestCursor a
-forestCursorAppendAndSelectTreeCursor tc fc =
-    fc & forestCursorListCursorL %~ nonEmptyCursorAppendAndSelect tc
+       (a -> b) -> TreeCursor a b -> ForestCursor a b -> ForestCursor a b
+forestCursorAppendAndSelectTreeCursor f tc =
+    forestCursorListCursorL %~
+    nonEmptyCursorAppendAndSelect (rebuildTreeCursor f) tc
 
-forestCursorInsertTree :: Tree a -> ForestCursor a -> ForestCursor a
+forestCursorInsertTree :: Tree b -> ForestCursor a b -> ForestCursor a b
 forestCursorInsertTree t fc =
-    fromMaybe (forestCursorInsertTreeCursor (makeTreeCursor t) fc) $
+    fromMaybe (forestCursorInsertEntireTree t fc) $
     fc & forestCursorSelectedTreeL (treeCursorInsert t)
 
-forestCursorInsertAndSelectTree :: Tree a -> ForestCursor a -> ForestCursor a
-forestCursorInsertAndSelectTree t fc =
-    fromMaybe (forestCursorInsertAndSelectTreeCursor (makeTreeCursor t) fc) $
-    fc & forestCursorSelectedTreeL (treeCursorInsertAndSelect t)
+forestCursorInsertAndSelectTree ::
+       (a -> b) -> (b -> a) -> Tree b -> ForestCursor a b -> ForestCursor a b
+forestCursorInsertAndSelectTree f g t fc =
+    fromMaybe (forestCursorInsertAndSelectTreeCursor f (makeTreeCursor g t) fc) $
+    fc & forestCursorSelectedTreeL (treeCursorInsertAndSelect f g t)
 
-forestCursorAppendTree :: Tree a -> ForestCursor a -> ForestCursor a
+forestCursorAppendTree :: Tree b -> ForestCursor a b -> ForestCursor a b
 forestCursorAppendTree t fc =
-    fromMaybe (forestCursorAppendTreeCursor (makeTreeCursor t) fc) $
+    fromMaybe (forestCursorAppendEntireTree t fc) $
     fc & forestCursorSelectedTreeL (treeCursorAppend t)
 
-forestCursorAppendAndSelectTree :: Tree a -> ForestCursor a -> ForestCursor a
-forestCursorAppendAndSelectTree t fc =
-    fromMaybe (forestCursorAppendAndSelectTreeCursor (makeTreeCursor t) fc) $
-    fc & forestCursorSelectedTreeL (treeCursorAppendAndSelect t)
+forestCursorAppendAndSelectTree ::
+       (a -> b) -> (b -> a) -> Tree b -> ForestCursor a b -> ForestCursor a b
+forestCursorAppendAndSelectTree f g t fc =
+    fromMaybe (forestCursorAppendAndSelectTreeCursor f (makeTreeCursor g t) fc) $
+    fc & forestCursorSelectedTreeL (treeCursorAppendAndSelect f g t)
 
-forestCursorInsert :: a -> ForestCursor a -> ForestCursor a
-forestCursorInsert a = forestCursorInsertTree $ Node a []
+forestCursorInsert :: b -> ForestCursor a b -> ForestCursor a b
+forestCursorInsert b = forestCursorInsertTree $ Node b []
 
-forestCursorInsertAndSelect :: a -> ForestCursor a -> ForestCursor a
-forestCursorInsertAndSelect a = forestCursorInsertAndSelectTree $ Node a []
+forestCursorInsertAndSelect ::
+       (a -> b) -> (b -> a) -> b -> ForestCursor a b -> ForestCursor a b
+forestCursorInsertAndSelect f g b =
+    forestCursorInsertAndSelectTree f g $ Node b []
 
-forestCursorAppend :: a -> ForestCursor a -> ForestCursor a
-forestCursorAppend a = forestCursorAppendTree $ Node a []
+forestCursorAppend :: b -> ForestCursor a b -> ForestCursor a b
+forestCursorAppend b = forestCursorAppendTree $ Node b []
 
-forestCursorAppendAndSelect :: a -> ForestCursor a -> ForestCursor a
-forestCursorAppendAndSelect a = forestCursorAppendAndSelectTree $ Node a []
+forestCursorAppendAndSelect ::
+       (a -> b) -> (b -> a) -> b -> ForestCursor a b -> ForestCursor a b
+forestCursorAppendAndSelect f g b =
+    forestCursorAppendAndSelectTree f g $ Node b []
 
 forestCursorAddChildTreeToNodeAtPos ::
-       Int -> Tree a -> ForestCursor a -> ForestCursor a
-forestCursorAddChildTreeToNodeAtPos i t fc =
-    fc & forestCursorSelectedTreeL %~ treeCursorAddChildAtPos i t
+       Int -> Tree b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildTreeToNodeAtPos i t =
+    forestCursorSelectedTreeL %~ treeCursorAddChildAtPos i t
 
 forestCursorAddChildTreeToNodeAtStart ::
-       Tree a -> ForestCursor a -> ForestCursor a
-forestCursorAddChildTreeToNodeAtStart t fc =
-    fc & forestCursorSelectedTreeL %~ treeCursorAddChildAtStart t
+       Tree b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildTreeToNodeAtStart t =
+    forestCursorSelectedTreeL %~ treeCursorAddChildAtStart t
 
 forestCursorAddChildTreeToNodeAtEnd ::
-       Tree a -> ForestCursor a -> ForestCursor a
+       Tree b -> ForestCursor a b -> ForestCursor a b
 forestCursorAddChildTreeToNodeAtEnd t fc =
     fc & forestCursorSelectedTreeL %~ treeCursorAddChildAtEnd t
 
-forestCursorAddChildToNodeAtPos :: Int -> a -> ForestCursor a -> ForestCursor a
-forestCursorAddChildToNodeAtPos i a =
-    forestCursorAddChildTreeToNodeAtPos i $ Node a []
+forestCursorAddChildToNodeAtPos ::
+       Int -> b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildToNodeAtPos i b =
+    forestCursorAddChildTreeToNodeAtPos i $ Node b []
 
-forestCursorAddChildToNodeAtStart :: a -> ForestCursor a -> ForestCursor a
-forestCursorAddChildToNodeAtStart a =
-    forestCursorAddChildTreeToNodeAtStart $ Node a []
+forestCursorAddChildToNodeAtStart :: b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildToNodeAtStart b =
+    forestCursorAddChildTreeToNodeAtStart $ Node b []
 
-forestCursorAddChildToNodeAtEnd :: a -> ForestCursor a -> ForestCursor a
-forestCursorAddChildToNodeAtEnd a =
-    forestCursorAddChildTreeToNodeAtEnd $ Node a []
+forestCursorAddChildToNodeAtEnd :: b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildToNodeAtEnd b =
+    forestCursorAddChildTreeToNodeAtEnd $ Node b []
 
 forestCursorRemoveTreeAndSelectPrev ::
-       ForestCursor a -> Maybe (DeleteOrUpdate (ForestCursor a))
-forestCursorRemoveTreeAndSelectPrev fc =
+       (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
+forestCursorRemoveTreeAndSelectPrev g fc =
     joinPossibleDeletes
         (fc &
          focusPossibleDeleteOrUpdate
              forestCursorSelectedTreeL
-             treeCursorDeleteElemAndSelectPrevious)
+             (treeCursorDeleteElemAndSelectPrevious g))
         (fc &
          focusPossibleDeleteOrUpdate
              forestCursorListCursorL
-             nonEmptyCursorRemoveElemAndSelectPrev)
+             (nonEmptyCursorRemoveElemAndSelectPrev (makeTreeCursor g)))
 
 forestCursorDeleteTreeAndSelectNext ::
-       ForestCursor a -> Maybe (DeleteOrUpdate (ForestCursor a))
-forestCursorDeleteTreeAndSelectNext fc =
+       (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
+forestCursorDeleteTreeAndSelectNext g fc =
     joinPossibleDeletes
         (fc &
          focusPossibleDeleteOrUpdate
              forestCursorSelectedTreeL
-             treeCursorDeleteElemAndSelectNext)
+             (treeCursorDeleteElemAndSelectNext g))
         (fc &
          focusPossibleDeleteOrUpdate
              forestCursorListCursorL
-             nonEmptyCursorDeleteElemAndSelectNext)
+             (nonEmptyCursorDeleteElemAndSelectNext (makeTreeCursor g)))
 
-forestCursorRemoveTree :: ForestCursor a -> DeleteOrUpdate (ForestCursor a)
-forestCursorRemoveTree fc =
-    (fc & forestCursorSelectedTreeL treeCursorRemoveElem) <|>
-    (fc & forestCursorListCursorL nonEmptyCursorRemoveElem)
+forestCursorRemoveTree ::
+       (b -> a) -> ForestCursor a b -> DeleteOrUpdate (ForestCursor a b)
+forestCursorRemoveTree g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorRemoveElem g)) <|>
+    (fc & forestCursorListCursorL (nonEmptyCursorRemoveElem (makeTreeCursor g)))
 
-forestCursorDeleteTree :: ForestCursor a -> DeleteOrUpdate (ForestCursor a)
-forestCursorDeleteTree fc =
-    (fc & forestCursorSelectedTreeL treeCursorDeleteElem) <|>
-    (fc & forestCursorListCursorL nonEmptyCursorDeleteElem)
+forestCursorDeleteTree ::
+       (b -> a) -> ForestCursor a b -> DeleteOrUpdate (ForestCursor a b)
+forestCursorDeleteTree g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorDeleteElem g)) <|>
+    (fc & forestCursorListCursorL (nonEmptyCursorDeleteElem (makeTreeCursor g)))
 
-forestCursorAddRoot :: ForestCursor a -> a -> TreeCursor a
-forestCursorAddRoot fc v =
-    makeTreeCursor $ Node v $ NE.toList $ rebuildForestCursor fc
+forestCursorAddRoot ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> a -> TreeCursor a b
+forestCursorAddRoot f g fc v =
+    makeTreeCursor g $ Node (f v) $ NE.toList $ rebuildForestCursor f fc

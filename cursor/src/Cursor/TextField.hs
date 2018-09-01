@@ -34,6 +34,7 @@ module Cursor.TextField
 import GHC.Generics (Generic)
 
 import Data.Validity
+import Data.Validity.Text ()
 
 import Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NE
@@ -47,7 +48,7 @@ import Cursor.List.NonEmpty
 import Cursor.Text
 
 newtype TextFieldCursor = TextFieldCursor
-    { textFieldCursorNonEmpty :: NonEmptyCursor TextCursor
+    { textFieldCursorNonEmpty :: NonEmptyCursor TextCursor Text
     } deriving (Show, Eq, Generic)
 
 instance Validity TextFieldCursor where
@@ -60,42 +61,16 @@ instance Validity TextFieldCursor where
               flip
                   NE.map
                   (NE.zip (fromJust $ NE.nonEmpty [0 ..]) $
-                   rebuildNonEmptyCursor textFieldCursorNonEmpty) $ \(i, tc) ->
+                   rebuildNonEmptyCursor
+                       rebuildTextCursor
+                       textFieldCursorNonEmpty) $ \(i, tc) ->
                   declare
                       (unwords
                            [ "The text cursor of the line at index"
                            , show (i :: Int)
                            , "does not contain any newlines"
                            ]) $
-                  T.all (not . (== '\n')) $ rebuildTextCursor tc
-            , decorate "The index of all except the current textcursor is 0" $
-              mconcat
-                  [ decorate
-                        "The index of all text cursors of previous lines is 0" $
-                    mconcat $
-                    flip
-                        map
-                        (zip [0 ..] $ nonEmptyCursorPrev textFieldCursorNonEmpty) $ \(i, tc) ->
-                        declare
-                            (unwords
-                                 [ "The text cursor of the previous line at index"
-                                 , show (i :: Int)
-                                 , "has index 0"
-                                 ]) $
-                        textCursorIndex tc == 0
-                  , decorate "The index of all text cursors of next lines is 0" $
-                    mconcat $
-                    flip
-                        map
-                        (zip [0 ..] $ nonEmptyCursorNext textFieldCursorNonEmpty) $ \(i, tc) ->
-                        declare
-                            (unwords
-                                 [ "The text cursor of the next line at index"
-                                 , show (i :: Int)
-                                 , "has index 0"
-                                 ]) $
-                        textCursorIndex tc == 0
-                  ]
+                  T.all (not . (== '\n')) tc
             ]
 
 makeTextFieldCursor :: Text -> TextFieldCursor
@@ -103,18 +78,17 @@ makeTextFieldCursor = makeTextFieldCursorWithSelection 0 0
 
 makeTextFieldCursorWithSelection :: Int -> Int -> Text -> TextFieldCursor
 makeTextFieldCursorWithSelection x y t =
-    (\tfc -> tfc & textFieldCursorSelectedL %~ textCursorSelectIndex y) $
     TextFieldCursor
     { textFieldCursorNonEmpty =
-          makeNonEmptyCursorWithSelection x $
+          makeNonEmptyCursorWithSelection (makeTextCursorWithSelection y) x $
           let ls = T.splitOn "\n" t
                 -- This is safe because 'splitOn' always returns a nonempty list.
-          in fromJust $ NE.nonEmpty $ map makeTextCursor ls
+          in fromJust $ NE.nonEmpty ls
     }
 
 rebuildTextFieldCursorLines :: TextFieldCursor -> NonEmpty Text
 rebuildTextFieldCursorLines =
-    NE.map rebuildTextCursor . rebuildNonEmptyCursor . textFieldCursorNonEmpty
+    rebuildNonEmptyCursor rebuildTextCursor . textFieldCursorNonEmpty
 
 rebuildTextFieldCursor :: TextFieldCursor -> Text
 rebuildTextFieldCursor =
@@ -131,7 +105,7 @@ emptyTextFieldCursor =
     {textFieldCursorNonEmpty = singletonNonEmptyCursor $ makeTextCursor ""}
 
 textFieldCursorNonEmptyCursorL ::
-       Lens' TextFieldCursor (NonEmptyCursor TextCursor)
+       Lens' TextFieldCursor (NonEmptyCursor TextCursor Text)
 textFieldCursorNonEmptyCursorL =
     lens textFieldCursorNonEmpty $ \tfc lec ->
         tfc {textFieldCursorNonEmpty = lec}
@@ -141,14 +115,16 @@ textFieldCursorSelectedL = textFieldCursorNonEmptyCursorL . nonEmptyCursorElemL
 
 textFieldCursorSelectPrevLine :: TextFieldCursor -> Maybe TextFieldCursor
 textFieldCursorSelectPrevLine =
-    moveMWhileKeepingSelection nonEmptyCursorSelectPrev
+    moveMWhileKeepingSelection $
+    nonEmptyCursorSelectPrev rebuildTextCursor makeTextCursor
 
 textFieldCursorSelectNextLine :: TextFieldCursor -> Maybe TextFieldCursor
 textFieldCursorSelectNextLine =
-    moveMWhileKeepingSelection nonEmptyCursorSelectNext
+    moveMWhileKeepingSelection $
+    nonEmptyCursorSelectNext rebuildTextCursor makeTextCursor
 
 moveMWhileKeepingSelection ::
-       (NonEmptyCursor TextCursor -> Maybe (NonEmptyCursor TextCursor))
+       (NonEmptyCursor TextCursor Text -> Maybe (NonEmptyCursor TextCursor Text))
     -> TextFieldCursor
     -> Maybe TextFieldCursor
 moveMWhileKeepingSelection movement tfc = do
@@ -159,14 +135,16 @@ moveMWhileKeepingSelection movement tfc = do
 
 textFieldCursorSelectFirstLine :: TextFieldCursor -> TextFieldCursor
 textFieldCursorSelectFirstLine =
-    moveWhileKeepingSelection nonEmptyCursorSelectFirst
+    moveWhileKeepingSelection $
+    nonEmptyCursorSelectFirst rebuildTextCursor makeTextCursor
 
 textFieldCursorSelectLastLine :: TextFieldCursor -> TextFieldCursor
 textFieldCursorSelectLastLine =
-    moveWhileKeepingSelection nonEmptyCursorSelectLast
+    moveWhileKeepingSelection $
+    nonEmptyCursorSelectLast rebuildTextCursor makeTextCursor
 
 moveWhileKeepingSelection ::
-       (NonEmptyCursor TextCursor -> NonEmptyCursor TextCursor)
+       (NonEmptyCursor TextCursor Text -> NonEmptyCursor TextCursor Text)
     -> TextFieldCursor
     -> TextFieldCursor
 moveWhileKeepingSelection movement tfc =
@@ -207,8 +185,7 @@ textFieldCursorInsertNewline =
     (\lec@NonEmptyCursor {..} ->
          let (tc1, tc2) = textCursorSplit nonEmptyCursorCurrent
          in lec
-            { nonEmptyCursorPrev =
-                  textCursorSelectIndex 0 tc1 : nonEmptyCursorPrev
+            { nonEmptyCursorPrev = rebuildTextCursor tc1 : nonEmptyCursorPrev
             , nonEmptyCursorCurrent = tc2
             })
 
@@ -219,8 +196,7 @@ textFieldCursorAppendNewline =
          let (tc1, tc2) = textCursorSplit nonEmptyCursorCurrent
          in lec
             { nonEmptyCursorCurrent = tc1
-            , nonEmptyCursorNext =
-                  textCursorSelectIndex 0 tc2 : nonEmptyCursorNext
+            , nonEmptyCursorNext = rebuildTextCursor tc2 : nonEmptyCursorNext
             })
 
 textFieldCursorRemove :: TextFieldCursor -> Maybe TextFieldCursor
@@ -236,7 +212,9 @@ textFieldCursorRemove =
                              lec
                              { nonEmptyCursorPrev = pls
                              , nonEmptyCursorCurrent =
-                                   textCursorCombine pl nonEmptyCursorCurrent
+                                   textCursorCombine
+                                       (makeTextCursor pl)
+                                       nonEmptyCursorCurrent
                              }
                  Just ctc -> Just $ lec & nonEmptyCursorElemL .~ ctc)
 
@@ -252,7 +230,9 @@ textFieldCursorDelete =
                              Just $
                              lec
                              { nonEmptyCursorCurrent =
-                                   textCursorCombine nonEmptyCursorCurrent pl
+                                   textCursorCombine
+                                       nonEmptyCursorCurrent
+                                       (makeTextCursor pl)
                              , nonEmptyCursorNext = pls
                              }
                  Just ctc -> Just $ lec & nonEmptyCursorElemL .~ ctc)
