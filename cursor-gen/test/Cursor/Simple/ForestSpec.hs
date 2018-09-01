@@ -3,7 +3,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Cursor.ForestSpec
+module Cursor.Simple.ForestSpec
     ( spec
     ) where
 
@@ -15,8 +15,8 @@ import Test.Validity.Optics
 
 import Control.Monad (unless)
 
-import Cursor.Forest
-import Cursor.Forest.Gen ()
+import Cursor.Simple.Forest
+import Cursor.Simple.Forest.Gen ()
 
 spec :: Spec
 spec = do
