@@ -81,7 +81,7 @@ spec = do
             producesValidsOnValids2 (mapCursorSelectIndex @Double @Rational)
         it "is the identity function when given the current selection" $
             forAllValid $ \nec ->
-                mapCursorSelectIndex nec (mapCursorSelection nec) `shouldBe`
+                mapCursorSelectIndex (mapCursorSelection nec) nec `shouldBe`
                 Just (nec :: MapCursor Double Rational)
         it "returns selects the element at the given index" pending
     describe "mapCursorInsert" $ do
@@ -117,14 +117,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildMapCursor lec
                     ne' = rebuildMapCursor lec'
-                 in unless (ne == ne') $
-                    expectationFailure $
-                    unlines
-                        [ "Cursor before:\n" ++ show lec
-                        , "Map before:  \n" ++ show ne
-                        , "Cursor after: \n" ++ show lec'
-                        , "Map after:   \n" ++ show ne'
-                        ]
+                in unless (ne == ne') $
+                   expectationFailure $
+                   unlines
+                       [ "Cursor before:\n" ++ show lec
+                       , "Map before:  \n" ++ show ne
+                       , "Cursor after: \n" ++ show lec'
+                       , "Map after:   \n" ++ show ne'
+                       ]
 
 isMovement :: (forall k v. MapCursor k v -> MapCursor k v) -> Property
 isMovement func =

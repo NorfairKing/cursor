@@ -21,7 +21,6 @@ import Cursor.Forest.Gen ()
 spec :: Spec
 spec = do
     eqSpec @(ForestCursor Int)
-    functorSpec @ForestCursor
     genValidSpec @(ForestCursor Double)
     describe "makeForestCursor" $
         it "produces valid cursors" $
@@ -104,12 +103,12 @@ spec = do
             producesValidsOnValids2 (forestCursorSelectIndex @Double)
         it "is the identity function when given the current selection" $
             forAllValid $ \fc ->
-                forestCursorSelectIndex fc (forestCursorSelection fc) `shouldBe`
+                forestCursorSelectIndex (forestCursorSelection fc) fc `shouldBe`
                 Just (fc :: ForestCursor Double)
         it "returns selects the element at the given index" pending
-    describe "forestCursorInsertTreeCursor" $ do
+    describe "forestCursorInsertEntireTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorInsertTreeCursor @Double)
+            producesValidsOnValids2 (forestCursorInsertEntireTree @Double)
         it
             "inserts a tree cursor before the currently selected tree cursor"
             pending
@@ -120,9 +119,9 @@ spec = do
         it
             "inserts a tree cursor before the currently selected tree cursor and selects it"
             pending
-    describe "forestCursorAppendTreeCursor" $ do
+    describe "forestCursorAppendEntireTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAppendTreeCursor @Double)
+            producesValidsOnValids2 (forestCursorAppendEntireTree @Double)
         it "appends a tree after the currently selected tree cursor" pending
     describe "forestCursorAppendAndSelectTreeCursor" $ do
         it "produces valid cursors" $

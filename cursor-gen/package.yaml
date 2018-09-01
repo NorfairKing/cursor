@@ -16,6 +16,7 @@ library:
   - Cursor.List.NonEmpty.Gen
   - Cursor.Map.Gen
   - Cursor.Map.KeyValue.Gen
+  - Cursor.Simple.List.NonEmpty.Gen
   - Cursor.Text.Gen
   - Cursor.TextField.Gen
   - Cursor.Tree.Gen
@@ -27,6 +28,7 @@ library:
   - genvalidity
   - genvalidity-containers
   - genvalidity-text
+  - text
 
 tests:
   cursor-test:

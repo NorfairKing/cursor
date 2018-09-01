@@ -16,7 +16,8 @@ import qualified Data.List.NonEmpty as NE
 
 import Cursor.List.NonEmpty
 
-instance GenUnchecked a => GenUnchecked (NonEmptyCursor a) where
+instance (GenUnchecked a, GenUnchecked b) =>
+         GenUnchecked (NonEmptyCursor a b) where
     genUnchecked =
         sized $ \n -> do
             part <- arbPartition n
@@ -32,7 +33,7 @@ instance GenUnchecked a => GenUnchecked (NonEmptyCursor a) where
                         forM bs $ \s_ -> resize s_ genUnchecked
                     pure NonEmptyCursor {..}
 
-instance GenValid a => GenValid (NonEmptyCursor a) where
+instance (GenValid a, GenValid b) => GenValid (NonEmptyCursor a b) where
     genValid =
         sized $ \n -> do
             part <- arbPartition n
@@ -46,8 +47,8 @@ instance GenValid a => GenValid (NonEmptyCursor a) where
                     nonEmptyCursorNext <- forM bs $ \s_ -> resize s_ genValid
                     pure NonEmptyCursor {..}
 
-nonEmptyElemOf :: NonEmptyCursor a -> Gen a
-nonEmptyElemOf = elements . NE.toList . rebuildNonEmptyCursor
+nonEmptyElemOf :: NonEmptyCursor a a -> Gen a
+nonEmptyElemOf = elements . NE.toList . rebuildNonEmptyCursor id
 
-nonEmptyWithIndex0 :: Gen a -> Gen (NonEmptyCursor a)
+nonEmptyWithIndex0 :: Gen a -> Gen (NonEmptyCursor a a)
 nonEmptyWithIndex0 g = NonEmptyCursor [] <$> g <*> genListOf g
