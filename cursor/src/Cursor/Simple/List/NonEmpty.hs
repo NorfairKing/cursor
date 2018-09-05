@@ -21,6 +21,10 @@ module Cursor.Simple.List.NonEmpty
     , nonEmptyCursorAppend
     , nonEmptyCursorInsertAndSelect
     , nonEmptyCursorAppendAndSelect
+    , nonEmptyCursorInsertAtStart
+    , nonEmptyCursorAppendAtEnd
+    , nonEmptyCursorInsertAtStartAndSelect
+    , nonEmptyCursorAppendAtEndAndSelect
     , nonEmptyCursorRemoveElemAndSelectPrev
     , nonEmptyCursorDeleteElemAndSelectNext
     , nonEmptyCursorRemoveElem
@@ -85,6 +89,20 @@ nonEmptyCursorInsertAndSelect = NEC.nonEmptyCursorInsertAndSelect id
 
 nonEmptyCursorAppendAndSelect :: a -> NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorAppendAndSelect = NEC.nonEmptyCursorAppendAndSelect id
+
+nonEmptyCursorInsertAtStart :: a -> NonEmptyCursor a -> NonEmptyCursor a
+nonEmptyCursorInsertAtStart = NEC.nonEmptyCursorInsertAtStart
+
+nonEmptyCursorAppendAtEnd :: a -> NonEmptyCursor a -> NonEmptyCursor a
+nonEmptyCursorAppendAtEnd = NEC.nonEmptyCursorAppendAtEnd
+
+nonEmptyCursorInsertAtStartAndSelect ::
+       a -> NonEmptyCursor a -> NonEmptyCursor a
+nonEmptyCursorInsertAtStartAndSelect =
+    NEC.nonEmptyCursorInsertAtStartAndSelect id id
+
+nonEmptyCursorAppendAtEndAndSelect :: a -> NonEmptyCursor a -> NonEmptyCursor a
+nonEmptyCursorAppendAtEndAndSelect = NEC.nonEmptyCursorAppendAtEndAndSelect id id
 
 nonEmptyCursorRemoveElemAndSelectPrev ::
        NonEmptyCursor a -> Maybe (DeleteOrUpdate (NonEmptyCursor a))

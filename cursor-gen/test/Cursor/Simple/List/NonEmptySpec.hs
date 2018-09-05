@@ -107,6 +107,28 @@ spec = do
             forAllValid $ \d ->
                 producesValidsOnValids (nonEmptyCursorAppendAndSelect @Double d)
         it "appends a character before the cursor and selects it" pending
+    describe "nonEmptyCursorInsertAtStart" $ do
+        it "produces valid cursors" $
+            forAllValid $ \d ->
+                producesValidsOnValids (nonEmptyCursorInsertAtStart @Double d)
+        it "inserts a character at the start of the list" pending
+    describe "nonEmptyCursorAppendAtEnd" $ do
+        it "produces valid cursors" $
+            forAllValid $ \d ->
+                producesValidsOnValids (nonEmptyCursorAppendAtEnd @Double d)
+        it "inserts a character at the end of the list" pending
+    describe "nonEmptyCursorInsertAtStartAndSelect" $ do
+        it "produces valid cursors" $
+            forAllValid $ \d ->
+                producesValidsOnValids
+                    (nonEmptyCursorInsertAtStartAndSelect @Double d)
+        it "inserts a character at the start of the list and selects it" pending
+    describe "nonEmptyCursorAppendAtEndAndSelect" $ do
+        it "produces valid cursors" $
+            forAllValid $ \d ->
+                producesValidsOnValids
+                    (nonEmptyCursorAppendAtEndAndSelect @Double d)
+        it "appends a character at the end of the list and selects it" pending
     describe "nonEmptyCursorRemoveElem" $ do
         it "produces valid cursors" $
             producesValidsOnValids (nonEmptyCursorRemoveElem @Double)

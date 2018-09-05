@@ -21,6 +21,10 @@ module Cursor.List.NonEmpty
     , nonEmptyCursorAppend
     , nonEmptyCursorInsertAndSelect
     , nonEmptyCursorAppendAndSelect
+    , nonEmptyCursorInsertAtStart
+    , nonEmptyCursorAppendAtEnd
+    , nonEmptyCursorInsertAtStartAndSelect
+    , nonEmptyCursorAppendAtEndAndSelect
     , nonEmptyCursorRemoveElemAndSelectPrev
     , nonEmptyCursorDeleteElemAndSelectNext
     , nonEmptyCursorRemoveElem
@@ -181,6 +185,24 @@ nonEmptyCursorAppendAndSelect f c lec =
     , nonEmptyCursorPrev =
           f (nonEmptyCursorCurrent lec) : nonEmptyCursorPrev lec
     }
+
+nonEmptyCursorInsertAtStart :: b -> NonEmptyCursor a b -> NonEmptyCursor a b
+nonEmptyCursorInsertAtStart c lec =
+    lec {nonEmptyCursorPrev = nonEmptyCursorPrev lec ++ [c]}
+
+nonEmptyCursorAppendAtEnd :: b -> NonEmptyCursor a b -> NonEmptyCursor a b
+nonEmptyCursorAppendAtEnd c lec =
+    lec {nonEmptyCursorNext = nonEmptyCursorNext lec ++ [c]}
+
+nonEmptyCursorInsertAtStartAndSelect ::
+       (a -> b) -> (b -> a) -> b -> NonEmptyCursor a b -> NonEmptyCursor a b
+nonEmptyCursorInsertAtStartAndSelect f g c =
+    nonEmptyCursorSelectFirst f g . nonEmptyCursorInsertAtStart c
+
+nonEmptyCursorAppendAtEndAndSelect ::
+       (a -> b) -> (b -> a) -> b -> NonEmptyCursor a b -> NonEmptyCursor a b
+nonEmptyCursorAppendAtEndAndSelect f g c =
+    nonEmptyCursorSelectLast f g . nonEmptyCursorAppendAtEnd c
 
 nonEmptyCursorRemoveElemAndSelectPrev ::
        (b -> a)
