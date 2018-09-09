@@ -14,14 +14,20 @@ import Test.Validity
 import Test.Validity.Optics
 
 import Control.Monad (unless)
+import Data.Tree
 
-import Cursor.Simple.Forest
+import Cursor.Forest (ForestCursor(..))
+import Cursor.List.NonEmpty
+import Cursor.Simple.Forest hiding (ForestCursor)
+import qualified Cursor.Simple.Forest as SFC (ForestCursor)
+import Cursor.Tree
+
 import Cursor.Simple.Forest.Gen ()
 
 spec :: Spec
 spec = do
-    eqSpec @(ForestCursor Int)
-    genValidSpec @(ForestCursor Double)
+    eqSpec @(SFC.ForestCursor Int)
+    genValidSpec @(SFC.ForestCursor Double)
     describe "makeForestCursor" $
         it "produces valid cursors" $
         producesValidsOnValids (makeForestCursor @Double)
@@ -30,7 +36,7 @@ spec = do
             producesValidsOnValids (rebuildForestCursor @Double)
         it "is the inverse of makeForestCursor for integers" $
             inverseFunctions (makeForestCursor @Int) rebuildForestCursor
-    describe "forestCursorListCursorL" $
+    describe "forestCursorLestCursorL" $
         lensSpecOnValid (forestCursorListCursorL @Double)
     describe "forestCursorSelectedTreeL" $
         lensSpecOnValid (forestCursorSelectedTreeL @Double)
@@ -59,11 +65,101 @@ spec = do
             producesValidsOnValids $ forestCursorSelectPrev @Double
         it "is a movement" $ isMovementM forestCursorSelectPrev
         it "selects the previous node" pending
+        it "Works for this classic example" $
+            --   > 1
+            --     > 2 <- expected end cursor
+            --   > 3 <- start cursor
+         do
+            let start =
+                    ForestCursor
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 3 :: Int
+                                , treeBelow = []
+                                }
+                          , nonEmptyCursorNext = []
+                          }
+                    }
+                expected =
+                    ForestCursor
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = []
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove =
+                                      Just
+                                          TreeAbove
+                                          { treeAboveAbove = Nothing
+                                          , treeAboveLefts = []
+                                          , treeAboveNode = 1
+                                          , treeAboveRights = []
+                                          }
+                                , treeCurrent = 2
+                                , treeBelow = []
+                                }
+                          , nonEmptyCursorNext = [Node 3 []]
+                          }
+                    }
+            case forestCursorSelectPrev start of
+                Nothing ->
+                    expectationFailure
+                        "forestCursorSelectPrev should not have failed."
+                Just actual -> actual `forestShouldBe` expected
     describe "forestCursorSelectNext" $ do
         it "produces valid cursors" $
             producesValidsOnValids $ forestCursorSelectNext @Double
         it "is a movement" $ isMovementM forestCursorSelectNext
         it "selects the next node" pending
+        it "Works for this classic example" $
+            --   > 1
+            --     > 2 <- start cursor
+            --   > 3 <- expected end cursor
+         do
+            let start =
+                    ForestCursor
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = []
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove =
+                                      Just
+                                          TreeAbove
+                                          { treeAboveAbove = Nothing
+                                          , treeAboveLefts = []
+                                          , treeAboveNode = 1
+                                          , treeAboveRights = []
+                                          }
+                                , treeCurrent = 2
+                                , treeBelow = []
+                                }
+                          , nonEmptyCursorNext = [Node 3 []]
+                          }
+                    }
+                expected =
+                    ForestCursor
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 3 :: Int
+                                , treeBelow = []
+                                }
+                          , nonEmptyCursorNext = []
+                          }
+                    }
+            case forestCursorSelectNext start of
+                Nothing ->
+                    expectationFailure
+                        "forestCursorSelectNext should not have failed."
+                Just actual -> actual `forestShouldBe` expected
     describe "forestCursorSelectPrevOnSameLevel" $ do
         it "produces valid cursors" $
             producesValidsOnValids $ forestCursorSelectPrevOnSameLevel @Double
@@ -104,7 +200,7 @@ spec = do
         it "is the identity function when given the current selection" $
             forAllValid $ \fc ->
                 forestCursorSelectIndex (forestCursorSelection fc) fc `shouldBe`
-                Just (fc :: ForestCursor Double)
+                Just (fc :: SFC.ForestCursor Double)
         it "returns selects the element at the given index" pending
     describe "forestCursorInsertEntireTree" $ do
         it "produces valid cursors" $
@@ -228,9 +324,10 @@ spec = do
             producesValidsOnValids2 (forestCursorAddRoot @Double)
         it "houses the entire forest under the given node" pending
 
-isMovementM :: (forall a. ForestCursor a -> Maybe (ForestCursor a)) -> Property
+isMovementM ::
+       (forall a. SFC.ForestCursor a -> Maybe (SFC.ForestCursor a)) -> Property
 isMovementM func =
-    forAllValid @(ForestCursor Int) $ \lec ->
+    forAllValid @(SFC.ForestCursor Int) $ \lec ->
         case func lec of
             Nothing -> pure () -- Fine
             Just lec' ->
@@ -245,8 +342,21 @@ isMovementM func =
                        , "Forest after:   \n" ++ show ne'
                        ]
 
-isMovement :: (forall a. ForestCursor a -> ForestCursor a) -> Property
+isMovement :: (forall a. SFC.ForestCursor a -> SFC.ForestCursor a) -> Property
 isMovement func =
     forAllValid $ \lec ->
-        rebuildForestCursor (lec :: ForestCursor Int) `shouldBe`
+        rebuildForestCursor (lec :: SFC.ForestCursor Int) `shouldBe`
         rebuildForestCursor (func lec)
+
+forestShouldBe ::
+       (Show a, Eq a) => SFC.ForestCursor a -> SFC.ForestCursor a -> Expectation
+forestShouldBe actual expected =
+    unless (actual == expected) $
+    expectationFailure $
+    unlines
+        [ "The following should have been equal."
+        , "actual:"
+        , drawForestCursor actual
+        , "expected:"
+        , drawForestCursor expected
+        ]

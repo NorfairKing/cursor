@@ -78,6 +78,12 @@ spec = do
     describe "treeCursorSelectBelowAtEnd" $ do
         testMovementM treeCursorSelectBelowAtEnd
         it "selects the last child below" pending
+    describe "treeCursorSelectBelowAtStartRecursively" $ do
+        testMovementM treeCursorSelectBelowAtStartRecursively
+        it "selects the first child below, recursively" pending
+    describe "treeCursorSelectBelowAtEndRecursively" $ do
+        testMovementM treeCursorSelectBelowAtEndRecursively
+        it "selects the last child below, recursively" pending
     describe "treeCursorSelectPrevOnSameLevel" $ do
         testMovementM treeCursorSelectPrevOnSameLevel
         it "selects the previous element" pending

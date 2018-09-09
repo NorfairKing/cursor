@@ -133,7 +133,9 @@ forestCursorSelectPrev ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
 forestCursorSelectPrev f g fc =
     (fc & forestCursorSelectedTreeL (treeCursorSelectPrev f g)) <|>
-    forestCursorSelectPrevTreeCursor f g fc
+    (forestCursorSelectPrevTreeCursor f g fc >>=
+     forestCursorSelectedTreeL (treeCursorSelectBelowAtEndRecursively f g)) <|>
+    (forestCursorSelectPrevTreeCursor f g fc)
 
 forestCursorSelectNextOnSameLevel ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)

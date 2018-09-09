@@ -17,9 +17,11 @@ module Cursor.Simple.Tree
     , treeCursorSelectFirst
     , treeCursorSelectLast
     , treeCursorSelectAbove
+    , treeCursorSelectBelowAtPos
     , treeCursorSelectBelowAtStart
     , treeCursorSelectBelowAtEnd
-    , treeCursorSelectBelowAtPos
+    , treeCursorSelectBelowAtStartRecursively
+    , treeCursorSelectBelowAtEndRecursively
     , treeCursorSelectPrevOnSameLevel
     , treeCursorSelectNextOnSameLevel
     , treeCursorSelectAbovePrev
@@ -119,6 +121,12 @@ treeCursorSelectBelowAtStart = TC.treeCursorSelectBelowAtStart id id
 
 treeCursorSelectBelowAtEnd :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectBelowAtEnd = TC.treeCursorSelectBelowAtEnd id id
+
+treeCursorSelectBelowAtStartRecursively :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorSelectBelowAtStartRecursively = TC.treeCursorSelectBelowAtStartRecursively id id
+
+treeCursorSelectBelowAtEndRecursively :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorSelectBelowAtEndRecursively = TC.treeCursorSelectBelowAtEndRecursively id id
 
 treeCursorSelectPrevOnSameLevel :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectPrevOnSameLevel = TC.treeCursorSelectPrevOnSameLevel id id
