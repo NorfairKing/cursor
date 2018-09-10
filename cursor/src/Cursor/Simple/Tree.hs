@@ -33,6 +33,11 @@ module Cursor.Simple.Tree
     , treeCursorAddChildAtPos
     , treeCursorAddChildAtStart
     , treeCursorAddChildAtEnd
+    , treeCursorDeleteSubTreeAndSelectPrevious
+    , treeCursorDeleteSubTreeAndSelectNext
+    , treeCursorDeleteSubTreeAndSelectAbove
+    , treeCursorRemoveSubTree
+    , treeCursorDeleteSubTree
     , treeCursorDeleteElemAndSelectPrevious
     , treeCursorDeleteElemAndSelectNext
     , treeCursorDeleteElemAndSelectAbove
@@ -167,6 +172,27 @@ treeCursorAddChildAtStart = TC.treeCursorAddChildAtStart
 
 treeCursorAddChildAtEnd :: Tree a -> TreeCursor a -> TreeCursor a
 treeCursorAddChildAtEnd = TC.treeCursorAddChildAtEnd
+
+treeCursorDeleteSubTreeAndSelectPrevious ::
+       TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
+treeCursorDeleteSubTreeAndSelectPrevious =
+    TC.treeCursorDeleteSubTreeAndSelectPrevious id
+
+treeCursorDeleteSubTreeAndSelectNext ::
+       TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
+treeCursorDeleteSubTreeAndSelectNext =
+    TC.treeCursorDeleteSubTreeAndSelectNext id
+
+treeCursorDeleteSubTreeAndSelectAbove ::
+       TreeCursor a -> DeleteOrUpdate (TreeCursor a)
+treeCursorDeleteSubTreeAndSelectAbove =
+    TC.treeCursorDeleteSubTreeAndSelectAbove id
+
+treeCursorRemoveSubTree :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)
+treeCursorRemoveSubTree = TC.treeCursorRemoveSubTree id
+
+treeCursorDeleteSubTree :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)
+treeCursorDeleteSubTree = TC.treeCursorDeleteSubTree id
 
 treeCursorDeleteElemAndSelectPrevious ::
        TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))

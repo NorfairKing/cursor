@@ -280,33 +280,52 @@ spec = do
         it "produces valid cursors " $
             producesValidsOnValids2 $ treeCursorAddChildAtEnd @Double
         it "adds a tree at the end of the children of the current node" pending
+    describe "treeCursorDeleteSubTreeAndSelectPrevious" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $
+            treeCursorDeleteSubTreeAndSelectPrevious @Double
+        it "deletes the current subtree selects the previous subtree" pending
+    describe "treeCursorDeleteSubTreeAndSelectNext" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $
+            treeCursorDeleteSubTreeAndSelectNext @Double
+        it "deletes the current subtree selects the next subtree" pending
+    describe "treeCursorDeleteSubTreeAndSelectAbove" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $
+            treeCursorDeleteSubTreeAndSelectAbove @Double
+        it "deletes the current subtree selects the above node" pending
+    describe "treeCursorRemoveSubTree" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ treeCursorRemoveSubTree @Double
+        it "removes the current subtree" pending
+    describe "treeCursorDeleteSubTree" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ treeCursorDeleteSubTree @Double
+        it "deletes the current subtree" pending
     describe "treeCursorDeleteElemAndSelectPrevious" $ do
         it "produces valids on valids" $
             producesValidsOnValids $
             treeCursorDeleteElemAndSelectPrevious @Double
         it
-            "deletes the current node and children and selects the previous tree"
+            "deletes the current element and selects the previous element"
             pending
     describe "treeCursorDeleteElemAndSelectNext" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDeleteElemAndSelectNext @Double
-        it
-            "deletes the current node and children and selects the next tree"
-            pending
+        it "deletes the current element and selects the next element" pending
     describe "treeCursorDeleteElemAndSelectAbove" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDeleteElemAndSelectAbove @Double
-        it
-            "deletes the current node and children and selects the above node"
-            pending
+        it "deletes the current element and selects the above element" pending
     describe "treeCursorRemoveElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorRemoveElem @Double
-        it "removes elements and select the former" pending
+        it "removes the current element" pending
     describe "treeCursorDeleteElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDeleteElem @Double
-        it "removes elements and select the next" pending
+        it "deletes the current element" pending
     describe "treeCursorSwapPrev" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorSwapPrev @Double
