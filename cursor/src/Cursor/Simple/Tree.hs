@@ -35,6 +35,7 @@ module Cursor.Simple.Tree
     , treeCursorAddChildAtEnd
     , treeCursorDeleteElemAndSelectPrevious
     , treeCursorDeleteElemAndSelectNext
+    , treeCursorDeleteElemAndSelectAbove
     , treeCursorRemoveElem
     , treeCursorDeleteElem
     , treeCursorSwapPrev
@@ -123,10 +124,12 @@ treeCursorSelectBelowAtEnd :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectBelowAtEnd = TC.treeCursorSelectBelowAtEnd id id
 
 treeCursorSelectBelowAtStartRecursively :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorSelectBelowAtStartRecursively = TC.treeCursorSelectBelowAtStartRecursively id id
+treeCursorSelectBelowAtStartRecursively =
+    TC.treeCursorSelectBelowAtStartRecursively id id
 
 treeCursorSelectBelowAtEndRecursively :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorSelectBelowAtEndRecursively = TC.treeCursorSelectBelowAtEndRecursively id id
+treeCursorSelectBelowAtEndRecursively =
+    TC.treeCursorSelectBelowAtEndRecursively id id
 
 treeCursorSelectPrevOnSameLevel :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectPrevOnSameLevel = TC.treeCursorSelectPrevOnSameLevel id id
@@ -173,6 +176,10 @@ treeCursorDeleteElemAndSelectPrevious =
 treeCursorDeleteElemAndSelectNext ::
        TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
 treeCursorDeleteElemAndSelectNext = TC.treeCursorDeleteElemAndSelectNext id
+
+treeCursorDeleteElemAndSelectAbove ::
+       TreeCursor a -> DeleteOrUpdate (TreeCursor a)
+treeCursorDeleteElemAndSelectAbove = TC.treeCursorDeleteElemAndSelectAbove id
 
 treeCursorRemoveElem :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)
 treeCursorRemoveElem = TC.treeCursorRemoveElem id

@@ -35,6 +35,7 @@ module Cursor.Tree
     , treeCursorAddChildAtEnd
     , treeCursorDeleteElemAndSelectPrevious
     , treeCursorDeleteElemAndSelectNext
+    , treeCursorDeleteElemAndSelectAbove
     , treeCursorRemoveElem
     , treeCursorDeleteElem
     , treeCursorSwapPrev
@@ -351,19 +352,34 @@ treeCursorDeleteElemAndSelectNext g TreeCursor {..} =
                     Just . Updated . makeTreeCursorWithAbove g tree $
                     Just ta {treeAboveRights = xs}
 
+treeCursorDeleteElemAndSelectAbove ::
+       (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
+treeCursorDeleteElemAndSelectAbove g TreeCursor {..} =
+    case treeAbove of
+        Nothing -> Deleted
+        Just TreeAbove {..} ->
+            Updated $
+            TreeCursor
+            { treeAbove = treeAboveAbove
+            , treeCurrent = g treeAboveNode
+            , treeBelow = reverse treeAboveLefts ++ treeAboveRights
+            }
+
 treeCursorRemoveElem ::
        (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
 treeCursorRemoveElem g tc =
     joinDeletes
         (treeCursorDeleteElemAndSelectPrevious g tc)
-        (treeCursorDeleteElemAndSelectNext g tc)
+        (treeCursorDeleteElemAndSelectNext g tc) <|>
+    treeCursorDeleteElemAndSelectAbove g tc
 
 treeCursorDeleteElem ::
        (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
 treeCursorDeleteElem g tc =
     joinDeletes
         (treeCursorDeleteElemAndSelectNext g tc)
-        (treeCursorDeleteElemAndSelectPrevious g tc)
+        (treeCursorDeleteElemAndSelectPrevious g tc) <|>
+    treeCursorDeleteElemAndSelectAbove g tc
 
 treeCursorSwapPrev ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)

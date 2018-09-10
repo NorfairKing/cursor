@@ -293,6 +293,12 @@ spec = do
         it
             "deletes the current node and children and selects the next tree"
             pending
+    describe "treeCursorDeleteElemAndSelectAbove" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ treeCursorDeleteElemAndSelectAbove @Double
+        it
+            "deletes the current node and children and selects the above node"
+            pending
     describe "treeCursorRemoveElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorRemoveElem @Double
