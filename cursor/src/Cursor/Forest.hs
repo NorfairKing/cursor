@@ -42,10 +42,14 @@ module Cursor.Forest
     , forestCursorAddChildToNodeAtPos
     , forestCursorAddChildToNodeAtStart
     , forestCursorAddChildToNodeAtEnd
-    , forestCursorRemoveTreeAndSelectPrev
-    , forestCursorDeleteTreeAndSelectNext
-    , forestCursorRemoveTree
-    , forestCursorDeleteTree
+    , forestCursorRemoveElemAndSelectPrev
+    , forestCursorDeleteElemAndSelectNext
+    , forestCursorRemoveElem
+    , forestCursorDeleteElem
+    , forestCursorRemoveSubTreeAndSelectPrev
+    , forestCursorDeleteSubTreeAndSelectNext
+    , forestCursorRemoveSubTree
+    , forestCursorDeleteSubTree
     , forestCursorAddRoot
     ) where
 
@@ -268,9 +272,9 @@ forestCursorAddChildToNodeAtEnd :: b -> ForestCursor a b -> ForestCursor a b
 forestCursorAddChildToNodeAtEnd b =
     forestCursorAddChildTreeToNodeAtEnd $ Node b []
 
-forestCursorRemoveTreeAndSelectPrev ::
+forestCursorRemoveElemAndSelectPrev ::
        (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
-forestCursorRemoveTreeAndSelectPrev g fc =
+forestCursorRemoveElemAndSelectPrev g fc =
     joinPossibleDeletes
         (fc &
          focusPossibleDeleteOrUpdate
@@ -281,9 +285,9 @@ forestCursorRemoveTreeAndSelectPrev g fc =
              forestCursorListCursorL
              (nonEmptyCursorRemoveElemAndSelectPrev (makeTreeCursor g)))
 
-forestCursorDeleteTreeAndSelectNext ::
+forestCursorDeleteElemAndSelectNext ::
        (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
-forestCursorDeleteTreeAndSelectNext g fc =
+forestCursorDeleteElemAndSelectNext g fc =
     joinPossibleDeletes
         (fc &
          focusPossibleDeleteOrUpdate
@@ -294,16 +298,54 @@ forestCursorDeleteTreeAndSelectNext g fc =
              forestCursorListCursorL
              (nonEmptyCursorDeleteElemAndSelectNext (makeTreeCursor g)))
 
-forestCursorRemoveTree ::
+forestCursorRemoveElem ::
        (b -> a) -> ForestCursor a b -> DeleteOrUpdate (ForestCursor a b)
-forestCursorRemoveTree g fc =
+forestCursorRemoveElem g fc =
     (fc & forestCursorSelectedTreeL (treeCursorRemoveElem g)) <|>
     (fc & forestCursorListCursorL (nonEmptyCursorRemoveElem (makeTreeCursor g)))
 
-forestCursorDeleteTree ::
+forestCursorDeleteElem ::
        (b -> a) -> ForestCursor a b -> DeleteOrUpdate (ForestCursor a b)
-forestCursorDeleteTree g fc =
+forestCursorDeleteElem g fc =
     (fc & forestCursorSelectedTreeL (treeCursorDeleteElem g)) <|>
+    (fc & forestCursorListCursorL (nonEmptyCursorDeleteElem (makeTreeCursor g)))
+
+forestCursorRemoveSubTreeAndSelectPrev ::
+       (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
+forestCursorRemoveSubTreeAndSelectPrev g fc =
+    joinPossibleDeletes
+        (fc &
+         focusPossibleDeleteOrUpdate
+             forestCursorSelectedTreeL
+             (treeCursorDeleteSubTreeAndSelectPrevious g))
+        (fc &
+         focusPossibleDeleteOrUpdate
+             forestCursorListCursorL
+             (nonEmptyCursorRemoveElemAndSelectPrev (makeTreeCursor g)))
+
+forestCursorDeleteSubTreeAndSelectNext ::
+       (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
+forestCursorDeleteSubTreeAndSelectNext g fc =
+    joinPossibleDeletes
+        (fc &
+         focusPossibleDeleteOrUpdate
+             forestCursorSelectedTreeL
+             (treeCursorDeleteSubTreeAndSelectNext g))
+        (fc &
+         focusPossibleDeleteOrUpdate
+             forestCursorListCursorL
+             (nonEmptyCursorDeleteElemAndSelectNext (makeTreeCursor g)))
+
+forestCursorRemoveSubTree ::
+       (b -> a) -> ForestCursor a b -> DeleteOrUpdate (ForestCursor a b)
+forestCursorRemoveSubTree g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorRemoveSubTree g)) <|>
+    (fc & forestCursorListCursorL (nonEmptyCursorRemoveElem (makeTreeCursor g)))
+
+forestCursorDeleteSubTree ::
+       (b -> a) -> ForestCursor a b -> DeleteOrUpdate (ForestCursor a b)
+forestCursorDeleteSubTree g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorDeleteSubTree g)) <|>
     (fc & forestCursorListCursorL (nonEmptyCursorDeleteElem (makeTreeCursor g)))
 
 forestCursorAddRoot ::

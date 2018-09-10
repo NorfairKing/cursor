@@ -303,22 +303,42 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids2 $ forestCursorAddChildToNodeAtEnd @Double
         it "adds a child to a node at the end the children of that node" pending
-    describe "forestCursorRemoveTreeAndSelectPrev" $ do
+    describe "forestCursorRemoveElemAndSelectPrev" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorRemoveTreeAndSelectPrev @Double)
-        it "removes the selected tree and selects the previous tree" pending
-    describe "forestCursorDeleteTreeAndSelectNext" $ do
+            producesValidsOnValids (forestCursorRemoveElemAndSelectPrev @Double)
+        it
+            "removes the selected element and selects the previous element"
+            pending
+    describe "forestCursorDeleteElemAndSelectNext" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorDeleteTreeAndSelectNext @Double)
-        it "deletes the selected tree and selects the next tree" pending
-    describe "forestCursorRemoveTree" $ do
+            producesValidsOnValids (forestCursorDeleteElemAndSelectNext @Double)
+        it "deletes the selected element and selects the next element" pending
+    describe "forestCursorRemoveElem" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorRemoveTree @Double)
-        it "removes the selected tree" pending
-    describe "forestCursorDeleteTree" $ do
+            producesValidsOnValids (forestCursorRemoveElem @Double)
+        it "removes the selected element" pending
+    describe "forestCursorDeleteElem" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorDeleteTree @Double)
-        it "deletes the selected tree" pending
+            producesValidsOnValids (forestCursorDeleteElem @Double)
+        it "deletes the selected element" pending
+    describe "forestCursorRemoveSubTreeAndSelectPrev" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids
+                (forestCursorRemoveSubTreeAndSelectPrev @Double)
+        it "removes the selected subtree and selects the previous tree" pending
+    describe "forestCursorDeleteSubTreeAndSelectNext" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids
+                (forestCursorDeleteSubTreeAndSelectNext @Double)
+        it "deletes the selected subtree and selects the next tree" pending
+    describe "forestCursorRemoveSubTree" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids (forestCursorRemoveSubTree @Double)
+        it "removes the selected subtree" pending
+    describe "forestCursorDeleteSubTree" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids (forestCursorDeleteSubTree @Double)
+        it "deletes the selected subtree" pending
     describe "forestCursorAddRoot" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorAddRoot @Double)
