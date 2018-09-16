@@ -166,7 +166,11 @@ spec = do
                         , treeCurrent = 3
                         , treeBelow = []
                         }
-            treeCursorSelectAbovePrev start `shouldBe` Just expected
+            case treeCursorSelectAbovePrev start of
+                Nothing ->
+                    expectationFailure
+                        "treeCursorSelectAbovePrev should not have failed"
+                Just r -> r `treeShouldBe` expected
         it "selects the previous element" pending
         it "after treeCursorSelectAboveNext is identity if they don't fail" $ do
             forAllValid $ \tc ->
@@ -249,7 +253,11 @@ spec = do
                         , treeCurrent = 4 :: Int
                         , treeBelow = []
                         }
-            treeCursorSelectAboveNext start `shouldBe` Just expected
+            case treeCursorSelectAboveNext start of
+                Nothing ->
+                    expectationFailure
+                        "treeCursorSelectAboveNext should not have failed."
+                Just r -> r `treeShouldBe` expected
         it "selects the next element" pending
         it "after treeCursorSelectAbovePrev is identity if they don't fail" $ do
             forAllValid $ \tc ->
@@ -376,7 +384,7 @@ spec = do
                             expectationFailure
                                 "treeCursorDeleteElemAndSelectNext should not have deleted the entire example tree."
                         Just (Updated f) ->
-                            f `shouldBe` simpleDeleteElemExpected
+                            f `treeShouldBe` simpleDeleteElemExpected
         it "deletes the current element and selects the next element" pending
     describe "treeCursorDeleteElemAndSelectAbove" $ do
         it "produces valids on valids" $
@@ -459,7 +467,6 @@ spec = do
                                             [ Node
                                                   'a'
                                                   [ Node 'b' [Node 'c' []]
-                                                  , Node 'd' [Node 'e' []]
                                                   , Node 'f' [Node 'g' []]
                                                   ]
                                             ]
@@ -474,11 +481,53 @@ spec = do
                     Nothing ->
                         expectationFailure
                             "treeCursorPromoteSubTree should not have failed"
-                    Just tc' -> tc' `shouldBe` promoteEnd
+                    Just tc' -> tc' `treeShouldBe` promoteEnd
         it "promotes the current subtree to the level of its parent" pending
     describe "treeCursorDemoteSubTree" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDemoteSubTree @Double
+        it "Works on the example from the docs" $
+            let promoteStart =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [Node 'a' [Node 'b' []]]
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = [Node 'e' []]
+                                      }
+                        , treeCurrent = 'c'
+                        , treeBelow = [Node 'd' []]
+                        }
+                promoteEnd =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [Node 'b' []]
+                                      , treeAboveAbove =
+                                            Just
+                                                TreeAbove
+                                                    { treeAboveLefts = []
+                                                    , treeAboveAbove = Nothing
+                                                    , treeAboveNode = 'p'
+                                                    , treeAboveRights =
+                                                          [Node 'e' []]
+                                                    }
+                                      , treeAboveNode = 'a'
+                                      , treeAboveRights = []
+                                      }
+                        , treeCurrent = 'c'
+                        , treeBelow = [Node 'd' []]
+                        }
+             in case treeCursorDemoteSubTree promoteStart of
+                    Nothing ->
+                        expectationFailure
+                            "treeCursorDemoteSubTree should not have failed"
+                    Just tc' -> tc' `treeShouldBe` promoteEnd
         it "demotes the current subtree to the level of its children" pending
 
 testMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Spec
@@ -515,3 +564,16 @@ isMovement func =
     forAllValid $ \lec ->
         rebuildTreeCursor (lec :: STC.TreeCursor Int) `shouldBe`
         rebuildTreeCursor (func lec)
+
+treeShouldBe ::
+       (Show a, Eq a) => STC.TreeCursor a -> STC.TreeCursor a -> Expectation
+treeShouldBe actual expected =
+    unless (actual == expected) $
+    expectationFailure $
+    unlines
+        [ "The following should have been equal."
+        , "actual:"
+        , drawTreeCursor actual
+        , "expected:"
+        , drawTreeCursor expected
+        ]

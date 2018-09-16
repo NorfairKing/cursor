@@ -611,4 +611,17 @@ treeCursorPromoteSubTree f g tc = do
 -- >  |- e
 treeCursorDemoteSubTree ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorDemoteSubTree = undefined
+treeCursorDemoteSubTree f g tc = do
+    ta <- treeAbove tc
+    case treeAboveLefts ta of
+        [] -> Nothing
+        (Node t ls:ts) ->
+            pure $
+            makeTreeCursorWithAbove g (currentTree f tc) $
+            Just
+                TreeAbove
+                    { treeAboveLefts = reverse ls
+                    , treeAboveAbove = Just ta {treeAboveLefts = ts}
+                    , treeAboveNode = t
+                    , treeAboveRights = []
+                    }
