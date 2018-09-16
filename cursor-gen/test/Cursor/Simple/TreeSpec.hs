@@ -38,6 +38,13 @@ spec = do
             producesValidsOnValids (rebuildTreeCursor @Double)
         it "is the inverse of makeTreeCursor for integers" $
             inverseFunctions (makeTreeCursor @Int) rebuildTreeCursor
+    describe "treeCursorAboveL" $ lensSpecOnValid (treeCursorAboveL @Double)
+    describe "treeCursorCurrentL" $ lensSpecOnValid (treeCursorCurrentL @Double)
+    describe "treeCursorBelowL" $ lensSpecOnValid (treeCursorBelowL @Double)
+    describe "treeAboveLeftsL" $ lensSpecOnValid (treeAboveLeftsL @Double)
+    describe "treeAboveAboveL" $ lensSpecOnValid (treeAboveAboveL @Double)
+    describe "treeAboveNodeL" $ lensSpecOnValid (treeAboveNodeL @Double)
+    describe "treeAboveRightsL" $ lensSpecOnValid (treeAboveRightsL @Double)
     describe "treeCursorSelectPrev" $ do
         testMovementM treeCursorSelectPrev
         it "selects the previous element" pending
@@ -159,7 +166,11 @@ spec = do
                         , treeCurrent = 3
                         , treeBelow = []
                         }
-            treeCursorSelectAbovePrev start `shouldBe` Just expected
+            case treeCursorSelectAbovePrev start of
+                Nothing ->
+                    expectationFailure
+                        "treeCursorSelectAbovePrev should not have failed"
+                Just r -> r `treeShouldBe` expected
         it "selects the previous element" pending
         it "after treeCursorSelectAboveNext is identity if they don't fail" $ do
             forAllValid $ \tc ->
@@ -242,7 +253,11 @@ spec = do
                         , treeCurrent = 4 :: Int
                         , treeBelow = []
                         }
-            treeCursorSelectAboveNext start `shouldBe` Just expected
+            case treeCursorSelectAboveNext start of
+                Nothing ->
+                    expectationFailure
+                        "treeCursorSelectAboveNext should not have failed."
+                Just r -> r `treeShouldBe` expected
         it "selects the next element" pending
         it "after treeCursorSelectAbovePrev is identity if they don't fail" $ do
             forAllValid $ \tc ->
@@ -369,26 +384,28 @@ spec = do
                             expectationFailure
                                 "treeCursorDeleteElemAndSelectNext should not have deleted the entire example tree."
                         Just (Updated f) ->
-                            f `shouldBe` simpleDeleteElemExpected
+                            f `treeShouldBe` simpleDeleteElemExpected
         it "deletes the current element and selects the next element" pending
     describe "treeCursorDeleteElemAndSelectAbove" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDeleteElemAndSelectAbove @Double
-        it "works for this simple example" $ forAllValid  $ \fs ->
-            let simpleDeleteElemStart =
-                    TreeCursor
-                        { treeAbove = Nothing
-                        , treeCurrent = 1 :: Int
-                        , treeBelow = [Node 2 fs]
-                        }
-             in case treeCursorDeleteElemAndSelectAbove simpleDeleteElemStart of
-                    Nothing -> pure ()
-                    Just Deleted ->
-                        expectationFailure
-                            "treeCursorDeleteElemAndSelectAbove should not have deleted the entire example tree."
-                    Just (Updated _) ->
-                        expectationFailure
-                            "treeCursorDeleteElemAndSelectAbove should not have updated the example tree, but failed instead."
+        it "works for this simple example" $
+            forAllValid $ \fs ->
+                let simpleDeleteElemStart =
+                        TreeCursor
+                            { treeAbove = Nothing
+                            , treeCurrent = 1 :: Int
+                            , treeBelow = [Node 2 fs]
+                            }
+                 in case treeCursorDeleteElemAndSelectAbove
+                             simpleDeleteElemStart of
+                        Nothing -> pure ()
+                        Just Deleted ->
+                            expectationFailure
+                                "treeCursorDeleteElemAndSelectAbove should not have deleted the entire example tree."
+                        Just (Updated _) ->
+                            expectationFailure
+                                "treeCursorDeleteElemAndSelectAbove should not have updated the example tree, but failed instead."
         it "deletes the current element and selects the above element" pending
     describe "treeCursorRemoveElem" $ do
         it "produces valids on valids" $
@@ -406,13 +423,204 @@ spec = do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorSwapNext @Double
         it "swaps the current node with the next node" pending
-    describe "treeCursorAboveL" $ lensSpecOnValid (treeCursorAboveL @Double)
-    describe "treeCursorCurrentL" $ lensSpecOnValid (treeCursorCurrentL @Double)
-    describe "treeCursorBelowL" $ lensSpecOnValid (treeCursorBelowL @Double)
-    describe "treeAboveLeftsL" $ lensSpecOnValid (treeAboveLeftsL @Double)
-    describe "treeAboveAboveL" $ lensSpecOnValid (treeAboveAboveL @Double)
-    describe "treeAboveNodeL" $ lensSpecOnValid (treeAboveNodeL @Double)
-    describe "treeAboveRightsL" $ lensSpecOnValid (treeAboveRightsL @Double)
+    describe "treeCursorPromoteElem" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ treeCursorPromoteElem @Double
+        it "Works on the example from the docs" $
+            let promoteStart =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [Node 'b' [Node 'c' []]]
+                                      , treeAboveAbove =
+                                            Just
+                                                TreeAbove
+                                                    { treeAboveLefts = []
+                                                    , treeAboveAbove = Nothing
+                                                    , treeAboveNode = 'p'
+                                                    , treeAboveRights =
+                                                          [Node 'h' []]
+                                                    }
+                                      , treeAboveNode = 'a'
+                                      , treeAboveRights =
+                                            [Node 'f' [Node 'g' []]]
+                                      }
+                        , treeCurrent = 'd'
+                        , treeBelow = [Node 'e' []]
+                        }
+                promoteEnd =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [ Node
+                                                  'a'
+                                                  [ Node
+                                                        'b'
+                                                        [ Node 'c' []
+                                                        , Node 'e' []
+                                                        ]
+                                                  , Node 'f' [Node 'g' []]
+                                                  ]
+                                            ]
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = [Node 'h' []]
+                                      }
+                        , treeCurrent = 'd'
+                        , treeBelow = []
+                        }
+             in case treeCursorPromoteElem promoteStart of
+                    Nothing ->
+                        expectationFailure
+                            "treeCursorPromoteElem should not have failed"
+                    Just tc' -> tc' `treeShouldBe` promoteEnd
+        it "promotes the current node to the level of its parent" pending
+    describe "treeCursorDemoteElem" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ treeCursorDemoteElem @Double
+        it "Works on the example from the docs" $
+            let promoteStart =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [Node 'a' [Node 'b' []]]
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = [Node 'e' []]
+                                      }
+                        , treeCurrent = 'c'
+                        , treeBelow = [Node 'd' []]
+                        }
+                promoteEnd =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts = [Node 'b' []]
+                                      , treeAboveAbove =
+                                            Just
+                                                TreeAbove
+                                                    { treeAboveLefts = []
+                                                    , treeAboveAbove = Nothing
+                                                    , treeAboveNode = 'p'
+                                                    , treeAboveRights =
+                                                          [Node 'e' []]
+                                                    }
+                                      , treeAboveNode = 'a'
+                                      , treeAboveRights = [Node 'd' []]
+                                      }
+                        , treeCurrent = 'c'
+                        , treeBelow = []
+                        }
+             in case treeCursorDemoteElem promoteStart of
+                    Nothing ->
+                        expectationFailure
+                            "treeCursorDemoteElem should not have failed"
+                    Just tc' -> tc' `treeShouldBe` promoteEnd
+        it "demotes the current node to the level of its children" pending
+    describe "treeCursorPromoteSubTree" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ treeCursorPromoteSubTree @Double
+        it "Works on the example from the docs" $
+            let promoteStart =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [Node 'b' [Node 'c' []]]
+                                      , treeAboveAbove =
+                                            Just
+                                                TreeAbove
+                                                    { treeAboveLefts = []
+                                                    , treeAboveAbove = Nothing
+                                                    , treeAboveNode = 'p'
+                                                    , treeAboveRights =
+                                                          [Node 'h' []]
+                                                    }
+                                      , treeAboveNode = 'a'
+                                      , treeAboveRights =
+                                            [Node 'f' [Node 'g' []]]
+                                      }
+                        , treeCurrent = 'd'
+                        , treeBelow = [Node 'e' []]
+                        }
+                promoteEnd =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [ Node
+                                                  'a'
+                                                  [ Node 'b' [Node 'c' []]
+                                                  , Node 'f' [Node 'g' []]
+                                                  ]
+                                            ]
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = [Node 'h' []]
+                                      }
+                        , treeCurrent = 'd'
+                        , treeBelow = [Node 'e' []]
+                        }
+             in case treeCursorPromoteSubTree promoteStart of
+                    Nothing ->
+                        expectationFailure
+                            "treeCursorPromoteSubTree should not have failed"
+                    Just tc' -> tc' `treeShouldBe` promoteEnd
+        it "promotes the current subtree to the level of its parent" pending
+    describe "treeCursorDemoteSubTree" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ treeCursorDemoteSubTree @Double
+        it "Works on the example from the docs" $
+            let promoteStart =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [Node 'a' [Node 'b' []]]
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = [Node 'e' []]
+                                      }
+                        , treeCurrent = 'c'
+                        , treeBelow = [Node 'd' []]
+                        }
+                promoteEnd =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts = [Node 'b' []]
+                                      , treeAboveAbove =
+                                            Just
+                                                TreeAbove
+                                                    { treeAboveLefts = []
+                                                    , treeAboveAbove = Nothing
+                                                    , treeAboveNode = 'p'
+                                                    , treeAboveRights =
+                                                          [Node 'e' []]
+                                                    }
+                                      , treeAboveNode = 'a'
+                                      , treeAboveRights = []
+                                      }
+                        , treeCurrent = 'c'
+                        , treeBelow = [Node 'd' []]
+                        }
+             in case treeCursorDemoteSubTree promoteStart of
+                    Nothing ->
+                        expectationFailure
+                            "treeCursorDemoteSubTree should not have failed"
+                    Just tc' -> tc' `treeShouldBe` promoteEnd
+        it "demotes the current subtree to the level of its children" pending
 
 testMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Spec
 testMovement func = do
@@ -448,3 +656,16 @@ isMovement func =
     forAllValid $ \lec ->
         rebuildTreeCursor (lec :: STC.TreeCursor Int) `shouldBe`
         rebuildTreeCursor (func lec)
+
+treeShouldBe ::
+       (Show a, Eq a) => STC.TreeCursor a -> STC.TreeCursor a -> Expectation
+treeShouldBe actual expected =
+    unless (actual == expected) $
+    expectationFailure $
+    unlines
+        [ "The following should have been equal."
+        , "actual:"
+        , drawTreeCursor actual
+        , "expected:"
+        , drawTreeCursor expected
+        ]
