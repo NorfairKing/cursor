@@ -17,6 +17,8 @@ import Test.Validity.Optics
 
 import Control.Monad (unless)
 
+import Text.Show.Pretty
+
 import Cursor.Simple.Tree hiding (TreeCursor)
 import qualified Cursor.Simple.Tree as STC (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
@@ -30,6 +32,9 @@ spec = do
     describe "makeTreeCursor" $
         it "produces valid cursors" $
         producesValidsOnValids (makeTreeCursor @Double)
+    describe "makeTreeCursorWithSelection" $
+        it "produces valid cursors" $
+        producesValidsOnValids2 (makeTreeCursorWithSelection @Double)
     describe "singletonTreeCursor" $
         it "produces valid cursors" $
         producesValidsOnValids (singletonTreeCursor @Double)
@@ -38,6 +43,17 @@ spec = do
             producesValidsOnValids (rebuildTreeCursor @Double)
         it "is the inverse of makeTreeCursor for integers" $
             inverseFunctions (makeTreeCursor @Int) rebuildTreeCursor
+        it
+            "is the inverse of makeTreeCursorWithSelection for the current selection" $
+            forAllValid $ \tc ->
+                case makeTreeCursorWithSelection
+                         @Double
+                         (treeCursorSelection tc)
+                         (rebuildTreeCursor tc) of
+                    Nothing ->
+                        expectationFailure
+                            "makeTreeCursorWithSelection should not have failed."
+                    Just r -> r `treeShouldBe` tc
     describe "treeCursorAboveL" $ lensSpecOnValid (treeCursorAboveL @Double)
     describe "treeCursorCurrentL" $ lensSpecOnValid (treeCursorCurrentL @Double)
     describe "treeCursorBelowL" $ lensSpecOnValid (treeCursorBelowL @Double)
@@ -45,6 +61,30 @@ spec = do
     describe "treeAboveAboveL" $ lensSpecOnValid (treeAboveAboveL @Double)
     describe "treeAboveNodeL" $ lensSpecOnValid (treeAboveNodeL @Double)
     describe "treeAboveRightsL" $ lensSpecOnValid (treeAboveRightsL @Double)
+    describe "treeCursorSelection" $
+        it "produces valids on valids" $
+        producesValidsOnValids (treeCursorSelection @Double)
+    describe "treeCursorSelect" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids2 (treeCursorSelect @Double)
+        it "is identity with the current selection" $
+            forAllValid $ \tc ->
+                let sel = treeCursorSelection tc
+                 in case treeCursorSelect @Double sel tc of
+                        Nothing ->
+                            expectationFailure
+                                "treeCursorSelect should not have failed."
+                        Just r ->
+                            unless (r == tc) $
+                            expectationFailure $
+                            unlines
+                                [ "selection:"
+                                , ppShow sel
+                                , "expected:"
+                                , drawTreeCursor tc
+                                , "actual:"
+                                , drawTreeCursor r
+                                ]
     describe "treeCursorSelectPrev" $ do
         testMovementM treeCursorSelectPrev
         it "selects the previous element" pending

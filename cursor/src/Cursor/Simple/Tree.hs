@@ -8,6 +8,7 @@ module Cursor.Simple.Tree
     , TreeAbove(..)
     , singletonTreeCursor
     , makeTreeCursor
+    , makeTreeCursorWithSelection
     , rebuildTreeCursor
     , drawTreeCursor
     , mapTreeCursor
@@ -19,6 +20,9 @@ module Cursor.Simple.Tree
     , treeAboveNodeL
     , treeAboveRightsL
     , treeCursorWithPointer
+    , treeCursorSelection
+    , TC.TreeCursorSelection(..)
+    , treeCursorSelect
     , treeCursorSelectPrev
     , treeCursorSelectNext
     , treeCursorSelectFirst
@@ -93,6 +97,10 @@ treeAboveRightsL = lens treeAboveRights $ \ta tar -> ta {treeAboveRights = tar}
 makeTreeCursor :: Tree a -> TreeCursor a
 makeTreeCursor = TC.makeTreeCursor id
 
+makeTreeCursorWithSelection ::
+       TC.TreeCursorSelection -> Tree a -> Maybe (TreeCursor a)
+makeTreeCursorWithSelection = TC.makeTreeCursorWithSelection id id
+
 singletonTreeCursor :: a -> TreeCursor a
 singletonTreeCursor = TC.singletonTreeCursor
 
@@ -107,6 +115,13 @@ mapTreeCursor f = TC.mapTreeCursor f f
 
 treeCursorWithPointer :: Show a => TreeCursor a -> Tree String
 treeCursorWithPointer = TC.treeCursorWithPointer
+
+treeCursorSelection :: TreeCursor a -> TC.TreeCursorSelection
+treeCursorSelection = TC.treeCursorSelection
+
+treeCursorSelect ::
+       TC.TreeCursorSelection -> TreeCursor a -> Maybe (TreeCursor a)
+treeCursorSelect = TC.treeCursorSelect id id
 
 treeCursorSelectPrev :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectPrev = TC.treeCursorSelectPrev id id

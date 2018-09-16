@@ -8,6 +8,7 @@ module Cursor.Tree
     , TreeAbove(..)
     , singletonTreeCursor
     , makeTreeCursor
+    , makeTreeCursorWithSelection
     , rebuildTreeCursor
     , drawTreeCursor
     , mapTreeCursor
@@ -19,6 +20,9 @@ module Cursor.Tree
     , treeAboveNodeL
     , treeAboveRightsL
     , treeCursorWithPointer
+    , treeCursorSelection
+    , TreeCursorSelection(..)
+    , treeCursorSelect
     , treeCursorSelectPrev
     , treeCursorSelectNext
     , treeCursorSelectFirst
@@ -116,6 +120,18 @@ makeTreeCursor :: (b -> a) -> Tree b -> TreeCursor a b
 makeTreeCursor g (Node v fs) =
     TreeCursor {treeAbove = Nothing, treeCurrent = g v, treeBelow = fs}
 
+makeTreeCursorWithSelection ::
+       (a -> b)
+    -> (b -> a)
+    -> TreeCursorSelection
+    -> Tree b
+    -> Maybe (TreeCursor a b)
+makeTreeCursorWithSelection f g sel = walkDown sel . makeTreeCursor g
+  where
+    walkDown SelectNode tc = pure tc
+    walkDown (SelectChild i sel) tc =
+        treeCursorSelectBelowAtPos f g i tc >>= walkDown sel
+
 makeTreeCursorWithAbove ::
        (b -> a) -> Tree b -> Maybe (TreeAbove b) -> TreeCursor a b
 makeTreeCursorWithAbove g (Node a forest) mta =
@@ -163,6 +179,30 @@ mapTreeCursor f g TreeCursor {..} =
         , treeCurrent = f treeCurrent
         , treeBelow = map (fmap g) treeBelow
         }
+
+treeCursorSelection :: TreeCursor a b -> TreeCursorSelection
+treeCursorSelection TreeCursor {..} = wrap treeAbove SelectNode
+  where
+    wrap :: Maybe (TreeAbove a) -> TreeCursorSelection -> TreeCursorSelection
+    wrap Nothing ts = ts
+    wrap (Just ta) ts = wrap (treeAboveAbove ta) $ SelectChild (length $ treeAboveLefts ta) ts
+
+data TreeCursorSelection
+    = SelectNode
+    | SelectChild Int
+                  TreeCursorSelection
+    deriving (Show, Eq, Generic)
+
+instance Validity TreeCursorSelection
+
+treeCursorSelect ::
+       (a -> b)
+    -> (b -> a)
+    -> TreeCursorSelection
+    -> TreeCursor a b
+    -> Maybe (TreeCursor a b)
+treeCursorSelect f g sel =
+    makeTreeCursorWithSelection f g sel . rebuildTreeCursor f
 
 treeCursorSelectPrev ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
