@@ -426,10 +426,103 @@ spec = do
     describe "treeCursorPromoteElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorPromoteElem @Double
+        it "Works on the example from the docs" $
+            let promoteStart =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [Node 'b' [Node 'c' []]]
+                                      , treeAboveAbove =
+                                            Just
+                                                TreeAbove
+                                                    { treeAboveLefts = []
+                                                    , treeAboveAbove = Nothing
+                                                    , treeAboveNode = 'p'
+                                                    , treeAboveRights =
+                                                          [Node 'h' []]
+                                                    }
+                                      , treeAboveNode = 'a'
+                                      , treeAboveRights =
+                                            [Node 'f' [Node 'g' []]]
+                                      }
+                        , treeCurrent = 'd'
+                        , treeBelow = [Node 'e' []]
+                        }
+                promoteEnd =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [ Node
+                                                  'a'
+                                                  [ Node
+                                                        'b'
+                                                        [ Node 'c' []
+                                                        , Node 'e' []
+                                                        ]
+                                                  , Node 'f' [Node 'g' []]
+                                                  ]
+                                            ]
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = [Node 'h' []]
+                                      }
+                        , treeCurrent = 'd'
+                        , treeBelow = []
+                        }
+             in case treeCursorPromoteElem promoteStart of
+                    Nothing ->
+                        expectationFailure
+                            "treeCursorPromoteElem should not have failed"
+                    Just tc' -> tc' `treeShouldBe` promoteEnd
         it "promotes the current node to the level of its parent" pending
     describe "treeCursorDemoteElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDemoteElem @Double
+        it "Works on the example from the docs" $
+            let promoteStart =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [Node 'a' [Node 'b' []]]
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = [Node 'e' []]
+                                      }
+                        , treeCurrent = 'c'
+                        , treeBelow = [Node 'd' []]
+                        }
+                promoteEnd =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts = [Node 'b' []]
+                                      , treeAboveAbove =
+                                            Just
+                                                TreeAbove
+                                                    { treeAboveLefts = []
+                                                    , treeAboveAbove = Nothing
+                                                    , treeAboveNode = 'p'
+                                                    , treeAboveRights =
+                                                          [Node 'e' []]
+                                                    }
+                                      , treeAboveNode = 'a'
+                                      , treeAboveRights = [Node 'd' []]
+                                      }
+                        , treeCurrent = 'c'
+                        , treeBelow = []
+                        }
+             in case treeCursorDemoteElem promoteStart of
+                    Nothing ->
+                        expectationFailure
+                            "treeCursorDemoteElem should not have failed"
+                    Just tc' -> tc' `treeShouldBe` promoteEnd
         it "demotes the current node to the level of its children" pending
     describe "treeCursorPromoteSubTree" $ do
         it "produces valids on valids" $
@@ -506,8 +599,7 @@ spec = do
                         { treeAbove =
                               Just
                                   TreeAbove
-                                      { treeAboveLefts =
-                                            [Node 'b' []]
+                                      { treeAboveLefts = [Node 'b' []]
                                       , treeAboveAbove =
                                             Just
                                                 TreeAbove

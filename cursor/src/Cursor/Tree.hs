@@ -517,7 +517,25 @@ treeCursorSwapNext f g tc = do
 -- >  |- h
 treeCursorPromoteElem ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorPromoteElem f g tc = undefined
+treeCursorPromoteElem f g tc = do
+    ta <- treeAbove tc
+    taa <- treeAboveAbove ta
+    lefts <-
+        case treeBelow tc of
+            [] -> pure $ treeAboveLefts ta
+            -- We need to put the below under the above lefts at the end
+            _ ->
+                case treeAboveLefts ta of
+                    [] -> Nothing
+                    (Node t ls:ts) -> pure $ Node t (ls ++ treeBelow tc) : ts
+    pure $
+        makeTreeCursorWithAbove g (Node (f $ treeCurrent tc) []) $
+        Just $
+        taa
+            { treeAboveLefts =
+                  Node (treeAboveNode ta) (reverse lefts ++ treeAboveRights ta) :
+                  treeAboveLefts taa
+            }
 
 -- | Demotes the current node to the level of its children.
 --
@@ -542,7 +560,20 @@ treeCursorPromoteElem f g tc = undefined
 -- >  |- e
 treeCursorDemoteElem ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorDemoteElem = undefined
+treeCursorDemoteElem f g tc = do
+    ta <- treeAbove tc
+    case treeAboveLefts ta of
+        [] -> Nothing
+        (Node t ls:ts) ->
+            pure $
+            makeTreeCursorWithAbove g (Node (f $ treeCurrent tc) []) $
+            Just
+                TreeAbove
+                    { treeAboveLefts = reverse ls
+                    , treeAboveAbove = Just ta {treeAboveLefts = ts}
+                    , treeAboveNode = t
+                    , treeAboveRights = treeBelow tc
+                    }
 
 -- | Promotes the current node to the level of its parent.
 -- This operation also brings along the subtree.
