@@ -204,7 +204,7 @@ treeCursorDeleteElemAndSelectNext ::
 treeCursorDeleteElemAndSelectNext = TC.treeCursorDeleteElemAndSelectNext id
 
 treeCursorDeleteElemAndSelectAbove ::
-       TreeCursor a -> DeleteOrUpdate (TreeCursor a)
+       TreeCursor a -> Maybe(DeleteOrUpdate (TreeCursor a))
 treeCursorDeleteElemAndSelectAbove = TC.treeCursorDeleteElemAndSelectAbove id
 
 treeCursorRemoveElem :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)

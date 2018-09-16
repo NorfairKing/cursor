@@ -275,28 +275,30 @@ forestCursorAddChildToNodeAtEnd b =
 forestCursorRemoveElemAndSelectPrev ::
        (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
 forestCursorRemoveElemAndSelectPrev g fc =
-    joinPossibleDeletes
-        (fc &
-         focusPossibleDeleteOrUpdate
-             forestCursorSelectedTreeL
-             (treeCursorDeleteElemAndSelectPrevious g))
-        (fc &
-         focusPossibleDeleteOrUpdate
-             forestCursorListCursorL
-             (nonEmptyCursorRemoveElemAndSelectPrev (makeTreeCursor g)))
+    case (fc &
+          focusPossibleDeleteOrUpdate
+              forestCursorSelectedTreeL
+              (treeCursorDeleteElemAndSelectPrevious g)) of
+        Just Deleted ->
+            (fc &
+             focusPossibleDeleteOrUpdate
+                 forestCursorListCursorL
+                 (nonEmptyCursorRemoveElemAndSelectPrev (makeTreeCursor g)))
+        r -> r
 
 forestCursorDeleteElemAndSelectNext ::
        (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
-forestCursorDeleteElemAndSelectNext g fc =
-    joinPossibleDeletes
+forestCursorDeleteElemAndSelectNext g fc = case
         (fc &
          focusPossibleDeleteOrUpdate
              forestCursorSelectedTreeL
-             (treeCursorDeleteElemAndSelectNext g))
-        (fc &
-         focusPossibleDeleteOrUpdate
-             forestCursorListCursorL
-             (nonEmptyCursorDeleteElemAndSelectNext (makeTreeCursor g)))
+             (treeCursorDeleteElemAndSelectNext g)) of
+        Just Deleted ->
+            (fc &
+             focusPossibleDeleteOrUpdate
+                 forestCursorListCursorL
+                 (nonEmptyCursorDeleteElemAndSelectNext (makeTreeCursor g)))
+        r -> r
 
 forestCursorRemoveElem ::
        (b -> a) -> ForestCursor a b -> DeleteOrUpdate (ForestCursor a b)

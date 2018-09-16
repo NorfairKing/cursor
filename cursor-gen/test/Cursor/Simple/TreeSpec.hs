@@ -21,6 +21,7 @@ import Cursor.Simple.Tree hiding (TreeCursor)
 import qualified Cursor.Simple.Tree as STC (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
 import Cursor.Tree (TreeCursor(..))
+import Cursor.Types
 
 spec :: Spec
 spec = do
@@ -111,45 +112,53 @@ spec = do
          do
             let start =
                     TreeCursor
-                    { treeAbove =
-                          Just
-                              (TreeAbove
-                               { treeAboveLefts = [Node 1 [Node 2 [Node 3 []]]]
-                               , treeAboveAbove = Nothing
-                               , treeAboveNode = 0
-                               , treeAboveRights = []
-                               })
-                    , treeCurrent = 4 :: Int
-                    , treeBelow = []
-                    }
+                        { treeAbove =
+                              Just
+                                  (TreeAbove
+                                       { treeAboveLefts =
+                                             [Node 1 [Node 2 [Node 3 []]]]
+                                       , treeAboveAbove = Nothing
+                                       , treeAboveNode = 0
+                                       , treeAboveRights = []
+                                       })
+                        , treeCurrent = 4 :: Int
+                        , treeBelow = []
+                        }
                 expected =
                     TreeCursor
-                    { treeAbove =
-                          Just
-                              (TreeAbove
-                               { treeAboveLefts = []
-                               , treeAboveAbove =
-                                     Just
-                                         (TreeAbove
-                                          { treeAboveLefts = []
-                                          , treeAboveAbove =
-                                                Just
-                                                    (TreeAbove
-                                                     { treeAboveLefts = []
-                                                     , treeAboveAbove = Nothing
-                                                     , treeAboveNode = 0
-                                                     , treeAboveRights =
-                                                           [Node 4 []]
-                                                     })
-                                          , treeAboveNode = 1
-                                          , treeAboveRights = []
-                                          })
-                               , treeAboveNode = 2
-                               , treeAboveRights = []
-                               })
-                    , treeCurrent = 3
-                    , treeBelow = []
-                    }
+                        { treeAbove =
+                              Just
+                                  (TreeAbove
+                                       { treeAboveLefts = []
+                                       , treeAboveAbove =
+                                             Just
+                                                 (TreeAbove
+                                                      { treeAboveLefts = []
+                                                      , treeAboveAbove =
+                                                            Just
+                                                                (TreeAbove
+                                                                     { treeAboveLefts =
+                                                                           []
+                                                                     , treeAboveAbove =
+                                                                           Nothing
+                                                                     , treeAboveNode =
+                                                                           0
+                                                                     , treeAboveRights =
+                                                                           [ Node
+                                                                                 4
+                                                                                 [
+                                                                                 ]
+                                                                           ]
+                                                                     })
+                                                      , treeAboveNode = 1
+                                                      , treeAboveRights = []
+                                                      })
+                                       , treeAboveNode = 2
+                                       , treeAboveRights = []
+                                       })
+                        , treeCurrent = 3
+                        , treeBelow = []
+                        }
             treeCursorSelectAbovePrev start `shouldBe` Just expected
         it "selects the previous element" pending
         it "after treeCursorSelectAboveNext is identity if they don't fail" $ do
@@ -186,45 +195,53 @@ spec = do
          do
             let start =
                     TreeCursor
-                    { treeAbove =
-                          Just
-                              (TreeAbove
-                               { treeAboveLefts = []
-                               , treeAboveAbove =
-                                     Just
-                                         (TreeAbove
-                                          { treeAboveLefts = []
-                                          , treeAboveAbove =
-                                                Just
-                                                    (TreeAbove
-                                                     { treeAboveLefts = []
-                                                     , treeAboveAbove = Nothing
-                                                     , treeAboveNode = 0
-                                                     , treeAboveRights =
-                                                           [Node 4 []]
-                                                     })
-                                          , treeAboveNode = 1
-                                          , treeAboveRights = []
-                                          })
-                               , treeAboveNode = 2
-                               , treeAboveRights = []
-                               })
-                    , treeCurrent = 3
-                    , treeBelow = []
-                    }
+                        { treeAbove =
+                              Just
+                                  (TreeAbove
+                                       { treeAboveLefts = []
+                                       , treeAboveAbove =
+                                             Just
+                                                 (TreeAbove
+                                                      { treeAboveLefts = []
+                                                      , treeAboveAbove =
+                                                            Just
+                                                                (TreeAbove
+                                                                     { treeAboveLefts =
+                                                                           []
+                                                                     , treeAboveAbove =
+                                                                           Nothing
+                                                                     , treeAboveNode =
+                                                                           0
+                                                                     , treeAboveRights =
+                                                                           [ Node
+                                                                                 4
+                                                                                 [
+                                                                                 ]
+                                                                           ]
+                                                                     })
+                                                      , treeAboveNode = 1
+                                                      , treeAboveRights = []
+                                                      })
+                                       , treeAboveNode = 2
+                                       , treeAboveRights = []
+                                       })
+                        , treeCurrent = 3
+                        , treeBelow = []
+                        }
                 expected =
                     TreeCursor
-                    { treeAbove =
-                          Just
-                              (TreeAbove
-                               { treeAboveLefts = [Node 1 [Node 2 [Node 3 []]]]
-                               , treeAboveAbove = Nothing
-                               , treeAboveNode = 0
-                               , treeAboveRights = []
-                               })
-                    , treeCurrent = 4 :: Int
-                    , treeBelow = []
-                    }
+                        { treeAbove =
+                              Just
+                                  (TreeAbove
+                                       { treeAboveLefts =
+                                             [Node 1 [Node 2 [Node 3 []]]]
+                                       , treeAboveAbove = Nothing
+                                       , treeAboveNode = 0
+                                       , treeAboveRights = []
+                                       })
+                        , treeCurrent = 4 :: Int
+                        , treeBelow = []
+                        }
             treeCursorSelectAboveNext start `shouldBe` Just expected
         it "selects the next element" pending
         it "after treeCursorSelectAbovePrev is identity if they don't fail" $ do
@@ -307,16 +324,71 @@ spec = do
         it "produces valids on valids" $
             producesValidsOnValids $
             treeCursorDeleteElemAndSelectPrevious @Double
+        it "works for this simple example" $
+            forAllValid $ \fs ->
+                let simpleDeleteElemStart =
+                        TreeCursor
+                            { treeAbove = Nothing
+                            , treeCurrent = 1 :: Int
+                            , treeBelow = [Node 2 fs]
+                            }
+                 in case treeCursorDeleteElemAndSelectPrevious
+                             simpleDeleteElemStart of
+                        Nothing -> pure ()
+                        Just Deleted ->
+                            expectationFailure
+                                "treeCursorDeleteElemAndSelectPrevious should not have deleted the entire example tree."
+                        Just (Updated _) ->
+                            expectationFailure
+                                "treeCursorDeleteElemAndSelectPrevious should not have updated the example tree, but failed instead."
         it
             "deletes the current element and selects the previous element"
             pending
     describe "treeCursorDeleteElemAndSelectNext" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDeleteElemAndSelectNext @Double
+        it "works for this simple example" $
+            forAllValid $ \fs ->
+                let simpleDeleteElemStart =
+                        TreeCursor
+                            { treeAbove = Nothing
+                            , treeCurrent = 1
+                            , treeBelow = [Node 2 fs]
+                            }
+                    simpleDeleteElemExpected =
+                        TreeCursor
+                            { treeAbove = Nothing
+                            , treeCurrent = 2 :: Int
+                            , treeBelow = fs
+                            }
+                 in case treeCursorDeleteElemAndSelectNext simpleDeleteElemStart of
+                        Nothing ->
+                            expectationFailure
+                                "treeCursorDeleteElemAndSelectNext should not have failed."
+                        Just Deleted ->
+                            expectationFailure
+                                "treeCursorDeleteElemAndSelectNext should not have deleted the entire example tree."
+                        Just (Updated f) ->
+                            f `shouldBe` simpleDeleteElemExpected
         it "deletes the current element and selects the next element" pending
     describe "treeCursorDeleteElemAndSelectAbove" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDeleteElemAndSelectAbove @Double
+        it "works for this simple example" $ forAllValid  $ \fs ->
+            let simpleDeleteElemStart =
+                    TreeCursor
+                        { treeAbove = Nothing
+                        , treeCurrent = 1 :: Int
+                        , treeBelow = [Node 2 fs]
+                        }
+             in case treeCursorDeleteElemAndSelectAbove simpleDeleteElemStart of
+                    Nothing -> pure ()
+                    Just Deleted ->
+                        expectationFailure
+                            "treeCursorDeleteElemAndSelectAbove should not have deleted the entire example tree."
+                    Just (Updated _) ->
+                        expectationFailure
+                            "treeCursorDeleteElemAndSelectAbove should not have updated the example tree, but failed instead."
         it "deletes the current element and selects the above element" pending
     describe "treeCursorRemoveElem" $ do
         it "produces valids on valids" $
@@ -362,14 +434,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildTreeCursor lec
                     ne' = rebuildTreeCursor lec'
-                in unless (ne == ne') $
-                   expectationFailure $
-                   unlines
-                       [ "Cursor before:\n" ++ show lec
-                       , "Tree before:  \n" ++ show ne
-                       , "Cursor after: \n" ++ show lec'
-                       , "Tree after:   \n" ++ show ne'
-                       ]
+                 in unless (ne == ne') $
+                    expectationFailure $
+                    unlines
+                        [ "Cursor before:\n" ++ show lec
+                        , "Tree before:  \n" ++ show ne
+                        , "Cursor after: \n" ++ show lec'
+                        , "Tree after:   \n" ++ show ne'
+                        ]
 
 isMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Property
 isMovement func =

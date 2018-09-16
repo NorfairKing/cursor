@@ -43,6 +43,18 @@ joinDeletes m1 m2 =
         (Nothing, Just a) -> a
         (Just a, _) -> a
 
+joinDeletes3 ::
+       Maybe (DeleteOrUpdate a)
+    -> Maybe (DeleteOrUpdate a)
+    -> Maybe (DeleteOrUpdate a)
+    -> DeleteOrUpdate a
+joinDeletes3 m1 m2 m3 =
+    case (m1, m2, m3) of
+        (Nothing, Nothing, Nothing) -> Deleted
+        (Nothing, Nothing, Just a) -> a
+        (Nothing, Just a, _) -> a
+        (Just a, _, _) -> a
+
 joinPossibleDeletes ::
        Maybe (DeleteOrUpdate a)
     -> Maybe (DeleteOrUpdate a)

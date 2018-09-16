@@ -155,10 +155,10 @@ treeCursorWithPointer TreeCursor {..} =
 mapTreeCursor :: (a -> c) -> (b -> d) -> TreeCursor a b -> TreeCursor c d
 mapTreeCursor f g TreeCursor {..} =
     TreeCursor
-    { treeAbove = fmap g <$> treeAbove
-    , treeCurrent = f treeCurrent
-    , treeBelow = map (fmap g) treeBelow
-    }
+        { treeAbove = fmap g <$> treeAbove
+        , treeCurrent = f treeCurrent
+        , treeBelow = map (fmap g) treeBelow
+        }
 
 treeCursorSelectPrev ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
@@ -192,7 +192,7 @@ treeCursorSelectAbove f g tc@TreeCursor {..} =
                     reverse treeAboveLefts ++
                     [currentTree f tc] ++ treeAboveRights
                 newTree = Node treeAboveNode newForrest
-            in Just $ makeTreeCursorWithAbove g newTree treeAboveAbove
+             in Just $ makeTreeCursorWithAbove g newTree treeAboveAbove
 
 treeCursorSelectBelowAtPos ::
        (a -> b) -> (b -> a) -> Int -> TreeCursor a b -> Maybe (TreeCursor a b)
@@ -204,11 +204,11 @@ treeCursorSelectBelowAtPos f g pos TreeCursor {..} =
             makeTreeCursorWithAbove g current $
             Just $
             TreeAbove
-            { treeAboveLefts = reverse lefts
-            , treeAboveAbove = treeAbove
-            , treeAboveNode = f treeCurrent
-            , treeAboveRights = rights
-            }
+                { treeAboveLefts = reverse lefts
+                , treeAboveAbove = treeAbove
+                , treeAboveNode = f treeCurrent
+                , treeAboveRights = rights
+                }
 
 treeCursorSelectBelowAtStart ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
@@ -243,9 +243,9 @@ treeCursorSelectPrevOnSameLevel f g tc@TreeCursor {..} = do
             Just . makeTreeCursorWithAbove g tree $
             Just
                 ta
-                { treeAboveLefts = xs
-                , treeAboveRights = currentTree f tc : treeAboveRights ta
-                }
+                    { treeAboveLefts = xs
+                    , treeAboveRights = currentTree f tc : treeAboveRights ta
+                    }
 
 treeCursorSelectNextOnSameLevel ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
@@ -256,9 +256,9 @@ treeCursorSelectNextOnSameLevel f g tc@TreeCursor {..} = do
         tree:xs ->
             Just . makeTreeCursorWithAbove g tree . Just $
             ta
-            { treeAboveLefts = currentTree f tc : treeAboveLefts ta
-            , treeAboveRights = xs
-            }
+                { treeAboveLefts = currentTree f tc : treeAboveLefts ta
+                , treeAboveRights = xs
+                }
 
 -- | Go back and down as far as necessary to find a previous element on a level below
 treeCursorSelectAbovePrev ::
@@ -325,7 +325,7 @@ treeCursorAppendAndSelect f g tree tc@TreeCursor {..} = do
 treeCursorAddChildAtPos :: Int -> Tree b -> TreeCursor a b -> TreeCursor a b
 treeCursorAddChildAtPos i t tc =
     let (before, after) = splitAt i $ treeBelow tc
-    in tc {treeBelow = before ++ [t] ++ after}
+     in tc {treeBelow = before ++ [t] ++ after}
 
 treeCursorAddChildAtStart :: Tree b -> TreeCursor a b -> TreeCursor a b
 treeCursorAddChildAtStart t tc = tc {treeBelow = t : treeBelow tc}
@@ -365,10 +365,10 @@ treeCursorDeleteSubTreeAndSelectAbove g TreeCursor {..} =
         Just TreeAbove {..} ->
             Updated $
             TreeCursor
-            { treeAbove = treeAboveAbove
-            , treeCurrent = g treeAboveNode
-            , treeBelow = reverse treeAboveLefts ++ treeAboveRights
-            }
+                { treeAbove = treeAboveAbove
+                , treeCurrent = g treeAboveNode
+                , treeBelow = reverse treeAboveLefts ++ treeAboveRights
+                }
 
 treeCursorRemoveSubTree ::
        (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
@@ -390,7 +390,10 @@ treeCursorDeleteElemAndSelectPrevious ::
        (b -> a) -> TreeCursor a b -> Maybe (DeleteOrUpdate (TreeCursor a b))
 treeCursorDeleteElemAndSelectPrevious g TreeCursor {..} =
     case treeAbove of
-        Nothing -> Just Deleted
+        Nothing ->
+            case treeBelow of
+                [] -> Just Deleted
+                _ -> Nothing
         Just ta ->
             case treeAboveLefts ta of
                 [] -> Nothing
@@ -398,55 +401,65 @@ treeCursorDeleteElemAndSelectPrevious g TreeCursor {..} =
                     Just . Updated . makeTreeCursorWithAbove g tree $
                     Just
                         ta
-                        { treeAboveLefts = xs
-                        , treeAboveRights = treeBelow ++ treeAboveRights ta
-                        }
+                            { treeAboveLefts = xs
+                            , treeAboveRights = treeBelow ++ treeAboveRights ta
+                            }
 
 treeCursorDeleteElemAndSelectNext ::
        (b -> a) -> TreeCursor a b -> Maybe (DeleteOrUpdate (TreeCursor a b))
 treeCursorDeleteElemAndSelectNext g TreeCursor {..} =
-    case treeAbove of
-        Nothing -> Just Deleted
-        Just ta ->
-            case treeAboveRights ta of
-                [] -> Nothing
-                tree:xs ->
-                    Just . Updated . makeTreeCursorWithAbove g tree $
-                    Just
-                        ta
-                        { treeAboveLefts =
-                              reverse treeBelow ++ treeAboveLefts ta
-                        , treeAboveRights = xs
-                        }
+    case treeBelow of
+        [] ->
+            case treeAbove of
+                Nothing -> Just Deleted
+                Just ta ->
+                    case treeAboveRights ta of
+                        [] -> Nothing
+                        tree:xs ->
+                            Just . Updated . makeTreeCursorWithAbove g tree $
+                            Just
+                                ta
+                                    { treeAboveLefts =
+                                          reverse treeBelow ++ treeAboveLefts ta
+                                    , treeAboveRights = xs
+                                    }
+        (Node e ts:xs) ->
+            let t = Node e $ ts ++ xs
+             in Just . Updated $ makeTreeCursorWithAbove g t treeAbove
 
 treeCursorDeleteElemAndSelectAbove ::
-       (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
+       (b -> a) -> TreeCursor a b -> Maybe (DeleteOrUpdate (TreeCursor a b))
 treeCursorDeleteElemAndSelectAbove g TreeCursor {..} =
     case treeAbove of
-        Nothing -> Deleted
+        Nothing ->
+            case treeBelow of
+                [] -> Just Deleted
+                _ -> Nothing
         Just TreeAbove {..} ->
+            Just $
             Updated $
             TreeCursor
-            { treeAbove = treeAboveAbove
-            , treeCurrent = g treeAboveNode
-            , treeBelow = reverse treeAboveLefts ++ treeBelow ++ treeAboveRights
-            }
+                { treeAbove = treeAboveAbove
+                , treeCurrent = g treeAboveNode
+                , treeBelow =
+                      reverse treeAboveLefts ++ treeBelow ++ treeAboveRights
+                }
 
 treeCursorRemoveElem ::
        (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
 treeCursorRemoveElem g tc =
-    joinDeletes
+    joinDeletes3
         (treeCursorDeleteElemAndSelectPrevious g tc)
-        (treeCursorDeleteElemAndSelectNext g tc) <|>
-    treeCursorDeleteElemAndSelectAbove g tc
+        (treeCursorDeleteElemAndSelectNext g tc)
+        (treeCursorDeleteElemAndSelectAbove g tc)
 
 treeCursorDeleteElem ::
        (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
 treeCursorDeleteElem g tc =
-    joinDeletes
+    joinDeletes3
         (treeCursorDeleteElemAndSelectNext g tc)
-        (treeCursorDeleteElemAndSelectPrevious g tc) <|>
-    treeCursorDeleteElemAndSelectAbove g tc
+        (treeCursorDeleteElemAndSelectPrevious g tc)
+        (treeCursorDeleteElemAndSelectAbove g tc)
 
 treeCursorSwapPrev ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)

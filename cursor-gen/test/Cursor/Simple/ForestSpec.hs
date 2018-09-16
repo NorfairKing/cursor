@@ -21,6 +21,7 @@ import Cursor.List.NonEmpty
 import Cursor.Simple.Forest hiding (ForestCursor)
 import qualified Cursor.Simple.Forest as SFC (ForestCursor)
 import Cursor.Tree
+import Cursor.Types
 
 import Cursor.Simple.Forest.Gen ()
 
@@ -72,39 +73,40 @@ spec = do
          do
             let start =
                     ForestCursor
-                    { forestCursorListCursor =
-                          NonEmptyCursor
-                          { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
-                          , nonEmptyCursorCurrent =
-                                TreeCursor
-                                { treeAbove = Nothing
-                                , treeCurrent = 3 :: Int
-                                , treeBelow = []
-                                }
-                          , nonEmptyCursorNext = []
-                          }
-                    }
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 3 :: Int
+                                            , treeBelow = []
+                                            }
+                                  , nonEmptyCursorNext = []
+                                  }
+                        }
                 expected =
                     ForestCursor
-                    { forestCursorListCursor =
-                          NonEmptyCursor
-                          { nonEmptyCursorPrev = []
-                          , nonEmptyCursorCurrent =
-                                TreeCursor
-                                { treeAbove =
-                                      Just
-                                          TreeAbove
-                                          { treeAboveAbove = Nothing
-                                          , treeAboveLefts = []
-                                          , treeAboveNode = 1
-                                          , treeAboveRights = []
-                                          }
-                                , treeCurrent = 2
-                                , treeBelow = []
-                                }
-                          , nonEmptyCursorNext = [Node 3 []]
-                          }
-                    }
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = []
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove =
+                                                  Just
+                                                      TreeAbove
+                                                          { treeAboveAbove =
+                                                                Nothing
+                                                          , treeAboveLefts = []
+                                                          , treeAboveNode = 1
+                                                          , treeAboveRights = []
+                                                          }
+                                            , treeCurrent = 2
+                                            , treeBelow = []
+                                            }
+                                  , nonEmptyCursorNext = [Node 3 []]
+                                  }
+                        }
             case forestCursorSelectPrev start of
                 Nothing ->
                     expectationFailure
@@ -122,39 +124,40 @@ spec = do
          do
             let start =
                     ForestCursor
-                    { forestCursorListCursor =
-                          NonEmptyCursor
-                          { nonEmptyCursorPrev = []
-                          , nonEmptyCursorCurrent =
-                                TreeCursor
-                                { treeAbove =
-                                      Just
-                                          TreeAbove
-                                          { treeAboveAbove = Nothing
-                                          , treeAboveLefts = []
-                                          , treeAboveNode = 1
-                                          , treeAboveRights = []
-                                          }
-                                , treeCurrent = 2
-                                , treeBelow = []
-                                }
-                          , nonEmptyCursorNext = [Node 3 []]
-                          }
-                    }
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = []
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove =
+                                                  Just
+                                                      TreeAbove
+                                                          { treeAboveAbove =
+                                                                Nothing
+                                                          , treeAboveLefts = []
+                                                          , treeAboveNode = 1
+                                                          , treeAboveRights = []
+                                                          }
+                                            , treeCurrent = 2
+                                            , treeBelow = []
+                                            }
+                                  , nonEmptyCursorNext = [Node 3 []]
+                                  }
+                        }
                 expected =
                     ForestCursor
-                    { forestCursorListCursor =
-                          NonEmptyCursor
-                          { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
-                          , nonEmptyCursorCurrent =
-                                TreeCursor
-                                { treeAbove = Nothing
-                                , treeCurrent = 3 :: Int
-                                , treeBelow = []
-                                }
-                          , nonEmptyCursorNext = []
-                          }
-                    }
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 3 :: Int
+                                            , treeBelow = []
+                                            }
+                                  , nonEmptyCursorNext = []
+                                  }
+                        }
             case forestCursorSelectNext start of
                 Nothing ->
                     expectationFailure
@@ -306,20 +309,154 @@ spec = do
     describe "forestCursorRemoveElemAndSelectPrev" $ do
         it "produces valid cursors" $
             producesValidsOnValids (forestCursorRemoveElemAndSelectPrev @Double)
+        it "works for this simple example" $
+            forAllValid $ \fs ->
+                let simpleDeleteElemStart =
+                        ForestCursor
+                            { forestCursorListCursor =
+                                  NonEmptyCursor
+                                      { nonEmptyCursorPrev = []
+                                      , nonEmptyCursorCurrent =
+                                            TreeCursor
+                                                { treeAbove = Nothing
+                                                , treeCurrent = 1 :: Int
+                                                , treeBelow = [Node 2 fs]
+                                                }
+                                      , nonEmptyCursorNext = []
+                                      }
+                            }
+                 in case forestCursorRemoveElemAndSelectPrev
+                             simpleDeleteElemStart of
+                        Nothing -> pure ()
+                        Just Deleted ->
+                            expectationFailure
+                                "forestCursorRemoveElemAndSelectPrev should not have deleted the entire example forest."
+                        Just (Updated _) ->
+                            expectationFailure
+                                "forestCursorRemoveElemAndSelectPrev should not have updated the forest cursor, but failed instead."
         it
             "removes the selected element and selects the previous element"
             pending
     describe "forestCursorDeleteElemAndSelectNext" $ do
         it "produces valid cursors" $
             producesValidsOnValids (forestCursorDeleteElemAndSelectNext @Double)
+        it "works for this simple example" $
+            forAllValid $ \fs ->
+                let simpleDeleteElemStart =
+                        ForestCursor
+                            { forestCursorListCursor =
+                                  NonEmptyCursor
+                                      { nonEmptyCursorPrev = []
+                                      , nonEmptyCursorCurrent =
+                                            TreeCursor
+                                                { treeAbove = Nothing
+                                                , treeCurrent = 1
+                                                , treeBelow = [Node 2 fs]
+                                                }
+                                      , nonEmptyCursorNext = []
+                                      }
+                            }
+                    simpleDeleteElemExpected =
+                        ForestCursor
+                            { forestCursorListCursor =
+                                  NonEmptyCursor
+                                      { nonEmptyCursorPrev = []
+                                      , nonEmptyCursorCurrent =
+                                            TreeCursor
+                                                { treeAbove = Nothing
+                                                , treeCurrent = 2 :: Int
+                                                , treeBelow = fs
+                                                }
+                                      , nonEmptyCursorNext = []
+                                      }
+                            }
+                 in case forestCursorDeleteElemAndSelectNext
+                             simpleDeleteElemStart of
+                        Nothing ->
+                            expectationFailure
+                                "forestCursorDeleteElemAndSelectNext should not have failed."
+                        Just Deleted ->
+                            expectationFailure
+                                "forestCursorDeleteElemAndSelectNext should not have deleted the entire example forest."
+                        Just (Updated f) ->
+                            f `shouldBe` simpleDeleteElemExpected
         it "deletes the selected element and selects the next element" pending
     describe "forestCursorRemoveElem" $ do
         it "produces valid cursors" $
             producesValidsOnValids (forestCursorRemoveElem @Double)
+        it "works for this simple example" $
+            forAllValid $ \fs ->
+                let simpleDeleteElemStart =
+                        ForestCursor
+                            { forestCursorListCursor =
+                                  NonEmptyCursor
+                                      { nonEmptyCursorPrev = []
+                                      , nonEmptyCursorCurrent =
+                                            TreeCursor
+                                                { treeAbove = Nothing
+                                                , treeCurrent = 1
+                                                , treeBelow = [Node 2 fs]
+                                                }
+                                      , nonEmptyCursorNext = []
+                                      }
+                            }
+                    simpleDeleteElemExpected =
+                        ForestCursor
+                            { forestCursorListCursor =
+                                  NonEmptyCursor
+                                      { nonEmptyCursorPrev = []
+                                      , nonEmptyCursorCurrent =
+                                            TreeCursor
+                                                { treeAbove = Nothing
+                                                , treeCurrent = 2 :: Int
+                                                , treeBelow = fs
+                                                }
+                                      , nonEmptyCursorNext = []
+                                      }
+                            }
+                 in case forestCursorRemoveElem simpleDeleteElemStart of
+                        Deleted ->
+                            expectationFailure
+                                "forestCursorRemoveElem should not have deleted the entire example forest."
+                        Updated f -> f `shouldBe` simpleDeleteElemExpected
         it "removes the selected element" pending
     describe "forestCursorDeleteElem" $ do
         it "produces valid cursors" $
             producesValidsOnValids (forestCursorDeleteElem @Double)
+        it "works for this simple example" $ forAllValid $ \fs ->
+            let simpleDeleteElemStart =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = []
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 1
+                                            , treeBelow = [Node 2 fs]
+                                            }
+                                  , nonEmptyCursorNext = []
+                                  }
+                        }
+                simpleDeleteElemExpected =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = []
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 2 :: Int
+                                            , treeBelow = fs
+                                            }
+                                  , nonEmptyCursorNext = []
+                                  }
+                        }
+             in case forestCursorDeleteElem simpleDeleteElemStart of
+                    Deleted ->
+                        expectationFailure
+                            "forestCursorDeleteElem should not have deleted the entire example forest."
+                    Updated f -> f `shouldBe` simpleDeleteElemExpected
         it "deletes the selected element" pending
     describe "forestCursorRemoveSubTreeAndSelectPrev" $ do
         it "produces valid cursors" $
@@ -353,14 +490,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildForestCursor lec
                     ne' = rebuildForestCursor lec'
-                in unless (ne == ne') $
-                   expectationFailure $
-                   unlines
-                       [ "Cursor before:\n" ++ show lec
-                       , "Forest before:  \n" ++ show ne
-                       , "Cursor after: \n" ++ show lec'
-                       , "Forest after:   \n" ++ show ne'
-                       ]
+                 in unless (ne == ne') $
+                    expectationFailure $
+                    unlines
+                        [ "Cursor before:\n" ++ show lec
+                        , "Forest before:  \n" ++ show ne
+                        , "Cursor after: \n" ++ show lec'
+                        , "Forest after:   \n" ++ show ne'
+                        ]
 
 isMovement :: (forall a. SFC.ForestCursor a -> SFC.ForestCursor a) -> Property
 isMovement func =
