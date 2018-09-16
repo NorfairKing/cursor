@@ -45,6 +45,10 @@ module Cursor.Tree
     , treeCursorDeleteElem
     , treeCursorSwapPrev
     , treeCursorSwapNext
+    , treeCursorPromoteElem
+    , treeCursorDemoteElem
+    , treeCursorPromoteSubTree
+    , treeCursorDemoteSubTree
     , treeCursorAboveL
     , treeCursorCurrentL
     , treeCursorBelowL
@@ -482,3 +486,129 @@ treeCursorSwapNext f g tc = do
             [] -> Nothing
             (r:rs) -> Just (above {treeAboveRights = t : rs}, r)
     pure $ makeTreeCursorWithAbove g t' $ Just above'
+
+-- | Promotes the current node to the level of its parent.
+-- This operation also brings along the subtree.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |  |  |- c
+-- >  |  |- d <--
+-- >  |  |  |- e
+-- >  |  |- f
+-- >  |     |- g
+-- >  |- h
+--
+-- After:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |  |  |- c
+-- >  |  |  |- e
+-- >  |  |- f
+-- >  |     |- g
+-- >  |- d <--
+-- >  |- h
+treeCursorPromoteElem ::
+       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
+treeCursorPromoteElem f g tc = undefined
+
+-- | Demotes the current node to the level of its children.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |- c <--
+-- >  |  |- d
+-- >  |- e
+--
+-- After:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |  |- c <--
+-- >  |  |- d
+-- >  |- e
+treeCursorDemoteElem ::
+       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
+treeCursorDemoteElem = undefined
+
+-- | Promotes the current node to the level of its parent.
+-- This operation also brings along the subtree.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |  |  |- c
+-- >  |  |- d <--
+-- >  |  |  |- e
+-- >  |  |- f
+-- >  |     |- g
+-- >  |- h
+--
+-- After:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |  |  |- c
+-- >  |  |- f
+-- >  |     |- g
+-- >  |- d <--
+-- >  |  |- e
+-- >  |- h
+treeCursorPromoteSubTree ::
+       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
+treeCursorPromoteSubTree f g tc = do
+    ta <- treeAbove tc
+    taa <- treeAboveAbove ta
+    pure $
+        makeTreeCursorWithAbove g (currentTree f tc) $
+        Just $
+        taa
+            { treeAboveLefts =
+                  Node
+                      (treeAboveNode ta)
+                      (reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
+                  treeAboveLefts taa
+            }
+
+-- | Demotes the current subtree to the level of its children.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |- c <--
+-- >  |  |- d
+-- >  |- e
+--
+-- After:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |  |- c <--
+-- >  |     |- d
+-- >  |- e
+treeCursorDemoteSubTree ::
+       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
+treeCursorDemoteSubTree = undefined

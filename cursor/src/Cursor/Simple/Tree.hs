@@ -11,6 +11,13 @@ module Cursor.Simple.Tree
     , rebuildTreeCursor
     , drawTreeCursor
     , mapTreeCursor
+    , treeCursorAboveL
+    , treeCursorCurrentL
+    , treeCursorBelowL
+    , treeAboveLeftsL
+    , treeAboveAboveL
+    , treeAboveNodeL
+    , treeAboveRightsL
     , treeCursorWithPointer
     , treeCursorSelectPrev
     , treeCursorSelectNext
@@ -45,13 +52,10 @@ module Cursor.Simple.Tree
     , treeCursorDeleteElem
     , treeCursorSwapPrev
     , treeCursorSwapNext
-    , treeCursorAboveL
-    , treeCursorCurrentL
-    , treeCursorBelowL
-    , treeAboveLeftsL
-    , treeAboveAboveL
-    , treeAboveNodeL
-    , treeAboveRightsL
+    , treeCursorPromoteElem
+    , treeCursorDemoteElem
+    , treeCursorPromoteSubTree
+    , treeCursorDemoteSubTree
     ) where
 
 import Data.Tree
@@ -204,7 +208,7 @@ treeCursorDeleteElemAndSelectNext ::
 treeCursorDeleteElemAndSelectNext = TC.treeCursorDeleteElemAndSelectNext id
 
 treeCursorDeleteElemAndSelectAbove ::
-       TreeCursor a -> Maybe(DeleteOrUpdate (TreeCursor a))
+       TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
 treeCursorDeleteElemAndSelectAbove = TC.treeCursorDeleteElemAndSelectAbove id
 
 treeCursorRemoveElem :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)
@@ -218,3 +222,15 @@ treeCursorSwapPrev = TC.treeCursorSwapPrev id id
 
 treeCursorSwapNext :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSwapNext = TC.treeCursorSwapNext id id
+
+treeCursorPromoteSubTree :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorPromoteSubTree = TC.treeCursorPromoteSubTree id id
+
+treeCursorDemoteSubTree :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorDemoteSubTree = TC.treeCursorDemoteSubTree id id
+
+treeCursorPromoteElem :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorPromoteElem = TC.treeCursorPromoteElem id id
+
+treeCursorDemoteElem :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorDemoteElem = TC.treeCursorDemoteElem id id
