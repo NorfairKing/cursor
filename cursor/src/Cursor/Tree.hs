@@ -488,7 +488,6 @@ treeCursorSwapNext f g tc = do
     pure $ makeTreeCursorWithAbove g t' $ Just above'
 
 -- | Promotes the current node to the level of its parent.
--- This operation also brings along the subtree.
 --
 -- Example:
 --
@@ -576,7 +575,6 @@ treeCursorDemoteElem f g tc = do
                     }
 
 -- | Promotes the current node to the level of its parent.
--- This operation also brings along the subtree.
 --
 -- Example:
 --

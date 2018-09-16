@@ -496,6 +496,50 @@ spec = do
     describe "forestCursorDemoteSubTree" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ forestCursorDemoteSubTree @Double
+        it "works on the example from the documentation" $
+            let start =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev =
+                                        [Node 'a' [Node 'b' []]]
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 'c'
+                                            , treeBelow = [Node 'd' []]
+                                            }
+                                  , nonEmptyCursorNext = []
+                                  }
+                        }
+                expected =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = []
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove =
+                                                  Just
+                                                      TreeAbove
+                                                          { treeAboveLefts =
+                                                                [Node 'b' []]
+                                                          , treeAboveAbove =
+                                                                Nothing
+                                                          , treeAboveNode = 'a'
+                                                          , treeAboveRights = []
+                                                          }
+                                            , treeCurrent = 'c'
+                                            , treeBelow = [Node 'd' []]
+                                            }
+                                  , nonEmptyCursorNext = []
+                                  }
+                        }
+             in case forestCursorDemoteSubTree start of
+                    Nothing ->
+                        expectationFailure
+                            "forestCursorDemoteSubTree should not have failed."
+                    Just f -> f `shouldBe` expected
         it "demotes the current subtree to the level of its children" pending
 
 isMovementM ::

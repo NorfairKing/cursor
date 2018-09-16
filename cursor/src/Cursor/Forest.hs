@@ -359,18 +359,117 @@ forestCursorAddRoot ::
 forestCursorAddRoot f g fc v =
     makeTreeCursor g $ Node (f v) $ NE.toList $ rebuildForestCursor f fc
 
+-- | Promotes the current node to the level of its parent.
+--
+-- Example:
+--
+-- Before:
+--
+-- > - a
+-- >   |- b
+-- >   |  |- c
+-- >   |- d <--
+-- >   |  |- e
+-- >   |- f
+-- >      |- g
+-- > - h
+--
+-- After:
+--
+-- > - a
+-- >   |- b
+-- >   |  |- c
+-- >   |  |- e
+-- >   |- f
+-- >      |- g
+-- > - d <--
+-- > - h
 forestCursorPromoteElem ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
-forestCursorPromoteElem = undefined
+forestCursorPromoteElem f g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorPromoteElem f g)) <|> go
+  where
+    go = undefined
 
+-- | Demotes the current node to the level of its children.
+--
+-- Example:
+--
+-- Before:
+--
+-- > - a
+-- >   |- b
+-- > - c <--
+-- >   |- d
+-- > - e
+--
+-- After:
+--
+-- > - a
+-- >   |- b
+-- >   |- c <--
+-- >   |- d
+-- > - e
 forestCursorDemoteElem ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
-forestCursorDemoteElem = undefined
+forestCursorDemoteElem f g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorDemoteElem f g)) <|> go
+  where
+    go = undefined
 
+-- | Promotes the current node to the level of its parent.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  - a
+-- >    |- b
+-- >    |  |- c
+-- >    |- d <--
+-- >    |  |- e
+-- >    |- f
+-- >       |- g
+-- >  - h
+--
+-- After:
+--
+-- >
+-- > - a
+-- >   |- b
+-- >   |  |- c
+-- >   |- f
+-- >      |- g
+-- > - d <--
+-- >   |- e
+-- > - h
 forestCursorPromoteSubTree ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
-forestCursorPromoteSubTree = undefined
+forestCursorPromoteSubTree f g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorPromoteSubTree f g)) <|> go
+  where
+    go = undefined
 
+-- | Demotes the current subtree to the level of its children.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  - a
+-- >    |- b
+-- >  - c <--
+-- >    |- d
+--
+-- After:
+--
+-- >  - a
+-- >    |- b
+-- >    |- c <--
+-- >       |- d
 forestCursorDemoteSubTree ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
-forestCursorDemoteSubTree = undefined
+forestCursorDemoteSubTree f g fc =
+    (fc & forestCursorSelectedTreeL (treeCursorDemoteSubTree f g)) <|> go
+  where
+    go = undefined
