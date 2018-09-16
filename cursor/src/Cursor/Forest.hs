@@ -51,6 +51,10 @@ module Cursor.Forest
     , forestCursorRemoveSubTree
     , forestCursorDeleteSubTree
     , forestCursorAddRoot
+    , forestCursorPromoteElem
+    , forestCursorDemoteElem
+    , forestCursorPromoteSubTree
+    , forestCursorDemoteSubTree
     ) where
 
 import GHC.Generics (Generic)
@@ -288,11 +292,11 @@ forestCursorRemoveElemAndSelectPrev g fc =
 
 forestCursorDeleteElemAndSelectNext ::
        (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
-forestCursorDeleteElemAndSelectNext g fc = case
-        (fc &
-         focusPossibleDeleteOrUpdate
-             forestCursorSelectedTreeL
-             (treeCursorDeleteElemAndSelectNext g)) of
+forestCursorDeleteElemAndSelectNext g fc =
+    case (fc &
+          focusPossibleDeleteOrUpdate
+              forestCursorSelectedTreeL
+              (treeCursorDeleteElemAndSelectNext g)) of
         Just Deleted ->
             (fc &
              focusPossibleDeleteOrUpdate
@@ -354,3 +358,19 @@ forestCursorAddRoot ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> a -> TreeCursor a b
 forestCursorAddRoot f g fc v =
     makeTreeCursor g $ Node (f v) $ NE.toList $ rebuildForestCursor f fc
+
+forestCursorPromoteElem ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorPromoteElem = undefined
+
+forestCursorDemoteElem ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorDemoteElem = undefined
+
+forestCursorPromoteSubTree ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorPromoteSubTree = undefined
+
+forestCursorDemoteSubTree ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorDemoteSubTree = undefined

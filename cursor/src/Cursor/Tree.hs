@@ -11,6 +11,13 @@ module Cursor.Tree
     , rebuildTreeCursor
     , drawTreeCursor
     , mapTreeCursor
+    , treeCursorAboveL
+    , treeCursorCurrentL
+    , treeCursorBelowL
+    , treeAboveLeftsL
+    , treeAboveAboveL
+    , treeAboveNodeL
+    , treeAboveRightsL
     , treeCursorWithPointer
     , treeCursorSelectPrev
     , treeCursorSelectNext
@@ -49,13 +56,6 @@ module Cursor.Tree
     , treeCursorDemoteElem
     , treeCursorPromoteSubTree
     , treeCursorDemoteSubTree
-    , treeCursorAboveL
-    , treeCursorCurrentL
-    , treeCursorBelowL
-    , treeAboveLeftsL
-    , treeAboveAboveL
-    , treeAboveNodeL
-    , treeAboveRightsL
     ) where
 
 import Data.Tree

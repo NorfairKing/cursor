@@ -423,40 +423,41 @@ spec = do
     describe "forestCursorDeleteElem" $ do
         it "produces valid cursors" $
             producesValidsOnValids (forestCursorDeleteElem @Double)
-        it "works for this simple example" $ forAllValid $ \fs ->
-            let simpleDeleteElemStart =
-                    ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = []
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 1
-                                            , treeBelow = [Node 2 fs]
-                                            }
-                                  , nonEmptyCursorNext = []
-                                  }
-                        }
-                simpleDeleteElemExpected =
-                    ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = []
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 2 :: Int
-                                            , treeBelow = fs
-                                            }
-                                  , nonEmptyCursorNext = []
-                                  }
-                        }
-             in case forestCursorDeleteElem simpleDeleteElemStart of
-                    Deleted ->
-                        expectationFailure
-                            "forestCursorDeleteElem should not have deleted the entire example forest."
-                    Updated f -> f `shouldBe` simpleDeleteElemExpected
+        it "works for this simple example" $
+            forAllValid $ \fs ->
+                let simpleDeleteElemStart =
+                        ForestCursor
+                            { forestCursorListCursor =
+                                  NonEmptyCursor
+                                      { nonEmptyCursorPrev = []
+                                      , nonEmptyCursorCurrent =
+                                            TreeCursor
+                                                { treeAbove = Nothing
+                                                , treeCurrent = 1
+                                                , treeBelow = [Node 2 fs]
+                                                }
+                                      , nonEmptyCursorNext = []
+                                      }
+                            }
+                    simpleDeleteElemExpected =
+                        ForestCursor
+                            { forestCursorListCursor =
+                                  NonEmptyCursor
+                                      { nonEmptyCursorPrev = []
+                                      , nonEmptyCursorCurrent =
+                                            TreeCursor
+                                                { treeAbove = Nothing
+                                                , treeCurrent = 2 :: Int
+                                                , treeBelow = fs
+                                                }
+                                      , nonEmptyCursorNext = []
+                                      }
+                            }
+                 in case forestCursorDeleteElem simpleDeleteElemStart of
+                        Deleted ->
+                            expectationFailure
+                                "forestCursorDeleteElem should not have deleted the entire example forest."
+                        Updated f -> f `shouldBe` simpleDeleteElemExpected
         it "deletes the selected element" pending
     describe "forestCursorRemoveSubTreeAndSelectPrev" $ do
         it "produces valid cursors" $
@@ -480,6 +481,22 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorAddRoot @Double)
         it "houses the entire forest under the given node" pending
+    describe "forestCursorPromoteElem" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ forestCursorPromoteElem @Double
+        it "promotes the current node to the level of its parent" pending
+    describe "forestCursorDemoteElem" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ forestCursorDemoteElem @Double
+        it "demotes the current node to the level of its children" pending
+    describe "forestCursorPromoteSubTree" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ forestCursorPromoteSubTree @Double
+        it "promotes the current subtree to the level of its parent" pending
+    describe "forestCursorDemoteSubTree" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ forestCursorDemoteSubTree @Double
+        it "demotes the current subtree to the level of its children" pending
 
 isMovementM ::
        (forall a. SFC.ForestCursor a -> Maybe (SFC.ForestCursor a)) -> Property
