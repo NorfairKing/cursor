@@ -41,6 +41,25 @@ spec = do
         lensSpecOnValid (forestCursorListCursorL @Double)
     describe "forestCursorSelectedTreeL" $
         lensSpecOnValid (forestCursorSelectedTreeL @Double)
+    describe "forestCursorSelection" $ do
+        it "produces valid ints" $
+            producesValidsOnValids (forestCursorSelection @Double)
+        it "returns the index of the currently selected element" pending
+    describe "forestCursorSelectIndex" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorSelectIndex @Double)
+        it "is the identity function when given the current selection" $
+            forAllValid $ \fc ->
+                forestCursorSelectIndex (forestCursorSelection fc) fc `shouldBe`
+                Just (fc :: SFC.ForestCursor Double)
+        it "returns selects the element at the given index" pending
+    movementsSpec
+    insertSpec
+    deleteSpec
+    shiftingSpec
+
+movementsSpec :: Spec
+movementsSpec = do
     describe "forestCursorSelectPrevTreeCursor" $ do
         it "produces valid cursors" $
             producesValidsOnValids $ forestCursorSelectPrevTreeCursor @Double
@@ -193,18 +212,9 @@ spec = do
             producesValidsOnValids $ forestCursorSelectBelowAtEnd @Double
         it "is a movement" $ isMovementM forestCursorSelectBelowAtEnd
         it "selects the first child of the selected node" pending
-    describe "forestCursorSelection" $ do
-        it "produces valid ints" $
-            producesValidsOnValids (forestCursorSelection @Double)
-        it "returns the index of the currently selected element" pending
-    describe "forestCursorSelectIndex" $ do
-        it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorSelectIndex @Double)
-        it "is the identity function when given the current selection" $
-            forAllValid $ \fc ->
-                forestCursorSelectIndex (forestCursorSelection fc) fc `shouldBe`
-                Just (fc :: SFC.ForestCursor Double)
-        it "returns selects the element at the given index" pending
+
+insertSpec :: Spec
+insertSpec = do
     describe "forestCursorInsertEntireTree" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorInsertEntireTree @Double)
@@ -306,6 +316,13 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids2 $ forestCursorAddChildToNodeAtEnd @Double
         it "adds a child to a node at the end the children of that node" pending
+    describe "forestCursorAddRoot" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (forestCursorAddRoot @Double)
+        it "houses the entire forest under the given node" pending
+
+deleteSpec :: Spec
+deleteSpec = do
     describe "forestCursorRemoveElemAndSelectPrev" $ do
         it "produces valid cursors" $
             producesValidsOnValids (forestCursorRemoveElemAndSelectPrev @Double)
@@ -477,21 +494,191 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids (forestCursorDeleteSubTree @Double)
         it "deletes the selected subtree" pending
-    describe "forestCursorAddRoot" $ do
-        it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAddRoot @Double)
-        it "houses the entire forest under the given node" pending
+
+shiftingSpec :: Spec
+shiftingSpec = do
     describe "forestCursorPromoteElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ forestCursorPromoteElem @Double
+        it "works on the example from the documentation" $
+            let start =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = []
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove =
+                                                  Just
+                                                      TreeAbove
+                                                          { treeAboveLefts =
+                                                                [ Node
+                                                                      'b'
+                                                                      [ Node
+                                                                            'c'
+                                                                            []
+                                                                      ]
+                                                                ]
+                                                          , treeAboveAbove =
+                                                                Nothing
+                                                          , treeAboveNode = 'a'
+                                                          , treeAboveRights =
+                                                                [ Node
+                                                                      'f'
+                                                                      [ Node
+                                                                            'g'
+                                                                            []
+                                                                      ]
+                                                                ]
+                                                          }
+                                            , treeCurrent = 'd'
+                                            , treeBelow = [Node 'e' []]
+                                            }
+                                  , nonEmptyCursorNext = [Node 'h' []]
+                                  }
+                        }
+                expected =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev =
+                                        [ Node
+                                              'a'
+                                              [ Node
+                                                    'b'
+                                                    [Node 'c' [], Node 'e' []]
+                                              , Node 'f' [Node 'g' []]
+                                              ]
+                                        ]
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 'd'
+                                            , treeBelow = []
+                                            }
+                                  , nonEmptyCursorNext = [Node 'h' []]
+                                  }
+                        }
+             in case forestCursorPromoteElem start of
+                    Nothing ->
+                        expectationFailure
+                            "forestCursorPromoteElem should not have failed."
+                    Just f -> f `shouldBe` expected
         it "promotes the current node to the level of its parent" pending
     describe "forestCursorDemoteElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ forestCursorDemoteElem @Double
+        it "works on the example from the documentation" $
+            let start =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev =
+                                        [Node 'a' [Node 'b' []]]
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 'c'
+                                            , treeBelow = [Node 'd' []]
+                                            }
+                                  , nonEmptyCursorNext = [Node 'e' []]
+                                  }
+                        }
+                expected =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = []
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove =
+                                                  Just
+                                                      TreeAbove
+                                                          { treeAboveLefts =
+                                                                [Node 'b' []]
+                                                          , treeAboveAbove =
+                                                                Nothing
+                                                          , treeAboveNode = 'a'
+                                                          , treeAboveRights =
+                                                                [Node 'd' []]
+                                                          }
+                                            , treeCurrent = 'c'
+                                            , treeBelow = []
+                                            }
+                                  , nonEmptyCursorNext = [Node 'e' []]
+                                  }
+                        }
+             in case forestCursorDemoteElem start of
+                    Nothing ->
+                        expectationFailure
+                            "forestCursorDemoteElem should not have failed."
+                    Just f -> f `shouldBe` expected
         it "demotes the current node to the level of its children" pending
     describe "forestCursorPromoteSubTree" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ forestCursorPromoteSubTree @Double
+        it "works on the example from the documentation" $
+            let start =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = []
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove =
+                                                  Just
+                                                      TreeAbove
+                                                          { treeAboveLefts =
+                                                                [ Node
+                                                                      'b'
+                                                                      [ Node
+                                                                            'c'
+                                                                            []
+                                                                      ]
+                                                                ]
+                                                          , treeAboveAbove =
+                                                                Nothing
+                                                          , treeAboveNode = 'a'
+                                                          , treeAboveRights =
+                                                                [ Node
+                                                                      'f'
+                                                                      [ Node
+                                                                            'g'
+                                                                            []
+                                                                      ]
+                                                                ]
+                                                          }
+                                            , treeCurrent = 'd'
+                                            , treeBelow = [Node 'e' []]
+                                            }
+                                  , nonEmptyCursorNext = [Node 'h' []]
+                                  }
+                        }
+                expected =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev =
+                                        [ Node
+                                              'a'
+                                              [ Node 'b' [Node 'c' []]
+                                              , Node 'f' [Node 'g' []]
+                                              ]
+                                        ]
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 'd'
+                                            , treeBelow = [Node 'e' []]
+                                            }
+                                  , nonEmptyCursorNext = [Node 'h' []]
+                                  }
+                        }
+             in case forestCursorPromoteSubTree start of
+                    Nothing ->
+                        expectationFailure
+                            "forestCursorPromoteSubTree should not have failed."
+                    Just f -> f `shouldBe` expected
         it "promotes the current subtree to the level of its parent" pending
     describe "forestCursorDemoteSubTree" $ do
         it "produces valids on valids" $
