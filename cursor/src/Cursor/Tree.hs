@@ -57,8 +57,9 @@ module Cursor.Tree
     , treeCursorSwapPrev
     , treeCursorSwapNext
     , treeCursorPromoteElem
-    , treeCursorDemoteElem
     , treeCursorPromoteSubTree
+    , PromoteResult(..)
+    , treeCursorDemoteElem
     , treeCursorDemoteSubTree
     , DemoteResult(..)
     ) where
@@ -578,6 +579,62 @@ treeCursorPromoteElem f g tc = do
                   treeAboveLefts taa
             }
 
+-- | Promotes the current node to the level of its parent.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |  |  |- c
+-- >  |  |- d <--
+-- >  |  |  |- e
+-- >  |  |- f
+-- >  |     |- g
+-- >  |- h
+--
+-- After:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |  |  |- c
+-- >  |  |- f
+-- >  |     |- g
+-- >  |- d <--
+-- >  |  |- e
+-- >  |- h
+treeCursorPromoteSubTree ::
+       (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteResult (TreeCursor a b)
+treeCursorPromoteSubTree f g tc =
+    case treeAbove tc of
+        Nothing -> CannotPromoteTopNode
+        Just ta ->
+            case treeAboveAbove ta of
+                Nothing -> NoGrandparentToPromoteUnder
+                Just taa ->
+                    Promoted $
+                    makeTreeCursorWithAbove g (currentTree f tc) $
+                    Just $
+                    taa
+                        { treeAboveLefts =
+                              Node
+                                  (treeAboveNode ta)
+                                  (reverse (treeAboveLefts ta) ++
+                                   treeAboveRights ta) :
+                              treeAboveLefts taa
+                        }
+
+data PromoteResult a
+    = CannotPromoteTopNode
+    | NoGrandparentToPromoteUnder
+    | Promoted a
+    deriving (Show, Eq, Generic, Functor)
+
+instance Validity a => Validity (PromoteResult a)
+
 -- | Demotes the current node to the level of its children.
 --
 -- Example:
@@ -617,49 +674,6 @@ treeCursorDemoteElem f g tc =
                             , treeAboveNode = t
                             , treeAboveRights = treeBelow tc
                             }
-
--- | Promotes the current node to the level of its parent.
---
--- Example:
---
--- Before:
---
--- >  p
--- >  |- a
--- >  |  |- b
--- >  |  |  |- c
--- >  |  |- d <--
--- >  |  |  |- e
--- >  |  |- f
--- >  |     |- g
--- >  |- h
---
--- After:
---
--- >  p
--- >  |- a
--- >  |  |- b
--- >  |  |  |- c
--- >  |  |- f
--- >  |     |- g
--- >  |- d <--
--- >  |  |- e
--- >  |- h
-treeCursorPromoteSubTree ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorPromoteSubTree f g tc = do
-    ta <- treeAbove tc
-    taa <- treeAboveAbove ta
-    pure $
-        makeTreeCursorWithAbove g (currentTree f tc) $
-        Just $
-        taa
-            { treeAboveLefts =
-                  Node
-                      (treeAboveNode ta)
-                      (reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
-                  treeAboveLefts taa
-            }
 
 -- | Demotes the current subtree to the level of its children.
 --

@@ -56,10 +56,11 @@ module Cursor.Simple.Tree
     , treeCursorDeleteElem
     , treeCursorSwapPrev
     , treeCursorSwapNext
-    , treeCursorPromoteElem
-    , treeCursorDemoteElem
     , treeCursorPromoteSubTree
+    , treeCursorPromoteElem
+    , TC.PromoteResult(..)
     , treeCursorDemoteSubTree
+    , treeCursorDemoteElem
     , TC.DemoteResult(..)
     ) where
 
@@ -239,14 +240,14 @@ treeCursorSwapPrev = TC.treeCursorSwapPrev id id
 treeCursorSwapNext :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSwapNext = TC.treeCursorSwapNext id id
 
+treeCursorPromoteSubTree :: TreeCursor a -> TC.PromoteResult (TreeCursor a)
+treeCursorPromoteSubTree = TC.treeCursorPromoteSubTree id id
+
 treeCursorPromoteElem :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorPromoteElem = TC.treeCursorPromoteElem id id
 
-treeCursorDemoteElem :: TreeCursor a -> TC.DemoteResult (TreeCursor a)
-treeCursorDemoteElem = TC.treeCursorDemoteElem id id
-
-treeCursorPromoteSubTree :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorPromoteSubTree = TC.treeCursorPromoteSubTree id id
-
 treeCursorDemoteSubTree :: TreeCursor a -> TC.DemoteResult (TreeCursor a)
 treeCursorDemoteSubTree = TC.treeCursorDemoteSubTree id id
+
+treeCursorDemoteElem :: TreeCursor a -> TC.DemoteResult (TreeCursor a)
+treeCursorDemoteElem = TC.treeCursorDemoteElem id id

@@ -466,10 +466,22 @@ forestCursorDemoteElem f g fc@(ForestCursor ne) =
 -- > - h
 forestCursorPromoteSubTree ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
-forestCursorPromoteSubTree f g fc =
-    (fc & forestCursorSelectedTreeL (treeCursorPromoteSubTree f g)) <|> go
-  where
-    go = undefined
+forestCursorPromoteSubTree f g fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL (treeCursorPromoteSubTree f g) of
+        Promoted fc' -> pure fc'
+        NoGrandparentToPromoteUnder ->
+            case treeCursorDeleteSubTree g $ fc ^. forestCursorSelectedTreeL of
+                Deleted -> Nothing -- Cannot happen, otherwise we would have gotten 'CannotPromoteTopNode'.
+                Updated tc' ->
+                    pure $
+                    ForestCursor $
+                    ne
+                        { nonEmptyCursorPrev =
+                              rebuildTreeCursor f tc' : nonEmptyCursorPrev ne
+                        , nonEmptyCursorCurrent =
+                              (fc ^. forestCursorSelectedTreeL) { treeAbove = Nothing}
+                        }
+        CannotPromoteTopNode -> Nothing
 
 -- | Demotes the current subtree to the level of its children.
 --
