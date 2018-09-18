@@ -726,7 +726,7 @@ shiftingSpec = do
                     Nothing ->
                         expectationFailure
                             "forestCursorDemoteSubTree should not have failed."
-                    Just f -> f `shouldBe` expected
+                    Just f -> f `forestShouldBe` expected
         it "demotes the current subtree to the level of its children" pending
 
 isMovementM ::

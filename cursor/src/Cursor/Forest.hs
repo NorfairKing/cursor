@@ -469,7 +469,27 @@ forestCursorPromoteSubTree f g fc =
 -- >       |- d
 forestCursorDemoteSubTree ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
-forestCursorDemoteSubTree f g fc =
-    (fc & forestCursorSelectedTreeL (treeCursorDemoteSubTree f g)) <|> go
+forestCursorDemoteSubTree f g fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL (treeCursorDemoteSubTree f g) of
+        CannotDemoteTopNode ->
+            case nonEmptyCursorPrev ne of
+                [] -> Nothing
+                (Node v vts:ts) -> do
+                    let n' =
+                            Node v $
+                            vts ++
+                            [ rebuildTreeCursor
+                                  f
+                                  (fc ^. forestCursorSelectedTreeL)
+                            ]
+                    tc <- makeTreeCursorWithSelection f g (SelectChild (length vts) SelectNode) n'
+                    pure $
+                        ForestCursor
+                            ne
+                                { nonEmptyCursorPrev = ts
+                                , nonEmptyCursorCurrent = tc
+                                }
+        NoSiblingsToDemoteUnder -> Nothing
+        SubTreeDemoted fc' -> pure fc'
   where
     go = undefined

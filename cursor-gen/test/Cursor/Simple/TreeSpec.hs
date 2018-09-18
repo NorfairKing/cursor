@@ -656,10 +656,10 @@ spec = do
                         , treeBelow = [Node 'd' []]
                         }
              in case treeCursorDemoteSubTree promoteStart of
-                    Nothing ->
+                    SubTreeDemoted tc' -> tc' `treeShouldBe` promoteEnd
+                    _ ->
                         expectationFailure
                             "treeCursorDemoteSubTree should not have failed"
-                    Just tc' -> tc' `treeShouldBe` promoteEnd
         it "demotes the current subtree to the level of its children" pending
 
 testMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Spec
