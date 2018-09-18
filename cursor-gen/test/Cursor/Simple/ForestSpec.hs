@@ -612,7 +612,7 @@ shiftingSpec = do
                     Nothing ->
                         expectationFailure
                             "forestCursorDemoteElem should not have failed."
-                    Just f -> f `shouldBe` expected
+                    Just f -> f `forestShouldBe` expected
         it "demotes the current node to the level of its children" pending
     describe "forestCursorPromoteSubTree" $ do
         it "produces valids on valids" $

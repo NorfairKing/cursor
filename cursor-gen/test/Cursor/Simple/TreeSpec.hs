@@ -559,10 +559,10 @@ spec = do
                         , treeBelow = []
                         }
              in case treeCursorDemoteElem promoteStart of
-                    Nothing ->
+                    Demoted tc' -> tc' `treeShouldBe` promoteEnd
+                    _ ->
                         expectationFailure
                             "treeCursorDemoteElem should not have failed"
-                    Just tc' -> tc' `treeShouldBe` promoteEnd
         it "demotes the current node to the level of its children" pending
     describe "treeCursorPromoteSubTree" $ do
         it "produces valids on valids" $
@@ -656,7 +656,7 @@ spec = do
                         , treeBelow = [Node 'd' []]
                         }
              in case treeCursorDemoteSubTree promoteStart of
-                    SubTreeDemoted tc' -> tc' `treeShouldBe` promoteEnd
+                    Demoted tc' -> tc' `treeShouldBe` promoteEnd
                     _ ->
                         expectationFailure
                             "treeCursorDemoteSubTree should not have failed"
