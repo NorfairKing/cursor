@@ -535,9 +535,8 @@ treeCursorDeleteElem g tc =
 -- > p
 -- > |- b <--
 -- > |- a
-treeCursorSwapPrev ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> SwapResult (TreeCursor a b)
-treeCursorSwapPrev f g tc = do
+treeCursorSwapPrev :: TreeCursor a b -> SwapResult (TreeCursor a b)
+treeCursorSwapPrev tc = do
     case treeAbove tc of
         Nothing -> SwapperIsTopNode
         Just ta ->
@@ -569,9 +568,8 @@ treeCursorSwapPrev f g tc = do
 -- > p
 -- > |- b
 -- > |- a <--
-treeCursorSwapNext ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> SwapResult (TreeCursor a b)
-treeCursorSwapNext f g tc =
+treeCursorSwapNext :: TreeCursor a b -> SwapResult (TreeCursor a b)
+treeCursorSwapNext tc =
     case treeAbove tc of
         Nothing -> SwapperIsTopNode
         Just ta ->

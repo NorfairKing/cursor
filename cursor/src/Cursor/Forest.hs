@@ -376,10 +376,9 @@ forestCursorAddRoot f g fc v =
 --
 -- > - b <--
 -- > - a
-forestCursorSwapPrev ::
-       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
-forestCursorSwapPrev f g fc@(ForestCursor ne) =
-    case fc & forestCursorSelectedTreeL (treeCursorSwapPrev f g) of
+forestCursorSwapPrev :: ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSwapPrev fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL treeCursorSwapPrev of
         Swapped fc' -> pure fc'
         NoSiblingsToSwapWith -> Nothing
         SwapperIsTopNode ->
@@ -406,10 +405,9 @@ forestCursorSwapPrev f g fc@(ForestCursor ne) =
 --
 -- > - b
 -- > - a <--
-forestCursorSwapNext ::
-       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
-forestCursorSwapNext f g fc@(ForestCursor ne) =
-    case fc & forestCursorSelectedTreeL (treeCursorSwapNext f g) of
+forestCursorSwapNext :: ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSwapNext fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL treeCursorSwapNext of
         Swapped fc' -> pure fc'
         NoSiblingsToSwapWith -> Nothing
         SwapperIsTopNode ->

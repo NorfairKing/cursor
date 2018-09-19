@@ -239,10 +239,10 @@ treeCursorDeleteElem :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)
 treeCursorDeleteElem = TC.treeCursorDeleteElem id
 
 treeCursorSwapPrev :: TreeCursor a -> TC.SwapResult (TreeCursor a)
-treeCursorSwapPrev = TC.treeCursorSwapPrev id id
+treeCursorSwapPrev = TC.treeCursorSwapPrev
 
 treeCursorSwapNext :: TreeCursor a -> TC.SwapResult (TreeCursor a)
-treeCursorSwapNext = TC.treeCursorSwapNext id id
+treeCursorSwapNext = TC.treeCursorSwapNext
 
 treeCursorPromoteElem :: TreeCursor a -> TC.PromoteElemResult (TreeCursor a)
 treeCursorPromoteElem = TC.treeCursorPromoteElem id id

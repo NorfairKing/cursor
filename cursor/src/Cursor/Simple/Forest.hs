@@ -228,10 +228,10 @@ forestCursorAddRoot :: ForestCursor a -> a -> TreeCursor a
 forestCursorAddRoot = FC.forestCursorAddRoot id id
 
 forestCursorSwapPrev :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSwapPrev = FC.forestCursorSwapPrev id id
+forestCursorSwapPrev = FC.forestCursorSwapPrev
 
 forestCursorSwapNext :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorSwapNext = FC.forestCursorSwapNext id id
+forestCursorSwapNext = FC.forestCursorSwapNext
 
 forestCursorPromoteElem :: ForestCursor a -> Maybe (ForestCursor a)
 forestCursorPromoteElem = FC.forestCursorPromoteElem id id
