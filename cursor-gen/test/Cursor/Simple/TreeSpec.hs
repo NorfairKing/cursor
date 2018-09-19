@@ -519,51 +519,6 @@ spec = do
                         expectationFailure
                             "treeCursorPromoteElem should not have failed"
         it "promotes the current node to the level of its parent" pending
-    describe "treeCursorDemoteElem" $ do
-        it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorDemoteElem @Double
-        it "Works on the example from the docs" $
-            let promoteStart =
-                    TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts =
-                                            [Node 'a' [Node 'b' []]]
-                                      , treeAboveAbove = Nothing
-                                      , treeAboveNode = 'p'
-                                      , treeAboveRights = [Node 'e' []]
-                                      }
-                        , treeCurrent = 'c'
-                        , treeBelow = [Node 'd' []]
-                        }
-                promoteEnd =
-                    TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts = [Node 'b' []]
-                                      , treeAboveAbove =
-                                            Just
-                                                TreeAbove
-                                                    { treeAboveLefts = []
-                                                    , treeAboveAbove = Nothing
-                                                    , treeAboveNode = 'p'
-                                                    , treeAboveRights =
-                                                          [Node 'e' []]
-                                                    }
-                                      , treeAboveNode = 'a'
-                                      , treeAboveRights = [Node 'd' []]
-                                      }
-                        , treeCurrent = 'c'
-                        , treeBelow = []
-                        }
-             in case treeCursorDemoteElem promoteStart of
-                    Demoted tc' -> tc' `treeShouldBe` promoteEnd
-                    _ ->
-                        expectationFailure
-                            "treeCursorDemoteElem should not have failed"
-        it "demotes the current node to the level of its children" pending
     describe "treeCursorPromoteSubTree" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorPromoteSubTree @Double
@@ -616,6 +571,51 @@ spec = do
                         expectationFailure
                             "treeCursorPromoteSubTree should not have failed"
         it "promotes the current subtree to the level of its parent" pending
+    describe "treeCursorDemoteElem" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids $ treeCursorDemoteElem @Double
+        it "Works on the example from the docs" $
+            let promoteStart =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts =
+                                            [Node 'a' [Node 'b' []]]
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = [Node 'e' []]
+                                      }
+                        , treeCurrent = 'c'
+                        , treeBelow = [Node 'd' []]
+                        }
+                promoteEnd =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts = [Node 'b' []]
+                                      , treeAboveAbove =
+                                            Just
+                                                TreeAbove
+                                                    { treeAboveLefts = []
+                                                    , treeAboveAbove = Nothing
+                                                    , treeAboveNode = 'p'
+                                                    , treeAboveRights =
+                                                          [Node 'e' []]
+                                                    }
+                                      , treeAboveNode = 'a'
+                                      , treeAboveRights = [Node 'd' []]
+                                      }
+                        , treeCurrent = 'c'
+                        , treeBelow = []
+                        }
+             in case treeCursorDemoteElem promoteStart of
+                    Demoted tc' -> tc' `treeShouldBe` promoteEnd
+                    _ ->
+                        expectationFailure
+                            "treeCursorDemoteElem should not have failed"
+        it "demotes the current node to the level of its children" pending
     describe "treeCursorDemoteSubTree" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDemoteSubTree @Double
@@ -661,6 +661,90 @@ spec = do
                         expectationFailure
                             "treeCursorDemoteSubTree should not have failed"
         it "demotes the current subtree to the level of its children" pending
+    describe "treeCursorDemoteElemUnder" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids3 $ treeCursorDemoteElemUnder @Double
+        it "Works on the example from the docs" $
+            forAllValid $ \b1 ->
+                forAllValid $ \b2 ->
+                    let demoteStart =
+                            TreeCursor
+                                { treeAbove =
+                                      Just
+                                          TreeAbove
+                                              { treeAboveLefts = []
+                                              , treeAboveAbove = Nothing
+                                              , treeAboveNode = 'p'
+                                              , treeAboveRights = []
+                                              }
+                                , treeCurrent = 'a'
+                                , treeBelow = [Node 'b' []]
+                                }
+                        demoteEnd =
+                            TreeCursor
+                                { treeAbove =
+                                      Just
+                                          TreeAbove
+                                              { treeAboveLefts = []
+                                              , treeAboveAbove =
+                                                    Just
+                                                        TreeAbove
+                                                            { treeAboveLefts =
+                                                                  []
+                                                            , treeAboveAbove =
+                                                                  Nothing
+                                                            , treeAboveNode =
+                                                                  'p'
+                                                            , treeAboveRights =
+                                                                  [ Node
+                                                                        b2
+                                                                        [ Node
+                                                                              'b'
+                                                                              []
+                                                                        ]
+                                                                  ]
+                                                            }
+                                              , treeAboveNode = b1
+                                              , treeAboveRights = []
+                                              }
+                                , treeCurrent = 'a'
+                                , treeBelow = []
+                                }
+                     in case treeCursorDemoteElemUnder b1 b2 demoteStart of
+                            Just tc' -> tc' `treeShouldBe` demoteEnd
+                            _ ->
+                                expectationFailure
+                                    "treeCursorDemoteElemUnder should not have failed"
+        it "demotes the current node to the level of its children" pending
+    describe "treeCursorDemoteSubTreeUnder" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids2 $ treeCursorDemoteSubTreeUnder @Double
+        it "Works on the example from the docs" $
+            forAllValid $ \v -> do
+                let demoteStart =
+                        TreeCursor
+                            { treeAbove = Nothing
+                            , treeCurrent = 'a'
+                            , treeBelow = [Node 'b' []]
+                            }
+                    demoteEnd =
+                        TreeCursor
+                            { treeAbove =
+                                  Just
+                                      TreeAbove
+                                          { treeAboveLefts = []
+                                          , treeAboveAbove = Nothing
+                                          , treeAboveNode = v
+                                          , treeAboveRights = []
+                                          }
+                            , treeCurrent = 'a'
+                            , treeBelow = [Node 'b' []]
+                            }
+                treeCursorDemoteSubTreeUnder v demoteStart `treeShouldBe`
+                    demoteEnd
+        it
+            "demotes the current subtree to the level of its children, by adding a root"
+            pending
 
 testMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Spec
 testMovement func = do
