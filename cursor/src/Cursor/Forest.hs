@@ -457,9 +457,13 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
             let tc = fc ^. forestCursorSelectedTreeL
             ta <- treeAbove tc
             lefts <-
-                case treeAboveLefts ta of
-                    [] -> Nothing
-                    (Node t ls:ts) -> pure $ Node t (ls ++ treeBelow tc) : ts
+                case treeBelow tc of
+                    [] -> pure $ treeAboveLefts ta
+                    _ ->
+                        case treeAboveLefts ta of
+                            [] -> Nothing
+                            (Node t ls:ts) ->
+                                pure $ Node t (ls ++ treeBelow tc) : ts
             let ta' = ta {treeAboveLefts = lefts}
             let tc' = tc {treeAbove = Just ta'}
             tc'' <-
