@@ -8,10 +8,24 @@ module Cursor.Tree
     , TreeAbove(..)
     , singletonTreeCursor
     , makeTreeCursor
+    , makeTreeCursorWithSelection
     , rebuildTreeCursor
-    , drawTreeCursor
     , mapTreeCursor
+    -- * Lenses
+    , treeCursorAboveL
+    , treeCursorCurrentL
+    , treeCursorBelowL
+    , treeAboveLeftsL
+    , treeAboveAboveL
+    , treeAboveNodeL
+    , treeAboveRightsL
+    -- * Drawing
+    , drawTreeCursor
     , treeCursorWithPointer
+    -- * Movements
+    , treeCursorSelection
+    , TreeCursorSelection(..)
+    , treeCursorSelect
     , treeCursorSelectPrev
     , treeCursorSelectNext
     , treeCursorSelectFirst
@@ -26,6 +40,7 @@ module Cursor.Tree
     , treeCursorSelectNextOnSameLevel
     , treeCursorSelectAbovePrev
     , treeCursorSelectAboveNext
+    -- * Insertions
     , treeCursorInsert
     , treeCursorInsertAndSelect
     , treeCursorAppend
@@ -33,6 +48,7 @@ module Cursor.Tree
     , treeCursorAddChildAtPos
     , treeCursorAddChildAtStart
     , treeCursorAddChildAtEnd
+    -- * Deletions
     , treeCursorDeleteSubTreeAndSelectPrevious
     , treeCursorDeleteSubTreeAndSelectNext
     , treeCursorDeleteSubTreeAndSelectAbove
@@ -43,19 +59,20 @@ module Cursor.Tree
     , treeCursorDeleteElemAndSelectAbove
     , treeCursorRemoveElem
     , treeCursorDeleteElem
+    -- * Swapping
     , treeCursorSwapPrev
     , treeCursorSwapNext
+    -- * Promotions
     , treeCursorPromoteElem
-    , treeCursorDemoteElem
+    , PromoteElemResult(..)
     , treeCursorPromoteSubTree
+    , PromoteResult(..)
+    -- * Demotions
+    , treeCursorDemoteElem
     , treeCursorDemoteSubTree
-    , treeCursorAboveL
-    , treeCursorCurrentL
-    , treeCursorBelowL
-    , treeAboveLeftsL
-    , treeAboveAboveL
-    , treeAboveNodeL
-    , treeAboveRightsL
+    , DemoteResult(..)
+    , treeCursorDemoteElemUnder
+    , treeCursorDemoteSubTreeUnder
     ) where
 
 import Data.Tree
@@ -116,6 +133,18 @@ makeTreeCursor :: (b -> a) -> Tree b -> TreeCursor a b
 makeTreeCursor g (Node v fs) =
     TreeCursor {treeAbove = Nothing, treeCurrent = g v, treeBelow = fs}
 
+makeTreeCursorWithSelection ::
+       (a -> b)
+    -> (b -> a)
+    -> TreeCursorSelection
+    -> Tree b
+    -> Maybe (TreeCursor a b)
+makeTreeCursorWithSelection f g sel = walkDown sel . makeTreeCursor g
+  where
+    walkDown SelectNode tc = pure tc
+    walkDown (SelectChild i s) tc =
+        treeCursorSelectBelowAtPos f g i tc >>= walkDown s
+
 makeTreeCursorWithAbove ::
        (b -> a) -> Tree b -> Maybe (TreeAbove b) -> TreeCursor a b
 makeTreeCursorWithAbove g (Node a forest) mta =
@@ -163,6 +192,31 @@ mapTreeCursor f g TreeCursor {..} =
         , treeCurrent = f treeCurrent
         , treeBelow = map (fmap g) treeBelow
         }
+
+treeCursorSelection :: TreeCursor a b -> TreeCursorSelection
+treeCursorSelection TreeCursor {..} = wrap treeAbove SelectNode
+  where
+    wrap :: Maybe (TreeAbove a) -> TreeCursorSelection -> TreeCursorSelection
+    wrap Nothing ts = ts
+    wrap (Just ta) ts =
+        wrap (treeAboveAbove ta) $ SelectChild (length $ treeAboveLefts ta) ts
+
+data TreeCursorSelection
+    = SelectNode
+    | SelectChild Int
+                  TreeCursorSelection
+    deriving (Show, Eq, Generic)
+
+instance Validity TreeCursorSelection
+
+treeCursorSelect ::
+       (a -> b)
+    -> (b -> a)
+    -> TreeCursorSelection
+    -> TreeCursor a b
+    -> Maybe (TreeCursor a b)
+treeCursorSelect f g sel =
+    makeTreeCursorWithSelection f g sel . rebuildTreeCursor f
 
 treeCursorSelectPrev ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
@@ -488,7 +542,6 @@ treeCursorSwapNext f g tc = do
     pure $ makeTreeCursorWithAbove g t' $ Just above'
 
 -- | Promotes the current node to the level of its parent.
--- This operation also brings along the subtree.
 --
 -- Example:
 --
@@ -516,18 +569,27 @@ treeCursorSwapNext f g tc = do
 -- >  |- d <--
 -- >  |- h
 treeCursorPromoteElem ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
+       (a -> b)
+    -> (b -> a)
+    -> TreeCursor a b
+    -> PromoteElemResult (TreeCursor a b)
 treeCursorPromoteElem f g tc = do
-    ta <- treeAbove tc
-    taa <- treeAboveAbove ta
+    ta <-
+        case treeAbove tc of
+            Nothing -> CannotPromoteTopElem
+            Just ta -> pure ta
+    -- We need to put the below under the above lefts at the end
     lefts <-
         case treeBelow tc of
             [] -> pure $ treeAboveLefts ta
-            -- We need to put the below under the above lefts at the end
             _ ->
                 case treeAboveLefts ta of
-                    [] -> Nothing
+                    [] -> NoSiblingsToAdoptChildren
                     (Node t ls:ts) -> pure $ Node t (ls ++ treeBelow tc) : ts
+    taa <-
+        case treeAboveAbove ta of
+            Nothing -> NoGrandparentToPromoteElemUnder
+            Just taa -> pure taa
     pure $
         makeTreeCursorWithAbove g (Node (f $ treeCurrent tc) []) $
         Just $
@@ -537,46 +599,33 @@ treeCursorPromoteElem f g tc = do
                   treeAboveLefts taa
             }
 
--- | Demotes the current node to the level of its children.
---
--- Example:
---
--- Before:
---
--- >  p
--- >  |- a
--- >  |  |- b
--- >  |- c <--
--- >  |  |- d
--- >  |- e
---
--- After:
---
--- >  p
--- >  |- a
--- >  |  |- b
--- >  |  |- c <--
--- >  |  |- d
--- >  |- e
-treeCursorDemoteElem ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorDemoteElem f g tc = do
-    ta <- treeAbove tc
-    case treeAboveLefts ta of
-        [] -> Nothing
-        (Node t ls:ts) ->
-            pure $
-            makeTreeCursorWithAbove g (Node (f $ treeCurrent tc) []) $
-            Just
-                TreeAbove
-                    { treeAboveLefts = reverse ls
-                    , treeAboveAbove = Just ta {treeAboveLefts = ts}
-                    , treeAboveNode = t
-                    , treeAboveRights = treeBelow tc
-                    }
+data PromoteElemResult a
+    = CannotPromoteTopElem
+    | NoGrandparentToPromoteElemUnder
+    | NoSiblingsToAdoptChildren
+    | PromotedElem a
+    deriving (Show, Eq, Generic, Functor)
+
+instance Validity a => Validity (PromoteElemResult a)
+
+instance Applicative PromoteElemResult where
+    pure = PromotedElem
+    CannotPromoteTopElem <*> _ = CannotPromoteTopElem
+    NoGrandparentToPromoteElemUnder <*> _ = NoGrandparentToPromoteElemUnder
+    NoSiblingsToAdoptChildren <*> _ = NoSiblingsToAdoptChildren
+    PromotedElem f <*> PromotedElem a = PromotedElem $ f a
+    PromotedElem _ <*> CannotPromoteTopElem = CannotPromoteTopElem
+    PromotedElem _ <*> NoSiblingsToAdoptChildren = NoSiblingsToAdoptChildren
+    PromotedElem _ <*> NoGrandparentToPromoteElemUnder =
+        NoGrandparentToPromoteElemUnder
+
+instance Monad PromoteElemResult where
+    CannotPromoteTopElem >>= _ = CannotPromoteTopElem
+    NoGrandparentToPromoteElemUnder >>= _ = NoGrandparentToPromoteElemUnder
+    NoSiblingsToAdoptChildren >>= _ = NoSiblingsToAdoptChildren
+    PromotedElem a >>= f = f a
 
 -- | Promotes the current node to the level of its parent.
--- This operation also brings along the subtree.
 --
 -- Example:
 --
@@ -604,10 +653,16 @@ treeCursorDemoteElem f g tc = do
 -- >  |  |- e
 -- >  |- h
 treeCursorPromoteSubTree ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
+       (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteResult (TreeCursor a b)
 treeCursorPromoteSubTree f g tc = do
-    ta <- treeAbove tc
-    taa <- treeAboveAbove ta
+    ta <-
+        case treeAbove tc of
+            Nothing -> CannotPromoteTopNode
+            Just ta -> pure ta
+    taa <-
+        case treeAboveAbove ta of
+            Nothing -> NoGrandparentToPromoteUnder
+            Just taa -> pure taa
     pure $
         makeTreeCursorWithAbove g (currentTree f tc) $
         Just $
@@ -618,6 +673,67 @@ treeCursorPromoteSubTree f g tc = do
                       (reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
                   treeAboveLefts taa
             }
+
+data PromoteResult a
+    = CannotPromoteTopNode
+    | NoGrandparentToPromoteUnder
+    | Promoted a
+    deriving (Show, Eq, Generic, Functor)
+
+instance Validity a => Validity (PromoteResult a)
+
+instance Applicative PromoteResult where
+    pure = Promoted
+    CannotPromoteTopNode <*> _ = CannotPromoteTopNode
+    NoGrandparentToPromoteUnder <*> _ = NoGrandparentToPromoteUnder
+    Promoted f <*> Promoted a = Promoted $ f a
+    Promoted _ <*> CannotPromoteTopNode = CannotPromoteTopNode
+    Promoted _ <*> NoGrandparentToPromoteUnder = NoGrandparentToPromoteUnder
+
+instance Monad PromoteResult where
+    CannotPromoteTopNode >>= _ = CannotPromoteTopNode
+    NoGrandparentToPromoteUnder >>= _ = NoGrandparentToPromoteUnder
+    Promoted a >>= f = f a
+
+-- | Demotes the current node to the level of its children.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |- c <--
+-- >  |  |- d
+-- >  |- e
+--
+-- After:
+--
+-- >  p
+-- >  |- a
+-- >  |  |- b
+-- >  |  |- c <--
+-- >  |  |- d
+-- >  |- e
+treeCursorDemoteElem ::
+       (a -> b) -> (b -> a) -> TreeCursor a b -> DemoteResult (TreeCursor a b)
+treeCursorDemoteElem f g tc =
+    case treeAbove tc of
+        Nothing -> CannotDemoteTopNode
+        Just ta ->
+            case treeAboveLefts ta of
+                [] -> NoSiblingsToDemoteUnder
+                (Node t ls:ts) ->
+                    Demoted $
+                    makeTreeCursorWithAbove g (Node (f $ treeCurrent tc) []) $
+                    Just
+                        TreeAbove
+                            { treeAboveLefts = reverse ls
+                            , treeAboveAbove = Just ta {treeAboveLefts = ts}
+                            , treeAboveNode = t
+                            , treeAboveRights = treeBelow tc
+                            }
 
 -- | Demotes the current subtree to the level of its children.
 --
@@ -641,18 +757,90 @@ treeCursorPromoteSubTree f g tc = do
 -- >  |     |- d
 -- >  |- e
 treeCursorDemoteSubTree ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorDemoteSubTree f g tc = do
+       (a -> b) -> (b -> a) -> TreeCursor a b -> DemoteResult (TreeCursor a b)
+treeCursorDemoteSubTree f g tc =
+    case treeAbove tc of
+        Nothing -> CannotDemoteTopNode
+        Just ta ->
+            case treeAboveLefts ta of
+                [] -> NoSiblingsToDemoteUnder
+                (Node t ls:ts) ->
+                    Demoted $
+                    makeTreeCursorWithAbove g (currentTree f tc) $
+                    Just
+                        TreeAbove
+                            { treeAboveLefts = reverse ls
+                            , treeAboveAbove = Just ta {treeAboveLefts = ts}
+                            , treeAboveNode = t
+                            , treeAboveRights = []
+                            }
+
+data DemoteResult a
+    = CannotDemoteTopNode
+    | NoSiblingsToDemoteUnder
+    | Demoted a
+    deriving (Show, Eq, Generic, Functor)
+
+instance Validity a => Validity (DemoteResult a)
+
+-- | Demotes the current node to the level of its children, by adding two roots.
+-- One for the current node and one for its children that are left behind.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  p
+-- >  |- a <--
+-- >     |- b
+--
+-- After:
+--
+-- >  p
+-- >  |- <given element 1>
+-- >  |  |- a <--
+-- >  |- <given element 2>
+-- >  |  |- b
+treeCursorDemoteElemUnder :: b -> b -> TreeCursor a b -> Maybe (TreeCursor a b)
+treeCursorDemoteElemUnder b1 b2 tc = do
     ta <- treeAbove tc
-    case treeAboveLefts ta of
-        [] -> Nothing
-        (Node t ls:ts) ->
-            pure $
-            makeTreeCursorWithAbove g (currentTree f tc) $
-            Just
-                TreeAbove
-                    { treeAboveLefts = reverse ls
-                    , treeAboveAbove = Just ta {treeAboveLefts = ts}
-                    , treeAboveNode = t
-                    , treeAboveRights = []
-                    }
+    let ta' = ta {treeAboveRights = Node b2 (treeBelow tc) : treeAboveRights ta}
+    pure
+        tc
+            { treeAbove =
+                  Just
+                      TreeAbove
+                          { treeAboveLefts = []
+                          , treeAboveAbove = Just ta'
+                          , treeAboveNode = b1
+                          , treeAboveRights = []
+                          }
+            , treeBelow = []
+            }
+
+-- | Demotes the current subtree to the level of its children, by adding a root.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  a <--
+-- >  |- b
+--
+-- After:
+--
+-- >  <given element>
+-- >  |- a <--
+-- >     |- b
+treeCursorDemoteSubTreeUnder :: b -> TreeCursor a b -> TreeCursor a b
+treeCursorDemoteSubTreeUnder b tc =
+    tc
+        { treeAbove =
+              Just
+                  TreeAbove
+                      { treeAboveLefts = []
+                      , treeAboveAbove = treeAbove tc
+                      , treeAboveNode = b
+                      , treeAboveRights = []
+                      }
+        }

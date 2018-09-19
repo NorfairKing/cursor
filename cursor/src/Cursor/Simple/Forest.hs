@@ -51,6 +51,10 @@ module Cursor.Simple.Forest
     , forestCursorRemoveSubTree
     , forestCursorDeleteSubTree
     , forestCursorAddRoot
+    , forestCursorPromoteElem
+    , forestCursorDemoteElem
+    , forestCursorPromoteSubTree
+    , forestCursorDemoteSubTree
     ) where
 
 import Data.Validity.Tree ()
@@ -218,3 +222,15 @@ forestCursorDeleteSubTree = FC.forestCursorDeleteSubTree id
 
 forestCursorAddRoot :: ForestCursor a -> a -> TreeCursor a
 forestCursorAddRoot = FC.forestCursorAddRoot id id
+
+forestCursorPromoteElem :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorPromoteElem = FC.forestCursorPromoteElem id id
+
+forestCursorDemoteElem :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorDemoteElem = FC.forestCursorDemoteElem id id
+
+forestCursorPromoteSubTree :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorPromoteSubTree = FC.forestCursorPromoteSubTree id id
+
+forestCursorDemoteSubTree :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorDemoteSubTree = FC.forestCursorDemoteSubTree id id

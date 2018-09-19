@@ -51,6 +51,10 @@ module Cursor.Forest
     , forestCursorRemoveSubTree
     , forestCursorDeleteSubTree
     , forestCursorAddRoot
+    , forestCursorPromoteElem
+    , forestCursorDemoteElem
+    , forestCursorPromoteSubTree
+    , forestCursorDemoteSubTree
     ) where
 
 import GHC.Generics (Generic)
@@ -288,11 +292,11 @@ forestCursorRemoveElemAndSelectPrev g fc =
 
 forestCursorDeleteElemAndSelectNext ::
        (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
-forestCursorDeleteElemAndSelectNext g fc = case
-        (fc &
-         focusPossibleDeleteOrUpdate
-             forestCursorSelectedTreeL
-             (treeCursorDeleteElemAndSelectNext g)) of
+forestCursorDeleteElemAndSelectNext g fc =
+    case (fc &
+          focusPossibleDeleteOrUpdate
+              forestCursorSelectedTreeL
+              (treeCursorDeleteElemAndSelectNext g)) of
         Just Deleted ->
             (fc &
              focusPossibleDeleteOrUpdate
@@ -354,3 +358,196 @@ forestCursorAddRoot ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> a -> TreeCursor a b
 forestCursorAddRoot f g fc v =
     makeTreeCursor g $ Node (f v) $ NE.toList $ rebuildForestCursor f fc
+
+-- | Promotes the current node to the level of its parent.
+--
+-- Example:
+--
+-- Before:
+--
+-- > - a
+-- >   |- b
+-- >   |  |- c
+-- >   |- d <--
+-- >   |  |- e
+-- >   |- f
+-- >      |- g
+-- > - h
+--
+-- After:
+--
+-- > - a
+-- >   |- b
+-- >   |  |- c
+-- >   |  |- e
+-- >   |- f
+-- >      |- g
+-- > - d <--
+-- > - h
+forestCursorPromoteElem ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorPromoteElem f g fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL (treeCursorPromoteElem f g) of
+        PromotedElem fc' -> pure fc'
+        CannotPromoteTopElem -> Nothing
+        NoSiblingsToAdoptChildren -> Nothing
+        NoGrandparentToPromoteElemUnder -> do
+            let tc = fc ^. forestCursorSelectedTreeL
+            ta <- treeAbove tc
+            lefts <-
+                case treeAboveLefts ta of
+                    [] -> Nothing
+                    (Node t ls:ts) -> pure $ Node t (ls ++ treeBelow tc) : ts
+            let ta' = ta {treeAboveLefts = lefts}
+            let tc' = tc {treeAbove = Just ta'}
+            tc'' <-
+                case treeCursorDeleteSubTree g tc' of
+                    Deleted -> Nothing -- Cannot happen, otherwise we would have gotten 'CannotPromoteTopNode'.
+                    Updated tc'' -> pure tc''
+            pure $
+                ForestCursor $
+                ne
+                    { nonEmptyCursorPrev =
+                          rebuildTreeCursor f tc'' : nonEmptyCursorPrev ne
+                    , nonEmptyCursorCurrent = singletonTreeCursor $ treeCurrent $ fc ^. forestCursorSelectedTreeL
+                    }
+
+-- | Promotes the current node to the level of its parent.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  - a
+-- >    |- b
+-- >    |  |- c
+-- >    |- d <--
+-- >    |  |- e
+-- >    |- f
+-- >       |- g
+-- >  - h
+--
+-- After:
+--
+-- >
+-- > - a
+-- >   |- b
+-- >   |  |- c
+-- >   |- f
+-- >      |- g
+-- > - d <--
+-- >   |- e
+-- > - h
+forestCursorPromoteSubTree ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorPromoteSubTree f g fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL (treeCursorPromoteSubTree f g) of
+        Promoted fc' -> pure fc'
+        CannotPromoteTopNode -> Nothing
+        NoGrandparentToPromoteUnder ->
+            case treeCursorDeleteSubTree g $ fc ^. forestCursorSelectedTreeL of
+                Deleted -> Nothing -- Cannot happen, otherwise we would have gotten 'CannotPromoteTopNode'.
+                Updated tc' ->
+                    pure $
+                    ForestCursor $
+                    ne
+                        { nonEmptyCursorPrev =
+                              rebuildTreeCursor f tc' : nonEmptyCursorPrev ne
+                        , nonEmptyCursorCurrent =
+                              (fc ^. forestCursorSelectedTreeL)
+                                  {treeAbove = Nothing}
+                        }
+
+-- | Demotes the current node to the level of its children.
+--
+-- Example:
+--
+-- Before:
+--
+-- > - a
+-- >   |- b
+-- > - c <--
+-- >   |- d
+-- > - e
+--
+-- After:
+--
+-- > - a
+-- >   |- b
+-- >   |- c <--
+-- >   |- d
+-- > - e
+forestCursorDemoteElem ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorDemoteElem f g fc@(ForestCursor ne) =
+    case (fc & forestCursorSelectedTreeL (treeCursorDemoteElem f g)) of
+        Demoted fc' -> pure fc'
+        CannotDemoteTopNode ->
+            case nonEmptyCursorPrev ne of
+                [] -> Nothing
+                (Node v vts:ts) -> do
+                    let Node v' vts' =
+                            rebuildTreeCursor
+                                f
+                                (fc ^. forestCursorSelectedTreeL)
+                    let n' = Node v $ vts ++ (Node v' [] : vts')
+                    tc <-
+                        makeTreeCursorWithSelection
+                            f
+                            g
+                            (SelectChild (length vts) SelectNode)
+                            n'
+                    pure $
+                        ForestCursor
+                            ne
+                                { nonEmptyCursorPrev = ts
+                                , nonEmptyCursorCurrent = tc
+                                }
+        NoSiblingsToDemoteUnder -> Nothing
+
+-- | Demotes the current subtree to the level of its children.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  - a
+-- >    |- b
+-- >  - c <--
+-- >    |- d
+--
+-- After:
+--
+-- >  - a
+-- >    |- b
+-- >    |- c <--
+-- >       |- d
+forestCursorDemoteSubTree ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorDemoteSubTree f g fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL (treeCursorDemoteSubTree f g) of
+        Demoted fc' -> pure fc'
+        CannotDemoteTopNode ->
+            case nonEmptyCursorPrev ne of
+                [] -> Nothing
+                (Node v vts:ts) -> do
+                    let n' =
+                            Node v $
+                            vts ++
+                            [ rebuildTreeCursor
+                                  f
+                                  (fc ^. forestCursorSelectedTreeL)
+                            ]
+                    tc <-
+                        makeTreeCursorWithSelection
+                            f
+                            g
+                            (SelectChild (length vts) SelectNode)
+                            n'
+                    pure $
+                        ForestCursor
+                            ne
+                                { nonEmptyCursorPrev = ts
+                                , nonEmptyCursorCurrent = tc
+                                }
+        NoSiblingsToDemoteUnder -> Nothing

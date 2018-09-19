@@ -13,6 +13,9 @@ import Data.GenValidity.Containers ()
 
 import Cursor.Tree
 
+instance GenUnchecked TreeCursorSelection
+instance GenValid TreeCursorSelection
+
 instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (TreeCursor a b) where
     genUnchecked =
         sized $ \n -> do

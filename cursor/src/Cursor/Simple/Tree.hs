@@ -8,6 +8,7 @@ module Cursor.Simple.Tree
     , TreeAbove(..)
     , singletonTreeCursor
     , makeTreeCursor
+    , makeTreeCursorWithSelection
     , rebuildTreeCursor
     , drawTreeCursor
     , mapTreeCursor
@@ -19,6 +20,9 @@ module Cursor.Simple.Tree
     , treeAboveNodeL
     , treeAboveRightsL
     , treeCursorWithPointer
+    , treeCursorSelection
+    , TC.TreeCursorSelection(..)
+    , treeCursorSelect
     , treeCursorSelectPrev
     , treeCursorSelectNext
     , treeCursorSelectFirst
@@ -53,9 +57,14 @@ module Cursor.Simple.Tree
     , treeCursorSwapPrev
     , treeCursorSwapNext
     , treeCursorPromoteElem
-    , treeCursorDemoteElem
+    , TC.PromoteElemResult(..)
     , treeCursorPromoteSubTree
+    , TC.PromoteResult(..)
+    , treeCursorDemoteElem
     , treeCursorDemoteSubTree
+    , TC.DemoteResult(..)
+    , treeCursorDemoteElemUnder
+    , treeCursorDemoteSubTreeUnder
     ) where
 
 import Data.Tree
@@ -93,6 +102,10 @@ treeAboveRightsL = lens treeAboveRights $ \ta tar -> ta {treeAboveRights = tar}
 makeTreeCursor :: Tree a -> TreeCursor a
 makeTreeCursor = TC.makeTreeCursor id
 
+makeTreeCursorWithSelection ::
+       TC.TreeCursorSelection -> Tree a -> Maybe (TreeCursor a)
+makeTreeCursorWithSelection = TC.makeTreeCursorWithSelection id id
+
 singletonTreeCursor :: a -> TreeCursor a
 singletonTreeCursor = TC.singletonTreeCursor
 
@@ -107,6 +120,13 @@ mapTreeCursor f = TC.mapTreeCursor f f
 
 treeCursorWithPointer :: Show a => TreeCursor a -> Tree String
 treeCursorWithPointer = TC.treeCursorWithPointer
+
+treeCursorSelection :: TreeCursor a -> TC.TreeCursorSelection
+treeCursorSelection = TC.treeCursorSelection
+
+treeCursorSelect ::
+       TC.TreeCursorSelection -> TreeCursor a -> Maybe (TreeCursor a)
+treeCursorSelect = TC.treeCursorSelect id id
 
 treeCursorSelectPrev :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectPrev = TC.treeCursorSelectPrev id id
@@ -223,14 +243,20 @@ treeCursorSwapPrev = TC.treeCursorSwapPrev id id
 treeCursorSwapNext :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSwapNext = TC.treeCursorSwapNext id id
 
-treeCursorPromoteSubTree :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorPromoteSubTree = TC.treeCursorPromoteSubTree id id
-
-treeCursorDemoteSubTree :: TreeCursor a -> Maybe (TreeCursor a)
-treeCursorDemoteSubTree = TC.treeCursorDemoteSubTree id id
-
-treeCursorPromoteElem :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorPromoteElem :: TreeCursor a -> TC.PromoteElemResult (TreeCursor a)
 treeCursorPromoteElem = TC.treeCursorPromoteElem id id
 
-treeCursorDemoteElem :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorPromoteSubTree :: TreeCursor a -> TC.PromoteResult (TreeCursor a)
+treeCursorPromoteSubTree = TC.treeCursorPromoteSubTree id id
+
+treeCursorDemoteElem :: TreeCursor a -> TC.DemoteResult (TreeCursor a)
 treeCursorDemoteElem = TC.treeCursorDemoteElem id id
+
+treeCursorDemoteSubTree :: TreeCursor a -> TC.DemoteResult (TreeCursor a)
+treeCursorDemoteSubTree = TC.treeCursorDemoteSubTree id id
+
+treeCursorDemoteElemUnder :: a -> a -> TreeCursor a -> Maybe (TreeCursor a)
+treeCursorDemoteElemUnder = TC.treeCursorDemoteElemUnder
+
+treeCursorDemoteSubTreeUnder :: a -> TreeCursor a -> TreeCursor a
+treeCursorDemoteSubTreeUnder = TC.treeCursorDemoteSubTreeUnder
