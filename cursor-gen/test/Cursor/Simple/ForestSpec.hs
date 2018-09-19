@@ -818,6 +818,88 @@ shiftingSpec = do
                             "forestCursorDemoteSubTree should not have failed."
                     Just f -> f `forestShouldBe` expected
         it "demotes the current subtree to the level of its children" pending
+    describe "forestCursorDemoteElemUnder" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids3 $ forestCursorDemoteElemUnder @Double
+        it "Works on the example from the docs" $
+            forAllValid $ \b1 ->
+                forAllValid $ \b2 ->
+                    let demoteStart =
+                            ForestCursor $
+                            NonEmptyCursor
+                                { nonEmptyCursorPrev = []
+                                , nonEmptyCursorCurrent =
+                                      TreeCursor
+                                          { treeAbove = Nothing
+                                          , treeCurrent = 'a'
+                                          , treeBelow = [Node 'b' []]
+                                          }
+                                , nonEmptyCursorNext = []
+                                }
+                        demoteEnd =
+                            ForestCursor $
+                            NonEmptyCursor
+                                { nonEmptyCursorPrev = []
+                                , nonEmptyCursorCurrent =
+                                      TreeCursor
+                                          { treeAbove =
+                                                Just
+                                                    TreeAbove
+                                                        { treeAboveLefts = []
+                                                        , treeAboveAbove =
+                                                              Nothing
+                                                        , treeAboveNode = b1
+                                                        , treeAboveRights = []
+                                                        }
+                                          , treeCurrent = 'a'
+                                          , treeBelow = []
+                                          }
+                                , nonEmptyCursorNext = [Node b2 [Node 'b' []]]
+                                }
+                     in forestCursorDemoteElemUnder b1 b2 demoteStart `forestShouldBe`
+                        demoteEnd
+        it "demotes the current node to the level of its children" pending
+    describe "forestCursorDemoteSubTreeUnder" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids2 $ forestCursorDemoteSubTreeUnder @Double
+        it "Works on the example from the docs" $
+            forAllValid $ \v -> do
+                let demoteStart =
+                        ForestCursor $
+                        NonEmptyCursor
+                            { nonEmptyCursorPrev = []
+                            , nonEmptyCursorCurrent =
+                                  TreeCursor
+                                      { treeAbove = Nothing
+                                      , treeCurrent = 'a'
+                                      , treeBelow = [Node 'b' []]
+                                      }
+                            , nonEmptyCursorNext = []
+                            }
+                    demoteEnd =
+                        ForestCursor $
+                        NonEmptyCursor
+                            { nonEmptyCursorPrev = []
+                            , nonEmptyCursorCurrent =
+                                  TreeCursor
+                                      { treeAbove =
+                                            Just
+                                                TreeAbove
+                                                    { treeAboveLefts = []
+                                                    , treeAboveAbove = Nothing
+                                                    , treeAboveNode = v
+                                                    , treeAboveRights = []
+                                                    }
+                                      , treeCurrent = 'a'
+                                      , treeBelow = [Node 'b' []]
+                                      }
+                            , nonEmptyCursorNext = []
+                            }
+                forestCursorDemoteSubTreeUnder v demoteStart `forestShouldBe`
+                    demoteEnd
+        it
+            "demotes the current subtree to the level of its children, by adding a root"
+            pending
 
 isMovementM ::
        (forall a. SFC.ForestCursor a -> Maybe (SFC.ForestCursor a)) -> Property

@@ -54,9 +54,11 @@ module Cursor.Simple.Forest
     , forestCursorSwapPrev
     , forestCursorSwapNext
     , forestCursorPromoteElem
-    , forestCursorDemoteElem
     , forestCursorPromoteSubTree
+    , forestCursorDemoteElem
     , forestCursorDemoteSubTree
+    , forestCursorDemoteElemUnder
+    , forestCursorDemoteSubTreeUnder
     ) where
 
 import Data.Validity.Tree ()
@@ -227,16 +229,24 @@ forestCursorAddRoot = FC.forestCursorAddRoot id id
 
 forestCursorSwapPrev :: ForestCursor a -> Maybe (ForestCursor a)
 forestCursorSwapPrev = FC.forestCursorSwapPrev id id
+
 forestCursorSwapNext :: ForestCursor a -> Maybe (ForestCursor a)
 forestCursorSwapNext = FC.forestCursorSwapNext id id
+
 forestCursorPromoteElem :: ForestCursor a -> Maybe (ForestCursor a)
 forestCursorPromoteElem = FC.forestCursorPromoteElem id id
-
-forestCursorDemoteElem :: ForestCursor a -> Maybe (ForestCursor a)
-forestCursorDemoteElem = FC.forestCursorDemoteElem id id
 
 forestCursorPromoteSubTree :: ForestCursor a -> Maybe (ForestCursor a)
 forestCursorPromoteSubTree = FC.forestCursorPromoteSubTree id id
 
+forestCursorDemoteElem :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorDemoteElem = FC.forestCursorDemoteElem id id
+
 forestCursorDemoteSubTree :: ForestCursor a -> Maybe (ForestCursor a)
 forestCursorDemoteSubTree = FC.forestCursorDemoteSubTree id id
+
+forestCursorDemoteElemUnder :: a -> a -> ForestCursor a -> ForestCursor a
+forestCursorDemoteElemUnder = FC.forestCursorDemoteElemUnder
+
+forestCursorDemoteSubTreeUnder :: a -> ForestCursor a -> ForestCursor a
+forestCursorDemoteSubTreeUnder = FC.forestCursorDemoteSubTreeUnder

@@ -54,9 +54,11 @@ module Cursor.Forest
     , forestCursorSwapPrev
     , forestCursorSwapNext
     , forestCursorPromoteElem
-    , forestCursorDemoteElem
     , forestCursorPromoteSubTree
+    , forestCursorDemoteElem
     , forestCursorDemoteSubTree
+    , forestCursorDemoteElemUnder
+    , forestCursorDemoteSubTreeUnder
     ) where
 
 import GHC.Generics (Generic)
@@ -615,3 +617,62 @@ forestCursorDemoteSubTree f g fc@(ForestCursor ne) =
                                 , nonEmptyCursorCurrent = tc
                                 }
         NoSiblingsToDemoteUnder -> Nothing
+
+-- | Demotes the current node to the level of its children, by adding two roots.
+-- One for the current node and one for its children that are left behind.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  - a <--
+-- >    |- b
+--
+-- After:
+--
+-- >  - <given element 1>
+-- >    |- a <--
+-- >  - <given element 2>
+-- >    |- b
+forestCursorDemoteElemUnder :: b -> b -> ForestCursor a b -> ForestCursor a b
+forestCursorDemoteElemUnder b1 b2 fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL (treeCursorDemoteElemUnder b1 b2) of
+        Just fc' -> fc'
+        Nothing ->
+            let t = fc ^. forestCursorSelectedTreeL
+             in ForestCursor $
+                ne
+                    { nonEmptyCursorCurrent =
+                          TreeCursor
+                              { treeAbove =
+                                    Just
+                                        TreeAbove
+                                            { treeAboveLefts = []
+                                            , treeAboveAbove = Nothing
+                                            , treeAboveNode = b1
+                                            , treeAboveRights = []
+                                            }
+                              , treeCurrent = treeCurrent t
+                              , treeBelow = []
+                              }
+                    , nonEmptyCursorNext =
+                          Node b2 (treeBelow t) : nonEmptyCursorNext ne
+                    }
+
+-- | Demotes the current subtree to the level of its children, by adding a root.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  a <--
+-- >  |- b
+--
+-- After:
+--
+-- >  <given element>
+-- >  |- a <--
+-- >     |- b
+forestCursorDemoteSubTreeUnder :: b -> ForestCursor a b -> ForestCursor a b
+forestCursorDemoteSubTreeUnder b =
+    forestCursorSelectedTreeL %~ treeCursorDemoteSubTreeUnder b
