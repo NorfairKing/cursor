@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.Simple.TreeSpec
     ( spec
@@ -455,14 +456,90 @@ spec = do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDeleteElem @Double
         it "deletes the current element" pending
+    functorSpec @SwapResult
     describe "treeCursorSwapPrev" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorSwapPrev @Double
+        it "works on the example from the docs" $
+            let start =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts = [Node 'a' []]
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = []
+                                      }
+                        , treeCurrent = 'b'
+                        , treeBelow = []
+                        }
+                end =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts = []
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = [Node 'a' []]
+                                      }
+                        , treeCurrent = 'b'
+                        , treeBelow = []
+                        }
+             in case treeCursorSwapPrev start of
+                    Swapped r -> r `treeShouldBe` end
+                    _ ->
+                        expectationFailure
+                            "treeCursorSwapPrev should not have failed."
+        it "reverts treeCursorSwapNext" $
+            inverseFunctionsIfSucceedOnValid
+                (treeCursorSwapNext @Double)
+                (treeCursorSwapPrev @Double)
         it "swaps the current node with the previous node" pending
     describe "treeCursorSwapNext" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorSwapNext @Double
+        it "works on the example from the docs" $
+            let start =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts = []
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = [Node 'b' []]
+                                      }
+                        , treeCurrent = 'a'
+                        , treeBelow = []
+                        }
+                end =
+                    TreeCursor
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                      { treeAboveLefts = [Node 'b' []]
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = []
+                                      }
+                        , treeCurrent = 'a'
+                        , treeBelow = []
+                        }
+             in case treeCursorSwapNext start of
+                    Swapped r -> r `treeShouldBe` end
+                    _ ->
+                        expectationFailure
+                            "treeCursorSwapNext should not have failed."
+        it "reverts treeCursorSwapNext" $
+            inverseFunctionsIfSucceedOnValid
+                (treeCursorSwapPrev @Double)
+                (treeCursorSwapNext @Double)
         it "swaps the current node with the next node" pending
+    functorSpec @PromoteElemResult
+    applicativeSpec @PromoteElemResult
+    monadSpec @PromoteElemResult
     describe "treeCursorPromoteElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorPromoteElem @Double
@@ -519,6 +596,9 @@ spec = do
                         expectationFailure
                             "treeCursorPromoteElem should not have failed"
         it "promotes the current node to the level of its parent" pending
+    functorSpec @PromoteResult
+    applicativeSpec @PromoteResult
+    monadSpec @PromoteResult
     describe "treeCursorPromoteSubTree" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorPromoteSubTree @Double
@@ -571,6 +651,7 @@ spec = do
                         expectationFailure
                             "treeCursorPromoteSubTree should not have failed"
         it "promotes the current subtree to the level of its parent" pending
+    functorSpec @DemoteResult
     describe "treeCursorDemoteElem" $ do
         it "produces valids on valids" $
             producesValidsOnValids $ treeCursorDemoteElem @Double
@@ -793,3 +874,9 @@ treeShouldBe actual expected =
         , "expected:"
         , drawTreeCursor expected
         ]
+
+instance CanFail SwapResult where
+    hasFailed (Swapped _) = False
+    hasFailed _ = True
+    resultIfSucceeded (Swapped a) = Just a
+    resultIfSucceeded _ = Nothing

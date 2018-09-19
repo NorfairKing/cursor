@@ -51,6 +51,8 @@ module Cursor.Simple.Forest
     , forestCursorRemoveSubTree
     , forestCursorDeleteSubTree
     , forestCursorAddRoot
+    , forestCursorSwapPrev
+    , forestCursorSwapNext
     , forestCursorPromoteElem
     , forestCursorDemoteElem
     , forestCursorPromoteSubTree
@@ -223,6 +225,10 @@ forestCursorDeleteSubTree = FC.forestCursorDeleteSubTree id
 forestCursorAddRoot :: ForestCursor a -> a -> TreeCursor a
 forestCursorAddRoot = FC.forestCursorAddRoot id id
 
+forestCursorSwapPrev :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorSwapPrev = FC.forestCursorSwapPrev id id
+forestCursorSwapNext :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorSwapNext = FC.forestCursorSwapNext id id
 forestCursorPromoteElem :: ForestCursor a -> Maybe (ForestCursor a)
 forestCursorPromoteElem = FC.forestCursorPromoteElem id id
 

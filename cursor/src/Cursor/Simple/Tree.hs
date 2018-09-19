@@ -56,6 +56,7 @@ module Cursor.Simple.Tree
     , treeCursorDeleteElem
     , treeCursorSwapPrev
     , treeCursorSwapNext
+    , TC.SwapResult(..)
     , treeCursorPromoteElem
     , TC.PromoteElemResult(..)
     , treeCursorPromoteSubTree
@@ -237,10 +238,10 @@ treeCursorRemoveElem = TC.treeCursorRemoveElem id
 treeCursorDeleteElem :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)
 treeCursorDeleteElem = TC.treeCursorDeleteElem id
 
-treeCursorSwapPrev :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorSwapPrev :: TreeCursor a -> TC.SwapResult (TreeCursor a)
 treeCursorSwapPrev = TC.treeCursorSwapPrev id id
 
-treeCursorSwapNext :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorSwapNext :: TreeCursor a -> TC.SwapResult (TreeCursor a)
 treeCursorSwapNext = TC.treeCursorSwapNext id id
 
 treeCursorPromoteElem :: TreeCursor a -> TC.PromoteElemResult (TreeCursor a)

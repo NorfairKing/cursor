@@ -62,6 +62,7 @@ module Cursor.Tree
     -- * Swapping
     , treeCursorSwapPrev
     , treeCursorSwapNext
+    , SwapResult(..)
     -- * Promotions
     , treeCursorPromoteElem
     , PromoteElemResult(..)
@@ -519,27 +520,81 @@ treeCursorDeleteElem g tc =
         (treeCursorDeleteElemAndSelectPrevious g tc)
         (treeCursorDeleteElemAndSelectAbove g tc)
 
+-- | Swaps the current node with the previous node on the same level
+--
+-- Example:
+--
+-- Before:
+--
+-- > p
+-- > |- a
+-- > |- b <--
+--
+-- After:
+--
+-- > p
+-- > |- b <--
+-- > |- a
 treeCursorSwapPrev ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
+       (a -> b) -> (b -> a) -> TreeCursor a b -> SwapResult (TreeCursor a b)
 treeCursorSwapPrev f g tc = do
-    above <- treeAbove tc
-    let t = currentTree f tc
-    (above', t') <-
-        case treeAboveLefts above of
-            [] -> Nothing
-            (l:ls) -> Just (above {treeAboveLefts = t : ls}, l)
-    pure $ makeTreeCursorWithAbove g t' $ Just above'
+    case treeAbove tc of
+        Nothing -> SwapperIsTopNode
+        Just ta ->
+            case treeAboveLefts ta of
+                [] -> NoSiblingsToSwapWith
+                (t:ts) ->
+                    Swapped $
+                    tc
+                        { treeAbove =
+                              Just
+                                  ta
+                                      { treeAboveLefts = ts
+                                      , treeAboveRights = t : treeAboveRights ta
+                                      }
+                        }
 
+-- | Swaps the current node with the next node on the same level
+--
+-- Example:
+--
+-- Before:
+--
+-- > p
+-- > |- a <--
+-- > |- b
+--
+-- After:
+--
+-- > p
+-- > |- b
+-- > |- a <--
 treeCursorSwapNext ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSwapNext f g tc = do
-    above <- treeAbove tc
-    let t = currentTree f tc
-    (above', t') <-
-        case treeAboveRights above of
-            [] -> Nothing
-            (r:rs) -> Just (above {treeAboveRights = t : rs}, r)
-    pure $ makeTreeCursorWithAbove g t' $ Just above'
+       (a -> b) -> (b -> a) -> TreeCursor a b -> SwapResult (TreeCursor a b)
+treeCursorSwapNext f g tc =
+    case treeAbove tc of
+        Nothing -> SwapperIsTopNode
+        Just ta ->
+            case treeAboveRights ta of
+                [] -> NoSiblingsToSwapWith
+                (t:ts) ->
+                    Swapped $
+                    tc
+                        { treeAbove =
+                              Just
+                                  ta
+                                      { treeAboveLefts = t : treeAboveLefts ta
+                                      , treeAboveRights = ts
+                                      }
+                        }
+
+data SwapResult a
+    = SwapperIsTopNode
+    | NoSiblingsToSwapWith
+    | Swapped a
+    deriving (Show, Eq, Generic, Functor)
+
+instance Validity a => Validity (SwapResult a)
 
 -- | Promotes the current node to the level of its parent.
 --

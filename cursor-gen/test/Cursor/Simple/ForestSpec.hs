@@ -55,6 +55,7 @@ spec = do
         it "returns selects the element at the given index" pending
     movementsSpec
     insertSpec
+    swapSpec
     deleteSpec
     shiftingSpec
 
@@ -320,6 +321,95 @@ insertSpec = do
         it "produces valid cursors" $
             producesValidsOnValids2 (forestCursorAddRoot @Double)
         it "houses the entire forest under the given node" pending
+
+swapSpec :: Spec
+swapSpec = do
+    describe "forestCursorSwapPrev" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids (forestCursorSwapPrev @Double)
+        it "works on the example from the docs" $
+            let start =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = [Node 'a' []]
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 'b'
+                                            , treeBelow = []
+                                            }
+                                  , nonEmptyCursorNext = []
+                                  }
+                        }
+                end =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = []
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 'b'
+                                            , treeBelow = []
+                                            }
+                                  , nonEmptyCursorNext = [Node 'a' []]
+                                  }
+                        }
+             in case forestCursorSwapPrev start of
+                    Nothing ->
+                        expectationFailure
+                            "forestCursorSwapPrev should not have failed."
+                    Just r -> r `forestShouldBe` end
+        it
+            "swaps the current node with the previous node on the same level"
+            pending
+        it "reverts forestCursorSwapNext" $
+            inverseFunctionsIfSucceedOnValid
+                (forestCursorSwapNext @Double)
+                (forestCursorSwapPrev @Double)
+    describe "forestCursorSwapNext" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids (forestCursorSwapNext @Double)
+        it "works on the example from the docs" $
+            let start =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = []
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 'a'
+                                            , treeBelow = []
+                                            }
+                                  , nonEmptyCursorNext = [Node 'b' []]
+                                  }
+                        }
+                end =
+                    ForestCursor
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                                  { nonEmptyCursorPrev = [Node 'b' []]
+                                  , nonEmptyCursorCurrent =
+                                        TreeCursor
+                                            { treeAbove = Nothing
+                                            , treeCurrent = 'a'
+                                            , treeBelow = []
+                                            }
+                                  , nonEmptyCursorNext = []
+                                  }
+                        }
+             in case forestCursorSwapNext start of
+                    Nothing ->
+                        expectationFailure
+                            "forestCursorSwapNext should not have failed."
+                    Just r -> r `forestShouldBe` end
+        it "swaps the current node with the next node on the same level" pending
+        it "reverts forestCursorSwapPrev" $
+            inverseFunctionsIfSucceedOnValid
+                (forestCursorSwapPrev @Double)
+                (forestCursorSwapNext @Double)
 
 deleteSpec :: Spec
 deleteSpec = do

@@ -51,6 +51,8 @@ module Cursor.Forest
     , forestCursorRemoveSubTree
     , forestCursorDeleteSubTree
     , forestCursorAddRoot
+    , forestCursorSwapPrev
+    , forestCursorSwapNext
     , forestCursorPromoteElem
     , forestCursorDemoteElem
     , forestCursorPromoteSubTree
@@ -359,6 +361,66 @@ forestCursorAddRoot ::
 forestCursorAddRoot f g fc v =
     makeTreeCursor g $ Node (f v) $ NE.toList $ rebuildForestCursor f fc
 
+-- | Swaps the current node with the previous node on the same level
+--
+-- Example:
+--
+-- Before:
+--
+-- > - a
+-- > - b <--
+--
+-- After:
+--
+-- > - b <--
+-- > - a
+forestCursorSwapPrev ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSwapPrev f g fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL (treeCursorSwapPrev f g) of
+        Swapped fc' -> pure fc'
+        NoSiblingsToSwapWith -> Nothing
+        SwapperIsTopNode ->
+            case nonEmptyCursorPrev ne of
+                [] -> Nothing
+                (t:ts) ->
+                    pure $
+                    ForestCursor
+                        ne
+                            { nonEmptyCursorPrev = ts
+                            , nonEmptyCursorNext = t : nonEmptyCursorNext ne
+                            }
+
+-- | Swaps the current node with the next node on the same level
+--
+-- Example:
+--
+-- Before:
+--
+-- > - a <--
+-- > - b
+--
+-- After:
+--
+-- > - b
+-- > - a <--
+forestCursorSwapNext ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorSwapNext f g fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL (treeCursorSwapNext f g) of
+        Swapped fc' -> pure fc'
+        NoSiblingsToSwapWith -> Nothing
+        SwapperIsTopNode ->
+            case nonEmptyCursorNext ne of
+                [] -> Nothing
+                (t:ts) ->
+                    pure $
+                    ForestCursor
+                        ne
+                            { nonEmptyCursorPrev = t : nonEmptyCursorPrev ne
+                            , nonEmptyCursorNext = ts
+                            }
+
 -- | Promotes the current node to the level of its parent.
 --
 -- Example:
@@ -409,7 +471,9 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
                 ne
                     { nonEmptyCursorPrev =
                           rebuildTreeCursor f tc'' : nonEmptyCursorPrev ne
-                    , nonEmptyCursorCurrent = singletonTreeCursor $ treeCurrent $ fc ^. forestCursorSelectedTreeL
+                    , nonEmptyCursorCurrent =
+                          singletonTreeCursor $
+                          treeCurrent $ fc ^. forestCursorSelectedTreeL
                     }
 
 -- | Promotes the current node to the level of its parent.
