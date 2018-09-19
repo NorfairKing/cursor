@@ -386,10 +386,77 @@ forestCursorAddRoot f g fc v =
 -- > - h
 forestCursorPromoteElem ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
-forestCursorPromoteElem f g fc =
-    (fc & forestCursorSelectedTreeL (treeCursorPromoteElem f g)) <|> go
-  where
-    go = undefined
+forestCursorPromoteElem f g fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL (treeCursorPromoteElem f g) of
+        PromotedElem fc' -> pure fc'
+        CannotPromoteTopElem -> Nothing
+        NoSiblingsToAdoptChildren -> Nothing
+        NoGrandparentToPromoteElemUnder -> do
+            let tc = fc ^. forestCursorSelectedTreeL
+            ta <- treeAbove tc
+            lefts <-
+                case treeAboveLefts ta of
+                    [] -> Nothing
+                    (Node t ls:ts) -> pure $ Node t (ls ++ treeBelow tc) : ts
+            let ta' = ta {treeAboveLefts = lefts}
+            let tc' = tc {treeAbove = Just ta'}
+            tc'' <-
+                case treeCursorDeleteSubTree g tc' of
+                    Deleted -> Nothing -- Cannot happen, otherwise we would have gotten 'CannotPromoteTopNode'.
+                    Updated tc'' -> pure tc''
+            pure $
+                ForestCursor $
+                ne
+                    { nonEmptyCursorPrev =
+                          rebuildTreeCursor f tc'' : nonEmptyCursorPrev ne
+                    , nonEmptyCursorCurrent = singletonTreeCursor $ treeCurrent $ fc ^. forestCursorSelectedTreeL
+                    }
+
+-- | Promotes the current node to the level of its parent.
+--
+-- Example:
+--
+-- Before:
+--
+-- >  - a
+-- >    |- b
+-- >    |  |- c
+-- >    |- d <--
+-- >    |  |- e
+-- >    |- f
+-- >       |- g
+-- >  - h
+--
+-- After:
+--
+-- >
+-- > - a
+-- >   |- b
+-- >   |  |- c
+-- >   |- f
+-- >      |- g
+-- > - d <--
+-- >   |- e
+-- > - h
+forestCursorPromoteSubTree ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorPromoteSubTree f g fc@(ForestCursor ne) =
+    case fc & forestCursorSelectedTreeL (treeCursorPromoteSubTree f g) of
+        Promoted fc' -> pure fc'
+        CannotPromoteTopNode -> Nothing
+        NoGrandparentToPromoteUnder ->
+            case treeCursorDeleteSubTree g $ fc ^. forestCursorSelectedTreeL of
+                Deleted -> Nothing -- Cannot happen, otherwise we would have gotten 'CannotPromoteTopNode'.
+                Updated tc' ->
+                    pure $
+                    ForestCursor $
+                    ne
+                        { nonEmptyCursorPrev =
+                              rebuildTreeCursor f tc' : nonEmptyCursorPrev ne
+                        , nonEmptyCursorCurrent =
+                              (fc ^. forestCursorSelectedTreeL)
+                                  {treeAbove = Nothing}
+                        }
 
 -- | Demotes the current node to the level of its children.
 --
@@ -437,51 +504,6 @@ forestCursorDemoteElem f g fc@(ForestCursor ne) =
                                 , nonEmptyCursorCurrent = tc
                                 }
         NoSiblingsToDemoteUnder -> Nothing
-
--- | Promotes the current node to the level of its parent.
---
--- Example:
---
--- Before:
---
--- >  - a
--- >    |- b
--- >    |  |- c
--- >    |- d <--
--- >    |  |- e
--- >    |- f
--- >       |- g
--- >  - h
---
--- After:
---
--- >
--- > - a
--- >   |- b
--- >   |  |- c
--- >   |- f
--- >      |- g
--- > - d <--
--- >   |- e
--- > - h
-forestCursorPromoteSubTree ::
-       (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
-forestCursorPromoteSubTree f g fc@(ForestCursor ne) =
-    case fc & forestCursorSelectedTreeL (treeCursorPromoteSubTree f g) of
-        Promoted fc' -> pure fc'
-        NoGrandparentToPromoteUnder ->
-            case treeCursorDeleteSubTree g $ fc ^. forestCursorSelectedTreeL of
-                Deleted -> Nothing -- Cannot happen, otherwise we would have gotten 'CannotPromoteTopNode'.
-                Updated tc' ->
-                    pure $
-                    ForestCursor $
-                    ne
-                        { nonEmptyCursorPrev =
-                              rebuildTreeCursor f tc' : nonEmptyCursorPrev ne
-                        , nonEmptyCursorCurrent =
-                              (fc ^. forestCursorSelectedTreeL) { treeAbove = Nothing}
-                        }
-        CannotPromoteTopNode -> Nothing
 
 -- | Demotes the current subtree to the level of its children.
 --

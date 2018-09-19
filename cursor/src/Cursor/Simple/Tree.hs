@@ -56,11 +56,12 @@ module Cursor.Simple.Tree
     , treeCursorDeleteElem
     , treeCursorSwapPrev
     , treeCursorSwapNext
-    , treeCursorPromoteSubTree
     , treeCursorPromoteElem
+    , TC.PromoteElemResult(..)
+    , treeCursorPromoteSubTree
     , TC.PromoteResult(..)
-    , treeCursorDemoteSubTree
     , treeCursorDemoteElem
+    , treeCursorDemoteSubTree
     , TC.DemoteResult(..)
     ) where
 
@@ -243,7 +244,7 @@ treeCursorSwapNext = TC.treeCursorSwapNext id id
 treeCursorPromoteSubTree :: TreeCursor a -> TC.PromoteResult (TreeCursor a)
 treeCursorPromoteSubTree = TC.treeCursorPromoteSubTree id id
 
-treeCursorPromoteElem :: TreeCursor a -> Maybe (TreeCursor a)
+treeCursorPromoteElem :: TreeCursor a -> TC.PromoteElemResult (TreeCursor a)
 treeCursorPromoteElem = TC.treeCursorPromoteElem id id
 
 treeCursorDemoteSubTree :: TreeCursor a -> TC.DemoteResult (TreeCursor a)

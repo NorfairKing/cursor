@@ -57,6 +57,7 @@ module Cursor.Tree
     , treeCursorSwapPrev
     , treeCursorSwapNext
     , treeCursorPromoteElem
+    , PromoteElemResult(..)
     , treeCursorPromoteSubTree
     , PromoteResult(..)
     , treeCursorDemoteElem
@@ -558,18 +559,27 @@ treeCursorSwapNext f g tc = do
 -- >  |- d <--
 -- >  |- h
 treeCursorPromoteElem ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
+       (a -> b)
+    -> (b -> a)
+    -> TreeCursor a b
+    -> PromoteElemResult (TreeCursor a b)
 treeCursorPromoteElem f g tc = do
-    ta <- treeAbove tc
-    taa <- treeAboveAbove ta
+    ta <-
+        case treeAbove tc of
+            Nothing -> CannotPromoteTopElem
+            Just ta -> pure ta
+    -- We need to put the below under the above lefts at the end
     lefts <-
         case treeBelow tc of
             [] -> pure $ treeAboveLefts ta
-            -- We need to put the below under the above lefts at the end
             _ ->
                 case treeAboveLefts ta of
-                    [] -> Nothing
+                    [] -> NoSiblingsToAdoptChildren
                     (Node t ls:ts) -> pure $ Node t (ls ++ treeBelow tc) : ts
+    taa <-
+        case treeAboveAbove ta of
+            Nothing -> NoGrandparentToPromoteElemUnder
+            Just taa -> pure taa
     pure $
         makeTreeCursorWithAbove g (Node (f $ treeCurrent tc) []) $
         Just $
@@ -578,6 +588,32 @@ treeCursorPromoteElem f g tc = do
                   Node (treeAboveNode ta) (reverse lefts ++ treeAboveRights ta) :
                   treeAboveLefts taa
             }
+
+data PromoteElemResult a
+    = CannotPromoteTopElem
+    | NoGrandparentToPromoteElemUnder
+    | NoSiblingsToAdoptChildren
+    | PromotedElem a
+    deriving (Show, Eq, Generic, Functor)
+
+instance Validity a => Validity (PromoteElemResult a)
+
+instance Applicative PromoteElemResult where
+    pure = PromotedElem
+    CannotPromoteTopElem <*> _ = CannotPromoteTopElem
+    NoGrandparentToPromoteElemUnder <*> _ = NoGrandparentToPromoteElemUnder
+    NoSiblingsToAdoptChildren <*> _ = NoSiblingsToAdoptChildren
+    PromotedElem f <*> PromotedElem a = PromotedElem $ f a
+    PromotedElem _ <*> CannotPromoteTopElem = CannotPromoteTopElem
+    PromotedElem _ <*> NoSiblingsToAdoptChildren = NoSiblingsToAdoptChildren
+    PromotedElem _ <*> NoGrandparentToPromoteElemUnder =
+        NoGrandparentToPromoteElemUnder
+
+instance Monad PromoteElemResult where
+    CannotPromoteTopElem >>= _ = CannotPromoteTopElem
+    NoGrandparentToPromoteElemUnder >>= _ = NoGrandparentToPromoteElemUnder
+    NoSiblingsToAdoptChildren >>= _ = NoSiblingsToAdoptChildren
+    PromotedElem a >>= f = f a
 
 -- | Promotes the current node to the level of its parent.
 --
@@ -608,24 +644,25 @@ treeCursorPromoteElem f g tc = do
 -- >  |- h
 treeCursorPromoteSubTree ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteResult (TreeCursor a b)
-treeCursorPromoteSubTree f g tc =
-    case treeAbove tc of
-        Nothing -> CannotPromoteTopNode
-        Just ta ->
-            case treeAboveAbove ta of
-                Nothing -> NoGrandparentToPromoteUnder
-                Just taa ->
-                    Promoted $
-                    makeTreeCursorWithAbove g (currentTree f tc) $
-                    Just $
-                    taa
-                        { treeAboveLefts =
-                              Node
-                                  (treeAboveNode ta)
-                                  (reverse (treeAboveLefts ta) ++
-                                   treeAboveRights ta) :
-                              treeAboveLefts taa
-                        }
+treeCursorPromoteSubTree f g tc = do
+    ta <-
+        case treeAbove tc of
+            Nothing -> CannotPromoteTopNode
+            Just ta -> pure ta
+    taa <-
+        case treeAboveAbove ta of
+            Nothing -> NoGrandparentToPromoteUnder
+            Just taa -> pure taa
+    pure $
+        makeTreeCursorWithAbove g (currentTree f tc) $
+        Just $
+        taa
+            { treeAboveLefts =
+                  Node
+                      (treeAboveNode ta)
+                      (reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
+                  treeAboveLefts taa
+            }
 
 data PromoteResult a
     = CannotPromoteTopNode
@@ -634,6 +671,19 @@ data PromoteResult a
     deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (PromoteResult a)
+
+instance Applicative PromoteResult where
+    pure = Promoted
+    CannotPromoteTopNode <*> _ = CannotPromoteTopNode
+    NoGrandparentToPromoteUnder <*> _ = NoGrandparentToPromoteUnder
+    Promoted f <*> Promoted a = Promoted $ f a
+    Promoted _ <*> CannotPromoteTopNode = CannotPromoteTopNode
+    Promoted _ <*> NoGrandparentToPromoteUnder = NoGrandparentToPromoteUnder
+
+instance Monad PromoteResult where
+    CannotPromoteTopNode >>= _ = CannotPromoteTopNode
+    NoGrandparentToPromoteUnder >>= _ = NoGrandparentToPromoteUnder
+    Promoted a >>= f = f a
 
 -- | Demotes the current node to the level of its children.
 --
