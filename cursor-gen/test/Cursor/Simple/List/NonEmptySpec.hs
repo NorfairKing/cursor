@@ -34,7 +34,7 @@ spec = do
                 makeNonEmptyCursorWithSelection
                     (nonEmptyCursorSelection @Double lec)
                     (rebuildNonEmptyCursor lec) `shouldBe`
-                lec
+                Just lec
     describe "singletonNonEmptyCursor" $
         it "produces valid cursors" $
         producesValidsOnValids (singletonNonEmptyCursor @Double)
@@ -46,7 +46,7 @@ spec = do
         it
             "is the inverse of makeNonEmptyCursorWithSelection for integers, for any index" $
             forAll genUnchecked $ \i ->
-                inverseFunctions
+                inverseFunctionsIfFirstSucceedsOnValid
                     (makeNonEmptyCursorWithSelection @Int i)
                     rebuildNonEmptyCursor
     describe "nonEmptyCursorElemL" $
@@ -146,14 +146,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildNonEmptyCursor lec
                     ne' = rebuildNonEmptyCursor lec'
-                in unless (ne == ne') $
-                   expectationFailure $
-                   unlines
-                       [ "Cursor before:\n" ++ show lec
-                       , "List before:  \n" ++ show ne
-                       , "Cursor after: \n" ++ show lec'
-                       , "List after:   \n" ++ show ne'
-                       ]
+                 in unless (ne == ne') $
+                    expectationFailure $
+                    unlines
+                        [ "Cursor before:\n" ++ show lec
+                        , "List before:  \n" ++ show ne
+                        , "Cursor after: \n" ++ show lec'
+                        , "List after:   \n" ++ show ne'
+                        ]
 
 isMovement :: (forall a. NonEmptyCursor a -> NonEmptyCursor a) -> Property
 isMovement func =

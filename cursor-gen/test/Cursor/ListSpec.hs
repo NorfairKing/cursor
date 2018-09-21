@@ -35,7 +35,7 @@ spec = do
             inverseFunctions (makeListCursor @Int) rebuildListCursor
         it "is the inverse of makeListCursorWithSelection for any index" $
             forAllUnchecked $ \i ->
-                inverseFunctions
+                inverseFunctionsIfFirstSucceeds
                     (makeListCursorWithSelection @Int i)
                     rebuildListCursor
     describe "listCursorNull" $

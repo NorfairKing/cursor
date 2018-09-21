@@ -12,8 +12,8 @@ import Test.Hspec
 
 import Test.QuickCheck
 import Test.Validity
--- import Test.Validity.Optics
 
+-- import Test.Validity.Optics
 import Text.Show.Pretty (ppShow)
 
 import qualified Data.Text as T
@@ -39,19 +39,21 @@ spec = do
             forAllValid $ \tfc -> do
                 let (x, y) = textFieldCursorSelection tfc
                     t = rebuildTextFieldCursor tfc
-                    tfc' = makeTextFieldCursorWithSelection x y t
-                unless (tfc' == tfc) $
-                    expectationFailure $
-                    unlines
-                        [ "expected"
-                        , ppShow tfc
-                        , "actual"
-                        , ppShow tfc'
-                        , "The selection of the original (expected) cursor was:"
-                        , show (x, y)
-                        , "The rebuild text was:"
-                        , show t
-                        ]
+                case makeTextFieldCursorWithSelection x y t of
+                    Nothing -> expectationFailure "makeTextFieldCursorWithSelection should not have failed."
+                    Just tfc' ->
+                        unless (tfc' == tfc) $
+                            expectationFailure $
+                            unlines
+                                [ "expected"
+                                , ppShow tfc
+                                , "actual"
+                                , ppShow tfc'
+                                , "The selection of the original (expected) cursor was:"
+                                , show (x, y)
+                                , "The rebuild text was:"
+                                , show t
+                                ]
     describe "rebuildTextFieldCursorLines" $ do
         it "produces valid lists" $
             producesValidsOnValids rebuildTextFieldCursorLines
@@ -72,7 +74,7 @@ spec = do
             "is the inverse of makeTextFieldCursorWithSelection for integers, for any index" $
             forAllValid $ \x ->
                 forAllValid $ \y ->
-                    inverseFunctionsOnValid
+                    inverseFunctionsIfFirstSucceedsOnValid
                         (makeTextFieldCursorWithSelection x y)
                         rebuildTextFieldCursor
     describe "textFieldCursorSelection" $
@@ -80,10 +82,6 @@ spec = do
         producesValidsOnValids textFieldCursorSelection
     describe "emptyTextFieldCursor" $
         it "is valid" $ shouldBeValid emptyTextFieldCursor
-    -- TODO fix this describe "textFieldCursorNonEmptyCursorL" $
-    -- TODO fix this     lensSpecOnValid textFieldCursorNonEmptyCursorL
-    -- TODO fix this describe "textFieldCursorSelectedL" $
-    -- TODO fix this     lensSpecOnValid textFieldCursorSelectedL
     describe "textFieldCursorSelectPrevLine" $ do
         it "produces valid cursors" $
             producesValidsOnValids textFieldCursorSelectPrevLine

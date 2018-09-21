@@ -37,6 +37,7 @@ import Data.Validity
 import Data.Validity.Tree ()
 
 import Data.List.NonEmpty (NonEmpty(..))
+import Data.Maybe
 
 import Lens.Micro
 
@@ -54,14 +55,12 @@ instance Functor (MapCursor k) where
     fmap f = mapCursorNonEmptyCursorL %~ mapNonEmptyCursor (fmap f) (fmap f)
 
 makeMapCursor :: NonEmpty (k, v) -> MapCursor k v
-makeMapCursor = makeMapCursorWithSelection 0
+makeMapCursor = fromJust . makeMapCursorWithSelection 0
 
-makeMapCursorWithSelection :: Int -> NonEmpty (k, v) -> MapCursor k v
+makeMapCursorWithSelection :: Int -> NonEmpty (k, v) -> Maybe (MapCursor k v)
 makeMapCursorWithSelection i ne =
-    MapCursor
-    { mapCursorList =
-          makeNonEmptyCursorWithSelection (uncurry makeKeyValueCursor) i ne
-    }
+    MapCursor <$>
+    makeNonEmptyCursorWithSelection (uncurry makeKeyValueCursor) i ne
 
 singletonMapCursor :: k -> v -> MapCursor k v
 singletonMapCursor k v = makeMapCursor $ (k, v) :| []

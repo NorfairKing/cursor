@@ -37,6 +37,8 @@ import GHC.Generics (Generic)
 
 import Data.Validity
 
+import Data.Maybe
+
 import Lens.Micro
 
 import Data.List.NonEmpty (NonEmpty(..), (<|))
@@ -54,35 +56,35 @@ data NonEmptyCursor a b = NonEmptyCursor
 instance (Validity a, Validity b) => Validity (NonEmptyCursor a b)
 
 makeNonEmptyCursor :: (b -> a) -> NonEmpty b -> NonEmptyCursor a b
-makeNonEmptyCursor g = makeNonEmptyCursorWithSelection g 0
+makeNonEmptyCursor g = fromJust . makeNonEmptyCursorWithSelection g 0
 
 makeNonEmptyCursorWithSelection ::
-       (b -> a) -> Int -> NonEmpty b -> NonEmptyCursor a b
-makeNonEmptyCursorWithSelection g i ne =
-    let (l, m, r) = applyNonEmptySelection ne i
-    in NonEmptyCursor
-       { nonEmptyCursorPrev = reverse l
-       , nonEmptyCursorCurrent = g m
-       , nonEmptyCursorNext = r
-       }
+       (b -> a) -> Int -> NonEmpty b -> Maybe (NonEmptyCursor a b)
+makeNonEmptyCursorWithSelection g i ne = do
+    (l, m, r) <- applyNonEmptySelection ne i
+    pure
+        NonEmptyCursor
+            { nonEmptyCursorPrev = reverse l
+            , nonEmptyCursorCurrent = g m
+            , nonEmptyCursorNext = r
+            }
   where
-    applyNonEmptySelection :: NonEmpty a -> Int -> ([a], a, [a])
+    applyNonEmptySelection :: NonEmpty a -> Int -> Maybe ([a], a, [a])
     applyNonEmptySelection (c :| rest) i_
-        | i_ <= 0 = ([], c, rest)
-        | otherwise =
-            case NE.nonEmpty rest of
-                Nothing -> ([], c, [])
-                Just ne_ ->
-                    let (l, m, r) = applyNonEmptySelection ne_ (i_ - 1)
-                    in (c : l, m, r)
+        | i_ < 0 = Nothing
+        | i_ == 0 = Just ([], c, rest)
+        | otherwise = do
+            ne_ <- NE.nonEmpty rest
+            (l, m, r) <- applyNonEmptySelection ne_ (i_ - 1)
+            pure (c : l, m, r)
 
 singletonNonEmptyCursor :: a -> NonEmptyCursor a b
 singletonNonEmptyCursor a =
     NonEmptyCursor
-    { nonEmptyCursorPrev = []
-    , nonEmptyCursorCurrent = a
-    , nonEmptyCursorNext = []
-    }
+        { nonEmptyCursorPrev = []
+        , nonEmptyCursorCurrent = a
+        , nonEmptyCursorNext = []
+        }
 
 rebuildNonEmptyCursor :: (a -> b) -> NonEmptyCursor a b -> NonEmpty b
 rebuildNonEmptyCursor f NonEmptyCursor {..} =
@@ -93,12 +95,12 @@ mapNonEmptyCursor ::
        (a -> c) -> (b -> d) -> NonEmptyCursor a b -> NonEmptyCursor c d
 mapNonEmptyCursor f g NonEmptyCursor {..} =
     NonEmptyCursor
-    { nonEmptyCursorPrev = map g nonEmptyCursorPrev
-    , nonEmptyCursorCurrent = f nonEmptyCursorCurrent
-    , nonEmptyCursorNext = map g nonEmptyCursorNext
-    }
+        { nonEmptyCursorPrev = map g nonEmptyCursorPrev
+        , nonEmptyCursorCurrent = f nonEmptyCursorCurrent
+        , nonEmptyCursorNext = map g nonEmptyCursorNext
+        }
 
-nonEmptyCursorElemL :: Lens' (NonEmptyCursor a b) a
+nonEmptyCursorElemL :: Lens (NonEmptyCursor a c) (NonEmptyCursor b c)  a b
 nonEmptyCursorElemL =
     lens nonEmptyCursorCurrent $ \lec le -> lec {nonEmptyCursorCurrent = le}
 
@@ -110,11 +112,11 @@ nonEmptyCursorSelectPrev f g lec =
         (e:rest) ->
             Just $
             lec
-            { nonEmptyCursorPrev = rest
-            , nonEmptyCursorCurrent = g e
-            , nonEmptyCursorNext =
-                  f (nonEmptyCursorCurrent lec) : nonEmptyCursorNext lec
-            }
+                { nonEmptyCursorPrev = rest
+                , nonEmptyCursorCurrent = g e
+                , nonEmptyCursorNext =
+                      f (nonEmptyCursorCurrent lec) : nonEmptyCursorNext lec
+                }
 
 nonEmptyCursorSelectNext ::
        (a -> b) -> (b -> a) -> NonEmptyCursor a b -> Maybe (NonEmptyCursor a b)
@@ -124,11 +126,11 @@ nonEmptyCursorSelectNext f g lec =
         (e:rest) ->
             Just $
             lec
-            { nonEmptyCursorPrev =
-                  f (nonEmptyCursorCurrent lec) : nonEmptyCursorPrev lec
-            , nonEmptyCursorCurrent = g e
-            , nonEmptyCursorNext = rest
-            }
+                { nonEmptyCursorPrev =
+                      f (nonEmptyCursorCurrent lec) : nonEmptyCursorPrev lec
+                , nonEmptyCursorCurrent = g e
+                , nonEmptyCursorNext = rest
+                }
 
 nonEmptyCursorSelectFirst ::
        (a -> b) -> (b -> a) -> NonEmptyCursor a b -> NonEmptyCursor a b
@@ -172,19 +174,19 @@ nonEmptyCursorInsertAndSelect ::
        (a -> b) -> a -> NonEmptyCursor a b -> NonEmptyCursor a b
 nonEmptyCursorInsertAndSelect f c lec =
     lec
-    { nonEmptyCursorCurrent = c
-    , nonEmptyCursorNext =
-          f (nonEmptyCursorCurrent lec) : nonEmptyCursorNext lec
-    }
+        { nonEmptyCursorCurrent = c
+        , nonEmptyCursorNext =
+              f (nonEmptyCursorCurrent lec) : nonEmptyCursorNext lec
+        }
 
 nonEmptyCursorAppendAndSelect ::
        (a -> b) -> a -> NonEmptyCursor a b -> NonEmptyCursor a b
 nonEmptyCursorAppendAndSelect f c lec =
     lec
-    { nonEmptyCursorCurrent = c
-    , nonEmptyCursorPrev =
-          f (nonEmptyCursorCurrent lec) : nonEmptyCursorPrev lec
-    }
+        { nonEmptyCursorCurrent = c
+        , nonEmptyCursorPrev =
+              f (nonEmptyCursorCurrent lec) : nonEmptyCursorPrev lec
+        }
 
 nonEmptyCursorInsertAtStart :: b -> NonEmptyCursor a b -> NonEmptyCursor a b
 nonEmptyCursorInsertAtStart c lec =

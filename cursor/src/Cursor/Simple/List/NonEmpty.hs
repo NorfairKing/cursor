@@ -45,7 +45,7 @@ type NonEmptyCursor a = NEC.NonEmptyCursor a a
 makeNonEmptyCursor :: NonEmpty a -> NonEmptyCursor a
 makeNonEmptyCursor = NEC.makeNonEmptyCursor id
 
-makeNonEmptyCursorWithSelection :: Int -> NonEmpty a -> NonEmptyCursor a
+makeNonEmptyCursorWithSelection :: Int -> NonEmpty a -> Maybe (NonEmptyCursor a)
 makeNonEmptyCursorWithSelection = NEC.makeNonEmptyCursorWithSelection id
 
 singletonNonEmptyCursor :: a -> NonEmptyCursor a
@@ -102,7 +102,8 @@ nonEmptyCursorInsertAtStartAndSelect =
     NEC.nonEmptyCursorInsertAtStartAndSelect id id
 
 nonEmptyCursorAppendAtEndAndSelect :: a -> NonEmptyCursor a -> NonEmptyCursor a
-nonEmptyCursorAppendAtEndAndSelect = NEC.nonEmptyCursorAppendAtEndAndSelect id id
+nonEmptyCursorAppendAtEndAndSelect =
+    NEC.nonEmptyCursorAppendAtEndAndSelect id id
 
 nonEmptyCursorRemoveElemAndSelectPrev ::
        NonEmptyCursor a -> Maybe (DeleteOrUpdate (NonEmptyCursor a))
