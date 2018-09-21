@@ -55,16 +55,19 @@ spec = do
                         expectationFailure
                             "makeTreeCursorWithSelection should not have failed."
                     Just r -> r `treeShouldBe` tc
-    describe "treeCursorAboveL" $ lensSpecOnValid (treeCursorAboveL @Double)
-    describe "treeCursorCurrentL" $ lensSpecOnValid (treeCursorCurrentL @Double)
-    describe "treeCursorBelowL" $ lensSpecOnValid (treeCursorBelowL @Double)
+    describe "treeCursorAboveL" $
+        lensSpecOnValid (treeCursorAboveL @Double @Double)
+    describe "treeCursorCurrentL" $
+        lensSpecOnValid (treeCursorCurrentL @Double @Double)
+    describe "treeCursorBelowL" $
+        lensSpecOnValid (treeCursorBelowL @Double @Double)
     describe "treeAboveLeftsL" $ lensSpecOnValid (treeAboveLeftsL @Double)
     describe "treeAboveAboveL" $ lensSpecOnValid (treeAboveAboveL @Double)
     describe "treeAboveNodeL" $ lensSpecOnValid (treeAboveNodeL @Double)
     describe "treeAboveRightsL" $ lensSpecOnValid (treeAboveRightsL @Double)
     describe "treeCursorSelection" $
         it "produces valids on valids" $
-        producesValidsOnValids (treeCursorSelection @Double)
+        producesValidsOnValids (treeCursorSelection @Double @Double)
     describe "treeCursorSelect" $ do
         it "produces valids on valids" $
             producesValidsOnValids2 (treeCursorSelect @Double)
@@ -323,7 +326,7 @@ spec = do
                                     ]
     describe "treeCursorInsert" $ do
         it "produces valids on valids" $
-            producesValidsOnValids2 $ treeCursorInsert @Double
+            producesValidsOnValids2 $ treeCursorInsert @Double @Double
         it "inserts the element" pending
     describe "treeCursorInsertAndSelect" $ do
         it "produces valids on valids" $
@@ -331,7 +334,7 @@ spec = do
         it "inserts and select the element" pending
     describe "treeCursorAppend" $ do
         it "produces valids on valids" $
-            producesValidsOnValids2 $ treeCursorAppend @Double
+            producesValidsOnValids2 $ treeCursorAppend @Double @Double
         it "appends the element" pending
     describe "treeCursorAppendAndSelect" $ do
         it "produces valids on valids" $
@@ -339,19 +342,19 @@ spec = do
         it "appends and select the element" pending
     describe "treeCursorAddChildAtPos" $ do
         it "produces valid cursors " $
-            producesValidsOnValids3 $ treeCursorAddChildAtPos @Double
+            producesValidsOnValids3 $ treeCursorAddChildAtPos @Double @Double
         it
             "adds a tree at the given index in the children of the current node"
             pending
     describe "treeCursorAddChildAtStart" $ do
         it "produces valid cursors " $
-            producesValidsOnValids2 $ treeCursorAddChildAtStart @Double
+            producesValidsOnValids2 $ treeCursorAddChildAtStart @Double @Double
         it
             "adds a tree at the start of the children of the current node"
             pending
     describe "treeCursorAddChildAtEnd" $ do
         it "produces valid cursors " $
-            producesValidsOnValids2 $ treeCursorAddChildAtEnd @Double
+            producesValidsOnValids2 $ treeCursorAddChildAtEnd @Double @Double
         it "adds a tree at the end of the children of the current node" pending
     describe "treeCursorDeleteSubTreeAndSelectPrevious" $ do
         it "produces valids on valids" $
@@ -459,7 +462,7 @@ spec = do
     functorSpec @SwapResult
     describe "treeCursorSwapPrev" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorSwapPrev @Double
+            producesValidsOnValids $ treeCursorSwapPrev @Double @Double
         it "works on the example from the docs" $
             let start =
                     TreeCursor
@@ -494,12 +497,12 @@ spec = do
                             "treeCursorSwapPrev should not have failed."
         it "reverts treeCursorSwapNext" $
             inverseFunctionsIfSucceedOnValid
-                (treeCursorSwapNext @Double)
-                (treeCursorSwapPrev @Double)
+                (treeCursorSwapNext @Double @Double)
+                (treeCursorSwapPrev @Double @Double)
         it "swaps the current node with the previous node" pending
     describe "treeCursorSwapNext" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorSwapNext @Double
+            producesValidsOnValids $ treeCursorSwapNext @Double @Double
         it "works on the example from the docs" $
             let start =
                     TreeCursor
@@ -534,8 +537,8 @@ spec = do
                             "treeCursorSwapNext should not have failed."
         it "reverts treeCursorSwapNext" $
             inverseFunctionsIfSucceedOnValid
-                (treeCursorSwapPrev @Double)
-                (treeCursorSwapNext @Double)
+                (treeCursorSwapPrev @Double @Double)
+                (treeCursorSwapNext @Double @Double)
         it "swaps the current node with the next node" pending
     functorSpec @PromoteElemResult
     applicativeSpec @PromoteElemResult
@@ -744,7 +747,7 @@ spec = do
         it "demotes the current subtree to the level of its children" pending
     describe "treeCursorDemoteElemUnder" $ do
         it "produces valids on valids" $
-            producesValidsOnValids3 $ treeCursorDemoteElemUnder @Double
+            producesValidsOnValids3 $ treeCursorDemoteElemUnder @Double @Double
         it "Works on the example from the docs" $
             forAllValid $ \b1 ->
                 forAllValid $ \b2 ->
@@ -799,7 +802,7 @@ spec = do
         it "demotes the current node to the level of its children" pending
     describe "treeCursorDemoteSubTreeUnder" $ do
         it "produces valids on valids" $
-            producesValidsOnValids2 $ treeCursorDemoteSubTreeUnder @Double
+            producesValidsOnValids2 $ treeCursorDemoteSubTreeUnder @Double @Double
         it "Works on the example from the docs" $
             forAllValid $ \v -> do
                 let demoteStart =
