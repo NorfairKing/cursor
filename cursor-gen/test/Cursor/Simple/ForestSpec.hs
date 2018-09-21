@@ -195,6 +195,16 @@ movementsSpec = do
             producesValidsOnValids $ forestCursorSelectNextOnSameLevel @Double
         it "is a movement" $ isMovementM forestCursorSelectNextOnSameLevel
         it "selects the next node on the same level as the current node" pending
+    describe "forestCursorSelectFirst" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectFirst @Double
+        it "is a movement" $ isMovement forestCursorSelectFirst
+        it "selects the first node in the forest" pending
+    describe "forestCursorSelectLast" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectLast @Double
+        it "is a movement" $ isMovement forestCursorSelectLast
+        it "selects the last node in the forest" pending
     describe "forestCursorSelectBelowAtPos" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 $ forestCursorSelectBelowAtPos @Double

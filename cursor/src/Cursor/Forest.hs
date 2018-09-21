@@ -19,6 +19,8 @@ module Cursor.Forest
     , forestCursorSelectNext
     , forestCursorSelectPrevOnSameLevel
     , forestCursorSelectNextOnSameLevel
+    , forestCursorSelectFirst
+    , forestCursorSelectLast
     , forestCursorSelectBelowAtPos
     , forestCursorSelectBelowAtStart
     , forestCursorSelectBelowAtEnd
@@ -160,6 +162,26 @@ forestCursorSelectPrevOnSameLevel ::
 forestCursorSelectPrevOnSameLevel f g fc =
     (fc & forestCursorSelectedTreeL (treeCursorSelectPrevOnSameLevel f g)) <|>
     forestCursorSelectPrevTreeCursor f g fc
+
+forestCursorSelectFirst ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> ForestCursor a b
+forestCursorSelectFirst f g fc =
+    case forestCursorSelectPrevTreeCursor f g fc of
+        Just fc' -> forestCursorSelectFirst f g fc'
+        Nothing ->
+            case forestCursorSelectPrev f g fc of
+                Just fc' -> forestCursorSelectFirst f g fc'
+                Nothing -> fc
+
+forestCursorSelectLast ::
+       (a -> b) -> (b -> a) -> ForestCursor a b -> ForestCursor a b
+forestCursorSelectLast f g fc =
+    case forestCursorSelectNextTreeCursor f g fc of
+        Just fc' -> forestCursorSelectLast f g fc'
+        Nothing ->
+            case forestCursorSelectNext f g fc of
+                Just fc' -> forestCursorSelectLast f g fc'
+                Nothing -> fc
 
 forestCursorSelectBelowAtPos ::
        (a -> b)
