@@ -24,31 +24,26 @@ module Cursor.Tree.Types
     , cForest
     , rebuildCForest
     , emptyCForest
+    , openForest
     , lengthCForest
     , unpackCForest
     ) where
 
+import Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NE
 import Data.Tree
 import Data.Validity
 import Data.Validity.Tree ()
 
 import GHC.Generics (Generic)
 
-import Control.Applicative
-import Control.Monad
-
 import Lens.Micro
-
-import Cursor.Types
 
 data TreeCursor a b = TreeCursor
     { treeAbove :: !(Maybe (TreeAbove b))
     , treeCurrent :: !a
     , treeBelow :: !(CForest b)
     } deriving (Show, Eq, Generic)
-
-currentTree :: (a -> b) -> TreeCursor a b -> CTree b
-currentTree f TreeCursor {..} = CNode (f treeCurrent) treeBelow
 
 treeCursorAboveL :: Lens' (TreeCursor a b) (Maybe (TreeAbove b))
 treeCursorAboveL = lens treeAbove $ \tc ta -> tc {treeAbove = ta}
@@ -84,15 +79,15 @@ treeAboveRightsL = lens treeAboveRights $ \ta tar -> ta {treeAboveRights = tar}
 
 data TreeCursorSelection
     = SelectNode
-    | SelectChild Int
-                  TreeCursorSelection
+    | SelectChild !Int
+                  !TreeCursorSelection
     deriving (Show, Eq, Generic)
 
 instance Validity TreeCursorSelection
 
 data CTree a =
-    CNode a
-          (CForest a)
+    CNode !a
+          !(CForest a)
     deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (CTree a)
@@ -107,8 +102,8 @@ rebuildCTree :: CTree a -> Tree a
 rebuildCTree (CNode v cf) = Node v $ rebuildCForest cf
 
 data CForest a
-    = ClosedForest [Tree a]
-    | OpenForest [CTree a]
+    = ClosedForest ![Tree a]
+    | OpenForest !(NonEmpty (CTree a))
     deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (CForest a)
@@ -119,15 +114,21 @@ makeCForest = cForest True
 cForest :: Bool -> Forest a -> CForest a
 cForest b f =
     if b
-        then OpenForest $ map (cTree b) f
+        then openForest $ map (cTree b) f
         else ClosedForest f
 
 rebuildCForest :: CForest a -> Forest a
 rebuildCForest (ClosedForest f) = f
-rebuildCForest (OpenForest ct) = map rebuildCTree ct
+rebuildCForest (OpenForest ct) = NE.toList $ NE.map rebuildCTree ct
 
 emptyCForest :: CForest a
 emptyCForest = ClosedForest []
+
+openForest :: [CTree a] -> CForest a
+openForest ts =
+    case NE.nonEmpty ts of
+        Nothing -> emptyCForest
+        Just ne -> OpenForest ne
 
 lengthCForest :: CForest a -> Int
 lengthCForest (ClosedForest ts) = length ts
@@ -135,4 +136,4 @@ lengthCForest (OpenForest ts) = length ts
 
 unpackCForest :: CForest a -> [CTree a]
 unpackCForest (ClosedForest ts) = map makeCTree ts
-unpackCForest (OpenForest ts) = ts
+unpackCForest (OpenForest ts) = NE.toList ts

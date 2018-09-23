@@ -13,6 +13,8 @@ module Cursor.Tree.Insert
     , treeCursorAddChildAtEnd
     ) where
 
+import qualified Data.List.NonEmpty as NE
+import Data.List.NonEmpty ((<|))
 import Data.Tree
 import Data.Validity
 import Data.Validity.Tree ()
@@ -71,21 +73,21 @@ treeCursorAddChildAtPos i t tc =
         ClosedForest ts ->
             let (before, after) = splitAt i ts
             in tc
-               {treeBelow = OpenForest $ map makeCTree $ before ++ [t] ++ after}
+               {treeBelow = openForest $ map makeCTree $ before ++ [t] ++ after}
         OpenForest ts ->
-            let (before, after) = splitAt i ts
-            in tc {treeBelow = OpenForest $ before ++ [makeCTree t] ++ after}
+            let (before, after) = splitAt i $ NE.toList ts
+            in tc {treeBelow = openForest $ before ++ [makeCTree t] ++ after}
 
 treeCursorAddChildAtStart :: Tree b -> TreeCursor a b -> TreeCursor a b
 treeCursorAddChildAtStart t tc =
     case treeBelow tc of
-        ClosedForest ts -> tc {treeBelow = OpenForest $ map makeCTree $ t : ts}
-        OpenForest ts -> tc {treeBelow = OpenForest $ makeCTree t : ts}
+        ClosedForest ts -> tc {treeBelow = openForest $ map makeCTree $ t : ts}
+        OpenForest ts -> tc {treeBelow = OpenForest $ makeCTree t <| ts}
 
 treeCursorAddChildAtEnd :: Tree b -> TreeCursor a b -> TreeCursor a b
 treeCursorAddChildAtEnd t tc =
     case treeBelow tc of
         ClosedForest ts ->
-            tc {treeBelow = OpenForest $ map makeCTree $ ts ++ [t]}
+            tc {treeBelow = openForest $ map makeCTree $ ts ++ [t]}
         OpenForest ts ->
-            tc {treeBelow = OpenForest $  ts ++ [makeCTree t]}
+            tc {treeBelow = openForest $ NE.toList ts ++ [makeCTree t]}

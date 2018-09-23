@@ -16,7 +16,9 @@ module Cursor.Tree.Delete
     , treeCursorDeleteElem
     ) where
 
+import Data.List.NonEmpty (NonEmpty(..))
 import Data.Tree
+import qualified Data.List.NonEmpty as NE
 import Data.Validity
 import Data.Validity.Tree ()
 
@@ -65,8 +67,7 @@ treeCursorDeleteSubTreeAndSelectAbove g TreeCursor {..} =
             TreeCursor
             { treeAbove = treeAboveAbove
             , treeCurrent = g treeAboveNode
-            , treeBelow =
-                  OpenForest $ (reverse treeAboveLefts) ++ treeAboveRights
+            , treeBelow = openForest $ reverse treeAboveLefts ++ treeAboveRights
             }
 
 treeCursorRemoveSubTree ::
@@ -92,7 +93,6 @@ treeCursorDeleteElemAndSelectPrevious g TreeCursor {..} =
         Nothing ->
             case treeBelow of
                 ClosedForest [] -> Just Deleted
-                OpenForest [] -> Just Deleted
                 _ -> Nothing
         Just ta ->
             case treeAboveLefts ta of
@@ -103,17 +103,14 @@ treeCursorDeleteElemAndSelectPrevious g TreeCursor {..} =
                         ta
                         { treeAboveLefts = xs
                         , treeAboveRights =
-                              (case treeBelow of
-                                   OpenForest ts -> ts
-                                   ClosedForest ts -> map makeCTree ts) ++
-                              treeAboveRights ta
+                              unpackCForest treeBelow ++ treeAboveRights ta
                         }
 
 treeCursorDeleteElemAndSelectNext ::
        (b -> a) -> TreeCursor a b -> Maybe (DeleteOrUpdate (TreeCursor a b))
 treeCursorDeleteElemAndSelectNext g TreeCursor {..} =
     case treeBelow of
-        OpenForest [] ->
+        ClosedForest [] ->
             case treeAbove of
                 Nothing -> Just Deleted
                 Just ta ->
@@ -128,9 +125,7 @@ treeCursorDeleteElemAndSelectNext g TreeCursor {..} =
                     case ts of
                         [] -> Just Deleted
                         (Node e ts:xs) ->
-                            let t =
-                                    CNode e $
-                                    OpenForest $ map makeCTree $ ts ++ xs
+                            let t = CNode e $ ClosedForest $ ts ++ xs
                             in Just . Updated $
                                makeTreeCursorWithAbove g t treeAbove
                 Just ta ->
@@ -145,8 +140,13 @@ treeCursorDeleteElemAndSelectNext g TreeCursor {..} =
                                       treeAboveLefts ta
                                 , treeAboveRights = xs
                                 }
-        OpenForest (CNode e ts:xs) ->
-            let t = CNode e $ OpenForest $ unpackCForest ts ++ xs
+        OpenForest (CNode e ts :| xs) ->
+            let t =
+                    CNode e $
+                    case ts of
+                        OpenForest ts_ -> openForest $ NE.toList ts_ ++ xs
+                        ClosedForest ts_ ->
+                            ClosedForest $ ts_ ++ map rebuildCTree xs
             in Just . Updated $ makeTreeCursorWithAbove g t treeAbove
 
 treeCursorDeleteElemAndSelectAbove ::
@@ -156,7 +156,6 @@ treeCursorDeleteElemAndSelectAbove g TreeCursor {..} =
         Nothing ->
             case treeBelow of
                 ClosedForest [] -> Just Deleted
-                OpenForest [] -> Just Deleted
                 _ -> Nothing
         Just TreeAbove {..} ->
             Just $
@@ -165,12 +164,9 @@ treeCursorDeleteElemAndSelectAbove g TreeCursor {..} =
             { treeAbove = treeAboveAbove
             , treeCurrent = g treeAboveNode
             , treeBelow =
-                  OpenForest $
+                  openForest $
                   reverse treeAboveLefts ++
-                  (case treeBelow of
-                       OpenForest ts -> ts
-                       ClosedForest ts -> map makeCTree ts) ++
-                  treeAboveRights
+                  unpackCForest treeBelow ++ treeAboveRights
             }
 
 treeCursorRemoveElem ::

@@ -23,6 +23,7 @@ module Cursor.Tree.Movement
     , treeCursorSelectAboveNext
     ) where
 
+import qualified Data.List.NonEmpty as NE
 import Data.Tree
 import Data.Validity
 import Data.Validity.Tree ()
@@ -86,7 +87,7 @@ treeCursorSelectAbove f g tc@TreeCursor {..} =
             let newForest =
                     (reverse treeAboveLefts) ++
                     [currentTree f tc] ++ treeAboveRights
-                newTree = CNode treeAboveNode $ OpenForest newForest
+                newTree = CNode treeAboveNode $ openForest newForest
             in Just $ makeTreeCursorWithAbove g newTree treeAboveAbove
 
 treeCursorSelectBelowAtPos ::
@@ -95,7 +96,7 @@ treeCursorSelectBelowAtPos f g pos TreeCursor {..} =
     case treeBelow of
         ClosedForest _ -> Nothing
         OpenForest ts ->
-            case splitAt pos ts of
+            case splitAt pos $ NE.toList ts of
                 (_, []) -> Nothing
                 (lefts, current:rights) ->
                     Just $

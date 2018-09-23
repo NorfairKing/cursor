@@ -68,7 +68,7 @@ rebuildTreeCursor f TreeCursor {..} =
     wrapAbove (Just TreeAbove {..}) t =
         wrapAbove treeAboveAbove $
         CNode treeAboveNode $
-        OpenForest $ concat [reverse treeAboveLefts, [t], treeAboveRights]
+        openForest $ concat [reverse treeAboveLefts, [t], treeAboveRights]
 
 mapTreeCursor :: (a -> c) -> (b -> d) -> TreeCursor a b -> TreeCursor c d
 mapTreeCursor f g TreeCursor {..} =

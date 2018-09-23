@@ -399,8 +399,7 @@ forestCursorDeleteSubTree g fc =
 forestCursorAddRoot ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> a -> TreeCursor a b
 forestCursorAddRoot f g fc v =
-    makeTreeCursor g $
-    CNode (f v) $ OpenForest $ NE.toList $ rebuildForestCursor f fc
+    makeTreeCursor g $ CNode (f v) $ OpenForest $ rebuildForestCursor f fc
 
 -- | Swaps the current node with the previous node on the same level
 --
@@ -497,7 +496,6 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
             ta <- treeAbove tc
             lefts <-
                 case (treeBelow tc) of
-                    OpenForest [] -> pure $ treeAboveLefts ta
                     ClosedForest [] -> pure $ treeAboveLefts ta
                     _ ->
                         case treeAboveLefts ta of
@@ -506,13 +504,9 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
                                 pure $
                                 CNode
                                     t
-                                    (OpenForest $
-                                     (case ls of
-                                          OpenForest ts_ -> ts_
-                                          ClosedForest ts_ -> map makeCTree ts_) ++
-                                     (case treeBelow tc of
-                                          OpenForest ts_ -> ts_
-                                          ClosedForest ts_ -> map makeCTree ts_)) :
+                                    (openForest $
+                                     unpackCForest ls ++
+                                     unpackCForest (treeBelow tc)) :
                                 ts
             let ta' = ta {treeAboveLefts = lefts}
             let tc' = tc {treeAbove = Just ta'}
@@ -610,7 +604,7 @@ forestCursorDemoteElem f g fc@(ForestCursor ne) =
                                 (fc ^. forestCursorSelectedTreeL)
                     let n' =
                             CNode v $
-                            OpenForest $
+                            openForest $
                             unpackCForest vts ++
                             (CNode v' $ ClosedForest []) : unpackCForest vts'
                     tc <-
@@ -655,7 +649,7 @@ forestCursorDemoteSubTree f g fc@(ForestCursor ne) =
                 (CNode v vts:ts) -> do
                     let n' =
                             CNode v $
-                            OpenForest $
+                            openForest $
                             unpackCForest vts ++
                             [ rebuildTreeCursor
                                   f

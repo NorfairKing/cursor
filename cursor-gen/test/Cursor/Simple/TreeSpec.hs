@@ -24,7 +24,7 @@ import Cursor.Simple.Tree hiding (TreeCursor)
 import qualified Cursor.Simple.Tree as STC (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
 import Cursor.Tree
-       (CForest(..), CTree(..), TreeAbove(..), TreeCursor(..),
+       (CForest(..), CTree(..), TreeAbove(..), TreeCursor(..),openForest,
         emptyCForest)
 import Cursor.Types
 
@@ -123,9 +123,9 @@ spec = do
                               (TreeAbove
                                { treeAboveLefts =
                                      [ CNode 1 $
-                                       OpenForest
+                                       openForest
                                            [ CNode 2 $
-                                             OpenForest [CNode 3 emptyCForest]
+                                             openForest [CNode 3 emptyCForest]
                                            ]
                                      ]
                                , treeAboveAbove = Nothing
@@ -239,9 +239,9 @@ spec = do
                               (TreeAbove
                                { treeAboveLefts =
                                      [ CNode 1 $
-                                       OpenForest
+                                       openForest
                                            [ CNode 2 $
-                                             OpenForest [CNode 3 emptyCForest]
+                                             openForest [CNode 3 emptyCForest]
                                            ]
                                      ]
                                , treeAboveAbove = Nothing
@@ -413,7 +413,7 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 1
-                        , treeBelow = OpenForest [CNode 2 fs]
+                        , treeBelow = openForest [CNode 2 fs]
                         }
                     simpleDeleteElemExpected =
                         TreeCursor

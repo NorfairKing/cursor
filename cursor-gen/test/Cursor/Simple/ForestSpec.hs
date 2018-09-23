@@ -98,7 +98,7 @@ movementsSpec = do
                     { forestCursorListCursor =
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
-                                [CNode 1 $ OpenForest [CNode 2 $ emptyCForest]]
+                                [CNode 1 $ openForest [CNode 2 $ emptyCForest]]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
@@ -170,7 +170,7 @@ movementsSpec = do
                     { forestCursorListCursor =
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
-                                [CNode 1 $ OpenForest [CNode 2 $ emptyCForest]]
+                                [CNode 1 $ openForest [CNode 2 $ emptyCForest]]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
@@ -745,7 +745,7 @@ shiftingSpec = do
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
                                 [ CNode 'a' $
-                                  OpenForest
+                                  openForest
                                       [ CNode 'b' $ ClosedForest [Node 'c' []]
                                       , CNode 'f' $ ClosedForest [Node 'g' []]
                                       ]
@@ -887,8 +887,7 @@ shiftingSpec = do
                                         , treeAboveRights = []
                                         }
                               , treeCurrent = 'a'
-                              , treeBelow =
-                                    ClosedForest [Node 'b' []]
+                              , treeBelow = ClosedForest [Node 'b' []]
                               }
                         , nonEmptyCursorNext = []
                         }

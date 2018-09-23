@@ -179,7 +179,6 @@ treeCursorPromoteElem f g tc = do
     lefts <-
         case (treeBelow tc) of
             ClosedForest [] -> pure $ treeAboveLefts ta
-            OpenForest [] -> pure $ treeAboveLefts ta
             _ ->
                 case treeAboveLefts ta of
                     [] -> NoSiblingsToAdoptChildren
@@ -187,13 +186,8 @@ treeCursorPromoteElem f g tc = do
                         pure $
                         CNode
                             t
-                            (OpenForest $
-                             (case ls of
-                                  OpenForest ts -> ts
-                                  ClosedForest ts -> map makeCTree ts) ++
-                             (case treeBelow tc of
-                                  OpenForest ts -> ts
-                                  ClosedForest ts -> map makeCTree ts)) :
+                            (openForest $
+                             unpackCForest ls ++ unpackCForest (treeBelow tc)) :
                         ts
     taa <-
         case treeAboveAbove ta of
@@ -206,7 +200,7 @@ treeCursorPromoteElem f g tc = do
         { treeAboveLefts =
               CNode
                   (treeAboveNode ta)
-                  (OpenForest $ reverse lefts ++ treeAboveRights ta) :
+                  (openForest $ reverse lefts ++ treeAboveRights ta) :
               treeAboveLefts taa
         }
 
@@ -281,7 +275,7 @@ treeCursorPromoteSubTree f g tc = do
         { treeAboveLefts =
               CNode
                   (treeAboveNode ta)
-                  (OpenForest $
+                  (openForest $
                    reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
               treeAboveLefts taa
         }
@@ -343,17 +337,10 @@ treeCursorDemoteElem f g tc =
                         (CNode (f $ treeCurrent tc) $ ClosedForest []) $
                     Just
                         TreeAbove
-                        { treeAboveLefts =
-                              reverse $
-                              case ls of
-                                  OpenForest ts -> ts
-                                  ClosedForest ts -> map makeCTree ts
+                        { treeAboveLefts = reverse $ unpackCForest ls
                         , treeAboveAbove = Just ta {treeAboveLefts = ts}
                         , treeAboveNode = t
-                        , treeAboveRights =
-                              case treeBelow tc of
-                                  OpenForest ts -> ts
-                                  ClosedForest ts -> map makeCTree ts
+                        , treeAboveRights = unpackCForest $ treeBelow tc
                         }
 
 -- | Demotes the current subtree to the level of its children.
@@ -390,11 +377,7 @@ treeCursorDemoteSubTree f g tc =
                     makeTreeCursorWithAbove g (currentTree f tc) $
                     Just
                         TreeAbove
-                        { treeAboveLefts =
-                              reverse $
-                              case ls of
-                                  OpenForest ts -> ts
-                                  ClosedForest ts -> map makeCTree ts
+                        { treeAboveLefts = reverse $ unpackCForest ls
                         , treeAboveAbove = Just ta {treeAboveLefts = ts}
                         , treeAboveNode = t
                         , treeAboveRights = []
