@@ -640,9 +640,13 @@ shiftingSpec = do
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
                                 [ CNode 'a' $
-                                  ClosedForest
-                                      [ Node 'b' $ [Node 'c' [], Node 'e' []]
-                                      , Node 'f' [Node 'g' []]
+                                  openForest
+                                      [ CNode 'b' $
+                                        openForest
+                                            [ CNode 'c' emptyCForest
+                                            , CNode 'e' emptyCForest
+                                            ]
+                                      , CNode 'f' $ ClosedForest [Node 'g' []]
                                       ]
                                 ]
                           , nonEmptyCursorCurrent =
