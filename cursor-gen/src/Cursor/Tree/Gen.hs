@@ -45,14 +45,15 @@ instance GenValid a => GenValid (DemoteResult a) where
     genValid = genValidStructurally
     shrinkValid = shrinkValidStructurally
 
-instance GenUnchecked a => GenUnchecked (Collapse a)
+instance GenUnchecked a => GenUnchecked (CTree a)
 
-instance GenValid a => GenValid (Collapse a) where
+instance GenValid a => GenValid (CTree a) where
     genValid = genValidStructurally
     shrinkValid = shrinkValidStructurally
 
-instance GenUnchecked a => GenUnchecked (CTree a)
-instance GenValid a => GenValid (CTree a) where
+instance GenUnchecked a => GenUnchecked (CForest a)
+
+instance GenValid a => GenValid (CForest a) where
     genValid = genValidStructurally
     shrinkValid = shrinkValidStructurally
 

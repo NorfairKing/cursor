@@ -61,16 +61,14 @@ module Cursor.Simple.Forest
     , forestCursorDemoteSubTree
     , FC.forestCursorDemoteElemUnder
     , FC.forestCursorDemoteSubTreeUnder
-    , FC.Collapse(..)
-    , FC.makeCollapse
-    , FC.collapse
-    , FC.rebuildCollapse
-    , FC.collapseValueL
     , FC.CTree(..)
-    , FC.CForest
     , FC.makeCTree
     , FC.cTree
     , FC.rebuildCTree
+    , FC.CForest(..)
+    , FC.makeCForest
+    , FC.cForest
+    , FC.rebuildCForest
     ) where
 
 import Data.Validity.Tree ()

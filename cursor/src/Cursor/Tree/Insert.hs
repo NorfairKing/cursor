@@ -67,14 +67,19 @@ treeCursorAppendAndSelect f g tree tc@TreeCursor {..} = do
 
 treeCursorAddChildAtPos :: Int -> Tree b -> TreeCursor a b -> TreeCursor a b
 treeCursorAddChildAtPos i t tc =
-    let (before, after) = splitAt i $ collapseValue $ treeBelow tc
-    in tc {treeBelow = collapse True $ before ++ [makeCTree t] ++ after}
+    case treeBelow tc of
+        ClosedForest ts ->
+            let (before, after) = splitAt i ts
+            in tc
+               {treeBelow = OpenForest $ map makeCTree $ before ++ [t] ++ after}
 
 treeCursorAddChildAtStart :: Tree b -> TreeCursor a b -> TreeCursor a b
 treeCursorAddChildAtStart t tc =
-    tc {treeBelow = collapse True $ makeCTree t : collapseValue (treeBelow tc)}
+    case treeBelow tc of
+        ClosedForest ts -> tc {treeBelow = OpenForest $ map makeCTree $ t : ts}
 
 treeCursorAddChildAtEnd :: Tree b -> TreeCursor a b -> TreeCursor a b
 treeCursorAddChildAtEnd t tc =
-    tc
-    {treeBelow = collapse True $ collapseValue (treeBelow tc) ++ [makeCTree t]}
+    case treeBelow tc of
+        ClosedForest ts ->
+            tc {treeBelow = OpenForest $ map makeCTree $ ts ++ [t]}

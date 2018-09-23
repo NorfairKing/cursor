@@ -6,9 +6,10 @@
 module Cursor.Tree.Draw
     ( drawTreeCursor
     , treeCursorWithPointer
-    , drawCollapseCForest
-    , drawCForest
-    , drawCTree
+    , showCForest
+    , showCTree
+    , showForest
+    , showTree
     ) where
 
 import Data.Tree
@@ -31,7 +32,7 @@ drawTreeCursor = drawTree . treeCursorWithPointer
 treeCursorWithPointer :: (Show a, Show b) => TreeCursor a b -> Tree String
 treeCursorWithPointer TreeCursor {..} =
     wrapAbove treeAbove $
-    Node (show treeCurrent ++ " <---") $ drawCollapseCForest treeBelow
+    Node (show treeCurrent ++ " <---") $ showCForest treeBelow
   where
     wrapAbove :: (Show b) => Maybe (TreeAbove b) -> Tree String -> Tree String
     wrapAbove Nothing t = t
@@ -39,16 +40,20 @@ treeCursorWithPointer TreeCursor {..} =
         wrapAbove treeAboveAbove $
         Node (show treeAboveNode) $
         concat
-            [ drawCForest $ reverse treeAboveLefts
+            [ map showCTree $ reverse treeAboveLefts
             , [t]
-            , drawCForest treeAboveRights
+            , map showCTree treeAboveRights
             ]
 
-drawCollapseCForest :: Show a => Collapse (CForest a) -> Forest String
-drawCollapseCForest Collapse {..} = drawCForest collapseValue
+showCForest :: Show a => CForest a -> Forest String
+showCForest (ClosedForest ts) = map showTree ts
+showCForest (OpenForest ts) = map showCTree ts
 
-drawCForest :: Show a => CForest a -> Forest String
-drawCForest = map drawCTree
+showCTree :: Show a => CTree a -> Tree String
+showCTree (CNode n fs) = Node (show n) $ showCForest fs
 
-drawCTree :: Show a => CTree a -> Tree String
-drawCTree (CNode n fs) = Node (show n) $ drawCollapseCForest fs
+showForest :: Show a => Forest a -> Forest String
+showForest = map showTree
+
+showTree :: Show a => Tree a -> Tree String
+showTree = fmap show

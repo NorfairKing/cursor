@@ -7,13 +7,15 @@ module Cursor.Simple.ForestSpec
     ( spec
     ) where
 
+import Data.Tree
+
+import Control.Monad (unless)
+
 import Test.Hspec
 
 import Test.QuickCheck
 import Test.Validity
 import Test.Validity.Optics
-
-import Control.Monad (unless)
 
 import Cursor.Forest (ForestCursor(..))
 import Cursor.List.NonEmpty
@@ -96,14 +98,12 @@ movementsSpec = do
                     { forestCursorListCursor =
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
-                                [ CNode 1 $
-                                  collapse True [CNode 2 $ makeCollapse []]
-                                ]
+                                [CNode 1 $ OpenForest [CNode 2 $ emptyCForest]]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 3 :: Int
-                                , treeBelow = makeCollapse []
+                                , treeBelow = emptyCForest
                                 }
                           , nonEmptyCursorNext = []
                           }
@@ -124,9 +124,9 @@ movementsSpec = do
                                           , treeAboveRights = []
                                           }
                                 , treeCurrent = 2
-                                , treeBelow = makeCollapse []
+                                , treeBelow = emptyCForest
                                 }
-                          , nonEmptyCursorNext = [CNode 3 $ makeCollapse []]
+                          , nonEmptyCursorNext = [CNode 3 $ emptyCForest]
                           }
                     }
             case forestCursorSelectPrev start of
@@ -160,9 +160,9 @@ movementsSpec = do
                                           , treeAboveRights = []
                                           }
                                 , treeCurrent = 2
-                                , treeBelow = makeCollapse []
+                                , treeBelow = emptyCForest
                                 }
-                          , nonEmptyCursorNext = [CNode 3 $ makeCollapse []]
+                          , nonEmptyCursorNext = [CNode 3 $ emptyCForest]
                           }
                     }
                 expected =
@@ -170,14 +170,12 @@ movementsSpec = do
                     { forestCursorListCursor =
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
-                                [ CNode 1 $
-                                  collapse True [CNode 2 $ makeCollapse []]
-                                ]
+                                [CNode 1 $ OpenForest [CNode 2 $ emptyCForest]]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 3 :: Int
-                                , treeBelow = makeCollapse []
+                                , treeBelow = emptyCForest
                                 }
                           , nonEmptyCursorNext = []
                           }
@@ -351,12 +349,12 @@ swapSpec = do
                     ForestCursor
                     { forestCursorListCursor =
                           NonEmptyCursor
-                          { nonEmptyCursorPrev = [CNode 'a' $ makeCollapse []]
+                          { nonEmptyCursorPrev = [CNode 'a' $ emptyCForest]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'b'
-                                , treeBelow = makeCollapse []
+                                , treeBelow = emptyCForest
                                 }
                           , nonEmptyCursorNext = []
                           }
@@ -370,9 +368,9 @@ swapSpec = do
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'b'
-                                , treeBelow = makeCollapse []
+                                , treeBelow = emptyCForest
                                 }
-                          , nonEmptyCursorNext = [CNode 'a' $ makeCollapse []]
+                          , nonEmptyCursorNext = [CNode 'a' $ emptyCForest]
                           }
                     }
             in case forestCursorSwapPrev start of
@@ -400,21 +398,21 @@ swapSpec = do
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'a'
-                                , treeBelow = makeCollapse []
+                                , treeBelow = emptyCForest
                                 }
-                          , nonEmptyCursorNext = [CNode 'b' $ makeCollapse []]
+                          , nonEmptyCursorNext = [CNode 'b' $ emptyCForest]
                           }
                     }
                 end =
                     ForestCursor
                     { forestCursorListCursor =
                           NonEmptyCursor
-                          { nonEmptyCursorPrev = [CNode 'b' $ makeCollapse []]
+                          { nonEmptyCursorPrev = [CNode 'b' $ emptyCForest]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'a'
-                                , treeBelow = makeCollapse []
+                                , treeBelow = emptyCForest
                                 }
                           , nonEmptyCursorNext = []
                           }
@@ -446,9 +444,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1 :: Int
-                                    , treeBelow =
-                                          makeCollapse
-                                              [CNode 2 $ makeCollapse fs]
+                                    , treeBelow = ClosedForest [Node 2 fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -479,9 +475,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1
-                                    , treeBelow =
-                                          makeCollapse
-                                              [CNode 2 $ makeCollapse fs]
+                                    , treeBelow = ClosedForest [Node 2 fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -495,7 +489,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 2 :: Int
-                                    , treeBelow = makeCollapse fs
+                                    , treeBelow = ClosedForest fs
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -524,9 +518,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1
-                                    , treeBelow =
-                                          makeCollapse
-                                              [CNode 2 $ makeCollapse fs]
+                                    , treeBelow = ClosedForest [Node 2 fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -540,7 +532,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 2 :: Int
-                                    , treeBelow = makeCollapse fs
+                                    , treeBelow = ClosedForest fs
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -565,9 +557,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1
-                                    , treeBelow =
-                                          makeCollapse
-                                              [CNode 2 $ makeCollapse fs]
+                                    , treeBelow = ClosedForest [Node 2 fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -581,7 +571,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 2 :: Int
-                                    , treeBelow = makeCollapse fs
+                                    , treeBelow = ClosedForest fs
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -629,26 +619,19 @@ shiftingSpec = do
                                           TreeAbove
                                           { treeAboveLefts =
                                                 [ CNode 'b' $
-                                                  makeCollapse
-                                                      [ CNode 'c' $
-                                                        makeCollapse []
-                                                      ]
+                                                  ClosedForest [Node 'c' []]
                                                 ]
                                           , treeAboveAbove = Nothing
                                           , treeAboveNode = 'a'
                                           , treeAboveRights =
                                                 [ CNode 'f' $
-                                                  makeCollapse
-                                                      [ CNode 'g' $
-                                                        makeCollapse []
-                                                      ]
+                                                  ClosedForest [Node 'g' []]
                                                 ]
                                           }
                                 , treeCurrent = 'd'
-                                , treeBelow =
-                                      makeCollapse [CNode 'e' $ makeCollapse []]
+                                , treeBelow = ClosedForest [Node 'e' []]
                                 }
-                          , nonEmptyCursorNext = [CNode 'h' $ makeCollapse []]
+                          , nonEmptyCursorNext = [CNode 'h' $ emptyCForest]
                           }
                     }
                 expected =
@@ -657,24 +640,18 @@ shiftingSpec = do
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
                                 [ CNode 'a' $
-                                  makeCollapse
-                                      [ CNode 'b' $
-                                        makeCollapse
-                                            [ CNode 'c' $ makeCollapse []
-                                            , CNode 'e' $ makeCollapse []
-                                            ]
-                                      , CNode 'f' $
-                                        makeCollapse
-                                            [CNode 'g' $ makeCollapse []]
+                                  ClosedForest
+                                      [ Node 'b' $ [Node 'c' [], Node 'e' []]
+                                      , Node 'f' [Node 'g' []]
                                       ]
                                 ]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'd'
-                                , treeBelow = makeCollapse []
+                                , treeBelow = emptyCForest
                                 }
-                          , nonEmptyCursorNext = [CNode 'h' $ makeCollapse []]
+                          , nonEmptyCursorNext = [CNode 'h' emptyCForest]
                           }
                     }
             in case forestCursorPromoteElem start of
@@ -692,17 +669,14 @@ shiftingSpec = do
                     { forestCursorListCursor =
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
-                                [ CNode 'a' $
-                                  makeCollapse [CNode 'b' $ makeCollapse []]
-                                ]
+                                [CNode 'a' $ ClosedForest [Node 'b' []]]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'c'
-                                , treeBelow =
-                                      makeCollapse [CNode 'd' $ makeCollapse []]
+                                , treeBelow = ClosedForest [Node 'd' []]
                                 }
-                          , nonEmptyCursorNext = [CNode 'e' $ makeCollapse []]
+                          , nonEmptyCursorNext = [CNode 'e' emptyCForest]
                           }
                     }
                 expected =
@@ -716,16 +690,16 @@ shiftingSpec = do
                                       Just
                                           TreeAbove
                                           { treeAboveLefts =
-                                                [CNode 'b' $ makeCollapse []]
+                                                [CNode 'b' $ emptyCForest]
                                           , treeAboveAbove = Nothing
                                           , treeAboveNode = 'a'
                                           , treeAboveRights =
-                                                [CNode 'd' $ makeCollapse []]
+                                                [CNode 'd' $ emptyCForest]
                                           }
                                 , treeCurrent = 'c'
-                                , treeBelow = makeCollapse []
+                                , treeBelow = emptyCForest
                                 }
-                          , nonEmptyCursorNext = [CNode 'e' $ makeCollapse []]
+                          , nonEmptyCursorNext = [CNode 'e' $ emptyCForest]
                           }
                     }
             in case forestCursorDemoteElem start of
@@ -750,26 +724,19 @@ shiftingSpec = do
                                           TreeAbove
                                           { treeAboveLefts =
                                                 [ CNode 'b' $
-                                                  makeCollapse
-                                                      [ CNode 'c' $
-                                                        makeCollapse []
-                                                      ]
+                                                  ClosedForest [Node 'c' []]
                                                 ]
                                           , treeAboveAbove = Nothing
                                           , treeAboveNode = 'a'
                                           , treeAboveRights =
                                                 [ CNode 'f' $
-                                                  makeCollapse
-                                                      [ CNode 'g' $
-                                                        makeCollapse []
-                                                      ]
+                                                  ClosedForest [Node 'g' []]
                                                 ]
                                           }
                                 , treeCurrent = 'd'
-                                , treeBelow =
-                                      makeCollapse [CNode 'e' $ makeCollapse []]
+                                , treeBelow = ClosedForest [Node 'e' []]
                                 }
-                          , nonEmptyCursorNext = [CNode 'h' $ makeCollapse []]
+                          , nonEmptyCursorNext = [CNode 'h' emptyCForest]
                           }
                     }
                 expected =
@@ -778,23 +745,18 @@ shiftingSpec = do
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
                                 [ CNode 'a' $
-                                  makeCollapse
-                                      [ CNode 'b' $
-                                        makeCollapse
-                                            [CNode 'c' $ makeCollapse []]
-                                      , CNode 'f' $
-                                        makeCollapse
-                                            [CNode 'g' $ makeCollapse []]
+                                  ClosedForest
+                                      [ Node 'b' [Node 'c' []]
+                                      , Node 'f' [Node 'g' []]
                                       ]
                                 ]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'd'
-                                , treeBelow =
-                                      makeCollapse [CNode 'e' $ makeCollapse []]
+                                , treeBelow = ClosedForest [Node 'e' []]
                                 }
-                          , nonEmptyCursorNext = [CNode 'h' $ makeCollapse []]
+                          , nonEmptyCursorNext = [CNode 'h' emptyCForest]
                           }
                     }
             in case forestCursorPromoteSubTree start of
@@ -812,15 +774,12 @@ shiftingSpec = do
                     { forestCursorListCursor =
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
-                                [ CNode 'a' $
-                                  makeCollapse [CNode 'b' $ makeCollapse []]
-                                ]
+                                [CNode 'a' $ ClosedForest [Node 'b' []]]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'c'
-                                , treeBelow =
-                                      makeCollapse [CNode 'd' $ makeCollapse []]
+                                , treeBelow = ClosedForest [Node 'd' []]
                                 }
                           , nonEmptyCursorNext = []
                           }
@@ -836,14 +795,13 @@ shiftingSpec = do
                                       Just
                                           TreeAbove
                                           { treeAboveLefts =
-                                                [CNode 'b' $ makeCollapse []]
+                                                [CNode 'b' emptyCForest]
                                           , treeAboveAbove = Nothing
                                           , treeAboveNode = 'a'
                                           , treeAboveRights = []
                                           }
                                 , treeCurrent = 'c'
-                                , treeBelow =
-                                      makeCollapse [CNode 'd' $ makeCollapse []]
+                                , treeBelow = ClosedForest [Node 'd' []]
                                 }
                           , nonEmptyCursorNext = []
                           }
@@ -869,9 +827,7 @@ shiftingSpec = do
                                   TreeCursor
                                   { treeAbove = Nothing
                                   , treeCurrent = 'a'
-                                  , treeBelow =
-                                        makeCollapse
-                                            [CNode 'b' $ makeCollapse []]
+                                  , treeBelow = ClosedForest [Node 'b' []]
                                   }
                             , nonEmptyCursorNext = []
                             }
@@ -890,12 +846,10 @@ shiftingSpec = do
                                             , treeAboveRights = []
                                             }
                                   , treeCurrent = 'a'
-                                  , treeBelow = makeCollapse []
+                                  , treeBelow = emptyCForest
                                   }
                             , nonEmptyCursorNext =
-                                  [ CNode b2 $
-                                    makeCollapse [CNode 'b' $ makeCollapse []]
-                                  ]
+                                  [CNode b2 $ ClosedForest [Node 'b' []]]
                             }
                     in forestCursorDemoteElemUnder b1 b2 demoteStart `forestShouldBe`
                        demoteEnd
@@ -914,8 +868,7 @@ shiftingSpec = do
                               TreeCursor
                               { treeAbove = Nothing
                               , treeCurrent = 'a'
-                              , treeBelow =
-                                    makeCollapse [CNode 'b' $ makeCollapse []]
+                              , treeBelow = ClosedForest [Node 'b' []]
                               }
                         , nonEmptyCursorNext = []
                         }
@@ -935,7 +888,7 @@ shiftingSpec = do
                                         }
                               , treeCurrent = 'a'
                               , treeBelow =
-                                    makeCollapse [CNode 'b' $ makeCollapse []]
+                                    ClosedForest [Node 'b' []]
                               }
                         , nonEmptyCursorNext = []
                         }

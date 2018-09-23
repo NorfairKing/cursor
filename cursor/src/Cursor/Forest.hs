@@ -61,16 +61,14 @@ module Cursor.Forest
     , forestCursorDemoteSubTree
     , forestCursorDemoteElemUnder
     , forestCursorDemoteSubTreeUnder
-    , Collapse(..)
-    , makeCollapse
-    , collapse
-    , rebuildCollapse
-    , collapseValueL
     , CTree(..)
-    , CForest
     , makeCTree
     , cTree
     , rebuildCTree
+    , CForest(..)
+    , makeCForest
+    , cForest
+    , rebuildCForest
     ) where
 
 import GHC.Generics (Generic)
@@ -107,9 +105,9 @@ rebuildForestCursor f =
 drawForestCursor :: (Show a, Show b) => ForestCursor a b -> String
 drawForestCursor ForestCursor {..} =
     drawForest $
-    (drawCForest $ reverse $ nonEmptyCursorPrev forestCursorListCursor) ++
+    (map showCTree $ reverse $ nonEmptyCursorPrev forestCursorListCursor) ++
     [treeCursorWithPointer $ nonEmptyCursorCurrent forestCursorListCursor] ++
-    (drawCForest $ nonEmptyCursorNext forestCursorListCursor)
+    (map showCTree $ nonEmptyCursorNext forestCursorListCursor)
 
 mapForestCursor :: (a -> c) -> (b -> d) -> ForestCursor a b -> ForestCursor c d
 mapForestCursor f g =
@@ -402,7 +400,7 @@ forestCursorAddRoot ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> a -> TreeCursor a b
 forestCursorAddRoot f g fc v =
     makeTreeCursor g $
-    CNode (f v) $ collapse True $ NE.toList $ rebuildForestCursor f fc
+    CNode (f v) $ OpenForest $ NE.toList $ rebuildForestCursor f fc
 
 -- | Swaps the current node with the previous node on the same level
 --
@@ -498,8 +496,9 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
             let tc = fc ^. forestCursorSelectedTreeL
             ta <- treeAbove tc
             lefts <-
-                case collapseValue (treeBelow tc) of
-                    [] -> pure $ treeAboveLefts ta
+                case (treeBelow tc) of
+                    OpenForest [] -> pure $ treeAboveLefts ta
+                    ClosedForest [] -> pure $ treeAboveLefts ta
                     _ ->
                         case treeAboveLefts ta of
                             [] -> Nothing
@@ -507,9 +506,13 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
                                 pure $
                                 CNode
                                     t
-                                    (makeCollapse $
-                                     collapseValue ls ++
-                                     collapseValue (treeBelow tc)) :
+                                    (OpenForest $
+                                     (case ls of
+                                          OpenForest ts_ -> ts_
+                                          ClosedForest ts_ -> map makeCTree ts_) ++
+                                     (case treeBelow tc of
+                                          OpenForest ts_ -> ts_
+                                          ClosedForest ts_ -> map makeCTree ts_)) :
                                 ts
             let ta' = ta {treeAboveLefts = lefts}
             let tc' = tc {treeAbove = Just ta'}
@@ -607,14 +610,14 @@ forestCursorDemoteElem f g fc@(ForestCursor ne) =
                                 (fc ^. forestCursorSelectedTreeL)
                     let n' =
                             CNode v $
-                            makeCollapse $
-                            collapseValue vts ++
-                            (CNode v' (makeCollapse []) : collapseValue vts')
+                            OpenForest $
+                            unpackCForest vts ++
+                            (CNode v' $ ClosedForest []) : unpackCForest vts'
                     tc <-
                         makeTreeCursorWithSelection
                             f
                             g
-                            (SelectChild (length $ collapseValue vts) SelectNode)
+                            (SelectChild (lengthCForest vts) SelectNode)
                             n'
                     pure $
                         ForestCursor
@@ -652,8 +655,8 @@ forestCursorDemoteSubTree f g fc@(ForestCursor ne) =
                 (CNode v vts:ts) -> do
                     let n' =
                             CNode v $
-                            collapse True $
-                            collapseValue vts ++
+                            OpenForest $
+                            unpackCForest vts ++
                             [ rebuildTreeCursor
                                   f
                                   (fc ^. forestCursorSelectedTreeL)
@@ -662,7 +665,7 @@ forestCursorDemoteSubTree f g fc@(ForestCursor ne) =
                         makeTreeCursorWithSelection
                             f
                             g
-                            (SelectChild (length $ collapseValue vts) SelectNode)
+                            (SelectChild (lengthCForest vts) SelectNode)
                             n'
                     pure $
                         ForestCursor
@@ -707,7 +710,7 @@ forestCursorDemoteElemUnder b1 b2 fc@(ForestCursor ne) =
                                , treeAboveRights = []
                                }
                      , treeCurrent = treeCurrent t
-                     , treeBelow = makeCollapse []
+                     , treeBelow = emptyCForest
                      }
                , nonEmptyCursorNext =
                      CNode b2 (treeBelow t) : nonEmptyCursorNext ne

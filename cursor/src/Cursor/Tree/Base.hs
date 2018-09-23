@@ -30,7 +30,7 @@ import Cursor.Types
 singletonTreeCursor :: a -> TreeCursor a b
 singletonTreeCursor v =
     TreeCursor
-    {treeAbove = Nothing, treeCurrent = v, treeBelow = makeCollapse []}
+    {treeAbove = Nothing, treeCurrent = v, treeBelow = ClosedForest []}
 
 makeTreeCursor :: (b -> a) -> CTree b -> TreeCursor a b
 makeTreeCursor g (CNode v fs) =
@@ -47,18 +47,20 @@ makeTreeCursorWithSelection f g sel = walkDown sel . makeTreeCursor g
     walkDown SelectNode tc = pure tc
     walkDown (SelectChild i s) TreeCursor {..} =
         (walkDown s =<<) $
-        case splitAt i $ collapseValue treeBelow of
-            (_, []) -> Nothing
-            (lefts, current:rights) ->
-                Just $
-                makeTreeCursorWithAbove g current $
-                Just $
-                TreeAbove
-                { treeAboveLefts = reverse lefts
-                , treeAboveAbove = treeAbove
-                , treeAboveNode = f treeCurrent
-                , treeAboveRights = rights
-                }
+        case treeBelow of
+            ClosedForest ts ->
+                case splitAt i ts of
+                    (_, []) -> Nothing
+                    (lefts, current:rights) ->
+                        Just $
+                        makeTreeCursorWithAbove g (makeCTree current) $
+                        Just $
+                        TreeAbove
+                        { treeAboveLefts = reverse $ map makeCTree lefts
+                        , treeAboveAbove = treeAbove
+                        , treeAboveNode = f treeCurrent
+                        , treeAboveRights = map makeCTree rights
+                        }
 
 rebuildTreeCursor :: (a -> b) -> TreeCursor a b -> CTree b
 rebuildTreeCursor f TreeCursor {..} =
@@ -68,14 +70,14 @@ rebuildTreeCursor f TreeCursor {..} =
     wrapAbove (Just TreeAbove {..}) t =
         wrapAbove treeAboveAbove $
         CNode treeAboveNode $
-        collapse True $ concat [reverse treeAboveLefts, [t], treeAboveRights]
+        OpenForest $ concat [reverse treeAboveLefts, [t], treeAboveRights]
 
 mapTreeCursor :: (a -> c) -> (b -> d) -> TreeCursor a b -> TreeCursor c d
 mapTreeCursor f g TreeCursor {..} =
     TreeCursor
     { treeAbove = fmap g <$> treeAbove
     , treeCurrent = f treeCurrent
-    , treeBelow = fmap (map (fmap g)) treeBelow
+    , treeBelow = fmap g treeBelow
     }
 
 currentTree :: (a -> b) -> TreeCursor a b -> CTree b

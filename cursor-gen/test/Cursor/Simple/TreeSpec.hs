@@ -23,7 +23,9 @@ import Test.Validity.Optics
 import Cursor.Simple.Tree hiding (TreeCursor)
 import qualified Cursor.Simple.Tree as STC (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
-import Cursor.Tree (TreeAbove(..), TreeCursor(..))
+import Cursor.Tree
+       (CForest(..), CTree(..), TreeAbove(..), TreeCursor(..),
+        emptyCForest)
 import Cursor.Types
 
 spec :: Spec
@@ -89,53 +91,6 @@ spec = do
                                , "actual:"
                                , drawTreeCursor r
                                ]
-    describe "treeCursorSelectPrev" $ do
-        testMovementM treeCursorSelectPrev
-        it "selects the previous element" pending
-        it "after treeCursorSelectNext is identity if they don't fail" $ do
-            inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectNext @Double)
-                (treeCursorSelectPrev @Double)
-    describe "treeCursorSelectNext" $ do
-        testMovementM treeCursorSelectNext
-        it "selects the next element" pending
-        it "after treeCursorSelectPrev is identity if they don't fail" $ do
-            inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectPrev @Double)
-                (treeCursorSelectNext @Double)
-    describe "treeCursorSelectFirst" $ do
-        testMovement treeCursorSelectFirst
-        it "selects the first element" pending
-        it "is idempotent" $ idempotentOnValid $ treeCursorSelectFirst @Double
-    describe "treeCursorSelectLast" $ do
-        testMovement treeCursorSelectLast
-        it "selects the last element" pending
-        it "is idempotent" $ idempotentOnValid $ treeCursorSelectLast @Double
-    describe "treeCursorSelectAbove" $ do
-        testMovementM treeCursorSelectAbove
-        it "selects the element above" pending
-        it "after treeCursorSelectBelow is identity if they don't fail" $ do
-            inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectBelowAtStart @Double) $
-                treeCursorSelectAbove @Double
-    describe "treeCursorSelectBelowAtPos" $ do
-        it "produces valids on valids" $
-            producesValidsOnValids2 $ treeCursorSelectBelowAtPos @Double
-        it "is a movement" $
-            forAllValid $ \n -> isMovementM $ treeCursorSelectBelowAtPos n
-        it "selects the element n-th below" pending
-    describe "treeCursorSelectBelowAtStart" $ do
-        testMovementM treeCursorSelectBelowAtStart
-        it "selects the first child below" pending
-    describe "treeCursorSelectBelowAtEnd" $ do
-        testMovementM treeCursorSelectBelowAtEnd
-        it "selects the last child below" pending
-    describe "treeCursorSelectBelowAtStartRecursively" $ do
-        testMovementM treeCursorSelectBelowAtStartRecursively
-        it "selects the first child below, recursively" pending
-    describe "treeCursorSelectBelowAtEndRecursively" $ do
-        testMovementM treeCursorSelectBelowAtEndRecursively
-        it "selects the last child below, recursively" pending
     describe "treeCursorSelectPrevOnSameLevel" $ do
         testMovementM treeCursorSelectPrevOnSameLevel
         it "selects the previous element" pending
@@ -172,7 +127,7 @@ spec = do
                                , treeAboveRights = []
                                })
                     , treeCurrent = 4 :: Int
-                    , treeBelow = makeCollapse []
+                    , treeBelow = emptyCForest
                     }
                 expected =
                     TreeCursor
@@ -200,7 +155,7 @@ spec = do
                                , treeAboveRights = []
                                })
                     , treeCurrent = 3
-                    , treeBelow = makeCollapse []
+                    , treeBelow = emptyCForest
                     }
             case treeCursorSelectAbovePrev start of
                 Nothing ->
@@ -266,7 +221,7 @@ spec = do
                                , treeAboveRights = []
                                })
                     , treeCurrent = 3
-                    , treeBelow = makeCollapse []
+                    , treeBelow = emptyCForest
                     }
                 expected =
                     TreeCursor
@@ -279,7 +234,7 @@ spec = do
                                , treeAboveRights = []
                                })
                     , treeCurrent = 4 :: Int
-                    , treeBelow = makeCollapse []
+                    , treeBelow = emptyCForest
                     }
             case treeCursorSelectAboveNext start of
                 Nothing ->
@@ -308,6 +263,53 @@ spec = do
                                     , "instead of"
                                     , drawTreeCursor tc
                                     ]
+    describe "treeCursorSelectPrev" $ do
+        testMovementM treeCursorSelectPrev
+        it "selects the previous element" pending
+        it "after treeCursorSelectNext is identity if they don't fail" $ do
+            inverseFunctionsIfSucceedOnValid
+                (treeCursorSelectNext @Double)
+                (treeCursorSelectPrev @Double)
+    describe "treeCursorSelectNext" $ do
+        testMovementM treeCursorSelectNext
+        it "selects the next element" pending
+        it "after treeCursorSelectPrev is identity if they don't fail" $ do
+            inverseFunctionsIfSucceedOnValid
+                (treeCursorSelectPrev @Double)
+                (treeCursorSelectNext @Double)
+    describe "treeCursorSelectFirst" $ do
+        testMovement treeCursorSelectFirst
+        it "selects the first element" pending
+        it "is idempotent" $ idempotentOnValid $ treeCursorSelectFirst @Double
+    describe "treeCursorSelectLast" $ do
+        testMovement treeCursorSelectLast
+        it "selects the last element" pending
+        it "is idempotent" $ idempotentOnValid $ treeCursorSelectLast @Double
+    describe "treeCursorSelectAbove" $ do
+        testMovementM treeCursorSelectAbove
+        it "selects the element above" pending
+        it "after treeCursorSelectBelow is identity if they don't fail" $ do
+            inverseFunctionsIfSucceedOnValid
+                (treeCursorSelectBelowAtStart @Double) $
+                treeCursorSelectAbove @Double
+    describe "treeCursorSelectBelowAtPos" $ do
+        it "produces valids on valids" $
+            producesValidsOnValids2 $ treeCursorSelectBelowAtPos @Double
+        it "is a movement" $
+            forAllValid $ \n -> isMovementM $ treeCursorSelectBelowAtPos n
+        it "selects the element n-th below" pending
+    describe "treeCursorSelectBelowAtStart" $ do
+        testMovementM treeCursorSelectBelowAtStart
+        it "selects the first child below" pending
+    describe "treeCursorSelectBelowAtEnd" $ do
+        testMovementM treeCursorSelectBelowAtEnd
+        it "selects the last child below" pending
+    describe "treeCursorSelectBelowAtStartRecursively" $ do
+        testMovementM treeCursorSelectBelowAtStartRecursively
+        it "selects the first child below, recursively" pending
+    describe "treeCursorSelectBelowAtEndRecursively" $ do
+        testMovementM treeCursorSelectBelowAtEndRecursively
+        it "selects the last child below, recursively" pending
     describe "treeCursorInsert" $ do
         it "produces valids on valids" $
             producesValidsOnValids2 $ treeCursorInsert @Double @Double
@@ -373,7 +375,7 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 1 :: Int
-                        , treeBelow = makeCollapse [node 2 fs]
+                        , treeBelow = ClosedForest [Node 2 fs]
                         }
                 in case treeCursorDeleteElemAndSelectPrevious
                             simpleDeleteElemStart of
@@ -396,13 +398,13 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 1
-                        , treeBelow = makeCollapse [node 2 fs]
+                        , treeBelow = ClosedForest [Node 2 fs]
                         }
                     simpleDeleteElemExpected =
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 2 :: Int
-                        , treeBelow = makeCollapse fs
+                        , treeBelow = ClosedForest fs
                         }
                 in case treeCursorDeleteElemAndSelectNext simpleDeleteElemStart of
                        Nothing ->
@@ -423,7 +425,7 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 1 :: Int
-                        , treeBelow = makeCollapse [node 2 fs]
+                        , treeBelow = ClosedForest [Node 2 fs]
                         }
                 in case treeCursorDeleteElemAndSelectAbove simpleDeleteElemStart of
                        Nothing -> pure ()
@@ -458,7 +460,7 @@ spec = do
                               , treeAboveRights = []
                               }
                     , treeCurrent = 'b'
-                    , treeBelow = makeCollapse []
+                    , treeBelow = emptyCForest
                     }
                 end =
                     TreeCursor
@@ -471,7 +473,7 @@ spec = do
                               , treeAboveRights = [node 'a' []]
                               }
                     , treeCurrent = 'b'
-                    , treeBelow = makeCollapse []
+                    , treeBelow = emptyCForest
                     }
             in case treeCursorSwapPrev start of
                    Swapped r -> r `treeShouldBe` end
@@ -498,7 +500,7 @@ spec = do
                               , treeAboveRights = [node 'b' []]
                               }
                     , treeCurrent = 'a'
-                    , treeBelow = makeCollapse []
+                    , treeBelow = emptyCForest
                     }
                 end =
                     TreeCursor
@@ -511,7 +513,7 @@ spec = do
                               , treeAboveRights = []
                               }
                     , treeCurrent = 'a'
-                    , treeBelow = makeCollapse []
+                    , treeBelow = emptyCForest
                     }
             in case treeCursorSwapNext start of
                    Swapped r -> r `treeShouldBe` end
@@ -548,7 +550,7 @@ spec = do
                               , treeAboveRights = [node 'f' [node 'g' []]]
                               }
                     , treeCurrent = 'd'
-                    , treeBelow = makeCollapse [node 'e' []]
+                    , treeBelow = ClosedForest [Node 'e' []]
                     }
                 promoteEnd =
                     TreeCursor
@@ -556,18 +558,18 @@ spec = do
                           Just
                               TreeAbove
                               { treeAboveLefts =
-                                    [ node
-                                          'a'
-                                          [ node 'b' [node 'c' [], node 'e' []]
-                                          , node 'f' [node 'g' []]
+                                    [ CNode 'a' $
+                                      ClosedForest
+                                          [ Node 'b' [Node 'c' [], Node 'e' []]
+                                          , Node 'f' [Node 'g' []]
                                           ]
                                     ]
                               , treeAboveAbove = Nothing
                               , treeAboveNode = 'p'
-                              , treeAboveRights = [node 'h' []]
+                              , treeAboveRights = [CNode 'h' emptyCForest]
                               }
                     , treeCurrent = 'd'
-                    , treeBelow = makeCollapse []
+                    , treeBelow = emptyCForest
                     }
             in case treeCursorPromoteElem promoteStart of
                    PromotedElem tc' -> tc' `treeShouldBe` promoteEnd
@@ -587,7 +589,8 @@ spec = do
                     { treeAbove =
                           Just
                               TreeAbove
-                              { treeAboveLefts = [node 'b' [node 'c' []]]
+                              { treeAboveLefts =
+                                    [CNode 'b' $ ClosedForest [Node 'c' []]]
                               , treeAboveAbove =
                                     Just
                                         TreeAbove
@@ -597,10 +600,11 @@ spec = do
                                         , treeAboveRights = [node 'h' []]
                                         }
                               , treeAboveNode = 'a'
-                              , treeAboveRights = [node 'f' [node 'g' []]]
+                              , treeAboveRights =
+                                    [CNode 'f' $ ClosedForest [Node 'g' []]]
                               }
                     , treeCurrent = 'd'
-                    , treeBelow = makeCollapse [node 'e' []]
+                    , treeBelow = ClosedForest [Node 'e' []]
                     }
                 promoteEnd =
                     TreeCursor
@@ -608,18 +612,18 @@ spec = do
                           Just
                               TreeAbove
                               { treeAboveLefts =
-                                    [ node
-                                          'a'
-                                          [ node 'b' [node 'c' []]
-                                          , node 'f' [node 'g' []]
+                                    [ CNode 'a' $
+                                      ClosedForest
+                                          [ Node 'b' [Node 'c' []]
+                                          , Node 'f' [Node 'g' []]
                                           ]
                                     ]
                               , treeAboveAbove = Nothing
                               , treeAboveNode = 'p'
-                              , treeAboveRights = [node 'h' []]
+                              , treeAboveRights = [CNode 'h' $ ClosedForest []]
                               }
                     , treeCurrent = 'd'
-                    , treeBelow = makeCollapse [node 'e' []]
+                    , treeBelow = ClosedForest [Node 'e' []]
                     }
             in case treeCursorPromoteSubTree promoteStart of
                    Promoted tc' -> tc' `treeShouldBe` promoteEnd
@@ -643,7 +647,7 @@ spec = do
                               , treeAboveRights = [node 'e' []]
                               }
                     , treeCurrent = 'c'
-                    , treeBelow = makeCollapse [node 'd' []]
+                    , treeBelow = ClosedForest [Node 'd' []]
                     }
                 promoteEnd =
                     TreeCursor
@@ -663,7 +667,7 @@ spec = do
                               , treeAboveRights = [node 'd' []]
                               }
                     , treeCurrent = 'c'
-                    , treeBelow = makeCollapse []
+                    , treeBelow = emptyCForest
                     }
             in case treeCursorDemoteElem promoteStart of
                    Demoted tc' -> tc' `treeShouldBe` promoteEnd
@@ -686,7 +690,7 @@ spec = do
                               , treeAboveRights = [node 'e' []]
                               }
                     , treeCurrent = 'c'
-                    , treeBelow = makeCollapse [node 'd' []]
+                    , treeBelow = ClosedForest [Node 'd' []]
                     }
                 promoteEnd =
                     TreeCursor
@@ -706,7 +710,7 @@ spec = do
                               , treeAboveRights = []
                               }
                     , treeCurrent = 'c'
-                    , treeBelow = makeCollapse [node 'd' []]
+                    , treeBelow = ClosedForest [Node 'd' []]
                     }
             in case treeCursorDemoteSubTree promoteStart of
                    Demoted tc' -> tc' `treeShouldBe` promoteEnd
@@ -731,7 +735,7 @@ spec = do
                                       , treeAboveRights = []
                                       }
                             , treeCurrent = 'a'
-                            , treeBelow = makeCollapse [node 'b' []]
+                            , treeBelow = ClosedForest [Node 'b' []]
                             }
                         demoteEnd =
                             TreeCursor
@@ -752,7 +756,7 @@ spec = do
                                       , treeAboveRights = []
                                       }
                             , treeCurrent = 'a'
-                            , treeBelow = makeCollapse []
+                            , treeBelow = emptyCForest
                             }
                     in case treeCursorDemoteElemUnder b1 b2 demoteStart of
                            Just tc' -> tc' `treeShouldBe` demoteEnd
@@ -770,7 +774,7 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 'a'
-                        , treeBelow = makeCollapse [node 'b' []]
+                        , treeBelow = ClosedForest [Node 'b' []]
                         }
                     demoteEnd =
                         TreeCursor
@@ -783,7 +787,7 @@ spec = do
                                   , treeAboveRights = []
                                   }
                         , treeCurrent = 'a'
-                        , treeBelow = makeCollapse [node 'b' []]
+                        , treeBelow = ClosedForest [Node 'b' []]
                         }
                 treeCursorDemoteSubTreeUnder v demoteStart `treeShouldBe`
                     demoteEnd
@@ -846,4 +850,4 @@ instance CanFail SwapResult where
     resultIfSucceeded _ = Nothing
 
 node :: a -> [CTree a] -> CTree a
-node a ts = CNode a $ makeCollapse ts
+node a ts = CNode a $ ClosedForest $ map rebuildCTree ts

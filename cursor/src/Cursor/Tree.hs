@@ -34,17 +34,15 @@ module Cursor.Tree
     , treeCursorDemoteElemUnder
     , treeCursorDemoteSubTreeUnder
     -- * Collapse
-    , Collapse(..)
-    , makeCollapse
-    , collapse
-    , rebuildCollapse
-    , collapseValueL
     -- * CTree
     , CTree(..)
-    , CForest
     , makeCTree
     , cTree
     , rebuildCTree
+    , CForest(..)
+    , makeCForest
+    , cForest
+    , rebuildCForest
     ) where
 
 import Data.Tree
@@ -179,26 +177,36 @@ treeCursorPromoteElem f g tc = do
             Just ta -> pure ta
     -- We need to put the below under the above lefts at the end
     lefts <-
-        case collapseValue (treeBelow tc) of
-            [] -> pure $ treeAboveLefts ta
+        case (treeBelow tc) of
+            ClosedForest [] -> pure $ treeAboveLefts ta
+            OpenForest [] -> pure $ treeAboveLefts ta
             _ ->
                 case treeAboveLefts ta of
                     [] -> NoSiblingsToAdoptChildren
                     (CNode t ls:ts) ->
                         pure $
-                        CNode t (fmap (++ collapseValue (treeBelow tc)) ls) : ts
+                        CNode
+                            t
+                            (OpenForest $
+                             (case ls of
+                                  OpenForest ts -> ts
+                                  ClosedForest ts -> map makeCTree ts) ++
+                             (case treeBelow tc of
+                                  OpenForest ts -> ts
+                                  ClosedForest ts -> map makeCTree ts)) :
+                        ts
     taa <-
         case treeAboveAbove ta of
             Nothing -> NoGrandparentToPromoteElemUnder
             Just taa -> pure taa
     pure $
-        makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) $ makeCollapse []) $
+        makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) $ ClosedForest []) $
         Just $
         taa
         { treeAboveLefts =
               CNode
                   (treeAboveNode ta)
-                  (makeCollapse $ reverse lefts ++ treeAboveRights ta) :
+                  (OpenForest $ reverse lefts ++ treeAboveRights ta) :
               treeAboveLefts taa
         }
 
@@ -273,7 +281,7 @@ treeCursorPromoteSubTree f g tc = do
         { treeAboveLefts =
               CNode
                   (treeAboveNode ta)
-                  (makeCollapse $
+                  (OpenForest $
                    reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
               treeAboveLefts taa
         }
@@ -332,13 +340,20 @@ treeCursorDemoteElem f g tc =
                     Demoted $
                     makeTreeCursorWithAbove
                         g
-                        (CNode (f $ treeCurrent tc) $ makeCollapse []) $
+                        (CNode (f $ treeCurrent tc) $ ClosedForest []) $
                     Just
                         TreeAbove
-                        { treeAboveLefts = reverse $ collapseValue ls
+                        { treeAboveLefts =
+                              reverse $
+                              case ls of
+                                  OpenForest ts -> ts
+                                  ClosedForest ts -> map makeCTree ts
                         , treeAboveAbove = Just ta {treeAboveLefts = ts}
                         , treeAboveNode = t
-                        , treeAboveRights = collapseValue (treeBelow tc)
+                        , treeAboveRights =
+                              case treeBelow tc of
+                                  OpenForest ts -> ts
+                                  ClosedForest ts -> map makeCTree ts
                         }
 
 -- | Demotes the current subtree to the level of its children.
@@ -375,7 +390,11 @@ treeCursorDemoteSubTree f g tc =
                     makeTreeCursorWithAbove g (currentTree f tc) $
                     Just
                         TreeAbove
-                        { treeAboveLefts = reverse $ collapseValue ls
+                        { treeAboveLefts =
+                              reverse $
+                              case ls of
+                                  OpenForest ts -> ts
+                                  ClosedForest ts -> map makeCTree ts
                         , treeAboveAbove = Just ta {treeAboveLefts = ts}
                         , treeAboveNode = t
                         , treeAboveRights = []
@@ -422,7 +441,7 @@ treeCursorDemoteElemUnder b1 b2 tc = do
                   , treeAboveNode = b1
                   , treeAboveRights = []
                   }
-        , treeBelow = makeCollapse []
+        , treeBelow = ClosedForest []
         }
 
 -- | Demotes the current subtree to the level of its children, by adding a root.

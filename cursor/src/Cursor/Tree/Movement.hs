@@ -83,27 +83,30 @@ treeCursorSelectAbove f g tc@TreeCursor {..} =
     case treeAbove of
         Nothing -> Nothing
         Just TreeAbove {..} ->
-            let newForrest =
-                    reverse treeAboveLefts ++
+            let newForest =
+                    (reverse treeAboveLefts) ++
                     [currentTree f tc] ++ treeAboveRights
-                newTree = CNode treeAboveNode $ collapse True newForrest
+                newTree = CNode treeAboveNode $ OpenForest newForest
             in Just $ makeTreeCursorWithAbove g newTree treeAboveAbove
 
 treeCursorSelectBelowAtPos ::
        (a -> b) -> (b -> a) -> Int -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorSelectBelowAtPos f g pos TreeCursor {..} =
-    case splitAt pos $ collapseValue treeBelow of
-        (_, []) -> Nothing
-        (lefts, current:rights) ->
-            Just $
-            makeTreeCursorWithAbove g current $
-            Just $
-            TreeAbove
-            { treeAboveLefts = reverse lefts
-            , treeAboveAbove = treeAbove
-            , treeAboveNode = f treeCurrent
-            , treeAboveRights = rights
-            }
+    case treeBelow of
+        ClosedForest _ -> Nothing
+        OpenForest ts ->
+            case splitAt pos ts of
+                (_, []) -> Nothing
+                (lefts, current:rights) ->
+                    Just $
+                    makeTreeCursorWithAbove g current $
+                    Just $
+                    TreeAbove
+                    { treeAboveLefts = reverse lefts
+                    , treeAboveAbove = treeAbove
+                    , treeAboveNode = f treeCurrent
+                    , treeAboveRights = rights
+                    }
 
 treeCursorSelectBelowAtStart ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
@@ -112,11 +115,9 @@ treeCursorSelectBelowAtStart f g = treeCursorSelectBelowAtPos f g 0
 treeCursorSelectBelowAtEnd ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorSelectBelowAtEnd f g tc =
-    treeCursorSelectBelowAtPos
-        f
-        g
-        (length (collapseValue $ treeBelow tc) - 1)
-        tc
+    case treeBelow tc of
+        ClosedForest _ -> Nothing
+        OpenForest ts -> treeCursorSelectBelowAtPos f g (length ts - 1) tc
 
 treeCursorSelectBelowAtStartRecursively ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
@@ -175,9 +176,12 @@ treeCursorSelectAboveNext f g tc =
     case treeCursorSelectNextOnSameLevel f g tc of
         Just _ -> Nothing
         Nothing ->
-            if (null $ collapseValue $ treeBelow tc)
-                then go tc
-                else Nothing
+            case treeBelow tc of
+                ClosedForest _ -> go tc
+                OpenForest ts ->
+                    if null ts
+                        then go tc
+                        else Nothing
   where
     go tc_ = do
         tc' <- treeCursorSelectAbove f g tc_

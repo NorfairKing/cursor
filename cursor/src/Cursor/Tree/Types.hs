@@ -14,19 +14,18 @@ module Cursor.Tree.Types
     , treeAboveNodeL
     , treeAboveRightsL
     , TreeCursorSelection(..)
-    -- * Collapse
-    , Collapse(..)
-    , makeCollapse
-    , collapse
-    , rebuildCollapse
-    , collapseValueL
-    , collapseShowL
     -- * CTree
     , CTree(..)
-    , CForest
     , makeCTree
     , cTree
     , rebuildCTree
+    , CForest(..)
+    , makeCForest
+    , cForest
+    , rebuildCForest
+    , emptyCForest
+    , lengthCForest
+    , unpackCForest
     ) where
 
 import Data.Tree
@@ -45,7 +44,7 @@ import Cursor.Types
 data TreeCursor a b = TreeCursor
     { treeAbove :: !(Maybe (TreeAbove b))
     , treeCurrent :: !a
-    , treeBelow :: !(Collapse (CForest b))
+    , treeBelow :: !(CForest b)
     } deriving (Show, Eq, Generic)
 
 currentTree :: (a -> b) -> TreeCursor a b -> CTree b
@@ -57,7 +56,7 @@ treeCursorAboveL = lens treeAbove $ \tc ta -> tc {treeAbove = ta}
 treeCursorCurrentL :: Lens' (TreeCursor a b) a
 treeCursorCurrentL = lens treeCurrent $ \tc a -> tc {treeCurrent = a}
 
-treeCursorBelowL :: Lens' (TreeCursor a b) (Collapse (CForest b))
+treeCursorBelowL :: Lens' (TreeCursor a b) (CForest b)
 treeCursorBelowL = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
 
 instance (Validity a, Validity b) => Validity (TreeCursor a b)
@@ -91,42 +90,49 @@ data TreeCursorSelection
 
 instance Validity TreeCursorSelection
 
-data Collapse a = Collapse
-    { collapseValue :: !a
-    , collapseShow :: !Bool
-    } deriving (Show, Eq, Generic, Functor)
-
-instance Validity a => Validity (Collapse a)
-
-makeCollapse :: a -> Collapse a
-makeCollapse = collapse True
-
-collapse :: Bool -> a -> Collapse a
-collapse b a = Collapse {collapseValue = a, collapseShow = b}
-
-rebuildCollapse :: Collapse a -> a
-rebuildCollapse = collapseValue
-
-collapseValueL :: Lens (Collapse a) (Collapse b) a b
-collapseValueL = lens collapseValue $ \c v -> c {collapseValue = v}
-
-collapseShowL :: Lens' (Collapse a) Bool
-collapseShowL = lens collapseShow $ \c b -> c {collapseShow = b}
-
 data CTree a =
-    CNode !a
-          !(Collapse (CForest a))
+    CNode a
+          (CForest a)
     deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (CTree a)
 
-type CForest a = [CTree a]
-
 makeCTree :: Tree a -> CTree a
-makeCTree = cTree True
+makeCTree = cTree False
 
 cTree :: Bool -> Tree a -> CTree a
-cTree b (Node v f) = CNode v $ collapse b $ map (cTree b) f
+cTree b (Node v f) = CNode v $ cForest b f
 
 rebuildCTree :: CTree a -> Tree a
-rebuildCTree (CNode v c) = Node v $ map rebuildCTree $ collapseValue c
+rebuildCTree (CNode v cf) = Node v $ rebuildCForest cf
+
+data CForest a
+    = ClosedForest [Tree a]
+    | OpenForest [CTree a]
+    deriving (Show, Eq, Generic, Functor)
+
+instance Validity a => Validity (CForest a)
+
+makeCForest :: Forest a -> CForest a
+makeCForest = cForest True
+
+cForest :: Bool -> Forest a -> CForest a
+cForest b f =
+    if b
+        then OpenForest $ map (cTree b) f
+        else ClosedForest f
+
+rebuildCForest :: CForest a -> Forest a
+rebuildCForest (ClosedForest f) = f
+rebuildCForest (OpenForest ct) = map rebuildCTree ct
+
+emptyCForest :: CForest a
+emptyCForest = ClosedForest []
+
+lengthCForest :: CForest a -> Int
+lengthCForest (ClosedForest ts) = length ts
+lengthCForest (OpenForest ts) = length ts
+
+unpackCForest :: CForest a -> [CTree a]
+unpackCForest (ClosedForest ts) = map makeCTree ts
+unpackCForest (OpenForest ts) = ts

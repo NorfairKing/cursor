@@ -28,10 +28,6 @@ spec = do
     genValidSpec @(PromoteResult Double)
     eqSpec @(DemoteResult Int)
     genValidSpec @(DemoteResult Double)
-    eqSpec @(Collapse Int)
-    genValidSpec @(Collapse Double)
-    describe "collapseValueL" $ lensSpecOnValid $ collapseValueL @Double
-    describe "collapseShowL" $ lensSpecOnValid $ collapseShowL @Double
     eqSpec @(CTree Int)
     genValidSpec @(CTree Double)
     eqSpec @(TreeAbove Int)

@@ -66,11 +66,6 @@ module Cursor.Simple.Tree
     , TC.DemoteResult(..)
     , TC.treeCursorDemoteElemUnder
     , TC.treeCursorDemoteSubTreeUnder
-    , TC.Collapse(..)
-    , TC.makeCollapse
-    , TC.collapse
-    , TC.rebuildCollapse
-    , TC.collapseValueL
     , TC.CTree(..)
     , TC.CForest
     , TC.makeCTree
