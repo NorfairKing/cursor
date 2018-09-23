@@ -17,10 +17,8 @@ import Text.Show.Pretty
 import Test.Hspec
 
 import Test.Validity
-import Test.Validity.Optics
 
 import Cursor.Simple.Tree hiding (TreeCursor)
-import qualified Cursor.Simple.Tree as STC (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
 import Cursor.Tree
        (CForest(..), CTree(..), TreeAbove(..), TreeCursor(..),
@@ -31,43 +29,6 @@ import Cursor.Simple.Tree.TestUtils
 
 spec :: Spec
 spec = do
-    eqSpec @(STC.TreeCursor Int)
-    genValidSpec @(STC.TreeCursor Double)
-    describe "makeTreeCursor" $
-        it "produces valid cursors" $
-        producesValidsOnValids (makeTreeCursor @Double)
-    describe "makeTreeCursorWithSelection" $
-        it "produces valid cursors" $
-        producesValidsOnValids2 (makeTreeCursorWithSelection @Double)
-    describe "singletonTreeCursor" $
-        it "produces valid cursors" $
-        producesValidsOnValids (singletonTreeCursor @Double)
-    describe "rebuildTreeCursor" $ do
-        it "produces valid trees" $
-            producesValidsOnValids (rebuildTreeCursor @Double)
-        it "is the inverse of makeTreeCursor for integers" $
-            inverseFunctions (makeTreeCursor @Int) rebuildTreeCursor
-        it
-            "is the inverse of makeTreeCursorWithSelection for the current selection" $
-            forAllValid $ \tc ->
-                case makeTreeCursorWithSelection
-                         @Double
-                         (treeCursorSelection tc)
-                         (rebuildTreeCursor tc) of
-                    Nothing ->
-                        expectationFailure
-                            "makeTreeCursorWithSelection should not have failed."
-                    Just r -> r `treeShouldBe` tc
-    describe "treeCursorAboveL" $
-        lensSpecOnValid (treeCursorAboveL @Double @Double)
-    describe "treeCursorCurrentL" $
-        lensSpecOnValid (treeCursorCurrentL @Double @Double)
-    describe "treeCursorBelowL" $
-        lensSpecOnValid (treeCursorBelowL @Double @Double)
-    describe "treeAboveLeftsL" $ lensSpecOnValid (treeAboveLeftsL @Double)
-    describe "treeAboveAboveL" $ lensSpecOnValid (treeAboveAboveL @Double)
-    describe "treeAboveNodeL" $ lensSpecOnValid (treeAboveNodeL @Double)
-    describe "treeAboveRightsL" $ lensSpecOnValid (treeAboveRightsL @Double)
     describe "treeCursorSelection" $
         it "produces valids on valids" $
         producesValidsOnValids (treeCursorSelection @Double @Double)
