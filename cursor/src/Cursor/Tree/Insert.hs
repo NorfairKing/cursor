@@ -16,19 +16,9 @@ module Cursor.Tree.Insert
 import qualified Data.List.NonEmpty as NE
 import Data.List.NonEmpty ((<|))
 import Data.Tree
-import Data.Validity
-import Data.Validity.Tree ()
-
-import GHC.Generics (Generic)
-
-import Control.Applicative
-import Control.Monad
-
-import Lens.Micro
 
 import Cursor.Tree.Base
 import Cursor.Tree.Types
-import Cursor.Types
 
 treeCursorInsert :: Tree b -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorInsert tree tc@TreeCursor {..} = do

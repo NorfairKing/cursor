@@ -13,19 +13,7 @@ module Cursor.Tree.Base
     , makeTreeCursorWithAbove
     ) where
 
-import Data.Tree
-import Data.Validity
-import Data.Validity.Tree ()
-
-import GHC.Generics (Generic)
-
-import Control.Applicative
-import Control.Monad
-
-import Lens.Micro
-
 import Cursor.Tree.Types
-import Cursor.Types
 
 singletonTreeCursor :: a -> TreeCursor a b
 singletonTreeCursor v =

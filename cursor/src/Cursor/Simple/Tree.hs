@@ -75,12 +75,10 @@ module Cursor.Simple.Tree
 
 import Data.Tree
 
-import Lens.Micro
-
 import Cursor.Types
 
 import qualified Cursor.Tree as TC
-import Cursor.Tree (CForest, CTree, TreeAbove(..))
+import Cursor.Tree (CTree, TreeAbove(..))
 
 type TreeCursor a = TC.TreeCursor a a
 

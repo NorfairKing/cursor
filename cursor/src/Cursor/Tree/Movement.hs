@@ -24,20 +24,13 @@ module Cursor.Tree.Movement
     ) where
 
 import qualified Data.List.NonEmpty as NE
-import Data.Tree
-import Data.Validity
 import Data.Validity.Tree ()
-
-import GHC.Generics (Generic)
 
 import Control.Applicative
 import Control.Monad
 
-import Lens.Micro
-
 import Cursor.Tree.Base
 import Cursor.Tree.Types
-import Cursor.Types
 
 treeCursorSelection :: TreeCursor a b -> TreeCursorSelection
 treeCursorSelection TreeCursor {..} = wrap treeAbove SelectNode

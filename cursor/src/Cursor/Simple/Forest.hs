@@ -76,10 +76,7 @@ import Data.Validity.Tree ()
 import Data.List.NonEmpty (NonEmpty)
 import Data.Tree
 
-import Lens.Micro
-
 import qualified Cursor.Forest as FC
-import Cursor.List.NonEmpty
 import Cursor.Simple.Tree
 import Cursor.Types
 

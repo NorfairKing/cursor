@@ -17,17 +17,10 @@ module Cursor.Tree.Delete
     ) where
 
 import Data.List.NonEmpty (NonEmpty(..))
-import Data.Tree
 import qualified Data.List.NonEmpty as NE
-import Data.Validity
-import Data.Validity.Tree ()
-
-import GHC.Generics (Generic)
+import Data.Tree
 
 import Control.Applicative
-import Control.Monad
-
-import Lens.Micro
 
 import Cursor.Tree.Base
 import Cursor.Tree.Types
@@ -124,8 +117,8 @@ treeCursorDeleteElemAndSelectNext g TreeCursor {..} =
                 Nothing ->
                     case ts of
                         [] -> Just Deleted
-                        (Node e ts:xs) ->
-                            let t = CNode e $ ClosedForest $ ts ++ xs
+                        (Node e ts_:xs) ->
+                            let t = CNode e $ ClosedForest $ ts_ ++ xs
                             in Just . Updated $
                                makeTreeCursorWithAbove g t treeAbove
                 Just ta ->

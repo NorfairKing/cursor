@@ -2,6 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# OPTIONS_GHC -fno-warn-duplicate-exports #-}
 
 module Cursor.Tree
     ( TreeCursor(..)
@@ -45,16 +46,9 @@ module Cursor.Tree
     , rebuildCForest
     ) where
 
-import Data.Tree
 import Data.Validity
-import Data.Validity.Tree ()
 
 import GHC.Generics (Generic)
-
-import Control.Applicative
-import Control.Monad
-
-import Lens.Micro
 
 import Cursor.Tree.Base
 import Cursor.Tree.Delete
@@ -62,7 +56,6 @@ import Cursor.Tree.Draw
 import Cursor.Tree.Insert
 import Cursor.Tree.Movement
 import Cursor.Tree.Types
-import Cursor.Types
 
 -- | Swaps the current node with the previous node on the same level
 --

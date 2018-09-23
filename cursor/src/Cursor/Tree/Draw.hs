@@ -14,18 +14,8 @@ module Cursor.Tree.Draw
 
 import qualified Data.List.NonEmpty as NE
 import Data.Tree
-import Data.Validity
-import Data.Validity.Tree ()
-
-import GHC.Generics (Generic)
-
-import Control.Applicative
-import Control.Monad
-
-import Lens.Micro
 
 import Cursor.Tree.Types
-import Cursor.Types
 
 drawTreeCursor :: (Show a, Show b) => TreeCursor a b -> String
 drawTreeCursor = drawTree . treeCursorWithPointer
