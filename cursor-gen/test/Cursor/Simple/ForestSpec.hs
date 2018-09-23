@@ -745,9 +745,9 @@ shiftingSpec = do
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
                                 [ CNode 'a' $
-                                  ClosedForest
-                                      [ Node 'b' [Node 'c' []]
-                                      , Node 'f' [Node 'g' []]
+                                  OpenForest
+                                      [ CNode 'b' $ ClosedForest [Node 'c' []]
+                                      , CNode 'f' $ ClosedForest [Node 'g' []]
                                       ]
                                 ]
                           , nonEmptyCursorCurrent =
@@ -763,7 +763,7 @@ shiftingSpec = do
                    Nothing ->
                        expectationFailure
                            "forestCursorPromoteSubTree should not have failed."
-                   Just f -> f `shouldBe` expected
+                   Just f -> f `forestShouldBe` expected
         it "promotes the current subtree to the level of its parent" pending
     describe "forestCursorDemoteSubTree" $ do
         it "produces valids on valids" $

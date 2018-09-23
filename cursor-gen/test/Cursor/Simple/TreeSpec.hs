@@ -121,7 +121,13 @@ spec = do
                     { treeAbove =
                           Just
                               (TreeAbove
-                               { treeAboveLefts = [node 1 [node 2 [node 3 []]]]
+                               { treeAboveLefts =
+                                     [ CNode 1 $
+                                       OpenForest
+                                           [ CNode 2 $
+                                             OpenForest [CNode 3 emptyCForest]
+                                           ]
+                                     ]
                                , treeAboveAbove = Nothing
                                , treeAboveNode = 0
                                , treeAboveRights = []
@@ -146,7 +152,10 @@ spec = do
                                                      , treeAboveAbove = Nothing
                                                      , treeAboveNode = 0
                                                      , treeAboveRights =
-                                                           [node 4 []]
+                                                           [ CNode
+                                                                 4
+                                                                 emptyCForest
+                                                           ]
                                                      })
                                           , treeAboveNode = 1
                                           , treeAboveRights = []
@@ -228,7 +237,13 @@ spec = do
                     { treeAbove =
                           Just
                               (TreeAbove
-                               { treeAboveLefts = [node 1 [node 2 [node 3 []]]]
+                               { treeAboveLefts =
+                                     [ CNode 1 $
+                                       OpenForest
+                                           [ CNode 2 $
+                                             OpenForest [CNode 3 emptyCForest]
+                                           ]
+                                     ]
                                , treeAboveAbove = Nothing
                                , treeAboveNode = 0
                                , treeAboveRights = []
@@ -398,13 +413,13 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 1
-                        , treeBelow = ClosedForest [Node 2 fs]
+                        , treeBelow = OpenForest [CNode 2 fs]
                         }
                     simpleDeleteElemExpected =
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 2 :: Int
-                        , treeBelow = ClosedForest fs
+                        , treeBelow = fs
                         }
                 in case treeCursorDeleteElemAndSelectNext simpleDeleteElemStart of
                        Nothing ->

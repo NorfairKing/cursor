@@ -112,27 +112,42 @@ treeCursorDeleteElemAndSelectPrevious g TreeCursor {..} =
 treeCursorDeleteElemAndSelectNext ::
        (b -> a) -> TreeCursor a b -> Maybe (DeleteOrUpdate (TreeCursor a b))
 treeCursorDeleteElemAndSelectNext g TreeCursor {..} =
-    case treeAbove of
-        Nothing ->
-            case treeBelow of
-                ClosedForest [] -> Just Deleted
-                OpenForest [] -> Just Deleted
-                _ -> Nothing
-        Just ta ->
-            case treeAboveRights ta of
-                [] -> Nothing
-                tree:xs ->
-                    Just . Updated . makeTreeCursorWithAbove g tree $
-                    Just
-                        ta
-                        { treeAboveLefts =
-                              reverse
-                                  (case treeBelow of
-                                       OpenForest ts -> ts
-                                       ClosedForest ts -> map makeCTree ts) ++
-                              treeAboveLefts ta
-                        , treeAboveRights = xs
-                        }
+    case treeBelow of
+        OpenForest [] ->
+            case treeAbove of
+                Nothing -> Just Deleted
+                Just ta ->
+                    case treeAboveRights ta of
+                        [] -> Nothing
+                        tree:xs ->
+                            Just . Updated . makeTreeCursorWithAbove g tree $
+                            Just ta {treeAboveRights = xs}
+        ClosedForest ts ->
+            case treeAbove of
+                Nothing ->
+                    case ts of
+                        [] -> Just Deleted
+                        (Node e ts:xs) ->
+                            let t =
+                                    CNode e $
+                                    OpenForest $ map makeCTree $ ts ++ xs
+                            in Just . Updated $
+                               makeTreeCursorWithAbove g t treeAbove
+                Just ta ->
+                    case treeAboveRights ta of
+                        [] -> Nothing
+                        tree:xs ->
+                            Just . Updated . makeTreeCursorWithAbove g tree $
+                            Just
+                                ta
+                                { treeAboveLefts =
+                                      map makeCTree (reverse ts) ++
+                                      treeAboveLefts ta
+                                , treeAboveRights = xs
+                                }
+        OpenForest (CNode e ts:xs) ->
+            let t = CNode e $ OpenForest $ unpackCForest ts ++ xs
+            in Just . Updated $ makeTreeCursorWithAbove g t treeAbove
 
 treeCursorDeleteElemAndSelectAbove ::
        (b -> a) -> TreeCursor a b -> Maybe (DeleteOrUpdate (TreeCursor a b))

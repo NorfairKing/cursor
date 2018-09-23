@@ -47,20 +47,18 @@ makeTreeCursorWithSelection f g sel = walkDown sel . makeTreeCursor g
     walkDown SelectNode tc = pure tc
     walkDown (SelectChild i s) TreeCursor {..} =
         (walkDown s =<<) $
-        case treeBelow of
-            ClosedForest ts ->
-                case splitAt i ts of
-                    (_, []) -> Nothing
-                    (lefts, current:rights) ->
-                        Just $
-                        makeTreeCursorWithAbove g (makeCTree current) $
-                        Just $
-                        TreeAbove
-                        { treeAboveLefts = reverse $ map makeCTree lefts
-                        , treeAboveAbove = treeAbove
-                        , treeAboveNode = f treeCurrent
-                        , treeAboveRights = map makeCTree rights
-                        }
+        case splitAt i $ unpackCForest treeBelow of
+            (_, []) -> Nothing
+            (lefts, current:rights) ->
+                Just $
+                makeTreeCursorWithAbove g current $
+                Just $
+                TreeAbove
+                { treeAboveLefts = reverse lefts
+                , treeAboveAbove = treeAbove
+                , treeAboveNode = f treeCurrent
+                , treeAboveRights = rights
+                }
 
 rebuildTreeCursor :: (a -> b) -> TreeCursor a b -> CTree b
 rebuildTreeCursor f TreeCursor {..} =

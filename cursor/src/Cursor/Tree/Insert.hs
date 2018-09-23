@@ -72,14 +72,20 @@ treeCursorAddChildAtPos i t tc =
             let (before, after) = splitAt i ts
             in tc
                {treeBelow = OpenForest $ map makeCTree $ before ++ [t] ++ after}
+        OpenForest ts ->
+            let (before, after) = splitAt i ts
+            in tc {treeBelow = OpenForest $ before ++ [makeCTree t] ++ after}
 
 treeCursorAddChildAtStart :: Tree b -> TreeCursor a b -> TreeCursor a b
 treeCursorAddChildAtStart t tc =
     case treeBelow tc of
         ClosedForest ts -> tc {treeBelow = OpenForest $ map makeCTree $ t : ts}
+        OpenForest ts -> tc {treeBelow = OpenForest $ makeCTree t : ts}
 
 treeCursorAddChildAtEnd :: Tree b -> TreeCursor a b -> TreeCursor a b
 treeCursorAddChildAtEnd t tc =
     case treeBelow tc of
         ClosedForest ts ->
             tc {treeBelow = OpenForest $ map makeCTree $ ts ++ [t]}
+        OpenForest ts ->
+            tc {treeBelow = OpenForest $  ts ++ [makeCTree t]}
