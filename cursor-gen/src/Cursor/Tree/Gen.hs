@@ -16,14 +16,26 @@ import Cursor.Tree
 instance GenUnchecked TreeCursorSelection
 
 instance GenValid TreeCursorSelection
+
 instance GenUnchecked a => GenUnchecked (SwapResult a)
+
 instance GenValid a => GenValid (SwapResult a)
+
 instance GenUnchecked a => GenUnchecked (PromoteElemResult a)
+
 instance GenValid a => GenValid (PromoteElemResult a)
+
 instance GenUnchecked a => GenUnchecked (PromoteResult a)
+
 instance GenValid a => GenValid (PromoteResult a)
+
 instance GenUnchecked a => GenUnchecked (DemoteResult a)
+
 instance GenValid a => GenValid (DemoteResult a)
+
+instance GenUnchecked a => GenUnchecked (Collapse a)
+
+instance GenValid a => GenValid (Collapse a)
 
 instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (TreeCursor a b) where
     genUnchecked =

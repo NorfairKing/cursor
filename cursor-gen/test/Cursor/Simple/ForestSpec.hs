@@ -93,40 +93,39 @@ movementsSpec = do
          do
             let start =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 3 :: Int
-                                            , treeBelow = []
-                                            }
-                                  , nonEmptyCursorNext = []
-                                  }
-                        }
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 3 :: Int
+                                , treeBelow = makeCollapse []
+                                }
+                          , nonEmptyCursorNext = []
+                          }
+                    }
                 expected =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = []
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove =
-                                                  Just
-                                                      TreeAbove
-                                                          { treeAboveAbove =
-                                                                Nothing
-                                                          , treeAboveLefts = []
-                                                          , treeAboveNode = 1
-                                                          , treeAboveRights = []
-                                                          }
-                                            , treeCurrent = 2
-                                            , treeBelow = []
-                                            }
-                                  , nonEmptyCursorNext = [Node 3 []]
-                                  }
-                        }
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = []
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove =
+                                      Just
+                                          TreeAbove
+                                          { treeAboveAbove = Nothing
+                                          , treeAboveLefts = []
+                                          , treeAboveNode = 1
+                                          , treeAboveRights = []
+                                          }
+                                , treeCurrent = 2
+                                , treeBelow = makeCollapse []
+                                }
+                          , nonEmptyCursorNext = [Node 3 []]
+                          }
+                    }
             case forestCursorSelectPrev start of
                 Nothing ->
                     expectationFailure
@@ -144,40 +143,39 @@ movementsSpec = do
          do
             let start =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = []
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove =
-                                                  Just
-                                                      TreeAbove
-                                                          { treeAboveAbove =
-                                                                Nothing
-                                                          , treeAboveLefts = []
-                                                          , treeAboveNode = 1
-                                                          , treeAboveRights = []
-                                                          }
-                                            , treeCurrent = 2
-                                            , treeBelow = []
-                                            }
-                                  , nonEmptyCursorNext = [Node 3 []]
-                                  }
-                        }
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = []
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove =
+                                      Just
+                                          TreeAbove
+                                          { treeAboveAbove = Nothing
+                                          , treeAboveLefts = []
+                                          , treeAboveNode = 1
+                                          , treeAboveRights = []
+                                          }
+                                , treeCurrent = 2
+                                , treeBelow = makeCollapse []
+                                }
+                          , nonEmptyCursorNext = [Node 3 []]
+                          }
+                    }
                 expected =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 3 :: Int
-                                            , treeBelow = []
-                                            }
-                                  , nonEmptyCursorNext = []
-                                  }
-                        }
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 3 :: Int
+                                , treeBelow = makeCollapse []
+                                }
+                          , nonEmptyCursorNext = []
+                          }
+                    }
             case forestCursorSelectNext start of
                 Nothing ->
                     expectationFailure
@@ -340,37 +338,37 @@ swapSpec = do
         it "works on the example from the docs" $
             let start =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = [Node 'a' []]
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 'b'
-                                            , treeBelow = []
-                                            }
-                                  , nonEmptyCursorNext = []
-                                  }
-                        }
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = [Node 'a' []]
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 'b'
+                                , treeBelow = makeCollapse []
+                                }
+                          , nonEmptyCursorNext = []
+                          }
+                    }
                 end =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = []
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 'b'
-                                            , treeBelow = []
-                                            }
-                                  , nonEmptyCursorNext = [Node 'a' []]
-                                  }
-                        }
-             in case forestCursorSwapPrev start of
-                    Nothing ->
-                        expectationFailure
-                            "forestCursorSwapPrev should not have failed."
-                    Just r -> r `forestShouldBe` end
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = []
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 'b'
+                                , treeBelow = makeCollapse []
+                                }
+                          , nonEmptyCursorNext = [Node 'a' []]
+                          }
+                    }
+            in case forestCursorSwapPrev start of
+                   Nothing ->
+                       expectationFailure
+                           "forestCursorSwapPrev should not have failed."
+                   Just r -> r `forestShouldBe` end
         it
             "swaps the current node with the previous node on the same level"
             pending
@@ -384,37 +382,37 @@ swapSpec = do
         it "works on the example from the docs" $
             let start =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = []
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 'a'
-                                            , treeBelow = []
-                                            }
-                                  , nonEmptyCursorNext = [Node 'b' []]
-                                  }
-                        }
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = []
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 'a'
+                                , treeBelow = makeCollapse []
+                                }
+                          , nonEmptyCursorNext = [Node 'b' []]
+                          }
+                    }
                 end =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = [Node 'b' []]
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 'a'
-                                            , treeBelow = []
-                                            }
-                                  , nonEmptyCursorNext = []
-                                  }
-                        }
-             in case forestCursorSwapNext start of
-                    Nothing ->
-                        expectationFailure
-                            "forestCursorSwapNext should not have failed."
-                    Just r -> r `forestShouldBe` end
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = [Node 'b' []]
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 'a'
+                                , treeBelow = makeCollapse []
+                                }
+                          , nonEmptyCursorNext = []
+                          }
+                    }
+            in case forestCursorSwapNext start of
+                   Nothing ->
+                       expectationFailure
+                           "forestCursorSwapNext should not have failed."
+                   Just r -> r `forestShouldBe` end
         it "swaps the current node with the next node on the same level" pending
         it "reverts forestCursorSwapPrev" $
             inverseFunctionsIfSucceedOnValid
@@ -430,27 +428,27 @@ deleteSpec = do
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
                         ForestCursor
-                            { forestCursorListCursor =
-                                  NonEmptyCursor
-                                      { nonEmptyCursorPrev = []
-                                      , nonEmptyCursorCurrent =
-                                            TreeCursor
-                                                { treeAbove = Nothing
-                                                , treeCurrent = 1 :: Int
-                                                , treeBelow = [Node 2 fs]
-                                                }
-                                      , nonEmptyCursorNext = []
-                                      }
-                            }
-                 in case forestCursorRemoveElemAndSelectPrev
-                             simpleDeleteElemStart of
-                        Nothing -> pure ()
-                        Just Deleted ->
-                            expectationFailure
-                                "forestCursorRemoveElemAndSelectPrev should not have deleted the entire example forest."
-                        Just (Updated _) ->
-                            expectationFailure
-                                "forestCursorRemoveElemAndSelectPrev should not have updated the forest cursor, but failed instead."
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                              { nonEmptyCursorPrev = []
+                              , nonEmptyCursorCurrent =
+                                    TreeCursor
+                                    { treeAbove = Nothing
+                                    , treeCurrent = 1 :: Int
+                                    , treeBelow = makeCollapse [Node 2 fs]
+                                    }
+                              , nonEmptyCursorNext = []
+                              }
+                        }
+                in case forestCursorRemoveElemAndSelectPrev
+                            simpleDeleteElemStart of
+                       Nothing -> pure ()
+                       Just Deleted ->
+                           expectationFailure
+                               "forestCursorRemoveElemAndSelectPrev should not have deleted the entire example forest."
+                       Just (Updated _) ->
+                           expectationFailure
+                               "forestCursorRemoveElemAndSelectPrev should not have updated the forest cursor, but failed instead."
         it
             "removes the selected element and selects the previous element"
             pending
@@ -461,42 +459,41 @@ deleteSpec = do
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
                         ForestCursor
-                            { forestCursorListCursor =
-                                  NonEmptyCursor
-                                      { nonEmptyCursorPrev = []
-                                      , nonEmptyCursorCurrent =
-                                            TreeCursor
-                                                { treeAbove = Nothing
-                                                , treeCurrent = 1
-                                                , treeBelow = [Node 2 fs]
-                                                }
-                                      , nonEmptyCursorNext = []
-                                      }
-                            }
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                              { nonEmptyCursorPrev = []
+                              , nonEmptyCursorCurrent =
+                                    TreeCursor
+                                    { treeAbove = Nothing
+                                    , treeCurrent = 1
+                                    , treeBelow = makeCollapse [Node 2 fs]
+                                    }
+                              , nonEmptyCursorNext = []
+                              }
+                        }
                     simpleDeleteElemExpected =
                         ForestCursor
-                            { forestCursorListCursor =
-                                  NonEmptyCursor
-                                      { nonEmptyCursorPrev = []
-                                      , nonEmptyCursorCurrent =
-                                            TreeCursor
-                                                { treeAbove = Nothing
-                                                , treeCurrent = 2 :: Int
-                                                , treeBelow = fs
-                                                }
-                                      , nonEmptyCursorNext = []
-                                      }
-                            }
-                 in case forestCursorDeleteElemAndSelectNext
-                             simpleDeleteElemStart of
-                        Nothing ->
-                            expectationFailure
-                                "forestCursorDeleteElemAndSelectNext should not have failed."
-                        Just Deleted ->
-                            expectationFailure
-                                "forestCursorDeleteElemAndSelectNext should not have deleted the entire example forest."
-                        Just (Updated f) ->
-                            f `shouldBe` simpleDeleteElemExpected
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                              { nonEmptyCursorPrev = []
+                              , nonEmptyCursorCurrent =
+                                    TreeCursor
+                                    { treeAbove = Nothing
+                                    , treeCurrent = 2 :: Int
+                                    , treeBelow = makeCollapse fs
+                                    }
+                              , nonEmptyCursorNext = []
+                              }
+                        }
+                in case forestCursorDeleteElemAndSelectNext
+                            simpleDeleteElemStart of
+                       Nothing ->
+                           expectationFailure
+                               "forestCursorDeleteElemAndSelectNext should not have failed."
+                       Just Deleted ->
+                           expectationFailure
+                               "forestCursorDeleteElemAndSelectNext should not have deleted the entire example forest."
+                       Just (Updated f) -> f `shouldBe` simpleDeleteElemExpected
         it "deletes the selected element and selects the next element" pending
     describe "forestCursorRemoveElem" $ do
         it "produces valid cursors" $
@@ -505,37 +502,37 @@ deleteSpec = do
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
                         ForestCursor
-                            { forestCursorListCursor =
-                                  NonEmptyCursor
-                                      { nonEmptyCursorPrev = []
-                                      , nonEmptyCursorCurrent =
-                                            TreeCursor
-                                                { treeAbove = Nothing
-                                                , treeCurrent = 1
-                                                , treeBelow = [Node 2 fs]
-                                                }
-                                      , nonEmptyCursorNext = []
-                                      }
-                            }
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                              { nonEmptyCursorPrev = []
+                              , nonEmptyCursorCurrent =
+                                    TreeCursor
+                                    { treeAbove = Nothing
+                                    , treeCurrent = 1
+                                    , treeBelow = makeCollapse [Node 2 fs]
+                                    }
+                              , nonEmptyCursorNext = []
+                              }
+                        }
                     simpleDeleteElemExpected =
                         ForestCursor
-                            { forestCursorListCursor =
-                                  NonEmptyCursor
-                                      { nonEmptyCursorPrev = []
-                                      , nonEmptyCursorCurrent =
-                                            TreeCursor
-                                                { treeAbove = Nothing
-                                                , treeCurrent = 2 :: Int
-                                                , treeBelow = fs
-                                                }
-                                      , nonEmptyCursorNext = []
-                                      }
-                            }
-                 in case forestCursorRemoveElem simpleDeleteElemStart of
-                        Deleted ->
-                            expectationFailure
-                                "forestCursorRemoveElem should not have deleted the entire example forest."
-                        Updated f -> f `shouldBe` simpleDeleteElemExpected
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                              { nonEmptyCursorPrev = []
+                              , nonEmptyCursorCurrent =
+                                    TreeCursor
+                                    { treeAbove = Nothing
+                                    , treeCurrent = 2 :: Int
+                                    , treeBelow = makeCollapse fs
+                                    }
+                              , nonEmptyCursorNext = []
+                              }
+                        }
+                in case forestCursorRemoveElem simpleDeleteElemStart of
+                       Deleted ->
+                           expectationFailure
+                               "forestCursorRemoveElem should not have deleted the entire example forest."
+                       Updated f -> f `shouldBe` simpleDeleteElemExpected
         it "removes the selected element" pending
     describe "forestCursorDeleteElem" $ do
         it "produces valid cursors" $
@@ -544,37 +541,37 @@ deleteSpec = do
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
                         ForestCursor
-                            { forestCursorListCursor =
-                                  NonEmptyCursor
-                                      { nonEmptyCursorPrev = []
-                                      , nonEmptyCursorCurrent =
-                                            TreeCursor
-                                                { treeAbove = Nothing
-                                                , treeCurrent = 1
-                                                , treeBelow = [Node 2 fs]
-                                                }
-                                      , nonEmptyCursorNext = []
-                                      }
-                            }
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                              { nonEmptyCursorPrev = []
+                              , nonEmptyCursorCurrent =
+                                    TreeCursor
+                                    { treeAbove = Nothing
+                                    , treeCurrent = 1
+                                    , treeBelow = makeCollapse [Node 2 fs]
+                                    }
+                              , nonEmptyCursorNext = []
+                              }
+                        }
                     simpleDeleteElemExpected =
                         ForestCursor
-                            { forestCursorListCursor =
-                                  NonEmptyCursor
-                                      { nonEmptyCursorPrev = []
-                                      , nonEmptyCursorCurrent =
-                                            TreeCursor
-                                                { treeAbove = Nothing
-                                                , treeCurrent = 2 :: Int
-                                                , treeBelow = fs
-                                                }
-                                      , nonEmptyCursorNext = []
-                                      }
-                            }
-                 in case forestCursorDeleteElem simpleDeleteElemStart of
-                        Deleted ->
-                            expectationFailure
-                                "forestCursorDeleteElem should not have deleted the entire example forest."
-                        Updated f -> f `shouldBe` simpleDeleteElemExpected
+                        { forestCursorListCursor =
+                              NonEmptyCursor
+                              { nonEmptyCursorPrev = []
+                              , nonEmptyCursorCurrent =
+                                    TreeCursor
+                                    { treeAbove = Nothing
+                                    , treeCurrent = 2 :: Int
+                                    , treeBelow = makeCollapse fs
+                                    }
+                              , nonEmptyCursorNext = []
+                              }
+                        }
+                in case forestCursorDeleteElem simpleDeleteElemStart of
+                       Deleted ->
+                           expectationFailure
+                               "forestCursorDeleteElem should not have deleted the entire example forest."
+                       Updated f -> f `shouldBe` simpleDeleteElemExpected
         it "deletes the selected element" pending
     describe "forestCursorRemoveSubTreeAndSelectPrev" $ do
         it "produces valid cursors" $
@@ -603,67 +600,52 @@ shiftingSpec = do
         it "works on the example from the documentation" $
             let start =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = []
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove =
-                                                  Just
-                                                      TreeAbove
-                                                          { treeAboveLefts =
-                                                                [ Node
-                                                                      'b'
-                                                                      [ Node
-                                                                            'c'
-                                                                            []
-                                                                      ]
-                                                                ]
-                                                          , treeAboveAbove =
-                                                                Nothing
-                                                          , treeAboveNode = 'a'
-                                                          , treeAboveRights =
-                                                                [ Node
-                                                                      'f'
-                                                                      [ Node
-                                                                            'g'
-                                                                            []
-                                                                      ]
-                                                                ]
-                                                          }
-                                            , treeCurrent = 'd'
-                                            , treeBelow = [Node 'e' []]
-                                            }
-                                  , nonEmptyCursorNext = [Node 'h' []]
-                                  }
-                        }
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = []
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove =
+                                      Just
+                                          TreeAbove
+                                          { treeAboveLefts =
+                                                [Node 'b' [Node 'c' []]]
+                                          , treeAboveAbove = Nothing
+                                          , treeAboveNode = 'a'
+                                          , treeAboveRights =
+                                                [Node 'f' [Node 'g' []]]
+                                          }
+                                , treeCurrent = 'd'
+                                , treeBelow = makeCollapse [Node 'e' []]
+                                }
+                          , nonEmptyCursorNext = [Node 'h' []]
+                          }
+                    }
                 expected =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev =
-                                        [ Node
-                                              'a'
-                                              [ Node
-                                                    'b'
-                                                    [Node 'c' [], Node 'e' []]
-                                              , Node 'f' [Node 'g' []]
-                                              ]
-                                        ]
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 'd'
-                                            , treeBelow = []
-                                            }
-                                  , nonEmptyCursorNext = [Node 'h' []]
-                                  }
-                        }
-             in case forestCursorPromoteElem start of
-                    Nothing ->
-                        expectationFailure
-                            "forestCursorPromoteElem should not have failed."
-                    Just f -> f `forestShouldBe` expected
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev =
+                                [ Node
+                                      'a'
+                                      [ Node 'b' [Node 'c' [], Node 'e' []]
+                                      , Node 'f' [Node 'g' []]
+                                      ]
+                                ]
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 'd'
+                                , treeBelow = makeCollapse []
+                                }
+                          , nonEmptyCursorNext = [Node 'h' []]
+                          }
+                    }
+            in case forestCursorPromoteElem start of
+                   Nothing ->
+                       expectationFailure
+                           "forestCursorPromoteElem should not have failed."
+                   Just f -> f `forestShouldBe` expected
         it "promotes the current node to the level of its parent" pending
     describe "forestCursorDemoteElem" $ do
         it "produces valids on valids" $
@@ -671,48 +653,44 @@ shiftingSpec = do
         it "works on the example from the documentation" $
             let start =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev =
-                                        [Node 'a' [Node 'b' []]]
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 'c'
-                                            , treeBelow = [Node 'd' []]
-                                            }
-                                  , nonEmptyCursorNext = [Node 'e' []]
-                                  }
-                        }
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = [Node 'a' [Node 'b' []]]
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 'c'
+                                , treeBelow = makeCollapse [Node 'd' []]
+                                }
+                          , nonEmptyCursorNext = [Node 'e' []]
+                          }
+                    }
                 expected =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = []
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove =
-                                                  Just
-                                                      TreeAbove
-                                                          { treeAboveLefts =
-                                                                [Node 'b' []]
-                                                          , treeAboveAbove =
-                                                                Nothing
-                                                          , treeAboveNode = 'a'
-                                                          , treeAboveRights =
-                                                                [Node 'd' []]
-                                                          }
-                                            , treeCurrent = 'c'
-                                            , treeBelow = []
-                                            }
-                                  , nonEmptyCursorNext = [Node 'e' []]
-                                  }
-                        }
-             in case forestCursorDemoteElem start of
-                    Nothing ->
-                        expectationFailure
-                            "forestCursorDemoteElem should not have failed."
-                    Just f -> f `forestShouldBe` expected
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = []
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove =
+                                      Just
+                                          TreeAbove
+                                          { treeAboveLefts = [Node 'b' []]
+                                          , treeAboveAbove = Nothing
+                                          , treeAboveNode = 'a'
+                                          , treeAboveRights = [Node 'd' []]
+                                          }
+                                , treeCurrent = 'c'
+                                , treeBelow = makeCollapse []
+                                }
+                          , nonEmptyCursorNext = [Node 'e' []]
+                          }
+                    }
+            in case forestCursorDemoteElem start of
+                   Nothing ->
+                       expectationFailure
+                           "forestCursorDemoteElem should not have failed."
+                   Just f -> f `forestShouldBe` expected
         it "demotes the current node to the level of its children" pending
     describe "forestCursorPromoteSubTree" $ do
         it "produces valids on valids" $
@@ -720,65 +698,52 @@ shiftingSpec = do
         it "works on the example from the documentation" $
             let start =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = []
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove =
-                                                  Just
-                                                      TreeAbove
-                                                          { treeAboveLefts =
-                                                                [ Node
-                                                                      'b'
-                                                                      [ Node
-                                                                            'c'
-                                                                            []
-                                                                      ]
-                                                                ]
-                                                          , treeAboveAbove =
-                                                                Nothing
-                                                          , treeAboveNode = 'a'
-                                                          , treeAboveRights =
-                                                                [ Node
-                                                                      'f'
-                                                                      [ Node
-                                                                            'g'
-                                                                            []
-                                                                      ]
-                                                                ]
-                                                          }
-                                            , treeCurrent = 'd'
-                                            , treeBelow = [Node 'e' []]
-                                            }
-                                  , nonEmptyCursorNext = [Node 'h' []]
-                                  }
-                        }
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = []
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove =
+                                      Just
+                                          TreeAbove
+                                          { treeAboveLefts =
+                                                [Node 'b' [Node 'c' []]]
+                                          , treeAboveAbove = Nothing
+                                          , treeAboveNode = 'a'
+                                          , treeAboveRights =
+                                                [Node 'f' [Node 'g' []]]
+                                          }
+                                , treeCurrent = 'd'
+                                , treeBelow = makeCollapse [Node 'e' []]
+                                }
+                          , nonEmptyCursorNext = [Node 'h' []]
+                          }
+                    }
                 expected =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev =
-                                        [ Node
-                                              'a'
-                                              [ Node 'b' [Node 'c' []]
-                                              , Node 'f' [Node 'g' []]
-                                              ]
-                                        ]
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 'd'
-                                            , treeBelow = [Node 'e' []]
-                                            }
-                                  , nonEmptyCursorNext = [Node 'h' []]
-                                  }
-                        }
-             in case forestCursorPromoteSubTree start of
-                    Nothing ->
-                        expectationFailure
-                            "forestCursorPromoteSubTree should not have failed."
-                    Just f -> f `shouldBe` expected
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev =
+                                [ Node
+                                      'a'
+                                      [ Node 'b' [Node 'c' []]
+                                      , Node 'f' [Node 'g' []]
+                                      ]
+                                ]
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 'd'
+                                , treeBelow = makeCollapse [Node 'e' []]
+                                }
+                          , nonEmptyCursorNext = [Node 'h' []]
+                          }
+                    }
+            in case forestCursorPromoteSubTree start of
+                   Nothing ->
+                       expectationFailure
+                           "forestCursorPromoteSubTree should not have failed."
+                   Just f -> f `shouldBe` expected
         it "promotes the current subtree to the level of its parent" pending
     describe "forestCursorDemoteSubTree" $ do
         it "produces valids on valids" $
@@ -786,47 +751,44 @@ shiftingSpec = do
         it "works on the example from the documentation" $
             let start =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev =
-                                        [Node 'a' [Node 'b' []]]
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove = Nothing
-                                            , treeCurrent = 'c'
-                                            , treeBelow = [Node 'd' []]
-                                            }
-                                  , nonEmptyCursorNext = []
-                                  }
-                        }
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = [Node 'a' [Node 'b' []]]
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove = Nothing
+                                , treeCurrent = 'c'
+                                , treeBelow = makeCollapse [Node 'd' []]
+                                }
+                          , nonEmptyCursorNext = []
+                          }
+                    }
                 expected =
                     ForestCursor
-                        { forestCursorListCursor =
-                              NonEmptyCursor
-                                  { nonEmptyCursorPrev = []
-                                  , nonEmptyCursorCurrent =
-                                        TreeCursor
-                                            { treeAbove =
-                                                  Just
-                                                      TreeAbove
-                                                          { treeAboveLefts =
-                                                                [Node 'b' []]
-                                                          , treeAboveAbove =
-                                                                Nothing
-                                                          , treeAboveNode = 'a'
-                                                          , treeAboveRights = []
-                                                          }
-                                            , treeCurrent = 'c'
-                                            , treeBelow = [Node 'd' []]
-                                            }
-                                  , nonEmptyCursorNext = []
-                                  }
-                        }
-             in case forestCursorDemoteSubTree start of
-                    Nothing ->
-                        expectationFailure
-                            "forestCursorDemoteSubTree should not have failed."
-                    Just f -> f `forestShouldBe` expected
+                    { forestCursorListCursor =
+                          NonEmptyCursor
+                          { nonEmptyCursorPrev = []
+                          , nonEmptyCursorCurrent =
+                                TreeCursor
+                                { treeAbove =
+                                      Just
+                                          TreeAbove
+                                          { treeAboveLefts = [Node 'b' []]
+                                          , treeAboveAbove = Nothing
+                                          , treeAboveNode = 'a'
+                                          , treeAboveRights = []
+                                          }
+                                , treeCurrent = 'c'
+                                , treeBelow = makeCollapse [Node 'd' []]
+                                }
+                          , nonEmptyCursorNext = []
+                          }
+                    }
+            in case forestCursorDemoteSubTree start of
+                   Nothing ->
+                       expectationFailure
+                           "forestCursorDemoteSubTree should not have failed."
+                   Just f -> f `forestShouldBe` expected
         it "demotes the current subtree to the level of its children" pending
     describe "forestCursorDemoteElemUnder" $ do
         it "produces valids on valids" $
@@ -837,37 +799,36 @@ shiftingSpec = do
                     let demoteStart =
                             ForestCursor $
                             NonEmptyCursor
-                                { nonEmptyCursorPrev = []
-                                , nonEmptyCursorCurrent =
-                                      TreeCursor
-                                          { treeAbove = Nothing
-                                          , treeCurrent = 'a'
-                                          , treeBelow = [Node 'b' []]
-                                          }
-                                , nonEmptyCursorNext = []
-                                }
+                            { nonEmptyCursorPrev = []
+                            , nonEmptyCursorCurrent =
+                                  TreeCursor
+                                  { treeAbove = Nothing
+                                  , treeCurrent = 'a'
+                                  , treeBelow = makeCollapse [Node 'b' []]
+                                  }
+                            , nonEmptyCursorNext = []
+                            }
                         demoteEnd =
                             ForestCursor $
                             NonEmptyCursor
-                                { nonEmptyCursorPrev = []
-                                , nonEmptyCursorCurrent =
-                                      TreeCursor
-                                          { treeAbove =
-                                                Just
-                                                    TreeAbove
-                                                        { treeAboveLefts = []
-                                                        , treeAboveAbove =
-                                                              Nothing
-                                                        , treeAboveNode = b1
-                                                        , treeAboveRights = []
-                                                        }
-                                          , treeCurrent = 'a'
-                                          , treeBelow = []
-                                          }
-                                , nonEmptyCursorNext = [Node b2 [Node 'b' []]]
-                                }
-                     in forestCursorDemoteElemUnder b1 b2 demoteStart `forestShouldBe`
-                        demoteEnd
+                            { nonEmptyCursorPrev = []
+                            , nonEmptyCursorCurrent =
+                                  TreeCursor
+                                  { treeAbove =
+                                        Just
+                                            TreeAbove
+                                            { treeAboveLefts = []
+                                            , treeAboveAbove = Nothing
+                                            , treeAboveNode = b1
+                                            , treeAboveRights = []
+                                            }
+                                  , treeCurrent = 'a'
+                                  , treeBelow = makeCollapse []
+                                  }
+                            , nonEmptyCursorNext = [Node b2 [Node 'b' []]]
+                            }
+                    in forestCursorDemoteElemUnder b1 b2 demoteStart `forestShouldBe`
+                       demoteEnd
         it "demotes the current node to the level of its children" pending
     describe "forestCursorDemoteSubTreeUnder" $ do
         it "produces valids on valids" $
@@ -877,34 +838,34 @@ shiftingSpec = do
                 let demoteStart =
                         ForestCursor $
                         NonEmptyCursor
-                            { nonEmptyCursorPrev = []
-                            , nonEmptyCursorCurrent =
-                                  TreeCursor
-                                      { treeAbove = Nothing
-                                      , treeCurrent = 'a'
-                                      , treeBelow = [Node 'b' []]
-                                      }
-                            , nonEmptyCursorNext = []
-                            }
+                        { nonEmptyCursorPrev = []
+                        , nonEmptyCursorCurrent =
+                              TreeCursor
+                              { treeAbove = Nothing
+                              , treeCurrent = 'a'
+                              , treeBelow = makeCollapse [Node 'b' []]
+                              }
+                        , nonEmptyCursorNext = []
+                        }
                     demoteEnd =
                         ForestCursor $
                         NonEmptyCursor
-                            { nonEmptyCursorPrev = []
-                            , nonEmptyCursorCurrent =
-                                  TreeCursor
-                                      { treeAbove =
-                                            Just
-                                                TreeAbove
-                                                    { treeAboveLefts = []
-                                                    , treeAboveAbove = Nothing
-                                                    , treeAboveNode = v
-                                                    , treeAboveRights = []
-                                                    }
-                                      , treeCurrent = 'a'
-                                      , treeBelow = [Node 'b' []]
-                                      }
-                            , nonEmptyCursorNext = []
-                            }
+                        { nonEmptyCursorPrev = []
+                        , nonEmptyCursorCurrent =
+                              TreeCursor
+                              { treeAbove =
+                                    Just
+                                        TreeAbove
+                                        { treeAboveLefts = []
+                                        , treeAboveAbove = Nothing
+                                        , treeAboveNode = v
+                                        , treeAboveRights = []
+                                        }
+                              , treeCurrent = 'a'
+                              , treeBelow = makeCollapse [Node 'b' []]
+                              }
+                        , nonEmptyCursorNext = []
+                        }
                 forestCursorDemoteSubTreeUnder v demoteStart `forestShouldBe`
                     demoteEnd
         it
@@ -920,14 +881,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildForestCursor lec
                     ne' = rebuildForestCursor lec'
-                 in unless (ne == ne') $
-                    expectationFailure $
-                    unlines
-                        [ "Cursor before:\n" ++ show lec
-                        , "Forest before:  \n" ++ show ne
-                        , "Cursor after: \n" ++ show lec'
-                        , "Forest after:   \n" ++ show ne'
-                        ]
+                in unless (ne == ne') $
+                   expectationFailure $
+                   unlines
+                       [ "Cursor before:\n" ++ show lec
+                       , "Forest before:  \n" ++ show ne
+                       , "Cursor after: \n" ++ show lec'
+                       , "Forest after:   \n" ++ show ne'
+                       ]
 
 isMovement :: (forall a. SFC.ForestCursor a -> SFC.ForestCursor a) -> Property
 isMovement func =

@@ -23,11 +23,15 @@ import Text.Show.Pretty
 import Cursor.Simple.Tree hiding (TreeCursor)
 import qualified Cursor.Simple.Tree as STC (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
-import Cursor.Tree (TreeCursor(..))
+import Cursor.Tree (Collapse(..), TreeAbove(..), TreeCursor(..))
 import Cursor.Types
 
 spec :: Spec
 spec = do
+    eqSpec @(Collapse Int)
+    genValidSpec @(Collapse Double)
+    eqSpec @(TreeAbove Int)
+    genValidSpec @(TreeAbove Double)
     eqSpec @(STC.TreeCursor Int)
     genValidSpec @(STC.TreeCursor Double)
     describe "makeTreeCursor" $
@@ -74,21 +78,21 @@ spec = do
         it "is identity with the current selection" $
             forAllValid $ \tc ->
                 let sel = treeCursorSelection tc
-                 in case treeCursorSelect @Double sel tc of
-                        Nothing ->
-                            expectationFailure
-                                "treeCursorSelect should not have failed."
-                        Just r ->
-                            unless (r == tc) $
-                            expectationFailure $
-                            unlines
-                                [ "selection:"
-                                , ppShow sel
-                                , "expected:"
-                                , drawTreeCursor tc
-                                , "actual:"
-                                , drawTreeCursor r
-                                ]
+                in case treeCursorSelect @Double sel tc of
+                       Nothing ->
+                           expectationFailure
+                               "treeCursorSelect should not have failed."
+                       Just r ->
+                           unless (r == tc) $
+                           expectationFailure $
+                           unlines
+                               [ "selection:"
+                               , ppShow sel
+                               , "expected:"
+                               , drawTreeCursor tc
+                               , "actual:"
+                               , drawTreeCursor r
+                               ]
     describe "treeCursorSelectPrev" $ do
         testMovementM treeCursorSelectPrev
         it "selects the previous element" pending
@@ -163,53 +167,45 @@ spec = do
          do
             let start =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  (TreeAbove
-                                       { treeAboveLefts =
-                                             [Node 1 [Node 2 [Node 3 []]]]
-                                       , treeAboveAbove = Nothing
-                                       , treeAboveNode = 0
-                                       , treeAboveRights = []
-                                       })
-                        , treeCurrent = 4 :: Int
-                        , treeBelow = []
-                        }
+                    { treeAbove =
+                          Just
+                              (TreeAbove
+                               { treeAboveLefts = [Node 1 [Node 2 [Node 3 []]]]
+                               , treeAboveAbove = Nothing
+                               , treeAboveNode = 0
+                               , treeAboveRights = []
+                               })
+                    , treeCurrent = 4 :: Int
+                    , treeBelow = makeCollapse []
+                    }
                 expected =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  (TreeAbove
-                                       { treeAboveLefts = []
-                                       , treeAboveAbove =
-                                             Just
-                                                 (TreeAbove
-                                                      { treeAboveLefts = []
-                                                      , treeAboveAbove =
-                                                            Just
-                                                                (TreeAbove
-                                                                     { treeAboveLefts =
-                                                                           []
-                                                                     , treeAboveAbove =
-                                                                           Nothing
-                                                                     , treeAboveNode =
-                                                                           0
-                                                                     , treeAboveRights =
-                                                                           [ Node
-                                                                                 4
-                                                                                 [
-                                                                                 ]
-                                                                           ]
-                                                                     })
-                                                      , treeAboveNode = 1
-                                                      , treeAboveRights = []
-                                                      })
-                                       , treeAboveNode = 2
-                                       , treeAboveRights = []
-                                       })
-                        , treeCurrent = 3
-                        , treeBelow = []
-                        }
+                    { treeAbove =
+                          Just
+                              (TreeAbove
+                               { treeAboveLefts = []
+                               , treeAboveAbove =
+                                     Just
+                                         (TreeAbove
+                                          { treeAboveLefts = []
+                                          , treeAboveAbove =
+                                                Just
+                                                    (TreeAbove
+                                                     { treeAboveLefts = []
+                                                     , treeAboveAbove = Nothing
+                                                     , treeAboveNode = 0
+                                                     , treeAboveRights =
+                                                           [Node 4 []]
+                                                     })
+                                          , treeAboveNode = 1
+                                          , treeAboveRights = []
+                                          })
+                               , treeAboveNode = 2
+                               , treeAboveRights = []
+                               })
+                    , treeCurrent = 3
+                    , treeBelow = makeCollapse []
+                    }
             case treeCursorSelectAbovePrev start of
                 Nothing ->
                     expectationFailure
@@ -250,53 +246,45 @@ spec = do
          do
             let start =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  (TreeAbove
-                                       { treeAboveLefts = []
-                                       , treeAboveAbove =
-                                             Just
-                                                 (TreeAbove
-                                                      { treeAboveLefts = []
-                                                      , treeAboveAbove =
-                                                            Just
-                                                                (TreeAbove
-                                                                     { treeAboveLefts =
-                                                                           []
-                                                                     , treeAboveAbove =
-                                                                           Nothing
-                                                                     , treeAboveNode =
-                                                                           0
-                                                                     , treeAboveRights =
-                                                                           [ Node
-                                                                                 4
-                                                                                 [
-                                                                                 ]
-                                                                           ]
-                                                                     })
-                                                      , treeAboveNode = 1
-                                                      , treeAboveRights = []
-                                                      })
-                                       , treeAboveNode = 2
-                                       , treeAboveRights = []
-                                       })
-                        , treeCurrent = 3
-                        , treeBelow = []
-                        }
+                    { treeAbove =
+                          Just
+                              (TreeAbove
+                               { treeAboveLefts = []
+                               , treeAboveAbove =
+                                     Just
+                                         (TreeAbove
+                                          { treeAboveLefts = []
+                                          , treeAboveAbove =
+                                                Just
+                                                    (TreeAbove
+                                                     { treeAboveLefts = []
+                                                     , treeAboveAbove = Nothing
+                                                     , treeAboveNode = 0
+                                                     , treeAboveRights =
+                                                           [Node 4 []]
+                                                     })
+                                          , treeAboveNode = 1
+                                          , treeAboveRights = []
+                                          })
+                               , treeAboveNode = 2
+                               , treeAboveRights = []
+                               })
+                    , treeCurrent = 3
+                    , treeBelow = makeCollapse []
+                    }
                 expected =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  (TreeAbove
-                                       { treeAboveLefts =
-                                             [Node 1 [Node 2 [Node 3 []]]]
-                                       , treeAboveAbove = Nothing
-                                       , treeAboveNode = 0
-                                       , treeAboveRights = []
-                                       })
-                        , treeCurrent = 4 :: Int
-                        , treeBelow = []
-                        }
+                    { treeAbove =
+                          Just
+                              (TreeAbove
+                               { treeAboveLefts = [Node 1 [Node 2 [Node 3 []]]]
+                               , treeAboveAbove = Nothing
+                               , treeAboveNode = 0
+                               , treeAboveRights = []
+                               })
+                    , treeCurrent = 4 :: Int
+                    , treeBelow = makeCollapse []
+                    }
             case treeCursorSelectAboveNext start of
                 Nothing ->
                     expectationFailure
@@ -387,19 +375,19 @@ spec = do
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
                         TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 1 :: Int
-                            , treeBelow = [Node 2 fs]
-                            }
-                 in case treeCursorDeleteElemAndSelectPrevious
-                             simpleDeleteElemStart of
-                        Nothing -> pure ()
-                        Just Deleted ->
-                            expectationFailure
-                                "treeCursorDeleteElemAndSelectPrevious should not have deleted the entire example tree."
-                        Just (Updated _) ->
-                            expectationFailure
-                                "treeCursorDeleteElemAndSelectPrevious should not have updated the example tree, but failed instead."
+                        { treeAbove = Nothing
+                        , treeCurrent = 1 :: Int
+                        , treeBelow = makeCollapse [Node 2 fs]
+                        }
+                in case treeCursorDeleteElemAndSelectPrevious
+                            simpleDeleteElemStart of
+                       Nothing -> pure ()
+                       Just Deleted ->
+                           expectationFailure
+                               "treeCursorDeleteElemAndSelectPrevious should not have deleted the entire example tree."
+                       Just (Updated _) ->
+                           expectationFailure
+                               "treeCursorDeleteElemAndSelectPrevious should not have updated the example tree, but failed instead."
         it
             "deletes the current element and selects the previous element"
             pending
@@ -410,25 +398,25 @@ spec = do
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
                         TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 1
-                            , treeBelow = [Node 2 fs]
-                            }
+                        { treeAbove = Nothing
+                        , treeCurrent = 1
+                        , treeBelow = makeCollapse [Node 2 fs]
+                        }
                     simpleDeleteElemExpected =
                         TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 2 :: Int
-                            , treeBelow = fs
-                            }
-                 in case treeCursorDeleteElemAndSelectNext simpleDeleteElemStart of
-                        Nothing ->
-                            expectationFailure
-                                "treeCursorDeleteElemAndSelectNext should not have failed."
-                        Just Deleted ->
-                            expectationFailure
-                                "treeCursorDeleteElemAndSelectNext should not have deleted the entire example tree."
-                        Just (Updated f) ->
-                            f `treeShouldBe` simpleDeleteElemExpected
+                        { treeAbove = Nothing
+                        , treeCurrent = 2 :: Int
+                        , treeBelow = makeCollapse fs
+                        }
+                in case treeCursorDeleteElemAndSelectNext simpleDeleteElemStart of
+                       Nothing ->
+                           expectationFailure
+                               "treeCursorDeleteElemAndSelectNext should not have failed."
+                       Just Deleted ->
+                           expectationFailure
+                               "treeCursorDeleteElemAndSelectNext should not have deleted the entire example tree."
+                       Just (Updated f) ->
+                           f `treeShouldBe` simpleDeleteElemExpected
         it "deletes the current element and selects the next element" pending
     describe "treeCursorDeleteElemAndSelectAbove" $ do
         it "produces valids on valids" $
@@ -437,19 +425,18 @@ spec = do
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
                         TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 1 :: Int
-                            , treeBelow = [Node 2 fs]
-                            }
-                 in case treeCursorDeleteElemAndSelectAbove
-                             simpleDeleteElemStart of
-                        Nothing -> pure ()
-                        Just Deleted ->
-                            expectationFailure
-                                "treeCursorDeleteElemAndSelectAbove should not have deleted the entire example tree."
-                        Just (Updated _) ->
-                            expectationFailure
-                                "treeCursorDeleteElemAndSelectAbove should not have updated the example tree, but failed instead."
+                        { treeAbove = Nothing
+                        , treeCurrent = 1 :: Int
+                        , treeBelow = makeCollapse [Node 2 fs]
+                        }
+                in case treeCursorDeleteElemAndSelectAbove simpleDeleteElemStart of
+                       Nothing -> pure ()
+                       Just Deleted ->
+                           expectationFailure
+                               "treeCursorDeleteElemAndSelectAbove should not have deleted the entire example tree."
+                       Just (Updated _) ->
+                           expectationFailure
+                               "treeCursorDeleteElemAndSelectAbove should not have updated the example tree, but failed instead."
         it "deletes the current element and selects the above element" pending
     describe "treeCursorRemoveElem" $ do
         it "produces valids on valids" $
@@ -466,35 +453,35 @@ spec = do
         it "works on the example from the docs" $
             let start =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts = [Node 'a' []]
-                                      , treeAboveAbove = Nothing
-                                      , treeAboveNode = 'p'
-                                      , treeAboveRights = []
-                                      }
-                        , treeCurrent = 'b'
-                        , treeBelow = []
-                        }
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts = [Node 'a' []]
+                              , treeAboveAbove = Nothing
+                              , treeAboveNode = 'p'
+                              , treeAboveRights = []
+                              }
+                    , treeCurrent = 'b'
+                    , treeBelow = makeCollapse []
+                    }
                 end =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts = []
-                                      , treeAboveAbove = Nothing
-                                      , treeAboveNode = 'p'
-                                      , treeAboveRights = [Node 'a' []]
-                                      }
-                        , treeCurrent = 'b'
-                        , treeBelow = []
-                        }
-             in case treeCursorSwapPrev start of
-                    Swapped r -> r `treeShouldBe` end
-                    _ ->
-                        expectationFailure
-                            "treeCursorSwapPrev should not have failed."
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts = []
+                              , treeAboveAbove = Nothing
+                              , treeAboveNode = 'p'
+                              , treeAboveRights = [Node 'a' []]
+                              }
+                    , treeCurrent = 'b'
+                    , treeBelow = makeCollapse []
+                    }
+            in case treeCursorSwapPrev start of
+                   Swapped r -> r `treeShouldBe` end
+                   _ ->
+                       expectationFailure
+                           "treeCursorSwapPrev should not have failed."
         it "reverts treeCursorSwapNext" $
             inverseFunctionsIfSucceedOnValid
                 (treeCursorSwapNext @Double @Double)
@@ -506,35 +493,35 @@ spec = do
         it "works on the example from the docs" $
             let start =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts = []
-                                      , treeAboveAbove = Nothing
-                                      , treeAboveNode = 'p'
-                                      , treeAboveRights = [Node 'b' []]
-                                      }
-                        , treeCurrent = 'a'
-                        , treeBelow = []
-                        }
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts = []
+                              , treeAboveAbove = Nothing
+                              , treeAboveNode = 'p'
+                              , treeAboveRights = [Node 'b' []]
+                              }
+                    , treeCurrent = 'a'
+                    , treeBelow = makeCollapse []
+                    }
                 end =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts = [Node 'b' []]
-                                      , treeAboveAbove = Nothing
-                                      , treeAboveNode = 'p'
-                                      , treeAboveRights = []
-                                      }
-                        , treeCurrent = 'a'
-                        , treeBelow = []
-                        }
-             in case treeCursorSwapNext start of
-                    Swapped r -> r `treeShouldBe` end
-                    _ ->
-                        expectationFailure
-                            "treeCursorSwapNext should not have failed."
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts = [Node 'b' []]
+                              , treeAboveAbove = Nothing
+                              , treeAboveNode = 'p'
+                              , treeAboveRights = []
+                              }
+                    , treeCurrent = 'a'
+                    , treeBelow = makeCollapse []
+                    }
+            in case treeCursorSwapNext start of
+                   Swapped r -> r `treeShouldBe` end
+                   _ ->
+                       expectationFailure
+                           "treeCursorSwapNext should not have failed."
         it "reverts treeCursorSwapNext" $
             inverseFunctionsIfSucceedOnValid
                 (treeCursorSwapPrev @Double @Double)
@@ -549,55 +536,48 @@ spec = do
         it "Works on the example from the docs" $
             let promoteStart =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts =
-                                            [Node 'b' [Node 'c' []]]
-                                      , treeAboveAbove =
-                                            Just
-                                                TreeAbove
-                                                    { treeAboveLefts = []
-                                                    , treeAboveAbove = Nothing
-                                                    , treeAboveNode = 'p'
-                                                    , treeAboveRights =
-                                                          [Node 'h' []]
-                                                    }
-                                      , treeAboveNode = 'a'
-                                      , treeAboveRights =
-                                            [Node 'f' [Node 'g' []]]
-                                      }
-                        , treeCurrent = 'd'
-                        , treeBelow = [Node 'e' []]
-                        }
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts = [Node 'b' [Node 'c' []]]
+                              , treeAboveAbove =
+                                    Just
+                                        TreeAbove
+                                        { treeAboveLefts = []
+                                        , treeAboveAbove = Nothing
+                                        , treeAboveNode = 'p'
+                                        , treeAboveRights = [Node 'h' []]
+                                        }
+                              , treeAboveNode = 'a'
+                              , treeAboveRights = [Node 'f' [Node 'g' []]]
+                              }
+                    , treeCurrent = 'd'
+                    , treeBelow = makeCollapse [Node 'e' []]
+                    }
                 promoteEnd =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts =
-                                            [ Node
-                                                  'a'
-                                                  [ Node
-                                                        'b'
-                                                        [ Node 'c' []
-                                                        , Node 'e' []
-                                                        ]
-                                                  , Node 'f' [Node 'g' []]
-                                                  ]
-                                            ]
-                                      , treeAboveAbove = Nothing
-                                      , treeAboveNode = 'p'
-                                      , treeAboveRights = [Node 'h' []]
-                                      }
-                        , treeCurrent = 'd'
-                        , treeBelow = []
-                        }
-             in case treeCursorPromoteElem promoteStart of
-                    PromotedElem tc' -> tc' `treeShouldBe` promoteEnd
-                    _ ->
-                        expectationFailure
-                            "treeCursorPromoteElem should not have failed"
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts =
+                                    [ Node
+                                          'a'
+                                          [ Node 'b' [Node 'c' [], Node 'e' []]
+                                          , Node 'f' [Node 'g' []]
+                                          ]
+                                    ]
+                              , treeAboveAbove = Nothing
+                              , treeAboveNode = 'p'
+                              , treeAboveRights = [Node 'h' []]
+                              }
+                    , treeCurrent = 'd'
+                    , treeBelow = makeCollapse []
+                    }
+            in case treeCursorPromoteElem promoteStart of
+                   PromotedElem tc' -> tc' `treeShouldBe` promoteEnd
+                   _ ->
+                       expectationFailure
+                           "treeCursorPromoteElem should not have failed"
         it "promotes the current node to the level of its parent" pending
     functorSpec @PromoteResult
     applicativeSpec @PromoteResult
@@ -608,51 +588,48 @@ spec = do
         it "Works on the example from the docs" $
             let promoteStart =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts =
-                                            [Node 'b' [Node 'c' []]]
-                                      , treeAboveAbove =
-                                            Just
-                                                TreeAbove
-                                                    { treeAboveLefts = []
-                                                    , treeAboveAbove = Nothing
-                                                    , treeAboveNode = 'p'
-                                                    , treeAboveRights =
-                                                          [Node 'h' []]
-                                                    }
-                                      , treeAboveNode = 'a'
-                                      , treeAboveRights =
-                                            [Node 'f' [Node 'g' []]]
-                                      }
-                        , treeCurrent = 'd'
-                        , treeBelow = [Node 'e' []]
-                        }
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts = [Node 'b' [Node 'c' []]]
+                              , treeAboveAbove =
+                                    Just
+                                        TreeAbove
+                                        { treeAboveLefts = []
+                                        , treeAboveAbove = Nothing
+                                        , treeAboveNode = 'p'
+                                        , treeAboveRights = [Node 'h' []]
+                                        }
+                              , treeAboveNode = 'a'
+                              , treeAboveRights = [Node 'f' [Node 'g' []]]
+                              }
+                    , treeCurrent = 'd'
+                    , treeBelow = makeCollapse [Node 'e' []]
+                    }
                 promoteEnd =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts =
-                                            [ Node
-                                                  'a'
-                                                  [ Node 'b' [Node 'c' []]
-                                                  , Node 'f' [Node 'g' []]
-                                                  ]
-                                            ]
-                                      , treeAboveAbove = Nothing
-                                      , treeAboveNode = 'p'
-                                      , treeAboveRights = [Node 'h' []]
-                                      }
-                        , treeCurrent = 'd'
-                        , treeBelow = [Node 'e' []]
-                        }
-             in case treeCursorPromoteSubTree promoteStart of
-                    Promoted tc' -> tc' `treeShouldBe` promoteEnd
-                    _ ->
-                        expectationFailure
-                            "treeCursorPromoteSubTree should not have failed"
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts =
+                                    [ Node
+                                          'a'
+                                          [ Node 'b' [Node 'c' []]
+                                          , Node 'f' [Node 'g' []]
+                                          ]
+                                    ]
+                              , treeAboveAbove = Nothing
+                              , treeAboveNode = 'p'
+                              , treeAboveRights = [Node 'h' []]
+                              }
+                    , treeCurrent = 'd'
+                    , treeBelow = makeCollapse [Node 'e' []]
+                    }
+            in case treeCursorPromoteSubTree promoteStart of
+                   Promoted tc' -> tc' `treeShouldBe` promoteEnd
+                   _ ->
+                       expectationFailure
+                           "treeCursorPromoteSubTree should not have failed"
         it "promotes the current subtree to the level of its parent" pending
     functorSpec @DemoteResult
     describe "treeCursorDemoteElem" $ do
@@ -661,44 +638,42 @@ spec = do
         it "Works on the example from the docs" $
             let promoteStart =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts =
-                                            [Node 'a' [Node 'b' []]]
-                                      , treeAboveAbove = Nothing
-                                      , treeAboveNode = 'p'
-                                      , treeAboveRights = [Node 'e' []]
-                                      }
-                        , treeCurrent = 'c'
-                        , treeBelow = [Node 'd' []]
-                        }
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts = [Node 'a' [Node 'b' []]]
+                              , treeAboveAbove = Nothing
+                              , treeAboveNode = 'p'
+                              , treeAboveRights = [Node 'e' []]
+                              }
+                    , treeCurrent = 'c'
+                    , treeBelow = makeCollapse [Node 'd' []]
+                    }
                 promoteEnd =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts = [Node 'b' []]
-                                      , treeAboveAbove =
-                                            Just
-                                                TreeAbove
-                                                    { treeAboveLefts = []
-                                                    , treeAboveAbove = Nothing
-                                                    , treeAboveNode = 'p'
-                                                    , treeAboveRights =
-                                                          [Node 'e' []]
-                                                    }
-                                      , treeAboveNode = 'a'
-                                      , treeAboveRights = [Node 'd' []]
-                                      }
-                        , treeCurrent = 'c'
-                        , treeBelow = []
-                        }
-             in case treeCursorDemoteElem promoteStart of
-                    Demoted tc' -> tc' `treeShouldBe` promoteEnd
-                    _ ->
-                        expectationFailure
-                            "treeCursorDemoteElem should not have failed"
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts = [Node 'b' []]
+                              , treeAboveAbove =
+                                    Just
+                                        TreeAbove
+                                        { treeAboveLefts = []
+                                        , treeAboveAbove = Nothing
+                                        , treeAboveNode = 'p'
+                                        , treeAboveRights = [Node 'e' []]
+                                        }
+                              , treeAboveNode = 'a'
+                              , treeAboveRights = [Node 'd' []]
+                              }
+                    , treeCurrent = 'c'
+                    , treeBelow = makeCollapse []
+                    }
+            in case treeCursorDemoteElem promoteStart of
+                   Demoted tc' -> tc' `treeShouldBe` promoteEnd
+                   _ ->
+                       expectationFailure
+                           "treeCursorDemoteElem should not have failed"
         it "demotes the current node to the level of its children" pending
     describe "treeCursorDemoteSubTree" $ do
         it "produces valids on valids" $
@@ -706,44 +681,42 @@ spec = do
         it "Works on the example from the docs" $
             let promoteStart =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts =
-                                            [Node 'a' [Node 'b' []]]
-                                      , treeAboveAbove = Nothing
-                                      , treeAboveNode = 'p'
-                                      , treeAboveRights = [Node 'e' []]
-                                      }
-                        , treeCurrent = 'c'
-                        , treeBelow = [Node 'd' []]
-                        }
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts = [Node 'a' [Node 'b' []]]
+                              , treeAboveAbove = Nothing
+                              , treeAboveNode = 'p'
+                              , treeAboveRights = [Node 'e' []]
+                              }
+                    , treeCurrent = 'c'
+                    , treeBelow = makeCollapse [Node 'd' []]
+                    }
                 promoteEnd =
                     TreeCursor
-                        { treeAbove =
-                              Just
-                                  TreeAbove
-                                      { treeAboveLefts = [Node 'b' []]
-                                      , treeAboveAbove =
-                                            Just
-                                                TreeAbove
-                                                    { treeAboveLefts = []
-                                                    , treeAboveAbove = Nothing
-                                                    , treeAboveNode = 'p'
-                                                    , treeAboveRights =
-                                                          [Node 'e' []]
-                                                    }
-                                      , treeAboveNode = 'a'
-                                      , treeAboveRights = []
-                                      }
-                        , treeCurrent = 'c'
-                        , treeBelow = [Node 'd' []]
-                        }
-             in case treeCursorDemoteSubTree promoteStart of
-                    Demoted tc' -> tc' `treeShouldBe` promoteEnd
-                    _ ->
-                        expectationFailure
-                            "treeCursorDemoteSubTree should not have failed"
+                    { treeAbove =
+                          Just
+                              TreeAbove
+                              { treeAboveLefts = [Node 'b' []]
+                              , treeAboveAbove =
+                                    Just
+                                        TreeAbove
+                                        { treeAboveLefts = []
+                                        , treeAboveAbove = Nothing
+                                        , treeAboveNode = 'p'
+                                        , treeAboveRights = [Node 'e' []]
+                                        }
+                              , treeAboveNode = 'a'
+                              , treeAboveRights = []
+                              }
+                    , treeCurrent = 'c'
+                    , treeBelow = makeCollapse [Node 'd' []]
+                    }
+            in case treeCursorDemoteSubTree promoteStart of
+                   Demoted tc' -> tc' `treeShouldBe` promoteEnd
+                   _ ->
+                       expectationFailure
+                           "treeCursorDemoteSubTree should not have failed"
         it "demotes the current subtree to the level of its children" pending
     describe "treeCursorDemoteElemUnder" $ do
         it "produces valids on valids" $
@@ -753,77 +726,69 @@ spec = do
                 forAllValid $ \b2 ->
                     let demoteStart =
                             TreeCursor
-                                { treeAbove =
-                                      Just
-                                          TreeAbove
-                                              { treeAboveLefts = []
-                                              , treeAboveAbove = Nothing
-                                              , treeAboveNode = 'p'
-                                              , treeAboveRights = []
-                                              }
-                                , treeCurrent = 'a'
-                                , treeBelow = [Node 'b' []]
-                                }
+                            { treeAbove =
+                                  Just
+                                      TreeAbove
+                                      { treeAboveLefts = []
+                                      , treeAboveAbove = Nothing
+                                      , treeAboveNode = 'p'
+                                      , treeAboveRights = []
+                                      }
+                            , treeCurrent = 'a'
+                            , treeBelow = makeCollapse [Node 'b' []]
+                            }
                         demoteEnd =
                             TreeCursor
-                                { treeAbove =
-                                      Just
-                                          TreeAbove
-                                              { treeAboveLefts = []
-                                              , treeAboveAbove =
-                                                    Just
-                                                        TreeAbove
-                                                            { treeAboveLefts =
-                                                                  []
-                                                            , treeAboveAbove =
-                                                                  Nothing
-                                                            , treeAboveNode =
-                                                                  'p'
-                                                            , treeAboveRights =
-                                                                  [ Node
-                                                                        b2
-                                                                        [ Node
-                                                                              'b'
-                                                                              []
-                                                                        ]
-                                                                  ]
-                                                            }
-                                              , treeAboveNode = b1
-                                              , treeAboveRights = []
-                                              }
-                                , treeCurrent = 'a'
-                                , treeBelow = []
-                                }
-                     in case treeCursorDemoteElemUnder b1 b2 demoteStart of
-                            Just tc' -> tc' `treeShouldBe` demoteEnd
-                            _ ->
-                                expectationFailure
-                                    "treeCursorDemoteElemUnder should not have failed"
+                            { treeAbove =
+                                  Just
+                                      TreeAbove
+                                      { treeAboveLefts = []
+                                      , treeAboveAbove =
+                                            Just
+                                                TreeAbove
+                                                { treeAboveLefts = []
+                                                , treeAboveAbove = Nothing
+                                                , treeAboveNode = 'p'
+                                                , treeAboveRights =
+                                                      [Node b2 [Node 'b' []]]
+                                                }
+                                      , treeAboveNode = b1
+                                      , treeAboveRights = []
+                                      }
+                            , treeCurrent = 'a'
+                            , treeBelow = makeCollapse []
+                            }
+                    in case treeCursorDemoteElemUnder b1 b2 demoteStart of
+                           Just tc' -> tc' `treeShouldBe` demoteEnd
+                           _ ->
+                               expectationFailure
+                                   "treeCursorDemoteElemUnder should not have failed"
         it "demotes the current node to the level of its children" pending
     describe "treeCursorDemoteSubTreeUnder" $ do
         it "produces valids on valids" $
-            producesValidsOnValids2 $ treeCursorDemoteSubTreeUnder @Double @Double
+            producesValidsOnValids2 $
+            treeCursorDemoteSubTreeUnder @Double @Double
         it "Works on the example from the docs" $
             forAllValid $ \v -> do
                 let demoteStart =
                         TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 'a'
-                            , treeBelow = [Node 'b' []]
-                            }
+                        { treeAbove = Nothing
+                        , treeCurrent = 'a'
+                        , treeBelow = makeCollapse [Node 'b' []]
+                        }
                     demoteEnd =
                         TreeCursor
-                            { treeAbove =
-                                  Just
-                                      TreeAbove
-                                          { treeAboveLefts = []
-                                          , treeAboveAbove = Nothing
-                                          , treeAboveNode = v
-                                          , treeAboveRights = []
-                                          }
-                            , treeCurrent = 'a'
-                            , treeBelow = [Node 'b' []]
-                            }
+                        { treeAbove =
+                              Just
+                                  TreeAbove
+                                  { treeAboveLefts = []
+                                  , treeAboveAbove = Nothing
+                                  , treeAboveNode = v
+                                  , treeAboveRights = []
+                                  }
+                        , treeCurrent = 'a'
+                        , treeBelow = makeCollapse [Node 'b' []]
+                        }
                 treeCursorDemoteSubTreeUnder v demoteStart `treeShouldBe`
                     demoteEnd
         it
@@ -850,14 +815,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildTreeCursor lec
                     ne' = rebuildTreeCursor lec'
-                 in unless (ne == ne') $
-                    expectationFailure $
-                    unlines
-                        [ "Cursor before:\n" ++ show lec
-                        , "Tree before:  \n" ++ show ne
-                        , "Cursor after: \n" ++ show lec'
-                        , "Tree after:   \n" ++ show ne'
-                        ]
+                in unless (ne == ne') $
+                   expectationFailure $
+                   unlines
+                       [ "Cursor before:\n" ++ show lec
+                       , "Tree before:  \n" ++ show ne
+                       , "Cursor after: \n" ++ show lec'
+                       , "Tree after:   \n" ++ show ne'
+                       ]
 
 isMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Property
 isMovement func =
