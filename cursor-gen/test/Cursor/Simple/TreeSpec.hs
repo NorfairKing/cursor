@@ -24,8 +24,8 @@ import Cursor.Simple.Tree hiding (TreeCursor)
 import qualified Cursor.Simple.Tree as STC (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
 import Cursor.Tree
-       (CForest(..), CTree(..), TreeAbove(..), TreeCursor(..),openForest,
-        emptyCForest)
+       (CForest(..), CTree(..), TreeAbove(..), TreeCursor(..),
+        emptyCForest, openForest)
 import Cursor.Types
 
 spec :: Spec
@@ -574,9 +574,14 @@ spec = do
                               TreeAbove
                               { treeAboveLefts =
                                     [ CNode 'a' $
-                                      ClosedForest
-                                          [ Node 'b' [Node 'c' [], Node 'e' []]
-                                          , Node 'f' [Node 'g' []]
+                                      openForest
+                                          [ CNode 'b' $
+                                            openForest
+                                                [ CNode 'c' emptyCForest
+                                                , CNode 'e' emptyCForest
+                                                ]
+                                          , CNode 'f' $
+                                            ClosedForest [Node 'g' []]
                                           ]
                                     ]
                               , treeAboveAbove = Nothing
@@ -628,9 +633,9 @@ spec = do
                               TreeAbove
                               { treeAboveLefts =
                                     [ CNode 'a' $
-                                      ClosedForest
-                                          [ Node 'b' [Node 'c' []]
-                                          , Node 'f' [Node 'g' []]
+                                      openForest
+                                          [ CNode 'b' $ ClosedForest [Node 'c' []]
+                                          , CNode 'f' $ ClosedForest [Node 'g' []]
                                           ]
                                     ]
                               , treeAboveAbove = Nothing
