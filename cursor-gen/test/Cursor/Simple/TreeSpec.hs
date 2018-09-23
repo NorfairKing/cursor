@@ -16,7 +16,6 @@ import Text.Show.Pretty
 
 import Test.Hspec
 
-import Test.QuickCheck
 import Test.Validity
 import Test.Validity.Optics
 
@@ -27,6 +26,8 @@ import Cursor.Tree
        (CForest(..), CTree(..), TreeAbove(..), TreeCursor(..),
         emptyCForest, openForest)
 import Cursor.Types
+
+import Cursor.Simple.Tree.TestUtils
 
 spec :: Spec
 spec = do
@@ -634,8 +635,10 @@ spec = do
                               { treeAboveLefts =
                                     [ CNode 'a' $
                                       openForest
-                                          [ CNode 'b' $ ClosedForest [Node 'c' []]
-                                          , CNode 'f' $ ClosedForest [Node 'g' []]
+                                          [ CNode 'b' $
+                                            ClosedForest [Node 'c' []]
+                                          , CNode 'f' $
+                                            ClosedForest [Node 'g' []]
                                           ]
                                     ]
                               , treeAboveAbove = Nothing
@@ -814,60 +817,3 @@ spec = do
         it
             "demotes the current subtree to the level of its children, by adding a root"
             pending
-
-testMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Spec
-testMovement func = do
-    it "produces valids on valids" $ producesValidsOnValids $ func @Double
-    it "is a movement" $ isMovement func
-
-testMovementM ::
-       (forall a. STC.TreeCursor a -> Maybe (STC.TreeCursor a)) -> Spec
-testMovementM func = do
-    it "produces valids on valids" $ producesValidsOnValids $ func @Double
-    it "is a movement" $ isMovementM func
-
-isMovementM ::
-       (forall a. STC.TreeCursor a -> Maybe (STC.TreeCursor a)) -> Property
-isMovementM func =
-    forAllValid @(STC.TreeCursor Int) $ \lec ->
-        case func lec of
-            Nothing -> pure () -- Fine
-            Just lec' ->
-                let ne = rebuildCTree $ rebuildTreeCursor lec
-                    ne' = rebuildCTree $ rebuildTreeCursor lec'
-                in unless (ne == ne') $
-                   expectationFailure $
-                   unlines
-                       [ "Cursor before:\n" ++ drawTreeCursor lec
-                       , "Tree before:  \n" ++ drawTree (fmap show ne)
-                       , "Cursor after: \n" ++ drawTreeCursor lec'
-                       , "Tree after:   \n" ++ drawTree (fmap show ne')
-                       ]
-
-isMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Property
-isMovement func =
-    forAllValid $ \lec ->
-        rebuildTreeCursor (lec :: STC.TreeCursor Int) `shouldBe`
-        rebuildTreeCursor (func lec)
-
-treeShouldBe ::
-       (Show a, Eq a) => STC.TreeCursor a -> STC.TreeCursor a -> Expectation
-treeShouldBe actual expected =
-    unless (actual == expected) $
-    expectationFailure $
-    unlines
-        [ "The following should have been equal."
-        , "actual:"
-        , drawTreeCursor actual
-        , "expected:"
-        , drawTreeCursor expected
-        ]
-
-instance CanFail SwapResult where
-    hasFailed (Swapped _) = False
-    hasFailed _ = True
-    resultIfSucceeded (Swapped a) = Just a
-    resultIfSucceeded _ = Nothing
-
-node :: a -> [CTree a] -> CTree a
-node a ts = CNode a $ ClosedForest $ map rebuildCTree ts
