@@ -10,28 +10,24 @@ module Cursor.Simple.TreeSpec
 
 import Data.Tree
 
+import Control.Monad (unless)
+
+import Text.Show.Pretty
+
 import Test.Hspec
 
 import Test.QuickCheck
 import Test.Validity
 import Test.Validity.Optics
 
-import Control.Monad (unless)
-
-import Text.Show.Pretty
-
 import Cursor.Simple.Tree hiding (TreeCursor)
 import qualified Cursor.Simple.Tree as STC (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
-import Cursor.Tree (Collapse(..), TreeAbove(..), TreeCursor(..))
+import Cursor.Tree (TreeAbove(..), TreeCursor(..))
 import Cursor.Types
 
 spec :: Spec
 spec = do
-    eqSpec @(Collapse Int)
-    genValidSpec @(Collapse Double)
-    eqSpec @(TreeAbove Int)
-    genValidSpec @(TreeAbove Double)
     eqSpec @(STC.TreeCursor Int)
     genValidSpec @(STC.TreeCursor Double)
     describe "makeTreeCursor" $
@@ -170,7 +166,7 @@ spec = do
                     { treeAbove =
                           Just
                               (TreeAbove
-                               { treeAboveLefts = [Node 1 [Node 2 [Node 3 []]]]
+                               { treeAboveLefts = [node 1 [node 2 [node 3 []]]]
                                , treeAboveAbove = Nothing
                                , treeAboveNode = 0
                                , treeAboveRights = []
@@ -195,7 +191,7 @@ spec = do
                                                      , treeAboveAbove = Nothing
                                                      , treeAboveNode = 0
                                                      , treeAboveRights =
-                                                           [Node 4 []]
+                                                           [node 4 []]
                                                      })
                                           , treeAboveNode = 1
                                           , treeAboveRights = []
@@ -261,7 +257,7 @@ spec = do
                                                      , treeAboveAbove = Nothing
                                                      , treeAboveNode = 0
                                                      , treeAboveRights =
-                                                           [Node 4 []]
+                                                           [node 4 []]
                                                      })
                                           , treeAboveNode = 1
                                           , treeAboveRights = []
@@ -277,7 +273,7 @@ spec = do
                     { treeAbove =
                           Just
                               (TreeAbove
-                               { treeAboveLefts = [Node 1 [Node 2 [Node 3 []]]]
+                               { treeAboveLefts = [node 1 [node 2 [node 3 []]]]
                                , treeAboveAbove = Nothing
                                , treeAboveNode = 0
                                , treeAboveRights = []
@@ -377,7 +373,7 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 1 :: Int
-                        , treeBelow = makeCollapse [Node 2 fs]
+                        , treeBelow = makeCollapse [node 2 fs]
                         }
                 in case treeCursorDeleteElemAndSelectPrevious
                             simpleDeleteElemStart of
@@ -400,7 +396,7 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 1
-                        , treeBelow = makeCollapse [Node 2 fs]
+                        , treeBelow = makeCollapse [node 2 fs]
                         }
                     simpleDeleteElemExpected =
                         TreeCursor
@@ -427,7 +423,7 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 1 :: Int
-                        , treeBelow = makeCollapse [Node 2 fs]
+                        , treeBelow = makeCollapse [node 2 fs]
                         }
                 in case treeCursorDeleteElemAndSelectAbove simpleDeleteElemStart of
                        Nothing -> pure ()
@@ -456,7 +452,7 @@ spec = do
                     { treeAbove =
                           Just
                               TreeAbove
-                              { treeAboveLefts = [Node 'a' []]
+                              { treeAboveLefts = [node 'a' []]
                               , treeAboveAbove = Nothing
                               , treeAboveNode = 'p'
                               , treeAboveRights = []
@@ -472,7 +468,7 @@ spec = do
                               { treeAboveLefts = []
                               , treeAboveAbove = Nothing
                               , treeAboveNode = 'p'
-                              , treeAboveRights = [Node 'a' []]
+                              , treeAboveRights = [node 'a' []]
                               }
                     , treeCurrent = 'b'
                     , treeBelow = makeCollapse []
@@ -499,7 +495,7 @@ spec = do
                               { treeAboveLefts = []
                               , treeAboveAbove = Nothing
                               , treeAboveNode = 'p'
-                              , treeAboveRights = [Node 'b' []]
+                              , treeAboveRights = [node 'b' []]
                               }
                     , treeCurrent = 'a'
                     , treeBelow = makeCollapse []
@@ -509,7 +505,7 @@ spec = do
                     { treeAbove =
                           Just
                               TreeAbove
-                              { treeAboveLefts = [Node 'b' []]
+                              { treeAboveLefts = [node 'b' []]
                               , treeAboveAbove = Nothing
                               , treeAboveNode = 'p'
                               , treeAboveRights = []
@@ -539,20 +535,20 @@ spec = do
                     { treeAbove =
                           Just
                               TreeAbove
-                              { treeAboveLefts = [Node 'b' [Node 'c' []]]
+                              { treeAboveLefts = [node 'b' [node 'c' []]]
                               , treeAboveAbove =
                                     Just
                                         TreeAbove
                                         { treeAboveLefts = []
                                         , treeAboveAbove = Nothing
                                         , treeAboveNode = 'p'
-                                        , treeAboveRights = [Node 'h' []]
+                                        , treeAboveRights = [node 'h' []]
                                         }
                               , treeAboveNode = 'a'
-                              , treeAboveRights = [Node 'f' [Node 'g' []]]
+                              , treeAboveRights = [node 'f' [node 'g' []]]
                               }
                     , treeCurrent = 'd'
-                    , treeBelow = makeCollapse [Node 'e' []]
+                    , treeBelow = makeCollapse [node 'e' []]
                     }
                 promoteEnd =
                     TreeCursor
@@ -560,15 +556,15 @@ spec = do
                           Just
                               TreeAbove
                               { treeAboveLefts =
-                                    [ Node
+                                    [ node
                                           'a'
-                                          [ Node 'b' [Node 'c' [], Node 'e' []]
-                                          , Node 'f' [Node 'g' []]
+                                          [ node 'b' [node 'c' [], node 'e' []]
+                                          , node 'f' [node 'g' []]
                                           ]
                                     ]
                               , treeAboveAbove = Nothing
                               , treeAboveNode = 'p'
-                              , treeAboveRights = [Node 'h' []]
+                              , treeAboveRights = [node 'h' []]
                               }
                     , treeCurrent = 'd'
                     , treeBelow = makeCollapse []
@@ -591,20 +587,20 @@ spec = do
                     { treeAbove =
                           Just
                               TreeAbove
-                              { treeAboveLefts = [Node 'b' [Node 'c' []]]
+                              { treeAboveLefts = [node 'b' [node 'c' []]]
                               , treeAboveAbove =
                                     Just
                                         TreeAbove
                                         { treeAboveLefts = []
                                         , treeAboveAbove = Nothing
                                         , treeAboveNode = 'p'
-                                        , treeAboveRights = [Node 'h' []]
+                                        , treeAboveRights = [node 'h' []]
                                         }
                               , treeAboveNode = 'a'
-                              , treeAboveRights = [Node 'f' [Node 'g' []]]
+                              , treeAboveRights = [node 'f' [node 'g' []]]
                               }
                     , treeCurrent = 'd'
-                    , treeBelow = makeCollapse [Node 'e' []]
+                    , treeBelow = makeCollapse [node 'e' []]
                     }
                 promoteEnd =
                     TreeCursor
@@ -612,18 +608,18 @@ spec = do
                           Just
                               TreeAbove
                               { treeAboveLefts =
-                                    [ Node
+                                    [ node
                                           'a'
-                                          [ Node 'b' [Node 'c' []]
-                                          , Node 'f' [Node 'g' []]
+                                          [ node 'b' [node 'c' []]
+                                          , node 'f' [node 'g' []]
                                           ]
                                     ]
                               , treeAboveAbove = Nothing
                               , treeAboveNode = 'p'
-                              , treeAboveRights = [Node 'h' []]
+                              , treeAboveRights = [node 'h' []]
                               }
                     , treeCurrent = 'd'
-                    , treeBelow = makeCollapse [Node 'e' []]
+                    , treeBelow = makeCollapse [node 'e' []]
                     }
             in case treeCursorPromoteSubTree promoteStart of
                    Promoted tc' -> tc' `treeShouldBe` promoteEnd
@@ -641,30 +637,30 @@ spec = do
                     { treeAbove =
                           Just
                               TreeAbove
-                              { treeAboveLefts = [Node 'a' [Node 'b' []]]
+                              { treeAboveLefts = [node 'a' [node 'b' []]]
                               , treeAboveAbove = Nothing
                               , treeAboveNode = 'p'
-                              , treeAboveRights = [Node 'e' []]
+                              , treeAboveRights = [node 'e' []]
                               }
                     , treeCurrent = 'c'
-                    , treeBelow = makeCollapse [Node 'd' []]
+                    , treeBelow = makeCollapse [node 'd' []]
                     }
                 promoteEnd =
                     TreeCursor
                     { treeAbove =
                           Just
                               TreeAbove
-                              { treeAboveLefts = [Node 'b' []]
+                              { treeAboveLefts = [node 'b' []]
                               , treeAboveAbove =
                                     Just
                                         TreeAbove
                                         { treeAboveLefts = []
                                         , treeAboveAbove = Nothing
                                         , treeAboveNode = 'p'
-                                        , treeAboveRights = [Node 'e' []]
+                                        , treeAboveRights = [node 'e' []]
                                         }
                               , treeAboveNode = 'a'
-                              , treeAboveRights = [Node 'd' []]
+                              , treeAboveRights = [node 'd' []]
                               }
                     , treeCurrent = 'c'
                     , treeBelow = makeCollapse []
@@ -684,33 +680,33 @@ spec = do
                     { treeAbove =
                           Just
                               TreeAbove
-                              { treeAboveLefts = [Node 'a' [Node 'b' []]]
+                              { treeAboveLefts = [node 'a' [node 'b' []]]
                               , treeAboveAbove = Nothing
                               , treeAboveNode = 'p'
-                              , treeAboveRights = [Node 'e' []]
+                              , treeAboveRights = [node 'e' []]
                               }
                     , treeCurrent = 'c'
-                    , treeBelow = makeCollapse [Node 'd' []]
+                    , treeBelow = makeCollapse [node 'd' []]
                     }
                 promoteEnd =
                     TreeCursor
                     { treeAbove =
                           Just
                               TreeAbove
-                              { treeAboveLefts = [Node 'b' []]
+                              { treeAboveLefts = [node 'b' []]
                               , treeAboveAbove =
                                     Just
                                         TreeAbove
                                         { treeAboveLefts = []
                                         , treeAboveAbove = Nothing
                                         , treeAboveNode = 'p'
-                                        , treeAboveRights = [Node 'e' []]
+                                        , treeAboveRights = [node 'e' []]
                                         }
                               , treeAboveNode = 'a'
                               , treeAboveRights = []
                               }
                     , treeCurrent = 'c'
-                    , treeBelow = makeCollapse [Node 'd' []]
+                    , treeBelow = makeCollapse [node 'd' []]
                     }
             in case treeCursorDemoteSubTree promoteStart of
                    Demoted tc' -> tc' `treeShouldBe` promoteEnd
@@ -735,7 +731,7 @@ spec = do
                                       , treeAboveRights = []
                                       }
                             , treeCurrent = 'a'
-                            , treeBelow = makeCollapse [Node 'b' []]
+                            , treeBelow = makeCollapse [node 'b' []]
                             }
                         demoteEnd =
                             TreeCursor
@@ -750,7 +746,7 @@ spec = do
                                                 , treeAboveAbove = Nothing
                                                 , treeAboveNode = 'p'
                                                 , treeAboveRights =
-                                                      [Node b2 [Node 'b' []]]
+                                                      [node b2 [node 'b' []]]
                                                 }
                                       , treeAboveNode = b1
                                       , treeAboveRights = []
@@ -774,7 +770,7 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 'a'
-                        , treeBelow = makeCollapse [Node 'b' []]
+                        , treeBelow = makeCollapse [node 'b' []]
                         }
                     demoteEnd =
                         TreeCursor
@@ -787,7 +783,7 @@ spec = do
                                   , treeAboveRights = []
                                   }
                         , treeCurrent = 'a'
-                        , treeBelow = makeCollapse [Node 'b' []]
+                        , treeBelow = makeCollapse [node 'b' []]
                         }
                 treeCursorDemoteSubTreeUnder v demoteStart `treeShouldBe`
                     demoteEnd
@@ -813,15 +809,15 @@ isMovementM func =
         case func lec of
             Nothing -> pure () -- Fine
             Just lec' ->
-                let ne = rebuildTreeCursor lec
-                    ne' = rebuildTreeCursor lec'
+                let ne = rebuildCTree $ rebuildTreeCursor lec
+                    ne' = rebuildCTree $ rebuildTreeCursor lec'
                 in unless (ne == ne') $
                    expectationFailure $
                    unlines
-                       [ "Cursor before:\n" ++ show lec
-                       , "Tree before:  \n" ++ show ne
-                       , "Cursor after: \n" ++ show lec'
-                       , "Tree after:   \n" ++ show ne'
+                       [ "Cursor before:\n" ++ drawTreeCursor lec
+                       , "Tree before:  \n" ++ drawTree (fmap show ne)
+                       , "Cursor after: \n" ++ drawTreeCursor lec'
+                       , "Tree after:   \n" ++ drawTree (fmap show ne')
                        ]
 
 isMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Property
@@ -848,3 +844,6 @@ instance CanFail SwapResult where
     hasFailed _ = True
     resultIfSucceeded (Swapped a) = Just a
     resultIfSucceeded _ = Nothing
+
+node :: a -> [CTree a] -> CTree a
+node a ts = CNode a $ makeCollapse ts

@@ -6,59 +6,18 @@
 module Cursor.Tree
     ( TreeCursor(..)
     , TreeAbove(..)
-    , singletonTreeCursor
-    , makeTreeCursor
-    , makeTreeCursorWithSelection
-    , rebuildTreeCursor
-    , mapTreeCursor
-    -- * Lenses
-    , treeCursorAboveL
-    , treeCursorCurrentL
-    , treeCursorBelowL
-    , treeAboveLeftsL
-    , treeAboveAboveL
-    , treeAboveNodeL
-    , treeAboveRightsL
+    -- * Types
+    , module Cursor.Tree.Types
+    -- * Construction, destruction
+    , module Cursor.Tree.Base
     -- * Drawing
-    , drawTreeCursor
-    , treeCursorWithPointer
+    , module Cursor.Tree.Draw
     -- * Movements
-    , treeCursorSelection
-    , TreeCursorSelection(..)
-    , treeCursorSelect
-    , treeCursorSelectPrev
-    , treeCursorSelectNext
-    , treeCursorSelectFirst
-    , treeCursorSelectLast
-    , treeCursorSelectAbove
-    , treeCursorSelectBelowAtPos
-    , treeCursorSelectBelowAtStart
-    , treeCursorSelectBelowAtEnd
-    , treeCursorSelectBelowAtStartRecursively
-    , treeCursorSelectBelowAtEndRecursively
-    , treeCursorSelectPrevOnSameLevel
-    , treeCursorSelectNextOnSameLevel
-    , treeCursorSelectAbovePrev
-    , treeCursorSelectAboveNext
+    , module Cursor.Tree.Movement
     -- * Insertions
-    , treeCursorInsert
-    , treeCursorInsertAndSelect
-    , treeCursorAppend
-    , treeCursorAppendAndSelect
-    , treeCursorAddChildAtPos
-    , treeCursorAddChildAtStart
-    , treeCursorAddChildAtEnd
+    , module Cursor.Tree.Insert
     -- * Deletions
-    , treeCursorDeleteSubTreeAndSelectPrevious
-    , treeCursorDeleteSubTreeAndSelectNext
-    , treeCursorDeleteSubTreeAndSelectAbove
-    , treeCursorRemoveSubTree
-    , treeCursorDeleteSubTree
-    , treeCursorDeleteElemAndSelectPrevious
-    , treeCursorDeleteElemAndSelectNext
-    , treeCursorDeleteElemAndSelectAbove
-    , treeCursorRemoveElem
-    , treeCursorDeleteElem
+    , module Cursor.Tree.Delete
     -- * Swapping
     , treeCursorSwapPrev
     , treeCursorSwapNext
@@ -80,6 +39,12 @@ module Cursor.Tree
     , collapse
     , rebuildCollapse
     , collapseValueL
+    -- * CTree
+    , CTree(..)
+    , CForest
+    , makeCTree
+    , cTree
+    , rebuildCTree
     ) where
 
 import Data.Tree
@@ -93,463 +58,13 @@ import Control.Monad
 
 import Lens.Micro
 
+import Cursor.Tree.Base
+import Cursor.Tree.Delete
+import Cursor.Tree.Draw
+import Cursor.Tree.Insert
+import Cursor.Tree.Movement
+import Cursor.Tree.Types
 import Cursor.Types
-
-data TreeCursor a b = TreeCursor
-    { treeAbove :: !(Maybe (TreeAbove b))
-    , treeCurrent :: !a
-    , treeBelow :: !(Collapse (Forest b))
-    } deriving (Show, Eq, Generic)
-
-currentTree :: (a -> b) -> TreeCursor a b -> Tree b
-currentTree f TreeCursor {..} = Node (f treeCurrent) (collapseValue treeBelow)
-
-treeCursorAboveL :: Lens' (TreeCursor a b) (Maybe (TreeAbove b))
-treeCursorAboveL = lens treeAbove $ \tc ta -> tc {treeAbove = ta}
-
-treeCursorCurrentL :: Lens' (TreeCursor a b) a
-treeCursorCurrentL = lens treeCurrent $ \tc a -> tc {treeCurrent = a}
-
-treeCursorCollapseBelowL :: Lens' (TreeCursor a b) (Collapse (Forest b))
-treeCursorCollapseBelowL = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
-
-treeCursorBelowL :: Lens' (TreeCursor a b) (Forest b)
-treeCursorBelowL = treeCursorCollapseBelowL . collapseValueL
-
-instance (Validity a, Validity b) => Validity (TreeCursor a b)
-
-data TreeAbove b = TreeAbove
-    { treeAboveLefts :: ![Tree b] -- In reverse order
-    , treeAboveAbove :: !(Maybe (TreeAbove b))
-    , treeAboveNode :: !b
-    , treeAboveRights :: ![Tree b]
-    } deriving (Show, Eq, Generic, Functor)
-
-instance Validity b => Validity (TreeAbove b)
-
-treeAboveLeftsL :: Lens' (TreeAbove b) [Tree b]
-treeAboveLeftsL = lens treeAboveLefts $ \ta tal -> ta {treeAboveLefts = tal}
-
-treeAboveAboveL :: Lens' (TreeAbove b) (Maybe (TreeAbove b))
-treeAboveAboveL = lens treeAboveAbove $ \ta taa -> ta {treeAboveAbove = taa}
-
-treeAboveNodeL :: Lens' (TreeAbove b) b
-treeAboveNodeL = lens treeAboveNode $ \ta a -> ta {treeAboveNode = a}
-
-treeAboveRightsL :: Lens' (TreeAbove b) [Tree b]
-treeAboveRightsL = lens treeAboveRights $ \ta tar -> ta {treeAboveRights = tar}
-
-makeTreeCursor :: (b -> a) -> Tree b -> TreeCursor a b
-makeTreeCursor g (Node v fs) =
-    TreeCursor
-    {treeAbove = Nothing, treeCurrent = g v, treeBelow = makeCollapse fs}
-
-makeTreeCursorWithSelection ::
-       (a -> b)
-    -> (b -> a)
-    -> TreeCursorSelection
-    -> Tree b
-    -> Maybe (TreeCursor a b)
-makeTreeCursorWithSelection f g sel = walkDown sel . makeTreeCursor g
-  where
-    walkDown SelectNode tc = pure tc
-    walkDown (SelectChild i s) tc =
-        treeCursorSelectBelowAtPos f g i tc >>= walkDown s
-
-makeTreeCursorWithAbove ::
-       (b -> a) -> Tree b -> Maybe (TreeAbove b) -> TreeCursor a b
-makeTreeCursorWithAbove g (Node a forest) mta =
-    TreeCursor
-    {treeAbove = mta, treeCurrent = g a, treeBelow = makeCollapse forest}
-
-singletonTreeCursor :: a -> TreeCursor a b
-singletonTreeCursor v =
-    TreeCursor
-    {treeAbove = Nothing, treeCurrent = v, treeBelow = makeCollapse []}
-
-rebuildTreeCursor :: (a -> b) -> TreeCursor a b -> Tree b
-rebuildTreeCursor f TreeCursor {..} =
-    wrapAbove treeAbove $ Node (f treeCurrent) $ rebuildCollapse treeBelow
-  where
-    wrapAbove Nothing t = t
-    wrapAbove (Just TreeAbove {..}) t =
-        wrapAbove treeAboveAbove $
-        Node treeAboveNode $
-        concat [reverse treeAboveLefts, [t], treeAboveRights]
-
-drawTreeCursor :: (Show a, Show b) => TreeCursor a b -> String
-drawTreeCursor = drawTree . treeCursorWithPointer
-
-treeCursorWithPointer :: (Show a, Show b) => TreeCursor a b -> Tree String
-treeCursorWithPointer TreeCursor {..} =
-    wrapAbove treeAbove $
-    Node (show treeCurrent ++ " <---") $ showCollapseForest treeBelow
-  where
-    wrapAbove :: (Show b) => Maybe (TreeAbove b) -> Tree String -> Tree String
-    wrapAbove Nothing t = t
-    wrapAbove (Just TreeAbove {..}) t =
-        wrapAbove treeAboveAbove $
-        Node (show treeAboveNode) $
-        concat
-            [ showForest $ reverse treeAboveLefts
-            , [t]
-            , showForest treeAboveRights
-            ]
-    showCollapseForest :: Show a => Collapse (Forest a) -> Forest String
-    showCollapseForest Collapse {..} = map (fmap go) collapseValue
-      where
-        go :: Show a => a -> String
-        go =
-            if collapseShow
-                then show
-                else ("hidden: " ++) . show
-    showForest :: Show a => Forest a -> Forest String
-    showForest = map $ fmap show
-
-mapTreeCursor :: (a -> c) -> (b -> d) -> TreeCursor a b -> TreeCursor c d
-mapTreeCursor f g TreeCursor {..} =
-    TreeCursor
-    { treeAbove = fmap g <$> treeAbove
-    , treeCurrent = f treeCurrent
-    , treeBelow = fmap (map (fmap g)) treeBelow
-    }
-
-treeCursorSelection :: TreeCursor a b -> TreeCursorSelection
-treeCursorSelection TreeCursor {..} = wrap treeAbove SelectNode
-  where
-    wrap :: Maybe (TreeAbove a) -> TreeCursorSelection -> TreeCursorSelection
-    wrap Nothing ts = ts
-    wrap (Just ta) ts =
-        wrap (treeAboveAbove ta) $ SelectChild (length $ treeAboveLefts ta) ts
-
-data TreeCursorSelection
-    = SelectNode
-    | SelectChild Int
-                  TreeCursorSelection
-    deriving (Show, Eq, Generic)
-
-instance Validity TreeCursorSelection
-
-treeCursorSelect ::
-       (a -> b)
-    -> (b -> a)
-    -> TreeCursorSelection
-    -> TreeCursor a b
-    -> Maybe (TreeCursor a b)
-treeCursorSelect f g sel =
-    makeTreeCursorWithSelection f g sel . rebuildTreeCursor f
-
-treeCursorSelectPrev ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectPrev f g tc =
-    treeCursorSelectAbovePrev f g tc <|> treeCursorSelectPrevOnSameLevel f g tc <|>
-    treeCursorSelectAbove f g tc
-
-treeCursorSelectNext ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectNext f g tc =
-    treeCursorSelectBelowAtStart f g tc <|>
-    treeCursorSelectNextOnSameLevel f g tc <|>
-    treeCursorSelectAboveNext f g tc
-
-treeCursorSelectFirst ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> TreeCursor a b
-treeCursorSelectFirst f g tc =
-    maybe tc (treeCursorSelectFirst f g) $ treeCursorSelectPrev f g tc
-
-treeCursorSelectLast :: (a -> b) -> (b -> a) -> TreeCursor a b -> TreeCursor a b
-treeCursorSelectLast f g tc =
-    maybe tc (treeCursorSelectLast f g) $ treeCursorSelectNext f g tc
-
-treeCursorSelectAbove ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectAbove f g tc@TreeCursor {..} =
-    case treeAbove of
-        Nothing -> Nothing
-        Just TreeAbove {..} ->
-            let newForrest =
-                    reverse treeAboveLefts ++
-                    [currentTree f tc] ++ treeAboveRights
-                newTree = Node treeAboveNode newForrest
-            in Just $ makeTreeCursorWithAbove g newTree treeAboveAbove
-
-treeCursorSelectBelowAtPos ::
-       (a -> b) -> (b -> a) -> Int -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectBelowAtPos f g pos TreeCursor {..} =
-    case splitAt pos $ collapseValue treeBelow of
-        (_, []) -> Nothing
-        (lefts, current:rights) ->
-            Just $
-            makeTreeCursorWithAbove g current $
-            Just $
-            TreeAbove
-            { treeAboveLefts = reverse lefts
-            , treeAboveAbove = treeAbove
-            , treeAboveNode = f treeCurrent
-            , treeAboveRights = rights
-            }
-
-treeCursorSelectBelowAtStart ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectBelowAtStart f g = treeCursorSelectBelowAtPos f g 0
-
-treeCursorSelectBelowAtEnd ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectBelowAtEnd f g tc =
-    treeCursorSelectBelowAtPos
-        f
-        g
-        (length (collapseValue $ treeBelow tc) - 1)
-        tc
-
-treeCursorSelectBelowAtStartRecursively ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectBelowAtStartRecursively f g tc =
-    go <$> treeCursorSelectBelowAtStart f g tc
-  where
-    go c = maybe c go $ treeCursorSelectBelowAtStart f g c
-
-treeCursorSelectBelowAtEndRecursively ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectBelowAtEndRecursively f g tc =
-    go <$> treeCursorSelectBelowAtEnd f g tc
-  where
-    go c = maybe c go $ treeCursorSelectBelowAtEnd f g c
-
-treeCursorSelectPrevOnSameLevel ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectPrevOnSameLevel f g tc@TreeCursor {..} = do
-    ta <- treeAbove
-    case treeAboveLefts ta of
-        [] -> Nothing
-        tree:xs ->
-            Just . makeTreeCursorWithAbove g tree $
-            Just
-                ta
-                { treeAboveLefts = xs
-                , treeAboveRights = currentTree f tc : treeAboveRights ta
-                }
-
-treeCursorSelectNextOnSameLevel ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectNextOnSameLevel f g tc@TreeCursor {..} = do
-    ta <- treeAbove
-    case treeAboveRights ta of
-        [] -> Nothing
-        tree:xs ->
-            Just . makeTreeCursorWithAbove g tree . Just $
-            ta
-            { treeAboveLefts = currentTree f tc : treeAboveLefts ta
-            , treeAboveRights = xs
-            }
-
--- | Go back and down as far as necessary to find a previous element on a level below
-treeCursorSelectAbovePrev ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectAbovePrev f g =
-    treeCursorSelectPrevOnSameLevel f g >=>
-    treeCursorSelectBelowAtEndRecursively f g
-
--- | Go up as far as necessary to find a next element on a level above and forward
---
--- Note: This will fail if there is a next node on the same level or any node below the current node
-treeCursorSelectAboveNext ::
-       (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorSelectAboveNext f g tc =
-    case treeCursorSelectNextOnSameLevel f g tc of
-        Just _ -> Nothing
-        Nothing ->
-            if (null $ collapseValue $ treeBelow tc)
-                then go tc
-                else Nothing
-  where
-    go tc_ = do
-        tc' <- treeCursorSelectAbove f g tc_
-        case treeCursorSelectNextOnSameLevel f g tc' of
-            Nothing -> go tc'
-            Just tc'' -> pure tc''
-
-treeCursorInsert :: Tree b -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorInsert tree tc@TreeCursor {..} = do
-    ta <- treeAbove
-    let newTreeAbove = ta {treeAboveLefts = tree : treeAboveLefts ta}
-    pure tc {treeAbove = Just newTreeAbove}
-
-treeCursorInsertAndSelect ::
-       (a -> b)
-    -> (b -> a)
-    -> Tree b
-    -> TreeCursor a b
-    -> Maybe (TreeCursor a b)
-treeCursorInsertAndSelect f g tree tc@TreeCursor {..} = do
-    ta <- treeAbove
-    let newTreeAbove =
-            ta {treeAboveRights = currentTree f tc : treeAboveRights ta}
-    pure $ makeTreeCursorWithAbove g tree $ Just newTreeAbove
-
-treeCursorAppend :: Tree b -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorAppend tree tc@TreeCursor {..} = do
-    ta <- treeAbove
-    let newTreeAbove = ta {treeAboveRights = tree : treeAboveRights ta}
-    pure tc {treeAbove = Just newTreeAbove}
-
-treeCursorAppendAndSelect ::
-       (a -> b)
-    -> (b -> a)
-    -> Tree b
-    -> TreeCursor a b
-    -> Maybe (TreeCursor a b)
-treeCursorAppendAndSelect f g tree tc@TreeCursor {..} = do
-    ta <- treeAbove
-    let newTreeAbove =
-            ta {treeAboveLefts = currentTree f tc : treeAboveLefts ta}
-    pure $ makeTreeCursorWithAbove g tree $ Just newTreeAbove
-
-treeCursorAddChildAtPos :: Int -> Tree b -> TreeCursor a b -> TreeCursor a b
-treeCursorAddChildAtPos i t tc =
-    let (before, after) = splitAt i $ collapseValue $ treeBelow tc
-    in tc {treeBelow = collapse True $ before ++ [t] ++ after}
-
-treeCursorAddChildAtStart :: Tree b -> TreeCursor a b -> TreeCursor a b
-treeCursorAddChildAtStart t tc =
-    tc {treeBelow = collapse True $ t : collapseValue (treeBelow tc)}
-
-treeCursorAddChildAtEnd :: Tree b -> TreeCursor a b -> TreeCursor a b
-treeCursorAddChildAtEnd t tc =
-    tc {treeBelow = collapse True $ collapseValue (treeBelow tc) ++ [t]}
-
-treeCursorDeleteSubTreeAndSelectPrevious ::
-       (b -> a) -> TreeCursor a b -> Maybe (DeleteOrUpdate (TreeCursor a b))
-treeCursorDeleteSubTreeAndSelectPrevious g TreeCursor {..} =
-    case treeAbove of
-        Nothing -> Just Deleted
-        Just ta ->
-            case treeAboveLefts ta of
-                [] -> Nothing
-                tree:xs ->
-                    Just . Updated . makeTreeCursorWithAbove g tree $
-                    Just ta {treeAboveLefts = xs}
-
-treeCursorDeleteSubTreeAndSelectNext ::
-       (b -> a) -> TreeCursor a b -> Maybe (DeleteOrUpdate (TreeCursor a b))
-treeCursorDeleteSubTreeAndSelectNext g TreeCursor {..} =
-    case treeAbove of
-        Nothing -> Just Deleted
-        Just ta ->
-            case treeAboveRights ta of
-                [] -> Nothing
-                tree:xs ->
-                    Just . Updated . makeTreeCursorWithAbove g tree $
-                    Just ta {treeAboveRights = xs}
-
-treeCursorDeleteSubTreeAndSelectAbove ::
-       (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
-treeCursorDeleteSubTreeAndSelectAbove g TreeCursor {..} =
-    case treeAbove of
-        Nothing -> Deleted
-        Just TreeAbove {..} ->
-            Updated $
-            TreeCursor
-            { treeAbove = treeAboveAbove
-            , treeCurrent = g treeAboveNode
-            , treeBelow =
-                  makeCollapse $ reverse treeAboveLefts ++ treeAboveRights
-            }
-
-treeCursorRemoveSubTree ::
-       (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
-treeCursorRemoveSubTree g tc =
-    joinDeletes
-        (treeCursorDeleteSubTreeAndSelectPrevious g tc)
-        (treeCursorDeleteSubTreeAndSelectNext g tc) <|>
-    treeCursorDeleteSubTreeAndSelectAbove g tc
-
-treeCursorDeleteSubTree ::
-       (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
-treeCursorDeleteSubTree g tc =
-    joinDeletes
-        (treeCursorDeleteSubTreeAndSelectNext g tc)
-        (treeCursorDeleteSubTreeAndSelectPrevious g tc) <|>
-    treeCursorDeleteSubTreeAndSelectAbove g tc
-
-treeCursorDeleteElemAndSelectPrevious ::
-       (b -> a) -> TreeCursor a b -> Maybe (DeleteOrUpdate (TreeCursor a b))
-treeCursorDeleteElemAndSelectPrevious g TreeCursor {..} =
-    case treeAbove of
-        Nothing ->
-            case collapseValue treeBelow of
-                [] -> Just Deleted
-                _ -> Nothing
-        Just ta ->
-            case treeAboveLefts ta of
-                [] -> Nothing
-                tree:xs ->
-                    Just . Updated . makeTreeCursorWithAbove g tree $
-                    Just
-                        ta
-                        { treeAboveLefts = xs
-                        , treeAboveRights =
-                              collapseValue treeBelow ++ treeAboveRights ta
-                        }
-
-treeCursorDeleteElemAndSelectNext ::
-       (b -> a) -> TreeCursor a b -> Maybe (DeleteOrUpdate (TreeCursor a b))
-treeCursorDeleteElemAndSelectNext g TreeCursor {..} =
-    case collapseValue treeBelow of
-        [] ->
-            case treeAbove of
-                Nothing -> Just Deleted
-                Just ta ->
-                    case treeAboveRights ta of
-                        [] -> Nothing
-                        tree:xs ->
-                            Just . Updated . makeTreeCursorWithAbove g tree $
-                            Just
-                                ta
-                                { treeAboveLefts =
-                                      reverse (collapseValue treeBelow) ++
-                                      treeAboveLefts ta
-                                , treeAboveRights = xs
-                                }
-        (Node e ts:xs) ->
-            let t = Node e $ ts ++ xs
-            in Just . Updated $ makeTreeCursorWithAbove g t treeAbove
-
-treeCursorDeleteElemAndSelectAbove ::
-       (b -> a) -> TreeCursor a b -> Maybe (DeleteOrUpdate (TreeCursor a b))
-treeCursorDeleteElemAndSelectAbove g TreeCursor {..} =
-    case treeAbove of
-        Nothing ->
-            case collapseValue treeBelow of
-                [] -> Just Deleted
-                _ -> Nothing
-        Just TreeAbove {..} ->
-            Just $
-            Updated $
-            TreeCursor
-            { treeAbove = treeAboveAbove
-            , treeCurrent = g treeAboveNode
-            , treeBelow =
-                  collapse True $
-                  reverse treeAboveLefts ++
-                  collapseValue treeBelow ++ treeAboveRights
-            }
-
-treeCursorRemoveElem ::
-       (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
-treeCursorRemoveElem g tc =
-    joinDeletes3
-        (treeCursorDeleteElemAndSelectPrevious g tc)
-        (treeCursorDeleteElemAndSelectNext g tc)
-        (treeCursorDeleteElemAndSelectAbove g tc)
-
-treeCursorDeleteElem ::
-       (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
-treeCursorDeleteElem g tc =
-    joinDeletes3
-        (treeCursorDeleteElemAndSelectNext g tc)
-        (treeCursorDeleteElemAndSelectPrevious g tc)
-        (treeCursorDeleteElemAndSelectAbove g tc)
 
 -- | Swaps the current node with the previous node on the same level
 --
@@ -669,18 +184,21 @@ treeCursorPromoteElem f g tc = do
             _ ->
                 case treeAboveLefts ta of
                     [] -> NoSiblingsToAdoptChildren
-                    (Node t ls:ts) ->
-                        pure $ Node t (ls ++ collapseValue (treeBelow tc)) : ts
+                    (CNode t ls:ts) ->
+                        pure $
+                        CNode t (fmap (++ collapseValue (treeBelow tc)) ls) : ts
     taa <-
         case treeAboveAbove ta of
             Nothing -> NoGrandparentToPromoteElemUnder
             Just taa -> pure taa
     pure $
-        makeTreeCursorWithAbove g (Node (f $ treeCurrent tc) []) $
+        makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) $ makeCollapse []) $
         Just $
         taa
         { treeAboveLefts =
-              Node (treeAboveNode ta) (reverse lefts ++ treeAboveRights ta) :
+              CNode
+                  (treeAboveNode ta)
+                  (makeCollapse $ reverse lefts ++ treeAboveRights ta) :
               treeAboveLefts taa
         }
 
@@ -753,9 +271,10 @@ treeCursorPromoteSubTree f g tc = do
         Just $
         taa
         { treeAboveLefts =
-              Node
+              CNode
                   (treeAboveNode ta)
-                  (reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
+                  (makeCollapse $
+                   reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
               treeAboveLefts taa
         }
 
@@ -809,12 +328,14 @@ treeCursorDemoteElem f g tc =
         Just ta ->
             case treeAboveLefts ta of
                 [] -> NoSiblingsToDemoteUnder
-                (Node t ls:ts) ->
+                (CNode t ls:ts) ->
                     Demoted $
-                    makeTreeCursorWithAbove g (Node (f $ treeCurrent tc) []) $
+                    makeTreeCursorWithAbove
+                        g
+                        (CNode (f $ treeCurrent tc) $ makeCollapse []) $
                     Just
                         TreeAbove
-                        { treeAboveLefts = reverse ls
+                        { treeAboveLefts = reverse $ collapseValue ls
                         , treeAboveAbove = Just ta {treeAboveLefts = ts}
                         , treeAboveNode = t
                         , treeAboveRights = collapseValue (treeBelow tc)
@@ -849,12 +370,12 @@ treeCursorDemoteSubTree f g tc =
         Just ta ->
             case treeAboveLefts ta of
                 [] -> NoSiblingsToDemoteUnder
-                (Node t ls:ts) ->
+                (CNode t ls:ts) ->
                     Demoted $
                     makeTreeCursorWithAbove g (currentTree f tc) $
                     Just
                         TreeAbove
-                        { treeAboveLefts = reverse ls
+                        { treeAboveLefts = reverse $ collapseValue ls
                         , treeAboveAbove = Just ta {treeAboveLefts = ts}
                         , treeAboveNode = t
                         , treeAboveRights = []
@@ -890,10 +411,7 @@ treeCursorDemoteElemUnder :: b -> b -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorDemoteElemUnder b1 b2 tc = do
     ta <- treeAbove tc
     let ta' =
-            ta
-            { treeAboveRights =
-                  Node b2 (collapseValue (treeBelow tc)) : treeAboveRights ta
-            }
+            ta {treeAboveRights = CNode b2 (treeBelow tc) : treeAboveRights ta}
     pure
         tc
         { treeAbove =
@@ -933,25 +451,3 @@ treeCursorDemoteSubTreeUnder b tc =
               , treeAboveRights = []
               }
     }
-
-data Collapse a = Collapse
-    { collapseValue :: !a
-    , collapseShow :: !Bool
-    } deriving (Show, Eq, Generic, Functor)
-
-instance Validity a => Validity (Collapse a)
-
-makeCollapse :: a -> Collapse a
-makeCollapse = collapse True
-
-collapse :: Bool -> a -> Collapse a
-collapse b a = Collapse {collapseValue = a, collapseShow = b}
-
-rebuildCollapse :: Collapse a -> a
-rebuildCollapse = collapseValue
-
-collapseValueL :: Lens (Collapse a) (Collapse b) a b
-collapseValueL = lens collapseValue $ \c v -> c {collapseValue = v}
-
-collapseShowL :: Lens' (Collapse a) Bool
-collapseShowL = lens collapseShow $ \c b -> c {collapseShow = b}

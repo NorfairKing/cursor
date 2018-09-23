@@ -14,7 +14,6 @@ import Test.Validity
 import Test.Validity.Optics
 
 import Control.Monad (unless)
-import Data.Tree
 
 import Cursor.Forest (ForestCursor(..))
 import Cursor.List.NonEmpty
@@ -38,12 +37,12 @@ spec = do
         it "is the inverse of makeForestCursor for integers" $
             inverseFunctions (makeForestCursor @Int) rebuildForestCursor
     describe "forestCursorLestCursorL" $
-        lensSpecOnValid (forestCursorListCursorL @Double)
+        lensSpecOnValid (forestCursorListCursorL @Double @Double)
     describe "forestCursorSelectedTreeL" $
-        lensSpecOnValid (forestCursorSelectedTreeL @Double)
+        lensSpecOnValid (forestCursorSelectedTreeL @Double @Double)
     describe "forestCursorSelection" $ do
         it "produces valid ints" $
-            producesValidsOnValids (forestCursorSelection @Double)
+            producesValidsOnValids (forestCursorSelection @Double @Double)
         it "returns the index of the currently selected element" pending
     describe "forestCursorSelectIndex" $ do
         it "produces valid cursors" $
@@ -86,7 +85,8 @@ movementsSpec = do
             producesValidsOnValids $ forestCursorSelectPrev @Double
         it "is a movement" $ isMovementM forestCursorSelectPrev
         it "selects the previous node" pending
-        it "Works for this classic example" $
+        -- TODO example with a collapsed tree
+        it "Works for this classic example without any collapsing" $
             --   > 1
             --     > 2 <- expected end cursor
             --   > 3 <- start cursor
@@ -95,7 +95,10 @@ movementsSpec = do
                     ForestCursor
                     { forestCursorListCursor =
                           NonEmptyCursor
-                          { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
+                          { nonEmptyCursorPrev =
+                                [ CNode 1 $
+                                  collapse True [CNode 2 $ makeCollapse []]
+                                ]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
@@ -123,7 +126,7 @@ movementsSpec = do
                                 , treeCurrent = 2
                                 , treeBelow = makeCollapse []
                                 }
-                          , nonEmptyCursorNext = [Node 3 []]
+                          , nonEmptyCursorNext = [CNode 3 $ makeCollapse []]
                           }
                     }
             case forestCursorSelectPrev start of
@@ -159,14 +162,17 @@ movementsSpec = do
                                 , treeCurrent = 2
                                 , treeBelow = makeCollapse []
                                 }
-                          , nonEmptyCursorNext = [Node 3 []]
+                          , nonEmptyCursorNext = [CNode 3 $ makeCollapse []]
                           }
                     }
                 expected =
                     ForestCursor
                     { forestCursorListCursor =
                           NonEmptyCursor
-                          { nonEmptyCursorPrev = [Node 1 [Node 2 []]]
+                          { nonEmptyCursorPrev =
+                                [ CNode 1 $
+                                  collapse True [CNode 2 $ makeCollapse []]
+                                ]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
@@ -226,7 +232,8 @@ insertSpec :: Spec
 insertSpec = do
     describe "forestCursorInsertEntireTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorInsertEntireTree @Double)
+            producesValidsOnValids2
+                (forestCursorInsertEntireTree @Double @Double)
         it
             "inserts a tree cursor before the currently selected tree cursor"
             pending
@@ -239,7 +246,8 @@ insertSpec = do
             pending
     describe "forestCursorAppendEntireTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAppendEntireTree @Double)
+            producesValidsOnValids2
+                (forestCursorAppendEntireTree @Double @Double)
         it "appends a tree after the currently selected tree cursor" pending
     describe "forestCursorAppendAndSelectTreeCursor" $ do
         it "produces valid cursors" $
@@ -250,7 +258,7 @@ insertSpec = do
             pending
     describe "forestCursorInsertTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorInsertTree @Double)
+            producesValidsOnValids2 (forestCursorInsertTree @Double @Double)
         it "inserts a tree before the currently selected tree" pending
     describe "forestCursorInsertAndSelectTree" $ do
         it "produces valid cursors" $
@@ -260,7 +268,7 @@ insertSpec = do
             pending
     describe "forestCursorAppendTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAppendTree @Double)
+            producesValidsOnValids2 (forestCursorAppendTree @Double @Double)
         it "appends a tree after the currently selected tree " pending
     describe "forestCursorAppendAndSelectTree" $ do
         it "produces valid cursors" $
@@ -270,7 +278,7 @@ insertSpec = do
             pending
     describe "forestCursorInsert" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorInsert @Double)
+            producesValidsOnValids2 (forestCursorInsert @Double @Double)
         it "inserts a node before the currently selected node" pending
     describe "forestCursorInsertAndSelect" $ do
         it "produces valid cursors" $
@@ -280,7 +288,7 @@ insertSpec = do
             pending
     describe "forestCursorAppend" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAppend @Double)
+            producesValidsOnValids2 (forestCursorAppend @Double @Double)
         it "appends a node after the currently selected node" pending
     describe "forestCursorAppendAndSelect" $ do
         it "produces valid cursors" $
@@ -291,39 +299,42 @@ insertSpec = do
     describe "forestCursorAddChildTreeToNodeAtPos" $ do
         it "produces valid cursors" $
             producesValidsOnValids3 $
-            forestCursorAddChildTreeToNodeAtPos @Double
+            forestCursorAddChildTreeToNodeAtPos @Double @Double
         it
             "adds a child tree to a node at the given position in the children of that node"
             pending
     describe "forestCursorAddChildTreeToNodeAtStart" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 $
-            forestCursorAddChildTreeToNodeAtStart @Double
+            forestCursorAddChildTreeToNodeAtStart @Double @Double
         it
             "adds a child tree to a node at the start the children of that node"
             pending
     describe "forestCursorAddChildTreeToNodeAtEnd" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 $
-            forestCursorAddChildTreeToNodeAtEnd @Double
+            forestCursorAddChildTreeToNodeAtEnd @Double @Double
         it
             "adds a child tree to a node at the end the children of that node"
             pending
     describe "forestCursorAddChildToNodeAtPos" $ do
         it "produces valid cursors" $
-            producesValidsOnValids3 $ forestCursorAddChildToNodeAtPos @Double
+            producesValidsOnValids3 $
+            forestCursorAddChildToNodeAtPos @Double @Double
         it
             "adds a child to a node at the given position in the children of that node"
             pending
     describe "forestCursorAddChildToNodeAtStart" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 $ forestCursorAddChildToNodeAtStart @Double
+            producesValidsOnValids2 $
+            forestCursorAddChildToNodeAtStart @Double @Double
         it
             "adds a child to a node at the start the children of that node"
             pending
     describe "forestCursorAddChildToNodeAtEnd" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 $ forestCursorAddChildToNodeAtEnd @Double
+            producesValidsOnValids2 $
+            forestCursorAddChildToNodeAtEnd @Double @Double
         it "adds a child to a node at the end the children of that node" pending
     describe "forestCursorAddRoot" $ do
         it "produces valid cursors" $
@@ -334,13 +345,13 @@ swapSpec :: Spec
 swapSpec = do
     describe "forestCursorSwapPrev" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorSwapPrev @Double)
+            producesValidsOnValids (forestCursorSwapPrev @Double @Double)
         it "works on the example from the docs" $
             let start =
                     ForestCursor
                     { forestCursorListCursor =
                           NonEmptyCursor
-                          { nonEmptyCursorPrev = [Node 'a' []]
+                          { nonEmptyCursorPrev = [CNode 'a' $ makeCollapse []]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
@@ -361,7 +372,7 @@ swapSpec = do
                                 , treeCurrent = 'b'
                                 , treeBelow = makeCollapse []
                                 }
-                          , nonEmptyCursorNext = [Node 'a' []]
+                          , nonEmptyCursorNext = [CNode 'a' $ makeCollapse []]
                           }
                     }
             in case forestCursorSwapPrev start of
@@ -374,11 +385,11 @@ swapSpec = do
             pending
         it "reverts forestCursorSwapNext" $
             inverseFunctionsIfSucceedOnValid
-                (forestCursorSwapNext @Double)
-                (forestCursorSwapPrev @Double)
+                (forestCursorSwapNext @Double @Double)
+                (forestCursorSwapPrev @Double @Double)
     describe "forestCursorSwapNext" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorSwapNext @Double)
+            producesValidsOnValids (forestCursorSwapNext @Double @Double)
         it "works on the example from the docs" $
             let start =
                     ForestCursor
@@ -391,14 +402,14 @@ swapSpec = do
                                 , treeCurrent = 'a'
                                 , treeBelow = makeCollapse []
                                 }
-                          , nonEmptyCursorNext = [Node 'b' []]
+                          , nonEmptyCursorNext = [CNode 'b' $ makeCollapse []]
                           }
                     }
                 end =
                     ForestCursor
                     { forestCursorListCursor =
                           NonEmptyCursor
-                          { nonEmptyCursorPrev = [Node 'b' []]
+                          { nonEmptyCursorPrev = [CNode 'b' $ makeCollapse []]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
@@ -416,8 +427,8 @@ swapSpec = do
         it "swaps the current node with the next node on the same level" pending
         it "reverts forestCursorSwapPrev" $
             inverseFunctionsIfSucceedOnValid
-                (forestCursorSwapPrev @Double)
-                (forestCursorSwapNext @Double)
+                (forestCursorSwapPrev @Double @Double)
+                (forestCursorSwapNext @Double @Double)
 
 deleteSpec :: Spec
 deleteSpec = do
@@ -435,7 +446,9 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1 :: Int
-                                    , treeBelow = makeCollapse [Node 2 fs]
+                                    , treeBelow =
+                                          makeCollapse
+                                              [CNode 2 $ makeCollapse fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -466,7 +479,9 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1
-                                    , treeBelow = makeCollapse [Node 2 fs]
+                                    , treeBelow =
+                                          makeCollapse
+                                              [CNode 2 $ makeCollapse fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -509,7 +524,9 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1
-                                    , treeBelow = makeCollapse [Node 2 fs]
+                                    , treeBelow =
+                                          makeCollapse
+                                              [CNode 2 $ makeCollapse fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -548,7 +565,9 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1
-                                    , treeBelow = makeCollapse [Node 2 fs]
+                                    , treeBelow =
+                                          makeCollapse
+                                              [CNode 2 $ makeCollapse fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -609,16 +628,27 @@ shiftingSpec = do
                                       Just
                                           TreeAbove
                                           { treeAboveLefts =
-                                                [Node 'b' [Node 'c' []]]
+                                                [ CNode 'b' $
+                                                  makeCollapse
+                                                      [ CNode 'c' $
+                                                        makeCollapse []
+                                                      ]
+                                                ]
                                           , treeAboveAbove = Nothing
                                           , treeAboveNode = 'a'
                                           , treeAboveRights =
-                                                [Node 'f' [Node 'g' []]]
+                                                [ CNode 'f' $
+                                                  makeCollapse
+                                                      [ CNode 'g' $
+                                                        makeCollapse []
+                                                      ]
+                                                ]
                                           }
                                 , treeCurrent = 'd'
-                                , treeBelow = makeCollapse [Node 'e' []]
+                                , treeBelow =
+                                      makeCollapse [CNode 'e' $ makeCollapse []]
                                 }
-                          , nonEmptyCursorNext = [Node 'h' []]
+                          , nonEmptyCursorNext = [CNode 'h' $ makeCollapse []]
                           }
                     }
                 expected =
@@ -626,10 +656,16 @@ shiftingSpec = do
                     { forestCursorListCursor =
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
-                                [ Node
-                                      'a'
-                                      [ Node 'b' [Node 'c' [], Node 'e' []]
-                                      , Node 'f' [Node 'g' []]
+                                [ CNode 'a' $
+                                  makeCollapse
+                                      [ CNode 'b' $
+                                        makeCollapse
+                                            [ CNode 'c' $ makeCollapse []
+                                            , CNode 'e' $ makeCollapse []
+                                            ]
+                                      , CNode 'f' $
+                                        makeCollapse
+                                            [CNode 'g' $ makeCollapse []]
                                       ]
                                 ]
                           , nonEmptyCursorCurrent =
@@ -638,7 +674,7 @@ shiftingSpec = do
                                 , treeCurrent = 'd'
                                 , treeBelow = makeCollapse []
                                 }
-                          , nonEmptyCursorNext = [Node 'h' []]
+                          , nonEmptyCursorNext = [CNode 'h' $ makeCollapse []]
                           }
                     }
             in case forestCursorPromoteElem start of
@@ -655,14 +691,18 @@ shiftingSpec = do
                     ForestCursor
                     { forestCursorListCursor =
                           NonEmptyCursor
-                          { nonEmptyCursorPrev = [Node 'a' [Node 'b' []]]
+                          { nonEmptyCursorPrev =
+                                [ CNode 'a' $
+                                  makeCollapse [CNode 'b' $ makeCollapse []]
+                                ]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'c'
-                                , treeBelow = makeCollapse [Node 'd' []]
+                                , treeBelow =
+                                      makeCollapse [CNode 'd' $ makeCollapse []]
                                 }
-                          , nonEmptyCursorNext = [Node 'e' []]
+                          , nonEmptyCursorNext = [CNode 'e' $ makeCollapse []]
                           }
                     }
                 expected =
@@ -675,15 +715,17 @@ shiftingSpec = do
                                 { treeAbove =
                                       Just
                                           TreeAbove
-                                          { treeAboveLefts = [Node 'b' []]
+                                          { treeAboveLefts =
+                                                [CNode 'b' $ makeCollapse []]
                                           , treeAboveAbove = Nothing
                                           , treeAboveNode = 'a'
-                                          , treeAboveRights = [Node 'd' []]
+                                          , treeAboveRights =
+                                                [CNode 'd' $ makeCollapse []]
                                           }
                                 , treeCurrent = 'c'
                                 , treeBelow = makeCollapse []
                                 }
-                          , nonEmptyCursorNext = [Node 'e' []]
+                          , nonEmptyCursorNext = [CNode 'e' $ makeCollapse []]
                           }
                     }
             in case forestCursorDemoteElem start of
@@ -707,16 +749,27 @@ shiftingSpec = do
                                       Just
                                           TreeAbove
                                           { treeAboveLefts =
-                                                [Node 'b' [Node 'c' []]]
+                                                [ CNode 'b' $
+                                                  makeCollapse
+                                                      [ CNode 'c' $
+                                                        makeCollapse []
+                                                      ]
+                                                ]
                                           , treeAboveAbove = Nothing
                                           , treeAboveNode = 'a'
                                           , treeAboveRights =
-                                                [Node 'f' [Node 'g' []]]
+                                                [ CNode 'f' $
+                                                  makeCollapse
+                                                      [ CNode 'g' $
+                                                        makeCollapse []
+                                                      ]
+                                                ]
                                           }
                                 , treeCurrent = 'd'
-                                , treeBelow = makeCollapse [Node 'e' []]
+                                , treeBelow =
+                                      makeCollapse [CNode 'e' $ makeCollapse []]
                                 }
-                          , nonEmptyCursorNext = [Node 'h' []]
+                          , nonEmptyCursorNext = [CNode 'h' $ makeCollapse []]
                           }
                     }
                 expected =
@@ -724,19 +777,24 @@ shiftingSpec = do
                     { forestCursorListCursor =
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
-                                [ Node
-                                      'a'
-                                      [ Node 'b' [Node 'c' []]
-                                      , Node 'f' [Node 'g' []]
+                                [ CNode 'a' $
+                                  makeCollapse
+                                      [ CNode 'b' $
+                                        makeCollapse
+                                            [CNode 'c' $ makeCollapse []]
+                                      , CNode 'f' $
+                                        makeCollapse
+                                            [CNode 'g' $ makeCollapse []]
                                       ]
                                 ]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'd'
-                                , treeBelow = makeCollapse [Node 'e' []]
+                                , treeBelow =
+                                      makeCollapse [CNode 'e' $ makeCollapse []]
                                 }
-                          , nonEmptyCursorNext = [Node 'h' []]
+                          , nonEmptyCursorNext = [CNode 'h' $ makeCollapse []]
                           }
                     }
             in case forestCursorPromoteSubTree start of
@@ -753,12 +811,16 @@ shiftingSpec = do
                     ForestCursor
                     { forestCursorListCursor =
                           NonEmptyCursor
-                          { nonEmptyCursorPrev = [Node 'a' [Node 'b' []]]
+                          { nonEmptyCursorPrev =
+                                [ CNode 'a' $
+                                  makeCollapse [CNode 'b' $ makeCollapse []]
+                                ]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'c'
-                                , treeBelow = makeCollapse [Node 'd' []]
+                                , treeBelow =
+                                      makeCollapse [CNode 'd' $ makeCollapse []]
                                 }
                           , nonEmptyCursorNext = []
                           }
@@ -773,13 +835,15 @@ shiftingSpec = do
                                 { treeAbove =
                                       Just
                                           TreeAbove
-                                          { treeAboveLefts = [Node 'b' []]
+                                          { treeAboveLefts =
+                                                [CNode 'b' $ makeCollapse []]
                                           , treeAboveAbove = Nothing
                                           , treeAboveNode = 'a'
                                           , treeAboveRights = []
                                           }
                                 , treeCurrent = 'c'
-                                , treeBelow = makeCollapse [Node 'd' []]
+                                , treeBelow =
+                                      makeCollapse [CNode 'd' $ makeCollapse []]
                                 }
                           , nonEmptyCursorNext = []
                           }
@@ -792,7 +856,8 @@ shiftingSpec = do
         it "demotes the current subtree to the level of its children" pending
     describe "forestCursorDemoteElemUnder" $ do
         it "produces valids on valids" $
-            producesValidsOnValids3 $ forestCursorDemoteElemUnder @Double
+            producesValidsOnValids3 $
+            forestCursorDemoteElemUnder @Double @Double
         it "Works on the example from the docs" $
             forAllValid $ \b1 ->
                 forAllValid $ \b2 ->
@@ -804,7 +869,9 @@ shiftingSpec = do
                                   TreeCursor
                                   { treeAbove = Nothing
                                   , treeCurrent = 'a'
-                                  , treeBelow = makeCollapse [Node 'b' []]
+                                  , treeBelow =
+                                        makeCollapse
+                                            [CNode 'b' $ makeCollapse []]
                                   }
                             , nonEmptyCursorNext = []
                             }
@@ -825,14 +892,18 @@ shiftingSpec = do
                                   , treeCurrent = 'a'
                                   , treeBelow = makeCollapse []
                                   }
-                            , nonEmptyCursorNext = [Node b2 [Node 'b' []]]
+                            , nonEmptyCursorNext =
+                                  [ CNode b2 $
+                                    makeCollapse [CNode 'b' $ makeCollapse []]
+                                  ]
                             }
                     in forestCursorDemoteElemUnder b1 b2 demoteStart `forestShouldBe`
                        demoteEnd
         it "demotes the current node to the level of its children" pending
     describe "forestCursorDemoteSubTreeUnder" $ do
         it "produces valids on valids" $
-            producesValidsOnValids2 $ forestCursorDemoteSubTreeUnder @Double
+            producesValidsOnValids2 $
+            forestCursorDemoteSubTreeUnder @Double @Double
         it "Works on the example from the docs" $
             forAllValid $ \v -> do
                 let demoteStart =
@@ -843,7 +914,8 @@ shiftingSpec = do
                               TreeCursor
                               { treeAbove = Nothing
                               , treeCurrent = 'a'
-                              , treeBelow = makeCollapse [Node 'b' []]
+                              , treeBelow =
+                                    makeCollapse [CNode 'b' $ makeCollapse []]
                               }
                         , nonEmptyCursorNext = []
                         }
@@ -862,7 +934,8 @@ shiftingSpec = do
                                         , treeAboveRights = []
                                         }
                               , treeCurrent = 'a'
-                              , treeBelow = makeCollapse [Node 'b' []]
+                              , treeBelow =
+                                    makeCollapse [CNode 'b' $ makeCollapse []]
                               }
                         , nonEmptyCursorNext = []
                         }
