@@ -7,18 +7,12 @@ module Cursor.Simple.Tree.CollapseSpec
     ( spec
     ) where
 
-import Data.Tree
-
 import Test.Hspec
 
 import Test.Validity
 
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
-import Cursor.Tree
-       (TreeAbove(..), TreeCursor(..), closedForest, emptyCForest)
-
-import Cursor.Simple.Tree.TestUtils
 
 spec :: Spec
 spec = do
