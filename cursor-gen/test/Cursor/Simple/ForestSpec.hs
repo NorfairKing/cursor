@@ -55,6 +55,7 @@ spec = do
                 Just (fc :: SFC.ForestCursor Double)
         it "returns selects the element at the given index" pending
     movementsSpec
+    collapseSpec
     insertSpec
     swapSpec
     deleteSpec
@@ -225,6 +226,18 @@ movementsSpec = do
             producesValidsOnValids $ forestCursorSelectBelowAtEnd @Double
         it "is a movement" $ isMovementM forestCursorSelectBelowAtEnd
         it "selects the first child of the selected node" pending
+
+collapseSpec :: Spec
+collapseSpec = do
+    describe "forestCursorOpenCurrentForest" $
+        it "produces valid cursors" $
+        producesValidsOnValids $ forestCursorOpenCurrentForest @Double @Double
+    describe "forestCursorCloseCurrentForest" $
+        it "produces valid cursors" $
+        producesValidsOnValids $ forestCursorCloseCurrentForest @Double @Double
+    describe "forestCursorToggleCurrentForest" $
+        it "produces valid cursors" $
+        producesValidsOnValids $ forestCursorToggleCurrentForest @Double @Double
 
 insertSpec :: Spec
 insertSpec = do

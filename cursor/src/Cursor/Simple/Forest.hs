@@ -24,6 +24,9 @@ module Cursor.Simple.Forest
     , forestCursorSelectBelowAtPos
     , forestCursorSelectBelowAtStart
     , forestCursorSelectBelowAtEnd
+    , FC.forestCursorCloseCurrentForest
+    , FC.forestCursorOpenCurrentForest
+    , FC.forestCursorToggleCurrentForest
     , FC.forestCursorSelection
     , forestCursorSelectIndex
     , FC.forestCursorInsertEntireTree
