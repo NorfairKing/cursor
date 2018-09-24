@@ -37,6 +37,9 @@ module Cursor.Simple.Tree
     , treeCursorSelectNextOnSameLevel
     , treeCursorSelectAbovePrev
     , treeCursorSelectAboveNext
+    , TC.treeCursorCloseCurrentForest
+    , TC.treeCursorOpenCurrentForest
+    , TC.treeCursorToggleCurrentForest
     , TC.treeCursorInsert
     , treeCursorInsertAndSelect
     , TC.treeCursorAppend

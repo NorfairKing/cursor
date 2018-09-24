@@ -9,6 +9,8 @@ module Cursor.Tree
     , module Cursor.Tree.Base
     -- * Drawing
     , module Cursor.Tree.Draw
+    -- * Collapsing
+    , module Cursor.Tree.Collapse
     -- * Movements
     , module Cursor.Tree.Movement
     -- * Insertions
@@ -28,6 +30,7 @@ import Cursor.Tree.Delete
 import Cursor.Tree.Demote
 import Cursor.Tree.Draw
 import Cursor.Tree.Insert
+import Cursor.Tree.Collapse
 import Cursor.Tree.Movement
 import Cursor.Tree.Promote
 import Cursor.Tree.Swap
