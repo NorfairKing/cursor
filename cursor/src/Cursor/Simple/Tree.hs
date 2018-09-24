@@ -37,6 +37,9 @@ module Cursor.Simple.Tree
     , treeCursorSelectNextOnSameLevel
     , treeCursorSelectAbovePrev
     , treeCursorSelectAboveNext
+    , TC.treeCursorCloseCurrentForest
+    , TC.treeCursorOpenCurrentForest
+    , TC.treeCursorToggleCurrentForest
     , TC.treeCursorInsert
     , treeCursorInsertAndSelect
     , TC.treeCursorAppend
@@ -66,30 +69,33 @@ module Cursor.Simple.Tree
     , TC.DemoteResult(..)
     , TC.treeCursorDemoteElemUnder
     , TC.treeCursorDemoteSubTreeUnder
+    , TC.CTree(..)
+    , TC.CForest
+    , TC.makeCTree
+    , TC.cTree
+    , TC.rebuildCTree
     ) where
 
 import Data.Tree
 
-import Lens.Micro
-
 import Cursor.Types
 
 import qualified Cursor.Tree as TC
-import Cursor.Tree (TreeAbove(..))
+import Cursor.Tree (CTree, TreeAbove(..))
 
 type TreeCursor a = TC.TreeCursor a a
 
-makeTreeCursor :: Tree a -> TreeCursor a
+makeTreeCursor :: CTree a -> TreeCursor a
 makeTreeCursor = TC.makeTreeCursor id
 
 makeTreeCursorWithSelection ::
-       TC.TreeCursorSelection -> Tree a -> Maybe (TreeCursor a)
+       TC.TreeCursorSelection -> CTree a -> Maybe (TreeCursor a)
 makeTreeCursorWithSelection = TC.makeTreeCursorWithSelection id id
 
 singletonTreeCursor :: a -> TreeCursor a
 singletonTreeCursor = TC.singletonTreeCursor
 
-rebuildTreeCursor :: TreeCursor a -> Tree a
+rebuildTreeCursor :: TreeCursor a -> CTree a
 rebuildTreeCursor = TC.rebuildTreeCursor id
 
 mapTreeCursor :: (a -> b) -> TreeCursor a -> TreeCursor b

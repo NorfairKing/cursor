@@ -26,6 +26,9 @@ module Cursor.Forest
     , forestCursorSelectBelowAtEnd
     , forestCursorSelection
     , forestCursorSelectIndex
+    , forestCursorCloseCurrentForest
+    , forestCursorOpenCurrentForest
+    , forestCursorToggleCurrentForest
     , forestCursorInsertEntireTree
     , forestCursorAppendEntireTree
     , forestCursorInsertAndSelectTreeCursor
@@ -61,6 +64,14 @@ module Cursor.Forest
     , forestCursorDemoteSubTree
     , forestCursorDemoteElemUnder
     , forestCursorDemoteSubTreeUnder
+    , CTree(..)
+    , makeCTree
+    , cTree
+    , rebuildCTree
+    , CForest(..)
+    , makeCForest
+    , cForest
+    , rebuildCForest
     ) where
 
 import GHC.Generics (Generic)
@@ -68,7 +79,6 @@ import GHC.Generics (Generic)
 import Data.Validity
 import Data.Validity.Tree ()
 
-import qualified Data.List.NonEmpty as NE
 import Data.List.NonEmpty (NonEmpty)
 import Data.Maybe
 import Data.Tree
@@ -82,31 +92,31 @@ import Cursor.Tree
 import Cursor.Types
 
 newtype ForestCursor a b = ForestCursor
-    { forestCursorListCursor :: NonEmptyCursor (TreeCursor a b) (Tree b)
+    { forestCursorListCursor :: NonEmptyCursor (TreeCursor a b) (CTree b)
     } deriving (Show, Eq, Generic)
 
 instance (Validity a, Validity b) => Validity (ForestCursor a b)
 
-makeForestCursor :: (b -> a) -> NonEmpty (Tree b) -> ForestCursor a b
+makeForestCursor :: (b -> a) -> NonEmpty (CTree b) -> ForestCursor a b
 makeForestCursor g = ForestCursor . makeNonEmptyCursor (makeTreeCursor g)
 
-rebuildForestCursor :: (a -> b) -> ForestCursor a b -> NonEmpty (Tree b)
+rebuildForestCursor :: (a -> b) -> ForestCursor a b -> NonEmpty (CTree b)
 rebuildForestCursor f =
     rebuildNonEmptyCursor (rebuildTreeCursor f) . forestCursorListCursor
 
 drawForestCursor :: (Show a, Show b) => ForestCursor a b -> String
 drawForestCursor ForestCursor {..} =
     drawForest $
-    (map (fmap show) $ reverse $ nonEmptyCursorPrev forestCursorListCursor) ++
+    (map showCTree $ reverse $ nonEmptyCursorPrev forestCursorListCursor) ++
     [treeCursorWithPointer $ nonEmptyCursorCurrent forestCursorListCursor] ++
-    (map (fmap show) $ nonEmptyCursorNext forestCursorListCursor)
+    (map showCTree $ nonEmptyCursorNext forestCursorListCursor)
 
 mapForestCursor :: (a -> c) -> (b -> d) -> ForestCursor a b -> ForestCursor c d
 mapForestCursor f g =
     forestCursorListCursorL %~ mapNonEmptyCursor (mapTreeCursor f g) (fmap g)
 
 forestCursorListCursorL ::
-       Lens (ForestCursor a b) (ForestCursor c d) (NonEmptyCursor (TreeCursor a b) (Tree b)) (NonEmptyCursor (TreeCursor c d) (Tree d))
+       Lens (ForestCursor a b) (ForestCursor c d) (NonEmptyCursor (TreeCursor a b) (CTree b)) (NonEmptyCursor (TreeCursor c d) (CTree d))
 forestCursorListCursorL =
     lens forestCursorListCursor $ \fc lc -> fc {forestCursorListCursor = lc}
 
@@ -216,9 +226,21 @@ forestCursorSelectIndex f g i =
     forestCursorListCursorL
         (nonEmptyCursorSelectIndex (rebuildTreeCursor f) (makeTreeCursor g) i)
 
+forestCursorOpenCurrentForest :: ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorOpenCurrentForest =
+    forestCursorSelectedTreeL treeCursorOpenCurrentForest
+
+forestCursorCloseCurrentForest :: ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorCloseCurrentForest =
+    forestCursorSelectedTreeL treeCursorCloseCurrentForest
+
+forestCursorToggleCurrentForest :: ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorToggleCurrentForest =
+    forestCursorSelectedTreeL treeCursorToggleCurrentForest
+
 forestCursorInsertEntireTree :: Tree b -> ForestCursor a b -> ForestCursor a b
 forestCursorInsertEntireTree t =
-    forestCursorListCursorL %~ nonEmptyCursorInsert t
+    forestCursorListCursorL %~ nonEmptyCursorInsert (makeCTree t)
 
 forestCursorInsertAndSelectTreeCursor ::
        (a -> b) -> TreeCursor a b -> ForestCursor a b -> ForestCursor a b
@@ -228,7 +250,7 @@ forestCursorInsertAndSelectTreeCursor f tc =
 
 forestCursorAppendEntireTree :: Tree b -> ForestCursor a b -> ForestCursor a b
 forestCursorAppendEntireTree t =
-    forestCursorListCursorL %~ nonEmptyCursorAppend t
+    forestCursorListCursorL %~ nonEmptyCursorAppend (makeCTree t)
 
 forestCursorAppendAndSelectTreeCursor ::
        (a -> b) -> TreeCursor a b -> ForestCursor a b -> ForestCursor a b
@@ -244,7 +266,11 @@ forestCursorInsertTree t fc =
 forestCursorInsertAndSelectTree ::
        (a -> b) -> (b -> a) -> Tree b -> ForestCursor a b -> ForestCursor a b
 forestCursorInsertAndSelectTree f g t fc =
-    fromMaybe (forestCursorInsertAndSelectTreeCursor f (makeTreeCursor g t) fc) $
+    fromMaybe
+        (forestCursorInsertAndSelectTreeCursor
+             f
+             (makeTreeCursor g $ makeCTree t)
+             fc) $
     fc & forestCursorSelectedTreeL (treeCursorInsertAndSelect f g t)
 
 forestCursorAppendTree :: Tree b -> ForestCursor a b -> ForestCursor a b
@@ -255,7 +281,11 @@ forestCursorAppendTree t fc =
 forestCursorAppendAndSelectTree ::
        (a -> b) -> (b -> a) -> Tree b -> ForestCursor a b -> ForestCursor a b
 forestCursorAppendAndSelectTree f g t fc =
-    fromMaybe (forestCursorAppendAndSelectTreeCursor f (makeTreeCursor g t) fc) $
+    fromMaybe
+        (forestCursorAppendAndSelectTreeCursor
+             f
+             (makeTreeCursor g $ makeCTree t)
+             fc) $
     fc & forestCursorSelectedTreeL (treeCursorAppendAndSelect f g t)
 
 forestCursorInsert :: b -> ForestCursor a b -> ForestCursor a b
@@ -383,7 +413,7 @@ forestCursorDeleteSubTree g fc =
 forestCursorAddRoot ::
        (a -> b) -> (b -> a) -> ForestCursor a b -> a -> TreeCursor a b
 forestCursorAddRoot f g fc v =
-    makeTreeCursor g $ Node (f v) $ NE.toList $ rebuildForestCursor f fc
+    makeTreeCursor g $ CNode (f v) $ OpenForest $ rebuildForestCursor f fc
 
 -- | Swaps the current node with the previous node on the same level
 --
@@ -410,9 +440,9 @@ forestCursorSwapPrev fc@(ForestCursor ne) =
                     pure $
                     ForestCursor
                         ne
-                            { nonEmptyCursorPrev = ts
-                            , nonEmptyCursorNext = t : nonEmptyCursorNext ne
-                            }
+                        { nonEmptyCursorPrev = ts
+                        , nonEmptyCursorNext = t : nonEmptyCursorNext ne
+                        }
 
 -- | Swaps the current node with the next node on the same level
 --
@@ -439,9 +469,9 @@ forestCursorSwapNext fc@(ForestCursor ne) =
                     pure $
                     ForestCursor
                         ne
-                            { nonEmptyCursorPrev = t : nonEmptyCursorPrev ne
-                            , nonEmptyCursorNext = ts
-                            }
+                        { nonEmptyCursorPrev = t : nonEmptyCursorPrev ne
+                        , nonEmptyCursorNext = ts
+                        }
 
 -- | Promotes the current node to the level of its parent.
 --
@@ -479,13 +509,19 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
             let tc = fc ^. forestCursorSelectedTreeL
             ta <- treeAbove tc
             lefts <-
-                case treeBelow tc of
-                    [] -> pure $ treeAboveLefts ta
+                case (treeBelow tc) of
+                    EmptyCForest -> pure $ treeAboveLefts ta
                     _ ->
                         case treeAboveLefts ta of
                             [] -> Nothing
-                            (Node t ls:ts) ->
-                                pure $ Node t (ls ++ treeBelow tc) : ts
+                            (CNode t ls:ts) ->
+                                pure $
+                                CNode
+                                    t
+                                    (openForest $
+                                     unpackCForest ls ++
+                                     unpackCForest (treeBelow tc)) :
+                                ts
             let ta' = ta {treeAboveLefts = lefts}
             let tc' = tc {treeAbove = Just ta'}
             tc'' <-
@@ -495,12 +531,12 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
             pure $
                 ForestCursor $
                 ne
-                    { nonEmptyCursorPrev =
-                          rebuildTreeCursor f tc'' : nonEmptyCursorPrev ne
-                    , nonEmptyCursorCurrent =
-                          singletonTreeCursor $
-                          treeCurrent $ fc ^. forestCursorSelectedTreeL
-                    }
+                { nonEmptyCursorPrev =
+                      rebuildTreeCursor f tc'' : nonEmptyCursorPrev ne
+                , nonEmptyCursorCurrent =
+                      singletonTreeCursor $
+                      treeCurrent $ fc ^. forestCursorSelectedTreeL
+                }
 
 -- | Promotes the current node to the level of its parent.
 --
@@ -541,12 +577,12 @@ forestCursorPromoteSubTree f g fc@(ForestCursor ne) =
                     pure $
                     ForestCursor $
                     ne
-                        { nonEmptyCursorPrev =
-                              rebuildTreeCursor f tc' : nonEmptyCursorPrev ne
-                        , nonEmptyCursorCurrent =
-                              (fc ^. forestCursorSelectedTreeL)
-                                  {treeAbove = Nothing}
-                        }
+                    { nonEmptyCursorPrev =
+                          rebuildTreeCursor f tc' : nonEmptyCursorPrev ne
+                    , nonEmptyCursorCurrent =
+                          (fc ^. forestCursorSelectedTreeL)
+                          {treeAbove = Nothing}
+                    }
 
 -- | Demotes the current node to the level of its children.
 --
@@ -575,24 +611,28 @@ forestCursorDemoteElem f g fc@(ForestCursor ne) =
         CannotDemoteTopNode ->
             case nonEmptyCursorPrev ne of
                 [] -> Nothing
-                (Node v vts:ts) -> do
-                    let Node v' vts' =
+                (CNode v vts:ts) -> do
+                    let CNode v' vts' =
                             rebuildTreeCursor
                                 f
                                 (fc ^. forestCursorSelectedTreeL)
-                    let n' = Node v $ vts ++ (Node v' [] : vts')
+                    let n' =
+                            CNode v $
+                            openForest $
+                            unpackCForest vts ++
+                            (CNode v' emptyCForest) : unpackCForest vts'
                     tc <-
                         makeTreeCursorWithSelection
                             f
                             g
-                            (SelectChild (length vts) SelectNode)
+                            (SelectChild (lengthCForest vts) SelectNode)
                             n'
                     pure $
                         ForestCursor
                             ne
-                                { nonEmptyCursorPrev = ts
-                                , nonEmptyCursorCurrent = tc
-                                }
+                            { nonEmptyCursorPrev = ts
+                            , nonEmptyCursorCurrent = tc
+                            }
         NoSiblingsToDemoteUnder -> Nothing
 
 -- | Demotes the current subtree to the level of its children.
@@ -620,10 +660,11 @@ forestCursorDemoteSubTree f g fc@(ForestCursor ne) =
         CannotDemoteTopNode ->
             case nonEmptyCursorPrev ne of
                 [] -> Nothing
-                (Node v vts:ts) -> do
+                (CNode v vts:ts) -> do
                     let n' =
-                            Node v $
-                            vts ++
+                            CNode v $
+                            openForest $
+                            unpackCForest vts ++
                             [ rebuildTreeCursor
                                   f
                                   (fc ^. forestCursorSelectedTreeL)
@@ -632,14 +673,14 @@ forestCursorDemoteSubTree f g fc@(ForestCursor ne) =
                         makeTreeCursorWithSelection
                             f
                             g
-                            (SelectChild (length vts) SelectNode)
+                            (SelectChild (lengthCForest vts) SelectNode)
                             n'
                     pure $
                         ForestCursor
                             ne
-                                { nonEmptyCursorPrev = ts
-                                , nonEmptyCursorCurrent = tc
-                                }
+                            { nonEmptyCursorPrev = ts
+                            , nonEmptyCursorCurrent = tc
+                            }
         NoSiblingsToDemoteUnder -> Nothing
 
 -- | Demotes the current node to the level of its children, by adding two roots.
@@ -664,24 +705,24 @@ forestCursorDemoteElemUnder b1 b2 fc@(ForestCursor ne) =
         Just fc' -> fc'
         Nothing ->
             let t = fc ^. forestCursorSelectedTreeL
-             in ForestCursor $
-                ne
-                    { nonEmptyCursorCurrent =
-                          TreeCursor
-                              { treeAbove =
-                                    Just
-                                        TreeAbove
-                                            { treeAboveLefts = []
-                                            , treeAboveAbove = Nothing
-                                            , treeAboveNode = b1
-                                            , treeAboveRights = []
-                                            }
-                              , treeCurrent = treeCurrent t
-                              , treeBelow = []
-                              }
-                    , nonEmptyCursorNext =
-                          Node b2 (treeBelow t) : nonEmptyCursorNext ne
-                    }
+            in ForestCursor $
+               ne
+               { nonEmptyCursorCurrent =
+                     TreeCursor
+                     { treeAbove =
+                           Just
+                               TreeAbove
+                               { treeAboveLefts = []
+                               , treeAboveAbove = Nothing
+                               , treeAboveNode = b1
+                               , treeAboveRights = []
+                               }
+                     , treeCurrent = treeCurrent t
+                     , treeBelow = emptyCForest
+                     }
+               , nonEmptyCursorNext =
+                     CNode b2 (treeBelow t) : nonEmptyCursorNext ne
+               }
 
 -- | Demotes the current subtree to the level of its children, by adding a root.
 --

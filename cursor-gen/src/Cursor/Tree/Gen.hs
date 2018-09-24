@@ -6,24 +6,56 @@ module Cursor.Tree.Gen
     (
     ) where
 
-import Test.QuickCheck
+import Data.Maybe
 
 import Data.GenValidity
 import Data.GenValidity.Containers ()
+
+import Test.QuickCheck
 
 import Cursor.Tree
 
 instance GenUnchecked TreeCursorSelection
 
-instance GenValid TreeCursorSelection
+instance GenValid TreeCursorSelection where
+    genValid = genValidStructurally
+    shrinkValid = shrinkValidStructurally
+
 instance GenUnchecked a => GenUnchecked (SwapResult a)
-instance GenValid a => GenValid (SwapResult a)
+
+instance GenValid a => GenValid (SwapResult a) where
+    genValid = genValidStructurally
+    shrinkValid = shrinkValidStructurally
+
 instance GenUnchecked a => GenUnchecked (PromoteElemResult a)
-instance GenValid a => GenValid (PromoteElemResult a)
+
+instance GenValid a => GenValid (PromoteElemResult a) where
+    genValid = genValidStructurally
+    shrinkValid = shrinkValidStructurally
+
 instance GenUnchecked a => GenUnchecked (PromoteResult a)
-instance GenValid a => GenValid (PromoteResult a)
+
+instance GenValid a => GenValid (PromoteResult a) where
+    genValid = genValidStructurally
+    shrinkValid = shrinkValidStructurally
+
 instance GenUnchecked a => GenUnchecked (DemoteResult a)
-instance GenValid a => GenValid (DemoteResult a)
+
+instance GenValid a => GenValid (DemoteResult a) where
+    genValid = genValidStructurally
+    shrinkValid = shrinkValidStructurally
+
+instance GenUnchecked a => GenUnchecked (CTree a)
+
+instance GenValid a => GenValid (CTree a) where
+    genValid = genValidStructurally
+    shrinkValid = shrinkValidStructurally
+
+instance GenUnchecked a => GenUnchecked (CForest a)
+
+instance GenValid a => GenValid (CForest a) where
+    genValid = genValidStructurally
+    shrinkValid = shrinkValidStructurally
 
 instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (TreeCursor a b) where
     genUnchecked =
@@ -33,6 +65,13 @@ instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (TreeCursor a b) where
             treeCurrent <- resize c genUnchecked
             treeBelow <- resize d genUnchecked
             pure TreeCursor {..}
+    shrinkUnchecked tc =
+        let opts =
+                catMaybes
+                    [ do ta <- treeAbove tc
+                         pure $ tc {treeAbove = treeAboveAbove ta}
+                    ]
+        in opts ++ genericShrinkUnchecked tc
 
 instance (GenValid a, GenValid b) => GenValid (TreeCursor a b) where
     genValid =
