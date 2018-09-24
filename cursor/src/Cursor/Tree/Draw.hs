@@ -37,7 +37,9 @@ treeCursorWithPointer TreeCursor {..} =
             ]
 
 showCForest :: Show a => CForest a -> Forest String
-showCForest (ClosedForest ts) = map (fmap ("hidden: " ++)) $ map showTree ts
+showCForest EmptyCForest = []
+showCForest (ClosedForest ts) =
+    map (fmap ("hidden: " ++)) $ map showTree $ NE.toList ts
 showCForest (OpenForest ts) = map showCTree $ NE.toList ts
 
 showCTree :: Show a => CTree a -> Tree String

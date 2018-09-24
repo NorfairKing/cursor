@@ -16,8 +16,8 @@ import Test.Validity
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
 import Cursor.Tree
-       (CForest(..), CTree(..), TreeAbove(..), TreeCursor(..),
-        emptyCForest, openForest)
+       ( CTree(..), TreeAbove(..), TreeCursor(..),
+        closedForest, emptyCForest, openForest)
 
 import Cursor.Simple.Tree.TestUtils
 
@@ -48,7 +48,7 @@ spec = do
                               , treeAboveRights = [node 'f' [node 'g' []]]
                               }
                     , treeCurrent = 'd'
-                    , treeBelow = ClosedForest [Node 'e' []]
+                    , treeBelow = closedForest [Node 'e' []]
                     }
                 promoteEnd =
                     TreeCursor
@@ -64,7 +64,7 @@ spec = do
                                                 , CNode 'e' emptyCForest
                                                 ]
                                           , CNode 'f' $
-                                            ClosedForest [Node 'g' []]
+                                            closedForest [Node 'g' []]
                                           ]
                                     ]
                               , treeAboveAbove = Nothing
@@ -93,7 +93,7 @@ spec = do
                           Just
                               TreeAbove
                               { treeAboveLefts =
-                                    [CNode 'b' $ ClosedForest [Node 'c' []]]
+                                    [CNode 'b' $ closedForest [Node 'c' []]]
                               , treeAboveAbove =
                                     Just
                                         TreeAbove
@@ -104,10 +104,10 @@ spec = do
                                         }
                               , treeAboveNode = 'a'
                               , treeAboveRights =
-                                    [CNode 'f' $ ClosedForest [Node 'g' []]]
+                                    [CNode 'f' $ closedForest [Node 'g' []]]
                               }
                     , treeCurrent = 'd'
-                    , treeBelow = ClosedForest [Node 'e' []]
+                    , treeBelow = closedForest [Node 'e' []]
                     }
                 promoteEnd =
                     TreeCursor
@@ -118,17 +118,17 @@ spec = do
                                     [ CNode 'a' $
                                       openForest
                                           [ CNode 'b' $
-                                            ClosedForest [Node 'c' []]
+                                            closedForest [Node 'c' []]
                                           , CNode 'f' $
-                                            ClosedForest [Node 'g' []]
+                                            closedForest [Node 'g' []]
                                           ]
                                     ]
                               , treeAboveAbove = Nothing
                               , treeAboveNode = 'p'
-                              , treeAboveRights = [CNode 'h' $ ClosedForest []]
+                              , treeAboveRights = [CNode 'h' $ closedForest []]
                               }
                     , treeCurrent = 'd'
-                    , treeBelow = ClosedForest [Node 'e' []]
+                    , treeBelow = closedForest [Node 'e' []]
                     }
             in case treeCursorPromoteSubTree promoteStart of
                    Promoted tc' -> tc' `treeShouldBe` promoteEnd

@@ -17,8 +17,7 @@ import Cursor.Tree.Types
 
 singletonTreeCursor :: a -> TreeCursor a b
 singletonTreeCursor v =
-    TreeCursor
-    {treeAbove = Nothing, treeCurrent = v, treeBelow = ClosedForest []}
+    TreeCursor {treeAbove = Nothing, treeCurrent = v, treeBelow = emptyCForest}
 
 makeTreeCursor :: (b -> a) -> CTree b -> TreeCursor a b
 makeTreeCursor g (CNode v fs) =

@@ -16,7 +16,7 @@ import Test.Validity
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
 import Cursor.Tree
-       (CForest(..), TreeAbove(..), TreeCursor(..), emptyCForest)
+       (TreeAbove(..), TreeCursor(..), closedForest, emptyCForest)
 
 import Cursor.Simple.Tree.TestUtils
 
@@ -38,7 +38,7 @@ spec = do
                               , treeAboveRights = [node 'e' []]
                               }
                     , treeCurrent = 'c'
-                    , treeBelow = ClosedForest [Node 'd' []]
+                    , treeBelow = closedForest [Node 'd' []]
                     }
                 promoteEnd =
                     TreeCursor
@@ -81,7 +81,7 @@ spec = do
                               , treeAboveRights = [node 'e' []]
                               }
                     , treeCurrent = 'c'
-                    , treeBelow = ClosedForest [Node 'd' []]
+                    , treeBelow = closedForest [Node 'd' []]
                     }
                 promoteEnd =
                     TreeCursor
@@ -101,7 +101,7 @@ spec = do
                               , treeAboveRights = []
                               }
                     , treeCurrent = 'c'
-                    , treeBelow = ClosedForest [Node 'd' []]
+                    , treeBelow = closedForest [Node 'd' []]
                     }
             in case treeCursorDemoteSubTree promoteStart of
                    Demoted tc' -> tc' `treeShouldBe` promoteEnd
@@ -126,7 +126,7 @@ spec = do
                                       , treeAboveRights = []
                                       }
                             , treeCurrent = 'a'
-                            , treeBelow = ClosedForest [Node 'b' []]
+                            , treeBelow = closedForest [Node 'b' []]
                             }
                         demoteEnd =
                             TreeCursor
@@ -165,7 +165,7 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 'a'
-                        , treeBelow = ClosedForest [Node 'b' []]
+                        , treeBelow = closedForest [Node 'b' []]
                         }
                     demoteEnd =
                         TreeCursor
@@ -178,7 +178,7 @@ spec = do
                                   , treeAboveRights = []
                                   }
                         , treeCurrent = 'a'
-                        , treeBelow = ClosedForest [Node 'b' []]
+                        , treeBelow = closedForest [Node 'b' []]
                         }
                 treeCursorDemoteSubTreeUnder v demoteStart `treeShouldBe`
                     demoteEnd

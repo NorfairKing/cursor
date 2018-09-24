@@ -57,7 +57,7 @@ treeCursorPromoteElem f g tc = do
     -- We need to put the below under the above lefts at the end
     lefts <-
         case (treeBelow tc) of
-            ClosedForest [] -> pure $ treeAboveLefts ta
+            EmptyCForest -> pure $ treeAboveLefts ta
             _ ->
                 case treeAboveLefts ta of
                     [] -> NoSiblingsToAdoptChildren
@@ -73,7 +73,7 @@ treeCursorPromoteElem f g tc = do
             Nothing -> NoGrandparentToPromoteElemUnder
             Just taa -> pure taa
     pure $
-        makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) $ ClosedForest []) $
+        makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) emptyCForest) $
         Just $
         taa
         { treeAboveLefts =

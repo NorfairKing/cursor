@@ -495,7 +495,7 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
             ta <- treeAbove tc
             lefts <-
                 case (treeBelow tc) of
-                    ClosedForest [] -> pure $ treeAboveLefts ta
+                    EmptyCForest -> pure $ treeAboveLefts ta
                     _ ->
                         case treeAboveLefts ta of
                             [] -> Nothing
@@ -605,7 +605,7 @@ forestCursorDemoteElem f g fc@(ForestCursor ne) =
                             CNode v $
                             openForest $
                             unpackCForest vts ++
-                            (CNode v' $ ClosedForest []) : unpackCForest vts'
+                            (CNode v' emptyCForest) : unpackCForest vts'
                     tc <-
                         makeTreeCursorWithSelection
                             f

@@ -16,7 +16,7 @@ import Test.Validity
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
 import Cursor.Tree
-       (CForest(..), CTree(..), TreeCursor(..), openForest)
+       (CTree(..), TreeCursor(..), closedForest, openForest)
 import Cursor.Types
 
 import Cursor.Simple.Tree.TestUtils
@@ -56,7 +56,7 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 1 :: Int
-                        , treeBelow = ClosedForest [Node 2 fs]
+                        , treeBelow = closedForest [Node 2 fs]
                         }
                 in case treeCursorDeleteElemAndSelectPrevious
                             simpleDeleteElemStart of
@@ -106,7 +106,7 @@ spec = do
                         TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 1 :: Int
-                        , treeBelow = ClosedForest [Node 2 fs]
+                        , treeBelow = closedForest [Node 2 fs]
                         }
                 in case treeCursorDeleteElemAndSelectAbove simpleDeleteElemStart of
                        Nothing -> pure ()

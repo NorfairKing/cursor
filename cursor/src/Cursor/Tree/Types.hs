@@ -25,6 +25,7 @@ module Cursor.Tree.Types
     , rebuildCForest
     , emptyCForest
     , openForest
+    , closedForest
     , lengthCForest
     , unpackCForest
     ) where
@@ -102,7 +103,8 @@ rebuildCTree :: CTree a -> Tree a
 rebuildCTree (CNode v cf) = Node v $ rebuildCForest cf
 
 data CForest a
-    = ClosedForest ![Tree a]
+    = EmptyCForest
+    | ClosedForest !(NonEmpty (Tree a))
     | OpenForest !(NonEmpty (CTree a))
     deriving (Show, Eq, Generic, Functor)
 
@@ -115,14 +117,15 @@ cForest :: Bool -> Forest a -> CForest a
 cForest b f =
     if b
         then openForest $ map (cTree b) f
-        else ClosedForest f
+        else closedForest f
 
 rebuildCForest :: CForest a -> Forest a
-rebuildCForest (ClosedForest f) = f
+rebuildCForest EmptyCForest = []
+rebuildCForest (ClosedForest f) = NE.toList f
 rebuildCForest (OpenForest ct) = NE.toList $ NE.map rebuildCTree ct
 
 emptyCForest :: CForest a
-emptyCForest = ClosedForest []
+emptyCForest = EmptyCForest
 
 openForest :: [CTree a] -> CForest a
 openForest ts =
@@ -130,10 +133,18 @@ openForest ts =
         Nothing -> emptyCForest
         Just ne -> OpenForest ne
 
+closedForest :: [Tree a] -> CForest a
+closedForest ts =
+    case NE.nonEmpty ts of
+        Nothing -> emptyCForest
+        Just ne -> ClosedForest ne
+
 lengthCForest :: CForest a -> Int
+lengthCForest EmptyCForest = 0
 lengthCForest (ClosedForest ts) = length ts
 lengthCForest (OpenForest ts) = length ts
 
 unpackCForest :: CForest a -> [CTree a]
-unpackCForest (ClosedForest ts) = map makeCTree ts
+unpackCForest EmptyCForest = []
+unpackCForest (ClosedForest ts) = NE.toList $ NE.map makeCTree ts
 unpackCForest (OpenForest ts) = NE.toList ts

@@ -444,7 +444,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1 :: Int
-                                    , treeBelow = ClosedForest [Node 2 fs]
+                                    , treeBelow = closedForest [Node 2 fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -475,7 +475,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1
-                                    , treeBelow = ClosedForest [Node 2 fs]
+                                    , treeBelow = closedForest [Node 2 fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -489,7 +489,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 2 :: Int
-                                    , treeBelow = ClosedForest fs
+                                    , treeBelow = closedForest fs
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -518,7 +518,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1
-                                    , treeBelow = ClosedForest [Node 2 fs]
+                                    , treeBelow = closedForest [Node 2 fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -532,7 +532,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 2 :: Int
-                                    , treeBelow = ClosedForest fs
+                                    , treeBelow = closedForest fs
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -557,7 +557,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 1
-                                    , treeBelow = ClosedForest [Node 2 fs]
+                                    , treeBelow = closedForest [Node 2 fs]
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -571,7 +571,7 @@ deleteSpec = do
                                     TreeCursor
                                     { treeAbove = Nothing
                                     , treeCurrent = 2 :: Int
-                                    , treeBelow = ClosedForest fs
+                                    , treeBelow = closedForest fs
                                     }
                               , nonEmptyCursorNext = []
                               }
@@ -619,17 +619,17 @@ shiftingSpec = do
                                           TreeAbove
                                           { treeAboveLefts =
                                                 [ CNode 'b' $
-                                                  ClosedForest [Node 'c' []]
+                                                  closedForest [Node 'c' []]
                                                 ]
                                           , treeAboveAbove = Nothing
                                           , treeAboveNode = 'a'
                                           , treeAboveRights =
                                                 [ CNode 'f' $
-                                                  ClosedForest [Node 'g' []]
+                                                  closedForest [Node 'g' []]
                                                 ]
                                           }
                                 , treeCurrent = 'd'
-                                , treeBelow = ClosedForest [Node 'e' []]
+                                , treeBelow = closedForest [Node 'e' []]
                                 }
                           , nonEmptyCursorNext = [CNode 'h' $ emptyCForest]
                           }
@@ -646,7 +646,7 @@ shiftingSpec = do
                                             [ CNode 'c' emptyCForest
                                             , CNode 'e' emptyCForest
                                             ]
-                                      , CNode 'f' $ ClosedForest [Node 'g' []]
+                                      , CNode 'f' $ closedForest [Node 'g' []]
                                       ]
                                 ]
                           , nonEmptyCursorCurrent =
@@ -673,12 +673,12 @@ shiftingSpec = do
                     { forestCursorListCursor =
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
-                                [CNode 'a' $ ClosedForest [Node 'b' []]]
+                                [CNode 'a' $ closedForest [Node 'b' []]]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'c'
-                                , treeBelow = ClosedForest [Node 'd' []]
+                                , treeBelow = closedForest [Node 'd' []]
                                 }
                           , nonEmptyCursorNext = [CNode 'e' emptyCForest]
                           }
@@ -728,17 +728,17 @@ shiftingSpec = do
                                           TreeAbove
                                           { treeAboveLefts =
                                                 [ CNode 'b' $
-                                                  ClosedForest [Node 'c' []]
+                                                  closedForest [Node 'c' []]
                                                 ]
                                           , treeAboveAbove = Nothing
                                           , treeAboveNode = 'a'
                                           , treeAboveRights =
                                                 [ CNode 'f' $
-                                                  ClosedForest [Node 'g' []]
+                                                  closedForest [Node 'g' []]
                                                 ]
                                           }
                                 , treeCurrent = 'd'
-                                , treeBelow = ClosedForest [Node 'e' []]
+                                , treeBelow = closedForest [Node 'e' []]
                                 }
                           , nonEmptyCursorNext = [CNode 'h' emptyCForest]
                           }
@@ -750,15 +750,15 @@ shiftingSpec = do
                           { nonEmptyCursorPrev =
                                 [ CNode 'a' $
                                   openForest
-                                      [ CNode 'b' $ ClosedForest [Node 'c' []]
-                                      , CNode 'f' $ ClosedForest [Node 'g' []]
+                                      [ CNode 'b' $ closedForest [Node 'c' []]
+                                      , CNode 'f' $ closedForest [Node 'g' []]
                                       ]
                                 ]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'd'
-                                , treeBelow = ClosedForest [Node 'e' []]
+                                , treeBelow = closedForest [Node 'e' []]
                                 }
                           , nonEmptyCursorNext = [CNode 'h' emptyCForest]
                           }
@@ -778,12 +778,12 @@ shiftingSpec = do
                     { forestCursorListCursor =
                           NonEmptyCursor
                           { nonEmptyCursorPrev =
-                                [CNode 'a' $ ClosedForest [Node 'b' []]]
+                                [CNode 'a' $ closedForest [Node 'b' []]]
                           , nonEmptyCursorCurrent =
                                 TreeCursor
                                 { treeAbove = Nothing
                                 , treeCurrent = 'c'
-                                , treeBelow = ClosedForest [Node 'd' []]
+                                , treeBelow = closedForest [Node 'd' []]
                                 }
                           , nonEmptyCursorNext = []
                           }
@@ -805,7 +805,7 @@ shiftingSpec = do
                                           , treeAboveRights = []
                                           }
                                 , treeCurrent = 'c'
-                                , treeBelow = ClosedForest [Node 'd' []]
+                                , treeBelow = closedForest [Node 'd' []]
                                 }
                           , nonEmptyCursorNext = []
                           }
@@ -831,7 +831,7 @@ shiftingSpec = do
                                   TreeCursor
                                   { treeAbove = Nothing
                                   , treeCurrent = 'a'
-                                  , treeBelow = ClosedForest [Node 'b' []]
+                                  , treeBelow = closedForest [Node 'b' []]
                                   }
                             , nonEmptyCursorNext = []
                             }
@@ -853,7 +853,7 @@ shiftingSpec = do
                                   , treeBelow = emptyCForest
                                   }
                             , nonEmptyCursorNext =
-                                  [CNode b2 $ ClosedForest [Node 'b' []]]
+                                  [CNode b2 $ closedForest [Node 'b' []]]
                             }
                     in forestCursorDemoteElemUnder b1 b2 demoteStart `forestShouldBe`
                        demoteEnd
@@ -872,7 +872,7 @@ shiftingSpec = do
                               TreeCursor
                               { treeAbove = Nothing
                               , treeCurrent = 'a'
-                              , treeBelow = ClosedForest [Node 'b' []]
+                              , treeBelow = closedForest [Node 'b' []]
                               }
                         , nonEmptyCursorNext = []
                         }
@@ -891,7 +891,7 @@ shiftingSpec = do
                                         , treeAboveRights = []
                                         }
                               , treeCurrent = 'a'
-                              , treeBelow = ClosedForest [Node 'b' []]
+                              , treeBelow = closedForest [Node 'b' []]
                               }
                         , nonEmptyCursorNext = []
                         }

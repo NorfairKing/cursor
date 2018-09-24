@@ -87,6 +87,7 @@ treeCursorSelectBelowAtPos ::
        (a -> b) -> (b -> a) -> Int -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorSelectBelowAtPos f g pos TreeCursor {..} =
     case treeBelow of
+        EmptyCForest -> Nothing
         ClosedForest _ -> Nothing
         OpenForest ts ->
             case splitAt pos $ NE.toList ts of
@@ -110,6 +111,7 @@ treeCursorSelectBelowAtEnd ::
        (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorSelectBelowAtEnd f g tc =
     case treeBelow tc of
+        EmptyCForest -> Nothing
         ClosedForest _ -> Nothing
         OpenForest ts -> treeCursorSelectBelowAtPos f g (length ts - 1) tc
 
@@ -171,6 +173,7 @@ treeCursorSelectAboveNext f g tc =
         Just _ -> Nothing
         Nothing ->
             case treeBelow tc of
+                EmptyCForest -> go tc
                 ClosedForest _ -> go tc
                 OpenForest ts ->
                     if null ts

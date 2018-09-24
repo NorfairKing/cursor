@@ -51,7 +51,7 @@ treeCursorDemoteElem f g tc =
                     Demoted $
                     makeTreeCursorWithAbove
                         g
-                        (CNode (f $ treeCurrent tc) $ ClosedForest []) $
+                        (CNode (f $ treeCurrent tc) emptyCForest) $
                     Just
                         TreeAbove
                         { treeAboveLefts = reverse $ unpackCForest ls
@@ -141,7 +141,7 @@ treeCursorDemoteElemUnder b1 b2 tc = do
                   , treeAboveNode = b1
                   , treeAboveRights = []
                   }
-        , treeBelow = ClosedForest []
+        , treeBelow = emptyCForest
         }
 
 -- | Demotes the current subtree to the level of its children, by adding a root.

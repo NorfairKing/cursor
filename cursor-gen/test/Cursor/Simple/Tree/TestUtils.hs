@@ -18,7 +18,7 @@ import Test.Validity
 import Cursor.Simple.Tree hiding (TreeCursor)
 import qualified Cursor.Simple.Tree as STC (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
-import Cursor.Tree (CForest(..), CTree(..))
+import Cursor.Tree (CTree(..), closedForest)
 
 testMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Spec
 testMovement func = do
@@ -75,4 +75,4 @@ instance CanFail SwapResult where
     resultIfSucceeded _ = Nothing
 
 node :: a -> [CTree a] -> CTree a
-node a ts = CNode a $ ClosedForest $ map rebuildCTree ts
+node a ts = CNode a $ closedForest $ map rebuildCTree ts
