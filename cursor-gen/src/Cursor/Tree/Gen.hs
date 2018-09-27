@@ -45,17 +45,48 @@ instance GenValid a => GenValid (DemoteResult a) where
     genValid = genValidStructurally
     shrinkValid = shrinkValidStructurally
 
-instance GenUnchecked a => GenUnchecked (CTree a)
+instance GenUnchecked a => GenUnchecked (CTree a) where
+    genUnchecked =
+        sized $ \n -> do
+            (a, b) <- genSplit n
+            val <- resize a genUnchecked
+            for <- resize b genUnchecked
+            pure $ CNode val for
 
 instance GenValid a => GenValid (CTree a) where
-    genValid = genValidStructurally
+    genValid =
+        sized $ \n -> do
+            (a, b) <- genSplit n
+            val <- resize a genValid
+            for <- resize b genValid
+            pure $ CNode val for
     shrinkValid = shrinkValidStructurally
 
-instance GenUnchecked a => GenUnchecked (CForest a)
+instance GenUnchecked a => GenUnchecked (CForest a) where
+    genUnchecked =
+        sized $ \n ->
+            case n of
+                0 -> pure EmptyCForest
+                _ ->
+                    oneof
+                        [ ClosedForest <$> resize n genUnchecked
+                        , OpenForest <$> resize n genUnchecked
+                        ]
+    shrinkUnchecked EmptyCForest = []
+    shrinkUnchecked cf = EmptyCForest : genericShrinkUnchecked cf
 
 instance GenValid a => GenValid (CForest a) where
-    genValid = genValidStructurally
-    shrinkValid = shrinkValidStructurally
+    genValid =
+        sized $ \n ->
+            case n of
+                0 -> pure EmptyCForest
+                _ ->
+                    oneof
+                        [ ClosedForest <$> resize n genValid
+                        , OpenForest <$> resize n genValid
+                        ]
+    shrinkValid EmptyCForest = []
+    shrinkValid cf = EmptyCForest : shrinkValidStructurally cf
 
 instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (TreeCursor a b) where
     genUnchecked =
