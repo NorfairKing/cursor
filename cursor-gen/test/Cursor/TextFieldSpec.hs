@@ -24,6 +24,7 @@ import Control.Monad
 
 import Cursor.TextField
 import Cursor.TextField.Gen ()
+import Cursor.Types
 
 spec :: Spec
 spec = do
@@ -40,20 +41,22 @@ spec = do
                 let (x, y) = textFieldCursorSelection tfc
                     t = rebuildTextFieldCursor tfc
                 case makeTextFieldCursorWithSelection x y t of
-                    Nothing -> expectationFailure "makeTextFieldCursorWithSelection should not have failed."
+                    Nothing ->
+                        expectationFailure
+                            "makeTextFieldCursorWithSelection should not have failed."
                     Just tfc' ->
                         unless (tfc' == tfc) $
-                            expectationFailure $
-                            unlines
-                                [ "expected"
-                                , ppShow tfc
-                                , "actual"
-                                , ppShow tfc'
-                                , "The selection of the original (expected) cursor was:"
-                                , show (x, y)
-                                , "The rebuild text was:"
-                                , show t
-                                ]
+                        expectationFailure $
+                        unlines
+                            [ "expected"
+                            , ppShow tfc
+                            , "actual"
+                            , ppShow tfc'
+                            , "The selection of the original (expected) cursor was:"
+                            , show (x, y)
+                            , "The rebuild text was:"
+                            , show t
+                            ]
     describe "rebuildTextFieldCursorLines" $ do
         it "produces valid lists" $
             producesValidsOnValids rebuildTextFieldCursorLines
@@ -82,6 +85,8 @@ spec = do
         producesValidsOnValids textFieldCursorSelection
     describe "emptyTextFieldCursor" $
         it "is valid" $ shouldBeValid emptyTextFieldCursor
+    describe "nullTextFieldCursor" $
+        it "produces valid" $ producesValidsOnValids nullTextFieldCursor
     describe "textFieldCursorSelectPrevLine" $ do
         it "produces valid cursors" $
             producesValidsOnValids textFieldCursorSelectPrevLine
@@ -140,10 +145,14 @@ spec = do
     describe "textFieldCursorRemove" $ do
         it "produces valid cursors" $
             producesValidsOnValids textFieldCursorRemove
+        it "removes empty text field cursor" $
+            textFieldCursorRemove emptyTextFieldCursor `shouldBe` Just Deleted
         it "removes a character or a line" pending
     describe "textFieldCursorDelete" $ do
         it "produces valid cursors" $
             producesValidsOnValids textFieldCursorDelete
+        it "removes empty text field cursor" $
+            textFieldCursorDelete emptyTextFieldCursor `shouldBe` Just Deleted
         it "deletes a character or a line" pending
     describe "textFieldCursorSelectStartOfLine" $ do
         it "produces valid cursors" $

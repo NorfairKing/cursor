@@ -5,11 +5,12 @@
 
 module Cursor.TextField
     ( TextFieldCursor(..)
-    , emptyTextFieldCursor
     , makeTextFieldCursor
     , makeTextFieldCursorWithSelection
     , rebuildTextFieldCursorLines
     , rebuildTextFieldCursor
+    , emptyTextFieldCursor
+    , nullTextFieldCursor
     , textFieldCursorSelection
     , textFieldCursorNonEmptyCursorL
     , textFieldCursorSelectedL
@@ -48,6 +49,7 @@ import Lens.Micro
 
 import Cursor.List.NonEmpty
 import Cursor.Text
+import Cursor.Types
 
 newtype TextFieldCursor = TextFieldCursor
     { textFieldCursorNonEmpty :: NonEmptyCursor TextCursor Text
@@ -102,15 +104,18 @@ rebuildTextFieldCursor :: TextFieldCursor -> Text
 rebuildTextFieldCursor =
     T.intercalate "\n" . NE.toList . rebuildTextFieldCursorLines
 
-textFieldCursorSelection :: TextFieldCursor -> (Int, Int)
-textFieldCursorSelection tfc =
-    ( nonEmptyCursorSelection $ textFieldCursorNonEmpty tfc
-    , textCursorIndex $ textFieldCursorNonEmpty tfc ^. nonEmptyCursorElemL)
-
 emptyTextFieldCursor :: TextFieldCursor
 emptyTextFieldCursor =
     TextFieldCursor
         {textFieldCursorNonEmpty = singletonNonEmptyCursor emptyTextCursor}
+
+nullTextFieldCursor :: TextFieldCursor -> Bool
+nullTextFieldCursor = (== emptyTextFieldCursor)
+
+textFieldCursorSelection :: TextFieldCursor -> (Int, Int)
+textFieldCursorSelection tfc =
+    ( nonEmptyCursorSelection $ textFieldCursorNonEmpty tfc
+    , textCursorIndex $ textFieldCursorNonEmpty tfc ^. nonEmptyCursorElemL)
 
 textFieldCursorNonEmptyCursorL ::
        Lens' TextFieldCursor (NonEmptyCursor TextCursor Text)
@@ -209,43 +214,57 @@ textFieldCursorAppendNewline =
                        rebuildTextCursor tc2 : nonEmptyCursorNext
                  })
 
-textFieldCursorRemove :: TextFieldCursor -> Maybe TextFieldCursor
-textFieldCursorRemove =
-    textFieldCursorNonEmptyCursorL
-        (\lec@NonEmptyCursor {..} ->
-             case textCursorRemove nonEmptyCursorCurrent of
-                 Nothing ->
-                     case nonEmptyCursorPrev of
-                         [] -> Nothing
-                         (pl:pls) ->
-                             Just $
-                             lec
-                                 { nonEmptyCursorPrev = pls
-                                 , nonEmptyCursorCurrent =
-                                       textCursorCombine
-                                           (unsafeMakeTextCursor pl)
-                                           nonEmptyCursorCurrent
-                                 }
-                 Just ctc -> Just $ lec & nonEmptyCursorElemL .~ ctc)
+textFieldCursorRemove ::
+       TextFieldCursor -> Maybe (DeleteOrUpdate TextFieldCursor)
+textFieldCursorRemove tfc =
+    if nullTextFieldCursor tfc
+        then Just Deleted
+        else focusPossibleDeleteOrUpdate
+                 textFieldCursorNonEmptyCursorL
+                 (\lec@NonEmptyCursor {..} ->
+                      case textCursorRemove nonEmptyCursorCurrent of
+                          Nothing ->
+                              case nonEmptyCursorPrev of
+                                  [] -> Nothing
+                                  (pl:pls) ->
+                                      Just $
+                                      Updated $
+                                      lec
+                                          { nonEmptyCursorPrev = pls
+                                          , nonEmptyCursorCurrent =
+                                                textCursorCombine
+                                                    (unsafeMakeTextCursor pl)
+                                                    nonEmptyCursorCurrent
+                                          }
+                          Just ctc ->
+                              Just $ Updated $ lec & nonEmptyCursorElemL .~ ctc)
+                 tfc
 
-textFieldCursorDelete :: TextFieldCursor -> Maybe TextFieldCursor
-textFieldCursorDelete =
-    textFieldCursorNonEmptyCursorL
-        (\lec@NonEmptyCursor {..} ->
-             case textCursorDelete nonEmptyCursorCurrent of
-                 Nothing ->
-                     case nonEmptyCursorNext of
-                         [] -> Nothing
-                         (pl:pls) ->
-                             Just $
-                             lec
-                                 { nonEmptyCursorCurrent =
-                                       textCursorCombine
-                                           nonEmptyCursorCurrent
-                                           (unsafeMakeTextCursor pl)
-                                 , nonEmptyCursorNext = pls
-                                 }
-                 Just ctc -> Just $ lec & nonEmptyCursorElemL .~ ctc)
+textFieldCursorDelete ::
+       TextFieldCursor -> Maybe (DeleteOrUpdate TextFieldCursor)
+textFieldCursorDelete tfc =
+    if nullTextFieldCursor tfc
+        then Just Deleted
+        else focusPossibleDeleteOrUpdate
+                 textFieldCursorNonEmptyCursorL
+                 (\lec@NonEmptyCursor {..} ->
+                      case textCursorDelete nonEmptyCursorCurrent of
+                          Nothing ->
+                              case nonEmptyCursorNext of
+                                  [] -> Nothing
+                                  (pl:pls) ->
+                                      Just $
+                                      Updated $
+                                      lec
+                                          { nonEmptyCursorCurrent =
+                                                textCursorCombine
+                                                    nonEmptyCursorCurrent
+                                                    (unsafeMakeTextCursor pl)
+                                          , nonEmptyCursorNext = pls
+                                          }
+                          Just ctc ->
+                              Just $ Updated $ lec & nonEmptyCursorElemL .~ ctc)
+                 tfc
 
 textFieldCursorSelectStartOfLine :: TextFieldCursor -> TextFieldCursor
 textFieldCursorSelectStartOfLine =
