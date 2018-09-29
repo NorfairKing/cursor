@@ -5,30 +5,35 @@
 
 module Cursor.Simple.List.NonEmpty
     ( NonEmptyCursor
+    , NEC.nonEmptyCursorPrev
+    , NEC.nonEmptyCursorCurrent
+    , NEC.nonEmptyCursorNext
     , makeNonEmptyCursor
     , makeNonEmptyCursorWithSelection
-    , singletonNonEmptyCursor
+    , NEC.singletonNonEmptyCursor
     , rebuildNonEmptyCursor
     , mapNonEmptyCursor
-    , nonEmptyCursorElemL
+    , NEC.nonEmptyCursorElemL
     , nonEmptyCursorSelectPrev
     , nonEmptyCursorSelectNext
     , nonEmptyCursorSelectFirst
     , nonEmptyCursorSelectLast
-    , nonEmptyCursorSelection
+    , NEC.nonEmptyCursorSelection
     , nonEmptyCursorSelectIndex
-    , nonEmptyCursorInsert
-    , nonEmptyCursorAppend
+    , NEC.nonEmptyCursorInsert
+    , NEC.nonEmptyCursorAppend
     , nonEmptyCursorInsertAndSelect
     , nonEmptyCursorAppendAndSelect
-    , nonEmptyCursorInsertAtStart
-    , nonEmptyCursorAppendAtEnd
+    , NEC.nonEmptyCursorInsertAtStart
+    , NEC.nonEmptyCursorAppendAtEnd
     , nonEmptyCursorInsertAtStartAndSelect
     , nonEmptyCursorAppendAtEndAndSelect
     , nonEmptyCursorRemoveElemAndSelectPrev
     , nonEmptyCursorDeleteElemAndSelectNext
     , nonEmptyCursorRemoveElem
     , nonEmptyCursorDeleteElem
+    , nonEmptyCursorSearch
+    , nonEmptyCursorSelectOrAdd
     ) where
 
 import Lens.Micro
@@ -48,17 +53,11 @@ makeNonEmptyCursor = NEC.makeNonEmptyCursor id
 makeNonEmptyCursorWithSelection :: Int -> NonEmpty a -> Maybe (NonEmptyCursor a)
 makeNonEmptyCursorWithSelection = NEC.makeNonEmptyCursorWithSelection id
 
-singletonNonEmptyCursor :: a -> NonEmptyCursor a
-singletonNonEmptyCursor = NEC.singletonNonEmptyCursor
-
 rebuildNonEmptyCursor :: NonEmptyCursor a -> NonEmpty a
 rebuildNonEmptyCursor = NEC.rebuildNonEmptyCursor id
 
 mapNonEmptyCursor :: (a -> b) -> NonEmptyCursor a -> NonEmptyCursor b
 mapNonEmptyCursor f = NEC.mapNonEmptyCursor f f
-
-nonEmptyCursorElemL :: Lens' (NonEmptyCursor a) a
-nonEmptyCursorElemL = NEC.nonEmptyCursorElemL
 
 nonEmptyCursorSelectPrev :: NonEmptyCursor a -> Maybe (NonEmptyCursor a)
 nonEmptyCursorSelectPrev = NEC.nonEmptyCursorSelectPrev id id
@@ -72,29 +71,14 @@ nonEmptyCursorSelectFirst = NEC.nonEmptyCursorSelectFirst id id
 nonEmptyCursorSelectLast :: NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorSelectLast = NEC.nonEmptyCursorSelectLast id id
 
-nonEmptyCursorSelection :: NonEmptyCursor a -> Int
-nonEmptyCursorSelection = NEC.nonEmptyCursorSelection
-
 nonEmptyCursorSelectIndex :: Int -> NonEmptyCursor a -> Maybe (NonEmptyCursor a)
 nonEmptyCursorSelectIndex = NEC.nonEmptyCursorSelectIndex id id
-
-nonEmptyCursorInsert :: a -> NonEmptyCursor a -> NonEmptyCursor a
-nonEmptyCursorInsert = NEC.nonEmptyCursorInsert
-
-nonEmptyCursorAppend :: a -> NonEmptyCursor a -> NonEmptyCursor a
-nonEmptyCursorAppend = NEC.nonEmptyCursorAppend
 
 nonEmptyCursorInsertAndSelect :: a -> NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorInsertAndSelect = NEC.nonEmptyCursorInsertAndSelect id
 
 nonEmptyCursorAppendAndSelect :: a -> NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorAppendAndSelect = NEC.nonEmptyCursorAppendAndSelect id
-
-nonEmptyCursorInsertAtStart :: a -> NonEmptyCursor a -> NonEmptyCursor a
-nonEmptyCursorInsertAtStart = NEC.nonEmptyCursorInsertAtStart
-
-nonEmptyCursorAppendAtEnd :: a -> NonEmptyCursor a -> NonEmptyCursor a
-nonEmptyCursorAppendAtEnd = NEC.nonEmptyCursorAppendAtEnd
 
 nonEmptyCursorInsertAtStartAndSelect ::
        a -> NonEmptyCursor a -> NonEmptyCursor a
@@ -122,3 +106,11 @@ nonEmptyCursorRemoveElem = NEC.nonEmptyCursorRemoveElem id
 nonEmptyCursorDeleteElem ::
        NonEmptyCursor a -> DeleteOrUpdate (NonEmptyCursor a)
 nonEmptyCursorDeleteElem = NEC.nonEmptyCursorDeleteElem id
+
+nonEmptyCursorSearch ::
+       (a -> Bool) -> NonEmptyCursor a -> Maybe (NonEmptyCursor a)
+nonEmptyCursorSearch = NEC.nonEmptyCursorSearch id id
+
+nonEmptyCursorSelectOrAdd ::
+       (a -> Bool) -> a -> NonEmptyCursor a -> NonEmptyCursor a
+nonEmptyCursorSelectOrAdd = NEC.nonEmptyCursorSelectOrAdd id id

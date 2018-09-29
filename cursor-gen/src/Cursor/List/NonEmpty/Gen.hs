@@ -4,6 +4,7 @@
 module Cursor.List.NonEmpty.Gen
     ( nonEmptyElemOf
     , nonEmptyWithIndex0
+    , nonEmptyWith
     ) where
 
 import Control.Monad
@@ -52,3 +53,16 @@ nonEmptyElemOf = elements . NE.toList . rebuildNonEmptyCursor id
 
 nonEmptyWithIndex0 :: Gen a -> Gen (NonEmptyCursor a a)
 nonEmptyWithIndex0 g = NonEmptyCursor [] <$> g <*> genListOf g
+
+nonEmptyWith :: a -> Gen a -> Gen (NonEmptyCursor a a)
+nonEmptyWith a g =
+    oneof
+        [ NonEmptyCursor <$> listWithA <*> g <*> genListOf g
+        , NonEmptyCursor <$> genListOf g <*> pure a <*> genListOf g
+        , NonEmptyCursor <$> genListOf g <*> g <*> listWithA
+        ]
+  where
+    listWithA = do
+        l1 <- genListOf g
+        l2 <- genListOf g
+        pure $ l1 ++ [a] ++ l2

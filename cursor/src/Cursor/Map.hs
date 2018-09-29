@@ -14,6 +14,9 @@ module Cursor.Map
     , mapCursorElemL
     , mapCursorElemKeyL
     , mapCursorElemValueL
+    , mapCursorSelectKey
+    , mapCursorSelectValue
+    , mapCursorToggleSelected
     , mapCursorSelectPrev
     , mapCursorSelectNext
     , mapCursorSelectFirst
@@ -83,6 +86,15 @@ mapCursorElemKeyL = mapCursorElemL . keyValueCursorKeyL
 
 mapCursorElemValueL :: Lens' (MapCursor k v) v
 mapCursorElemValueL = mapCursorElemL . keyValueCursorValueL
+
+mapCursorSelectKey :: MapCursor k v -> MapCursor k v
+mapCursorSelectKey = mapCursorElemL %~ keyValueCursorSelectKey
+
+mapCursorSelectValue :: MapCursor k v -> MapCursor k v
+mapCursorSelectValue = mapCursorElemL %~ keyValueCursorSelectValue
+
+mapCursorToggleSelected :: MapCursor k v -> MapCursor k v
+mapCursorToggleSelected = mapCursorElemL %~ keyValueCursorToggleSelected
 
 mapCursorSelectPrev :: MapCursor k v -> Maybe (MapCursor k v)
 mapCursorSelectPrev =

@@ -48,6 +48,17 @@ spec = do
         lensSpecOnValid (mapCursorElemKeyL @Double @Double)
     describe "mapCursorElemValueL" $
         lensSpecOnValid (mapCursorElemValueL @Double @Double)
+    describe "mapCursorSelectKey" $
+        it "produces valid cursors" $
+        producesValidsOnValids (mapCursorSelectKey @Double @Double)
+    describe "mapCursorSelectValue" $
+        it "produces valid cursors" $
+        producesValidsOnValids (mapCursorSelectValue @Double @Double)
+
+    describe "mapCursorToggleSelected" $
+        it "produces valid cursors" $
+        producesValidsOnValids (mapCursorToggleSelected @Double @Double)
+
     describe "mapCursorSelectPrev" $ do
         it "produces valid cursors" $
             producesValidsOnValids (mapCursorSelectPrev @Double @Rational)
@@ -117,14 +128,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildMapCursor lec
                     ne' = rebuildMapCursor lec'
-                in unless (ne == ne') $
-                   expectationFailure $
-                   unlines
-                       [ "Cursor before:\n" ++ show lec
-                       , "Map before:  \n" ++ show ne
-                       , "Cursor after: \n" ++ show lec'
-                       , "Map after:   \n" ++ show ne'
-                       ]
+                 in unless (ne == ne') $
+                    expectationFailure $
+                    unlines
+                        [ "Cursor before:\n" ++ show lec
+                        , "Map before:  \n" ++ show ne
+                        , "Cursor after: \n" ++ show lec'
+                        , "Map after:   \n" ++ show ne'
+                        ]
 
 isMovement :: (forall k v. MapCursor k v -> MapCursor k v) -> Property
 isMovement func =

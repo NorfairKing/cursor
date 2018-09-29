@@ -15,6 +15,7 @@ import Test.Validity.Optics
 
 import Control.Monad
 
+import Cursor.List.NonEmpty.Gen
 import Cursor.Simple.List.NonEmpty
 import Cursor.Simple.List.NonEmpty.Gen ()
 
@@ -37,7 +38,7 @@ spec = do
                 Just lec
     describe "singletonNonEmptyCursor" $
         it "produces valid cursors" $
-        producesValidsOnValids (singletonNonEmptyCursor @Double)
+        producesValidsOnValids (singletonNonEmptyCursor @Double @Double)
     describe "rebuildNonEmptyCursor" $ do
         it "produces valid nonempty lists" $
             producesValidsOnValids (rebuildNonEmptyCursor @Double)
@@ -50,7 +51,7 @@ spec = do
                     (makeNonEmptyCursorWithSelection @Int i)
                     rebuildNonEmptyCursor
     describe "nonEmptyCursorElemL" $
-        lensSpecOnValid (nonEmptyCursorElemL @Double)
+        lensSpecOnValid (nonEmptyCursorElemL @Double @Double)
     describe "nonEmptyCursorSelectPrev" $ do
         it "produces valid cursors" $
             producesValidsOnValids (nonEmptyCursorSelectPrev @Double)
@@ -77,7 +78,7 @@ spec = do
         it "selects the last element" pending
     describe "nonEmptyCursorSelection" $ do
         it "produces valid ints" $
-            producesValidsOnValids (nonEmptyCursorSelection @Double)
+            producesValidsOnValids (nonEmptyCursorSelection @Double @Double)
         it "returns the index of the currently selected element" pending
     describe "nonEmptyCursorSelectIndex" $ do
         it "produces valid cursors" $
@@ -90,12 +91,12 @@ spec = do
     describe "nonEmptyCursorInsert" $ do
         it "produces valid cursors" $
             forAllValid $ \d ->
-                producesValidsOnValids (nonEmptyCursorInsert @Double d)
+                producesValidsOnValids (nonEmptyCursorInsert @Double @Double d)
         it "inserts a character before the cursor" pending
     describe "nonEmptyCursorAppend" $ do
         it "produces valid cursors" $
             forAllValid $ \d ->
-                producesValidsOnValids (nonEmptyCursorAppend @Double d)
+                producesValidsOnValids (nonEmptyCursorAppend @Double @Double d)
         it "inserts a character after the cursor" pending
     describe "nonEmptyCursorInsertAndSelect" $ do
         it "produces valid cursors" $
@@ -110,12 +111,14 @@ spec = do
     describe "nonEmptyCursorInsertAtStart" $ do
         it "produces valid cursors" $
             forAllValid $ \d ->
-                producesValidsOnValids (nonEmptyCursorInsertAtStart @Double d)
+                producesValidsOnValids
+                    (nonEmptyCursorInsertAtStart @Double @Double d)
         it "inserts a character at the start of the list" pending
     describe "nonEmptyCursorAppendAtEnd" $ do
         it "produces valid cursors" $
             forAllValid $ \d ->
-                producesValidsOnValids (nonEmptyCursorAppendAtEnd @Double d)
+                producesValidsOnValids
+                    (nonEmptyCursorAppendAtEnd @Double @Double d)
         it "inserts a character at the end of the list" pending
     describe "nonEmptyCursorInsertAtStartAndSelect" $ do
         it "produces valid cursors" $
@@ -136,6 +139,29 @@ spec = do
     describe "nonEmptyCursorDeleteElem" $ do
         it "produces valid cursors" $
             producesValidsOnValids (nonEmptyCursorDeleteElem @Double)
+    describe "nonEmptyCursorSearch" $ do
+        it "produces valid cursors when looking for an equal element" $
+            forAllValid $ \a ->
+                producesValidsOnValids $ nonEmptyCursorSearch (== (a :: Double))
+        it
+            "is indeed the right value when it finds a value and is looking for an equal element" $
+            forAllValid $ \a ->
+                forAllValid $ \nec ->
+                    case nonEmptyCursorSearch (== (a :: Double)) nec of
+                        Nothing -> pure ()
+                        Just e -> nonEmptyCursorCurrent e `shouldBe` a
+        it "finds an element if it is in there" $
+            forAllValid $ \a ->
+                forAll (nonEmptyWith a genValid) $ \nec ->
+                    case nonEmptyCursorSearch (== (a :: Double)) nec of
+                        Nothing ->
+                            expectationFailure
+                                "Should not have failed to find the element."
+                        Just e -> nonEmptyCursorCurrent e `shouldBe` a
+    describe "nonEmptyCursorSelectOrAdd" $ do
+        it "produces valid cursors when looking for an equal element" $
+            forAllValid $ \a ->
+                producesValidsOnValids $ nonEmptyCursorSelectOrAdd (== a) (a :: Double)
 
 isMovementM ::
        (forall a. NonEmptyCursor a -> Maybe (NonEmptyCursor a)) -> Property

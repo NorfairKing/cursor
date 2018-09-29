@@ -29,6 +29,8 @@ module Cursor.List.NonEmpty
     , nonEmptyCursorDeleteElemAndSelectNext
     , nonEmptyCursorRemoveElem
     , nonEmptyCursorDeleteElem
+    , nonEmptyCursorSearch
+    , nonEmptyCursorSelectOrAdd
     , nonemptyPrepend
     , nonemptyAppend
     ) where
@@ -38,6 +40,8 @@ import GHC.Generics (Generic)
 import Data.Validity
 
 import Data.Maybe
+
+import Control.Monad
 
 import Lens.Micro
 
@@ -100,7 +104,7 @@ mapNonEmptyCursor f g NonEmptyCursor {..} =
         , nonEmptyCursorNext = map g nonEmptyCursorNext
         }
 
-nonEmptyCursorElemL :: Lens (NonEmptyCursor a c) (NonEmptyCursor b c)  a b
+nonEmptyCursorElemL :: Lens (NonEmptyCursor a c) (NonEmptyCursor b c) a b
 nonEmptyCursorElemL =
     lens nonEmptyCursorCurrent $ \lec le -> lec {nonEmptyCursorCurrent = le}
 
@@ -251,6 +255,36 @@ nonEmptyCursorDeleteElem g lec =
     joinDeletes
         (nonEmptyCursorDeleteElemAndSelectNext g lec)
         (nonEmptyCursorRemoveElemAndSelectPrev g lec)
+
+nonEmptyCursorSearch ::
+       (a -> b)
+    -> (b -> a)
+    -> (a -> Bool)
+    -> NonEmptyCursor a b
+    -> Maybe (NonEmptyCursor a b)
+nonEmptyCursorSearch f g p nec =
+    if p $ nonEmptyCursorCurrent nec
+        then Just nec
+        else lookPrev nec `mplus` lookNext nec
+  where
+    lookPrev = look nonEmptyCursorSelectPrev
+    lookNext = look nonEmptyCursorSelectNext
+    look func nec = do
+        nec' <- func f g nec
+        if p $ nonEmptyCursorCurrent nec'
+            then Just nec'
+            else look func nec'
+
+nonEmptyCursorSelectOrAdd ::
+     (a -> b)
+    -> (b -> a) -> (a -> Bool)
+    -> a
+    -> NonEmptyCursor a b
+    -> NonEmptyCursor a b
+nonEmptyCursorSelectOrAdd f g p a nec =
+    case nonEmptyCursorSearch f g p nec of
+        Nothing -> nonEmptyCursorAppendAndSelect f a nec
+        Just nec' -> nec'
 
 nonemptyPrepend :: [a] -> NonEmpty a -> NonEmpty a
 nonemptyPrepend ls ne = foldr (<|) ne ls
