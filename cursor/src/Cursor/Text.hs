@@ -53,7 +53,7 @@ emptyTextCursor :: TextCursor
 emptyTextCursor = TextCursor emptyListCursor
 
 makeTextCursor :: Text -> Maybe TextCursor
-makeTextCursor = makeTextCursorWithSelection 0
+makeTextCursor t = makeTextCursorWithSelection (T.length t) t
 
 makeTextCursorWithSelection :: Int -> Text -> Maybe TextCursor
 makeTextCursorWithSelection i t =
