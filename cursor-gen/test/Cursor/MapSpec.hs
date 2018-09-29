@@ -11,6 +11,8 @@ import Test.QuickCheck
 import Test.Validity
 import Test.Validity.Optics
 
+import Lens.Micro
+
 import Control.Monad
 
 import Cursor.Map
@@ -54,11 +56,9 @@ spec = do
     describe "mapCursorSelectValue" $
         it "produces valid cursors" $
         producesValidsOnValids (mapCursorSelectValue @Double @Double)
-
     describe "mapCursorToggleSelected" $
         it "produces valid cursors" $
         producesValidsOnValids (mapCursorToggleSelected @Double @Double)
-
     describe "mapCursorSelectPrev" $ do
         it "produces valid cursors" $
             producesValidsOnValids (mapCursorSelectPrev @Double @Rational)
@@ -119,6 +119,28 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids (mapCursorDeleteElem @Double @Rational)
         it "deletes an element" pending
+    describe "mapCursorSearch" $ do
+        it "produces valid cursors when looking for an equal pair" $
+            forAllValid $ \(k, v) ->
+                producesValidsOnValids $
+                mapCursorSearch @Double @Rational (\k_ v_ -> k_ == k && v_ == v)
+        it
+            "is indeed the right value when it finds a value and is looking for an equal element" $
+            forAllValid $ \(k, v) ->
+                forAllValid $ \nec ->
+                    case mapCursorSearch (\k_ v_ -> k_ == k && v_ == v) nec of
+                        Nothing -> pure ()
+                        Just e ->
+                            rebuildKeyValueCursor (e ^. mapCursorElemL) `shouldBe`
+                            (k :: Double, v :: Rational)
+    describe "mapCursorSelectOrAdd" $ do
+        it "produces valid cursors when looking for an equal element" $
+            forAllValid $ \(k, v) ->
+                producesValidsOnValids $
+                mapCursorSelectOrAdd
+                    (\k_ v_ -> k_ == k && v_ == v)
+                    (k :: Double)
+                    (v :: Rational)
 
 isMovementM :: (forall k v. MapCursor k v -> Maybe (MapCursor k v)) -> Property
 isMovementM func =

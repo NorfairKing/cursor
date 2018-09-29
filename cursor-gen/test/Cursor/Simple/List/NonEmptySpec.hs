@@ -15,9 +15,8 @@ import Test.Validity.Optics
 
 import Control.Monad
 
-import Cursor.List.NonEmpty.Gen
 import Cursor.Simple.List.NonEmpty
-import Cursor.Simple.List.NonEmpty.Gen ()
+import Cursor.Simple.List.NonEmpty.Gen
 
 spec :: Spec
 spec = do
@@ -161,7 +160,8 @@ spec = do
     describe "nonEmptyCursorSelectOrAdd" $ do
         it "produces valid cursors when looking for an equal element" $
             forAllValid $ \a ->
-                producesValidsOnValids $ nonEmptyCursorSelectOrAdd (== a) (a :: Double)
+                producesValidsOnValids $
+                nonEmptyCursorSelectOrAdd (== a) (a :: Double)
 
 isMovementM ::
        (forall a. NonEmptyCursor a -> Maybe (NonEmptyCursor a)) -> Property

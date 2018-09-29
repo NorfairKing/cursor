@@ -31,6 +31,8 @@ module Cursor.Map
     , mapCursorDeleteElemAndSelectNext
     , mapCursorRemoveElem
     , mapCursorDeleteElem
+    , mapCursorSearch
+    , mapCursorSelectOrAdd
     , module Cursor.Map.KeyValue
     ) where
 
@@ -168,3 +170,21 @@ mapCursorDeleteElem :: MapCursor k v -> DeleteOrUpdate (MapCursor k v)
 mapCursorDeleteElem =
     mapCursorNonEmptyCursorL $
     nonEmptyCursorDeleteElem (uncurry makeKeyValueCursor)
+
+mapCursorSearch :: (k -> v -> Bool) -> MapCursor k v -> Maybe (MapCursor k v)
+mapCursorSearch p =
+    mapCursorNonEmptyCursorL $
+    nonEmptyCursorSearch
+        rebuildKeyValueCursor
+        (uncurry makeKeyValueCursor)
+        (uncurry p . rebuildKeyValueCursor)
+
+mapCursorSelectOrAdd ::
+       (k -> v -> Bool) -> k -> v -> MapCursor k v -> MapCursor k v
+mapCursorSelectOrAdd p k v =
+    mapCursorNonEmptyCursorL %~
+    nonEmptyCursorSelectOrAdd
+        rebuildKeyValueCursor
+        (uncurry makeKeyValueCursor)
+        (uncurry p . rebuildKeyValueCursor)
+        (makeKeyValueCursor k v)

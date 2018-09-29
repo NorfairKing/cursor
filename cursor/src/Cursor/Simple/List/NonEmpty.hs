@@ -36,8 +36,6 @@ module Cursor.Simple.List.NonEmpty
     , nonEmptyCursorSelectOrAdd
     ) where
 
-import Lens.Micro
-
 import Data.List.NonEmpty (NonEmpty(..))
 
 import Cursor.Types

@@ -50,5 +50,6 @@ tests:
     - genvalidity-hspec
     - genvalidity-hspec-optics
     - hspec
+    - microlens
     - pretty-show
     - text
