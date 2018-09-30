@@ -8,6 +8,7 @@ module Cursor.Tree.Types
     , treeCursorAboveL
     , treeCursorCurrentL
     , treeCursorBelowL
+    , treeCursorCurrentSubTreeL
     , TreeAbove(..)
     , treeAboveLeftsL
     , treeAboveAboveL
@@ -54,6 +55,12 @@ treeCursorCurrentL = lens treeCurrent $ \tc a -> tc {treeCurrent = a}
 
 treeCursorBelowL :: Lens' (TreeCursor a b) (CForest b)
 treeCursorBelowL = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
+
+treeCursorCurrentSubTreeL :: Lens' (TreeCursor a b) (a, CForest b)
+treeCursorCurrentSubTreeL =
+    lens
+    (\tc -> (treeCurrent tc, treeBelow tc))
+    (\tc (a, cf) -> tc {treeCurrent = a, treeBelow = cf})
 
 instance (Validity a, Validity b) => Validity (TreeCursor a b)
 
