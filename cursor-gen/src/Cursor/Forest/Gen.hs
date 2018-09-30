@@ -17,4 +17,5 @@ instance (GenUnchecked a, GenUnchecked b) =>
          GenUnchecked (ForestCursor a b)
 
 instance (GenValid a, GenValid b) => GenValid (ForestCursor a b) where
-    genValid = genValidStructurally
+    genValid = ForestCursor <$> genValid
+    shrinkValid = shrinkValidStructurallyWithoutExtraFiltering

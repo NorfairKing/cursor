@@ -16,3 +16,4 @@ spec :: Spec
 spec = do
     eqSpec @(MapCursor Word Int Bool Ordering)
     genValidSpec @(MapCursor Double Rational Int Bool)
+    shrinkValidSpec @(MapCursor Double Rational Int Bool)

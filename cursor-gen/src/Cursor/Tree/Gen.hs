@@ -105,7 +105,8 @@ instance GenValid a => GenValid (CForest a) where
 instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (TreeCursor a b) where
     genUnchecked =
         sized $ \n -> do
-            (a, b, c, d) <- genSplit4 n
+            s <- upTo n
+            (a, b, c, d) <- genSplit4 s
             treeAbove <- resize (a + b) genUnchecked
             treeCurrent <- resize c genUnchecked
             treeBelow <- resize d genUnchecked
@@ -121,17 +122,19 @@ instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (TreeCursor a b) where
 instance (GenValid a, GenValid b) => GenValid (TreeCursor a b) where
     genValid =
         sized $ \n -> do
-            (a, b, c, d) <- genSplit4 n
+            s <- upTo n
+            (a, b, c, d) <- genSplit4 s
             treeAbove <- resize (a + b) genValid
             treeCurrent <- resize c genValid
             treeBelow <- resize d genValid
             pure TreeCursor {..}
-    shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
+    shrinkValid = shrinkValidStructurally
 
 instance GenUnchecked b => GenUnchecked (TreeAbove b) where
     genUnchecked =
         sized $ \n -> do
-            (a, b, c, d) <- genSplit4 n
+            s <- upTo n
+            (a, b, c, d) <- genSplit4 s
             treeAboveLefts <- resize a genUnchecked
             treeAboveAbove <- resize b genUnchecked
             treeAboveNode <- resize c genUnchecked
@@ -141,10 +144,11 @@ instance GenUnchecked b => GenUnchecked (TreeAbove b) where
 instance GenValid b => GenValid (TreeAbove b) where
     genValid =
         sized $ \n -> do
-            (a, b, c, d) <- genSplit4 n
+            s <- upTo n
+            (a, b, c, d) <- genSplit4 s
             treeAboveLefts <- resize a genValid
             treeAboveAbove <- resize b genValid
             treeAboveNode <- resize c genValid
             treeAboveRights <- resize d genValid
             pure TreeAbove {..}
-    shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
+    shrinkValid = shrinkValidStructurally

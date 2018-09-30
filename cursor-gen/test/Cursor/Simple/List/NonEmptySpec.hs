@@ -22,6 +22,7 @@ spec :: Spec
 spec = do
     eqSpec @(NonEmptyCursor Int)
     genValidSpec @(NonEmptyCursor Double)
+    shrinkValidSpec @(NonEmptyCursor Double)
     describe "makeNonEmptyCursor" $
         it "produces valid cursors" $
         producesValidsOnValids (makeNonEmptyCursor @Double)
