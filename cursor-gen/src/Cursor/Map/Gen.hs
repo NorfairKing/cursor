@@ -18,5 +18,5 @@ instance (GenUnchecked kc, GenUnchecked vc, GenUnchecked k, GenUnchecked v) =>
 
 instance (GenValid kc, GenValid vc, GenValid k, GenValid v) =>
          GenValid (MapCursor kc vc k v) where
-    genValid = genValidStructurally
-    shrinkValid = shrinkValidStructurally
+    genValid = genValidStructurallyWithoutExtraChecking
+    shrinkValid = shrinkValidStructurallyWithoutExtraFiltering

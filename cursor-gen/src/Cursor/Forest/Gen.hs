@@ -14,8 +14,10 @@ import Cursor.List.NonEmpty.Gen ()
 import Cursor.Tree.Gen ()
 
 instance (GenUnchecked a, GenUnchecked b) =>
-         GenUnchecked (ForestCursor a b)
+         GenUnchecked (ForestCursor a b) where
+    genUnchecked = ForestCursor <$> genUnchecked
+    shrinkUnchecked (ForestCursor ne) = ForestCursor <$> shrinkUnchecked ne
 
 instance (GenValid a, GenValid b) => GenValid (ForestCursor a b) where
     genValid = ForestCursor <$> genValid
-    shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
+    shrinkValid (ForestCursor ne) = ForestCursor <$> shrinkValid ne

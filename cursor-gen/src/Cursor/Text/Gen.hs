@@ -18,6 +18,7 @@ instance GenUnchecked TextCursor
 
 instance GenValid TextCursor where
     genValid = genValidStructurally
+    shrinkValid = shrinkValidStructurally
 
 textCursorWithGen :: Gen Char -> Gen TextCursor
 textCursorWithGen gen = TextCursor <$> listCursorWithGen gen

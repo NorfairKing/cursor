@@ -128,7 +128,7 @@ instance (GenValid a, GenValid b) => GenValid (TreeCursor a b) where
             treeCurrent <- resize c genValid
             treeBelow <- resize d genValid
             pure TreeCursor {..}
-    shrinkValid = shrinkValidStructurally
+    shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
 instance GenUnchecked b => GenUnchecked (TreeAbove b) where
     genUnchecked =
@@ -151,4 +151,4 @@ instance GenValid b => GenValid (TreeAbove b) where
             treeAboveNode <- resize c genValid
             treeAboveRights <- resize d genValid
             pure TreeAbove {..}
-    shrinkValid = shrinkValidStructurally
+    shrinkValid = shrinkValidStructurallyWithoutExtraFiltering

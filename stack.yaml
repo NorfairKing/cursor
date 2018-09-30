@@ -1,10 +1,10 @@
-resolver: nightly-2018-07-28
+resolver: lts-12.11
 packages:
 - cursor
 - cursor-gen
 extra-deps:
 - git: https://github.com/NorfairKing/validity.git
-  commit: 7095357fd6557c81b9af989cef388ea2d9a66988
+  commit: 550327539d84d72ba8be8412025b0074d14c4188
   subdirs:
   - genvalidity
   - genvalidity-aeson
