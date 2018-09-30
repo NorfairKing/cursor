@@ -21,21 +21,14 @@ import Cursor.Map.Gen ()
 spec :: Spec
 spec = do
     eqSpec @(MapCursor Int Int)
-    functorSpec @(MapCursor Int)
     genValidSpec @(MapCursor Double Double)
-    eqSpec @(KeyValueCursor Int Int)
-    functorSpec @(KeyValueCursor Int)
-    genValidSpec @(KeyValueCursor Double Double)
     describe "makeMapCursor" $
         it "produces valid cursors" $
         producesValidsOnValids (makeMapCursor @Double @Double)
     describe "makeMapCursorWithSelection" $
         it "produces valid cursors" $
-        producesValidsOnValids2 (makeMapCursorWithSelection @Double @Double)
-    describe "makeKeyValueCursor" $
-        it "produces valid cursors" $
-        producesValidsOnValids2 (makeKeyValueCursor @Double @Double)
-    describe "singletonKeyValueCursor" $
+        producesValidsOnValids3 (makeMapCursorWithSelection @Double @Double)
+    describe "singletonMapCursor" $
         it "produces valid cursors" $
         producesValidsOnValids2 (singletonMapCursor @Double @Double)
     describe "rebuildMapCursor" $ do
@@ -46,10 +39,6 @@ spec = do
     describe "mapCursorNonEmptyCursorL" $
         lensSpecOnValid (mapCursorNonEmptyCursorL @Double @Double)
     describe "mapCursorElemL" $ lensSpecOnValid (mapCursorElemL @Double @Double)
-    describe "mapCursorElemKeyL" $
-        lensSpecOnValid (mapCursorElemKeyL @Double @Double)
-    describe "mapCursorElemValueL" $
-        lensSpecOnValid (mapCursorElemValueL @Double @Double)
     describe "mapCursorSelectKey" $
         it "produces valid cursors" $
         producesValidsOnValids (mapCursorSelectKey @Double @Double)
@@ -131,7 +120,7 @@ spec = do
                     case mapCursorSearch (\k_ v_ -> k_ == k && v_ == v) nec of
                         Nothing -> pure ()
                         Just e ->
-                            rebuildKeyValueCursor (e ^. mapCursorElemL) `shouldBe`
+                            rebuildKeyValueCursor id id (e ^. mapCursorElemL) `shouldBe`
                             (k :: Double, v :: Rational)
     describe "mapCursorSelectOrAdd" $ do
         it "produces valid cursors when looking for an equal element" $
@@ -139,7 +128,7 @@ spec = do
                 producesValidsOnValids $
                 mapCursorSelectOrAdd
                     (\k_ v_ -> k_ == k && v_ == v)
-                    (makeKeyValueCursor (k :: Double)                    (v :: Rational))
+                    (makeKeyValueCursorKey (k :: Double) (v :: Rational))
 
 isMovementM :: (forall k v. MapCursor k v -> Maybe (MapCursor k v)) -> Property
 isMovementM func =

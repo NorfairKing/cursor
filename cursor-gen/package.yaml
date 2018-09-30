@@ -10,18 +10,6 @@ homepage: https://github.com/NorfairKing/cursor
 library:
   source-dirs: src/
   ghc-options: -Wall
-  exposed-modules:
-  - Cursor.Forest.Gen
-  - Cursor.List.Gen
-  - Cursor.List.NonEmpty.Gen
-  - Cursor.Map.Gen
-  - Cursor.Map.KeyValue.Gen
-  - Cursor.Simple.Forest.Gen
-  - Cursor.Simple.List.NonEmpty.Gen
-  - Cursor.Simple.Tree.Gen
-  - Cursor.Text.Gen
-  - Cursor.TextField.Gen
-  - Cursor.Tree.Gen
   dependencies:
   - QuickCheck 
   - base 

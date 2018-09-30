@@ -6,10 +6,11 @@
 
 module Cursor.Map.KeyValue
     ( KeyValueCursor(..)
-    , makeKeyValueCursor
+    , makeKeyValueCursorKey
+    , makeKeyValueCursorValue
     , rebuildKeyValueCursor
-    , keyValueCursorKeyL
-    , keyValueCursorValueL
+    , keyValueCursorSelection
+    , mapKeyValueCursor
     , keyValueCursorSelectKey
     , keyValueCursorSelectValue
     , keyValueCursorToggleSelected
@@ -20,50 +21,74 @@ import GHC.Generics (Generic)
 
 import Data.Validity
 
-import Lens.Micro
+data KeyValueCursor kc vc k v
+    = KeyValueCursorKey kc
+                        v
+    | KeyValueCursorValue k
+                          vc
+    deriving (Show, Eq, Generic)
 
-data KeyValueCursor k v = KeyValueCursor
-    { keyValueCursorKey :: k
-    , keyValueCursorValue :: v
-    , keyValueCursorToggle :: KeyValueToggle
-    } deriving (Show, Eq, Generic, Functor)
+instance (Validity kc, Validity vc, Validity k, Validity v) =>
+         Validity (KeyValueCursor kc vc k v)
 
-instance (Validity k, Validity v) => Validity (KeyValueCursor k v)
+makeKeyValueCursorKey :: kc -> v -> KeyValueCursor kc vc k v
+makeKeyValueCursorKey = KeyValueCursorKey
 
-makeKeyValueCursor :: k -> v -> KeyValueCursor k v
-makeKeyValueCursor k v =
-    KeyValueCursor
-        { keyValueCursorKey = k
-        , keyValueCursorValue = v
-        , keyValueCursorToggle = KeySelected
-        }
+makeKeyValueCursorValue :: k -> vc -> KeyValueCursor kc vc k v
+makeKeyValueCursorValue = KeyValueCursorValue
 
-rebuildKeyValueCursor :: KeyValueCursor k v -> (k, v)
-rebuildKeyValueCursor KeyValueCursor {..} =
-    (keyValueCursorKey, keyValueCursorValue)
+rebuildKeyValueCursor ::
+       (kc -> k) -> (vc -> v) -> KeyValueCursor kc vc k v -> (k, v)
+rebuildKeyValueCursor f _ (KeyValueCursorKey kc v) = (f kc, v)
+rebuildKeyValueCursor _ g (KeyValueCursorValue k vc) = (k, g vc)
 
-keyValueCursorKeyL :: Lens' (KeyValueCursor k v) k
-keyValueCursorKeyL =
-    lens keyValueCursorKey $ \kvc k -> kvc {keyValueCursorKey = k}
+keyValueCursorSelection :: KeyValueCursor kc vc k v -> KeyValueToggle
+keyValueCursorSelection (KeyValueCursorKey _ _) = KeySelected
+keyValueCursorSelection (KeyValueCursorValue _ _) = ValueSelected
 
-keyValueCursorValueL :: Lens' (KeyValueCursor k v) v
-keyValueCursorValueL =
-    lens keyValueCursorValue $ \kvc v -> kvc {keyValueCursorValue = v}
+mapKeyValueCursor ::
+       (kc -> lc)
+    -> (vc -> wc)
+    -> (k -> l)
+    -> (v -> w)
+    -> KeyValueCursor kc vc k v
+    -> KeyValueCursor lc wc l w
+mapKeyValueCursor a b c d kvc =
+    case kvc of
+        KeyValueCursorKey kc v -> KeyValueCursorKey (a kc) (d v)
+        KeyValueCursorValue k vc -> KeyValueCursorValue (c k) (b vc)
 
-keyValueCursorSelectKey :: KeyValueCursor k v -> KeyValueCursor k v
-keyValueCursorSelectKey kvc = kvc {keyValueCursorToggle = KeySelected}
+keyValueCursorSelectKey ::
+       (k -> kc)
+    -> (vc -> v)
+    -> KeyValueCursor kc vc k v
+    -> KeyValueCursor kc vc k v
+keyValueCursorSelectKey g h kvc =
+    case kvc of
+        KeyValueCursorValue k vc -> KeyValueCursorKey (g k) (h vc)
+        _ -> kvc
 
-keyValueCursorSelectValue :: KeyValueCursor k v -> KeyValueCursor k v
-keyValueCursorSelectValue kvc = kvc {keyValueCursorToggle = ValueSelected}
+keyValueCursorSelectValue ::
+       (kc -> k)
+    -> (v -> vc)
+    -> KeyValueCursor kc vc k v
+    -> KeyValueCursor kc vc k v
+keyValueCursorSelectValue f i kvc =
+    case kvc of
+        KeyValueCursorKey kc v -> KeyValueCursorValue (f kc) (i v)
+        _ -> kvc
 
-keyValueCursorToggleSelected :: KeyValueCursor k v -> KeyValueCursor k v
-keyValueCursorToggleSelected kvc =
-    kvc
-        { keyValueCursorToggle =
-              case keyValueCursorToggle kvc of
-                  KeySelected -> ValueSelected
-                  ValueSelected -> KeySelected
-        }
+keyValueCursorToggleSelected ::
+       (kc -> k)
+    -> (k -> kc)
+    -> (vc -> v)
+    -> (v -> vc)
+    -> KeyValueCursor kc vc k v
+    -> KeyValueCursor kc vc k v
+keyValueCursorToggleSelected f g h i kvc =
+    case kvc of
+        KeyValueCursorKey kc v -> KeyValueCursorValue (f kc) (i v)
+        KeyValueCursorValue k vc -> KeyValueCursorKey (g k) (h vc)
 
 data KeyValueToggle
     = KeySelected
