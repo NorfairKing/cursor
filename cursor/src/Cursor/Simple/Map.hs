@@ -9,7 +9,8 @@ module Cursor.Simple.Map
     , MC.mapCursorList
     , makeMapCursor
     , makeMapCursorWithSelection
-    , MC.singletonMapCursor
+    , MC.singletonMapCursorKey
+    , MC.singletonMapCursorValue
     , rebuildMapCursor
     , mapMapCursor
     , MC.mapCursorNonEmptyCursorL
@@ -25,8 +26,10 @@ module Cursor.Simple.Map
     , mapCursorSelectIndex
     , MC.mapCursorInsert
     , MC.mapCursorAppend
-    , mapCursorInsertAndSelect
-    , mapCursorAppendAndSelect
+    , mapCursorInsertAndSelectKey
+    , mapCursorAppendAndSelectKey
+    , mapCursorInsertAndSelectValue
+    , mapCursorAppendAndSelectValue
     , mapCursorRemoveElemAndSelectPrev
     , mapCursorDeleteElemAndSelectNext
     , mapCursorRemoveElem
@@ -80,11 +83,17 @@ mapCursorSelectLast = MC.mapCursorSelectLast id id id
 mapCursorSelectIndex :: Int -> MapCursor k v -> Maybe (MapCursor k v)
 mapCursorSelectIndex = MC.mapCursorSelectIndex id id id
 
-mapCursorInsertAndSelect :: k -> v -> MapCursor k v -> MapCursor k v
-mapCursorInsertAndSelect = MC.mapCursorInsertAndSelect id id
+mapCursorInsertAndSelectKey :: k -> v -> MapCursor k v -> MapCursor k v
+mapCursorInsertAndSelectKey = MC.mapCursorInsertAndSelectKey id id
 
-mapCursorAppendAndSelect :: k -> v -> MapCursor k v -> MapCursor k v
-mapCursorAppendAndSelect = MC.mapCursorAppendAndSelect id id
+mapCursorAppendAndSelectKey :: k -> v -> MapCursor k v -> MapCursor k v
+mapCursorAppendAndSelectKey = MC.mapCursorAppendAndSelectKey id id
+
+mapCursorInsertAndSelectValue :: k -> v -> MapCursor k v -> MapCursor k v
+mapCursorInsertAndSelectValue = MC.mapCursorInsertAndSelectValue id id
+
+mapCursorAppendAndSelectValue :: k -> v -> MapCursor k v -> MapCursor k v
+mapCursorAppendAndSelectValue = MC.mapCursorAppendAndSelectValue id id
 
 mapCursorRemoveElemAndSelectPrev ::
        MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))

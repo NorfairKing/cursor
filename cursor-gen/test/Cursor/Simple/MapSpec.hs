@@ -26,10 +26,14 @@ spec = do
     describe "makeMapCursorWithSelection" $
         it "produces valid cursors" $
         producesValidsOnValids2 (makeMapCursorWithSelection @Double @Rational)
-    describe "singletonMapCursor" $
+    describe "singletonMapCursorKey" $
         it "produces valid cursors" $
         producesValidsOnValids2
-            (singletonMapCursor @Double @Rational @Double @Rational)
+            (singletonMapCursorKey @Double @Rational @Double @Rational)
+    describe "singletonMapCursorValue" $
+        it "produces valid cursors" $
+        producesValidsOnValids2
+            (singletonMapCursorValue @Double @Rational @Double @Rational)
     describe "rebuildMapCursor" $ do
         it "produces valid Nonempty lists" $
             producesValidsOnValids (rebuildMapCursor @Double @Rational)
@@ -88,20 +92,30 @@ spec = do
         it "returns selects the element at the given index" pending
     describe "mapCursorInsert" $ do
         it "produces valid cursors" $
-            producesValidsOnValids3 (mapCursorInsert @Double @Rational @Double @Rational)
+            producesValidsOnValids3
+                (mapCursorInsert @Double @Rational @Double @Rational)
         it "inserts a character before the cursor" pending
     describe "mapCursorAppend" $ do
         it "produces valid cursors" $
-            producesValidsOnValids3 (mapCursorAppend @Double @Rational @Double @Rational)
+            producesValidsOnValids3
+                (mapCursorAppend @Double @Rational @Double @Rational)
         it "inserts a character after the cursor" pending
-    describe "mapCursorInsertAndSelect" $ do
+    describe "mapCursorInsertAndSelectKey" $ do
         it "produces valid cursors" $
-            producesValidsOnValids3 (mapCursorInsertAndSelect @Double @Rational)
-        it "inserts a character before the cursor and selects it" pending
-    describe "mapCursorAppendAndSelect" $ do
+            producesValidsOnValids3
+                (mapCursorInsertAndSelectKey @Double @Rational)
+    describe "mapCursorAppendAndSelectKey" $ do
         it "produces valid cursors" $
-            producesValidsOnValids3 (mapCursorAppendAndSelect @Double @Rational)
-        it "appends a character before the cursor and selects it" pending
+            producesValidsOnValids3
+                (mapCursorAppendAndSelectKey @Double @Rational)
+    describe "mapCursorInsertAndSelectValue" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids3
+                (mapCursorInsertAndSelectValue @Double @Rational)
+    describe "mapCursorAppendAndSelectValue" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids3
+                (mapCursorAppendAndSelectValue @Double @Rational)
     describe "mapCursorRemoveElem" $ do
         it "produces valid cursors" $
             producesValidsOnValids (mapCursorRemoveElem @Double @Rational)
