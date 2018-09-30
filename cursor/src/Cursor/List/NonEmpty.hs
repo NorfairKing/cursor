@@ -269,15 +269,16 @@ nonEmptyCursorSearch f g p nec =
   where
     lookPrev = look nonEmptyCursorSelectPrev
     lookNext = look nonEmptyCursorSelectNext
-    look func nec = do
-        nec' <- func f g nec
+    look func nec_ = do
+        nec' <- func f g nec_
         if p $ nonEmptyCursorCurrent nec'
             then Just nec'
             else look func nec'
 
 nonEmptyCursorSelectOrAdd ::
-     (a -> b)
-    -> (b -> a) -> (a -> Bool)
+       (a -> b)
+    -> (b -> a)
+    -> (a -> Bool)
     -> a
     -> NonEmptyCursor a b
     -> NonEmptyCursor a b

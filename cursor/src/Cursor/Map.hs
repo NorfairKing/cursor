@@ -180,11 +180,11 @@ mapCursorSearch p =
         (uncurry p . rebuildKeyValueCursor)
 
 mapCursorSelectOrAdd ::
-       (k -> v -> Bool) -> k -> v -> MapCursor k v -> MapCursor k v
-mapCursorSelectOrAdd p k v =
+       (k -> v -> Bool) -> KeyValueCursor k v -> MapCursor k v -> MapCursor k v
+mapCursorSelectOrAdd p kvc =
     mapCursorNonEmptyCursorL %~
     nonEmptyCursorSelectOrAdd
         rebuildKeyValueCursor
         (uncurry makeKeyValueCursor)
         (uncurry p . rebuildKeyValueCursor)
-        (makeKeyValueCursor k v)
+        kvc

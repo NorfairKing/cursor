@@ -139,8 +139,7 @@ spec = do
                 producesValidsOnValids $
                 mapCursorSelectOrAdd
                     (\k_ v_ -> k_ == k && v_ == v)
-                    (k :: Double)
-                    (v :: Rational)
+                    (makeKeyValueCursor (k :: Double)                    (v :: Rational))
 
 isMovementM :: (forall k v. MapCursor k v -> Maybe (MapCursor k v)) -> Property
 isMovementM func =
