@@ -13,7 +13,10 @@ import Cursor.Map
 import Cursor.List.NonEmpty.Gen ()
 import Cursor.Map.KeyValue.Gen ()
 
-instance (GenUnchecked k, GenUnchecked v) => GenUnchecked (MapCursor k v)
+instance (GenUnchecked kc, GenUnchecked vc, GenUnchecked k, GenUnchecked v) =>
+         GenUnchecked (MapCursor kc vc k v)
 
-instance (GenValid k, GenValid v) => GenValid (MapCursor k v) where
+instance (GenValid kc, GenValid vc, GenValid k, GenValid v) =>
+         GenValid (MapCursor kc vc k v) where
     genValid = genValidStructurally
+    shrinkValid = shrinkValidStructurally

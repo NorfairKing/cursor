@@ -49,132 +49,209 @@ import Cursor.List.NonEmpty
 import Cursor.Map.KeyValue
 import Cursor.Types
 
-newtype MapCursor k v = MapCursor
-    { mapCursorList :: NonEmptyCursor (KeyValueCursor k v k v) (k, v)
+newtype MapCursor kc vc k v = MapCursor
+    { mapCursorList :: NonEmptyCursor (KeyValueCursor kc vc k v) (k, v)
     } deriving (Show, Eq, Generic)
 
-instance (Validity k, Validity v) => Validity (MapCursor k v)
+instance (Validity kc, Validity vc, Validity k, Validity v) =>
+         Validity (MapCursor kc vc k v)
 
-makeMapCursor :: NonEmpty (k, v) -> MapCursor k v
-makeMapCursor = fromJust . makeMapCursorWithSelection 0 KeySelected
+makeMapCursor :: (k -> kc) -> NonEmpty (k, v) -> MapCursor kc vc k v
+makeMapCursor h = fromJust . makeMapCursorWithSelection h 0
 
 makeMapCursorWithSelection ::
-       Int -> KeyValueToggle -> NonEmpty (k, v) -> Maybe (MapCursor k v)
-makeMapCursorWithSelection i kvt ne =
+       (k -> kc) -> Int -> NonEmpty (k, v) -> Maybe (MapCursor kc vc k v)
+makeMapCursorWithSelection h ix ne =
     MapCursor <$>
     makeNonEmptyCursorWithSelection
-        (uncurry $
-         case kvt of
-             KeySelected -> makeKeyValueCursorKey
-             ValueSelected -> makeKeyValueCursorValue)
-        i
+        (\(k, v) -> makeKeyValueCursorKey (h k) v)
+        ix
         ne
 
-singletonMapCursor :: k -> v -> MapCursor k v
-singletonMapCursor k v = makeMapCursor $ (k, v) :| []
+singletonMapCursor :: kc -> v -> MapCursor kc vc k v
+singletonMapCursor kc v =
+    MapCursor
+        {mapCursorList = singletonNonEmptyCursor $ makeKeyValueCursorKey kc v}
 
-rebuildMapCursor :: MapCursor k v -> NonEmpty (k, v)
-rebuildMapCursor =
-    rebuildNonEmptyCursor (rebuildKeyValueCursor id id) . mapCursorList
-mapMapCursor :: (k -> l) -> (v -> w) -> MapCursor k v -> MapCursor l w
-mapMapCursor f g =
+rebuildMapCursor ::
+       (kc -> k) -> (vc -> v) -> MapCursor kc vc k v -> NonEmpty (k, v)
+rebuildMapCursor f g =
+    rebuildNonEmptyCursor (rebuildKeyValueCursor f g) . mapCursorList
+
+mapMapCursor ::
+       (kc -> lc)
+    -> (vc -> wc)
+    -> (k -> l)
+    -> (v -> w)
+    -> MapCursor kc vc k v
+    -> MapCursor lc wc l w
+mapMapCursor a b c d =
     mapCursorNonEmptyCursorL %~
-    mapNonEmptyCursor (mapKeyValueCursor f g f g) (\(k, v) -> (f k, g v))
-
+    mapNonEmptyCursor (mapKeyValueCursor a b c d) (\(k, v) -> (c k, d v))
 
 mapCursorNonEmptyCursorL ::
-       Lens (MapCursor k v) (MapCursor l w) (NonEmptyCursor (KeyValueCursor k v k v) ( k
-                                                                                     , v)) (NonEmptyCursor (KeyValueCursor l w l w) ( l
-                                                                                                                                    , w))
+       Lens (MapCursor kc vc k v) (MapCursor lc wc l w) (NonEmptyCursor (KeyValueCursor kc vc k v) ( k
+                                                                                                   , v)) (NonEmptyCursor (KeyValueCursor lc wc l w) ( l
+                                                                                                                                                    , w))
 mapCursorNonEmptyCursorL =
     lens mapCursorList $ \mc ne -> mc {mapCursorList = ne}
 
-mapCursorElemL :: Lens' (MapCursor k v) (KeyValueCursor k v k v)
+mapCursorElemL :: Lens' (MapCursor kc vc k v) (KeyValueCursor kc vc k v)
 mapCursorElemL = mapCursorNonEmptyCursorL . nonEmptyCursorElemL
 
-mapCursorSelectKey :: MapCursor k v -> MapCursor k v
-mapCursorSelectKey = mapCursorElemL %~ keyValueCursorSelectKey id id
+mapCursorSelectKey ::
+       (k -> kc) -> (vc -> v) -> MapCursor kc vc k v -> MapCursor kc vc k v
+mapCursorSelectKey g h = mapCursorElemL %~ keyValueCursorSelectKey g h
 
-mapCursorSelectValue :: MapCursor k v -> MapCursor k v
-mapCursorSelectValue = mapCursorElemL %~ keyValueCursorSelectValue id id
+mapCursorSelectValue ::
+       (kc -> k) -> (v -> vc) -> MapCursor kc vc k v -> MapCursor kc vc k v
+mapCursorSelectValue f i = mapCursorElemL %~ keyValueCursorSelectValue f i
 
-mapCursorToggleSelected :: MapCursor k v -> MapCursor k v
-mapCursorToggleSelected =
-    mapCursorElemL %~ keyValueCursorToggleSelected id id id id
+mapCursorToggleSelected ::
+       (kc -> k)
+    -> (k -> kc)
+    -> (vc -> v)
+    -> (v -> vc)
+    -> MapCursor kc vc k v
+    -> MapCursor kc vc k v
+mapCursorToggleSelected f g h i =
+    mapCursorElemL %~ keyValueCursorToggleSelected f g h i
 
-mapCursorSelectPrev :: MapCursor k v -> Maybe (MapCursor k v)
-mapCursorSelectPrev =
-    mapCursorNonEmptyCursorL $ nonEmptyCursorSelectPrev rebuild make
+mapCursorSelectPrev ::
+       (kc -> k)
+    -> (k -> kc)
+    -> (vc -> v)
+    -> MapCursor kc vc k v
+    -> Maybe (MapCursor kc vc k v)
+mapCursorSelectPrev f g h =
+    mapCursorNonEmptyCursorL $ nonEmptyCursorSelectPrev (rebuild f h) (make g)
 
-mapCursorSelectNext :: MapCursor k v -> Maybe (MapCursor k v)
-mapCursorSelectNext =
-    mapCursorNonEmptyCursorL $ nonEmptyCursorSelectNext rebuild make
+mapCursorSelectNext ::
+       (kc -> k)
+    -> (k -> kc)
+    -> (vc -> v)
+    -> MapCursor kc vc k v
+    -> Maybe (MapCursor kc vc k v)
+mapCursorSelectNext f g h =
+    mapCursorNonEmptyCursorL $ nonEmptyCursorSelectNext (rebuild f h) (make g)
 
-mapCursorSelectFirst :: MapCursor k v -> MapCursor k v
-mapCursorSelectFirst =
-    mapCursorNonEmptyCursorL %~ (nonEmptyCursorSelectFirst rebuild make)
+mapCursorSelectFirst ::
+       (kc -> k)
+    -> (k -> kc)
+    -> (vc -> v)
+    -> MapCursor kc vc k v
+    -> MapCursor kc vc k v
+mapCursorSelectFirst f g h =
+    mapCursorNonEmptyCursorL %~
+    (nonEmptyCursorSelectFirst (rebuild f h) (make g))
 
-mapCursorSelectLast :: MapCursor k v -> MapCursor k v
-mapCursorSelectLast =
-    mapCursorNonEmptyCursorL %~ (nonEmptyCursorSelectLast rebuild make)
+mapCursorSelectLast ::
+       (kc -> k)
+    -> (k -> kc)
+    -> (vc -> v)
+    -> MapCursor kc vc k v
+    -> MapCursor kc vc k v
+mapCursorSelectLast f g h =
+    mapCursorNonEmptyCursorL %~
+    (nonEmptyCursorSelectLast (rebuild f h) (make g))
 
-mapCursorSelection :: MapCursor k v -> Int
+mapCursorSelection :: MapCursor kc vc k v -> Int
 mapCursorSelection = nonEmptyCursorSelection . mapCursorList
 
-mapCursorSelectIndex :: Int -> MapCursor k v -> Maybe (MapCursor k v)
-mapCursorSelectIndex i =
-    mapCursorNonEmptyCursorL (nonEmptyCursorSelectIndex rebuild make i)
+mapCursorSelectIndex ::
+       (kc -> k)
+    -> (k -> kc)
+    -> (vc -> v)
+    -> Int
+    -> MapCursor kc vc k v
+    -> Maybe (MapCursor kc vc k v)
+mapCursorSelectIndex f g h i =
+    mapCursorNonEmptyCursorL
+        (nonEmptyCursorSelectIndex (rebuild f h) (make g) i)
 
-mapCursorInsert :: k -> v -> MapCursor k v -> MapCursor k v
+mapCursorInsert :: k -> v -> MapCursor kc vc k v -> MapCursor kc vc k v
 mapCursorInsert k v = mapCursorNonEmptyCursorL %~ (nonEmptyCursorInsert (k, v))
 
-mapCursorAppend :: k -> v -> MapCursor k v -> MapCursor k v
+mapCursorAppend :: k -> v -> MapCursor kc vc k v -> MapCursor kc vc k v
 mapCursorAppend k v = mapCursorNonEmptyCursorL %~ (nonEmptyCursorAppend (k, v))
 
-mapCursorInsertAndSelect :: k -> v -> MapCursor k v -> MapCursor k v
-mapCursorInsertAndSelect k v =
+mapCursorInsertAndSelect ::
+       (kc -> k)
+    -> (vc -> v)
+    -> kc
+    -> v
+    -> MapCursor kc vc k v
+    -> MapCursor kc vc k v
+mapCursorInsertAndSelect f h kc v =
     mapCursorNonEmptyCursorL %~
-    (nonEmptyCursorInsertAndSelect rebuild (make (k, v)))
+    (nonEmptyCursorInsertAndSelect (rebuild f h) (makeKeyValueCursorKey kc v))
 
-mapCursorAppendAndSelect :: k -> v -> MapCursor k v -> MapCursor k v
-mapCursorAppendAndSelect k v =
+mapCursorAppendAndSelect ::
+       (kc -> k)
+    -> (vc -> v)
+    -> kc
+    -> v
+    -> MapCursor kc vc k v
+    -> MapCursor kc vc k v
+mapCursorAppendAndSelect f h kc v =
     mapCursorNonEmptyCursorL %~
-    (nonEmptyCursorAppendAndSelect rebuild (make (k, v)))
+    (nonEmptyCursorAppendAndSelect (rebuild f h) (makeKeyValueCursorKey kc v))
 
 mapCursorRemoveElemAndSelectPrev ::
-       MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
-mapCursorRemoveElemAndSelectPrev =
+       (k -> kc)
+    -> MapCursor kc vc k v
+    -> Maybe (DeleteOrUpdate (MapCursor kc vc k v))
+mapCursorRemoveElemAndSelectPrev g =
     focusPossibleDeleteOrUpdate mapCursorNonEmptyCursorL $
-    nonEmptyCursorRemoveElemAndSelectPrev make
+    nonEmptyCursorRemoveElemAndSelectPrev (make g)
 
 mapCursorDeleteElemAndSelectNext ::
-       MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
-mapCursorDeleteElemAndSelectNext =
+       (k -> kc)
+    -> MapCursor kc vc k v
+    -> Maybe (DeleteOrUpdate (MapCursor kc vc k v))
+mapCursorDeleteElemAndSelectNext g =
     focusPossibleDeleteOrUpdate mapCursorNonEmptyCursorL $
-    nonEmptyCursorDeleteElemAndSelectNext make
+    nonEmptyCursorDeleteElemAndSelectNext (make g)
 
-mapCursorRemoveElem :: MapCursor k v -> DeleteOrUpdate (MapCursor k v)
-mapCursorRemoveElem = mapCursorNonEmptyCursorL $ nonEmptyCursorRemoveElem make
+mapCursorRemoveElem ::
+       (k -> kc) -> MapCursor kc vc k v -> DeleteOrUpdate (MapCursor kc vc k v)
+mapCursorRemoveElem g =
+    mapCursorNonEmptyCursorL $ nonEmptyCursorRemoveElem (make g)
 
-mapCursorDeleteElem :: MapCursor k v -> DeleteOrUpdate (MapCursor k v)
-mapCursorDeleteElem = mapCursorNonEmptyCursorL $ nonEmptyCursorDeleteElem make
+mapCursorDeleteElem ::
+       (k -> kc) -> MapCursor kc vc k v -> DeleteOrUpdate (MapCursor kc vc k v)
+mapCursorDeleteElem g =
+    mapCursorNonEmptyCursorL $ nonEmptyCursorDeleteElem (make g)
 
-mapCursorSearch :: (k -> v -> Bool) -> MapCursor k v -> Maybe (MapCursor k v)
-mapCursorSearch p =
+mapCursorSearch ::
+       (kc -> k)
+    -> (k -> kc)
+    -> (vc -> v)
+    -> (k -> v -> Bool)
+    -> MapCursor kc vc k v
+    -> Maybe (MapCursor kc vc k v)
+mapCursorSearch f g h p =
     mapCursorNonEmptyCursorL $
-    nonEmptyCursorSearch rebuild make (uncurry p . rebuild)
+    nonEmptyCursorSearch (rebuild f h) (make g) (uncurry p . rebuild f h)
 
 mapCursorSelectOrAdd ::
-       (k -> v -> Bool)
-    -> KeyValueCursor k v k v
-    -> MapCursor k v
-    -> MapCursor k v
-mapCursorSelectOrAdd p kvc =
+       (kc -> k)
+    -> (k -> kc)
+    -> (vc -> v)
+    -> (k -> v -> Bool)
+    -> KeyValueCursor kc vc k v
+    -> MapCursor kc vc k v
+    -> MapCursor kc vc k v
+mapCursorSelectOrAdd f g h p kvc =
     mapCursorNonEmptyCursorL %~
-    nonEmptyCursorSelectOrAdd rebuild make (uncurry p . rebuild) kvc
+    nonEmptyCursorSelectOrAdd
+        (rebuild f h)
+        (make g)
+        (uncurry p . rebuild f h)
+        kvc
 
-rebuild :: KeyValueCursor k v k v -> (k, v)
-rebuild = rebuildKeyValueCursor id id
+rebuild :: (kc -> k) -> (vc -> v) -> KeyValueCursor kc vc k v -> (k, v)
+rebuild f h = rebuildKeyValueCursor f h
 
-make :: (k, v) -> KeyValueCursor k v k v
-make = uncurry makeKeyValueCursorKey
+make :: (k -> kc) -> (k, v) -> KeyValueCursor kc vc k v
+make g (k, v) = makeKeyValueCursorKey (g k) v
