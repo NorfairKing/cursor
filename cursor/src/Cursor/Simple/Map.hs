@@ -5,7 +5,8 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Simple.Map
-    ( MapCursor(..)
+    ( MapCursor
+    , MC.mapCursorList
     , makeMapCursor
     , makeMapCursorWithSelection
     , MC.singletonMapCursor
@@ -35,17 +36,8 @@ module Cursor.Simple.Map
     , module Cursor.Simple.Map.KeyValue
     ) where
 
-import GHC.Generics (Generic)
-
-import Data.Validity
-import Data.Validity.Tree ()
-
 import Data.List.NonEmpty (NonEmpty(..))
-import Data.Maybe
 
-import Lens.Micro
-
-import Cursor.List.NonEmpty
 import qualified Cursor.Map as MC
 import Cursor.Simple.Map.KeyValue
 import Cursor.Types

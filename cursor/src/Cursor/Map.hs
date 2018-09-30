@@ -61,11 +61,11 @@ makeMapCursor h = fromJust . makeMapCursorWithSelection h 0
 
 makeMapCursorWithSelection ::
        (k -> kc) -> Int -> NonEmpty (k, v) -> Maybe (MapCursor kc vc k v)
-makeMapCursorWithSelection h ix ne =
+makeMapCursorWithSelection h i ne =
     MapCursor <$>
     makeNonEmptyCursorWithSelection
         (\(k, v) -> makeKeyValueCursorKey (h k) v)
-        ix
+        i
         ne
 
 singletonMapCursor :: kc -> v -> MapCursor kc vc k v
