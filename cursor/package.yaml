@@ -1,5 +1,5 @@
 name: cursor
-version: '0.0.0.0'
+version: '0.0.0.1'
 author: Tom Sydney Kerckhove
 maintainer: syd@cs-syd.eu
 copyright: ! 'Copyright: (c) 2018 Tom Sydney Kerckhove'
@@ -16,7 +16,7 @@ library:
   - base  <5
   - containers
   - microlens
-  - validity
+  - validity >= 0.8.0.0
   - validity-containers
   - validity-text
   - text

@@ -3,38 +3,15 @@ packages:
 - cursor
 - cursor-gen
 extra-deps:
-- git: https://github.com/NorfairKing/validity.git
-  commit: 550327539d84d72ba8be8412025b0074d14c4188
-  subdirs:
-  - genvalidity
-  - genvalidity-aeson
-  - genvalidity-bytestring
-  - genvalidity-containers
-  - genvalidity-hspec
-  - genvalidity-hspec-aeson
-  - genvalidity-hspec-binary
-  - genvalidity-hspec-cereal
-  - genvalidity-hspec-hashable
-  - genvalidity-hspec-optics
-  - genvalidity-path
-  - genvalidity-property
-  - genvalidity-scientific
-  - genvalidity-text
-  - genvalidity-time
-  - genvalidity-unordered-containers
-  - genvalidity-uuid
-  - genvalidity-vector
-  - validity
-  - validity-aeson
-  - validity-bytestring
-  - validity-containers
-  - validity-path
-  - validity-primitive
-  - validity-scientific
-  - validity-text
-  - validity-time
-  - validity-unordered-containers
-  - validity-uuid
-  - validity-vector
+- genvalidity-0.6.1.0
+- genvalidity-containers-0.5.1.0
+- genvalidity-text-0.5.1.0
+- genvalidity-aeson-0.2.0.2
+- genvalidity-property-0.2.1.1
+- genvalidity-hspec-0.6.2.0
+- genvalidity-hspec-optics-0.1.1.0
+- validity-0.8.0.0
+- validity-containers-0.3.1.0
+- validity-text-0.3.1.0
 nix:
   path: [ "nixpkgs=https://github.com/NixOS/nixpkgs/archive/886871538c15681575925a990a3f1b68ed9d5477.tar.gz" ]
