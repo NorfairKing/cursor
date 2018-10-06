@@ -3,8 +3,11 @@ version: '0.0.0.0'
 author: Tom Sydney Kerckhove
 maintainer: syd@cs-syd.eu
 copyright: ! 'Copyright: (c) 2018 Tom Sydney Kerckhove'
-license: AllRightsReserved
+license: MIT
 homepage: https://github.com/NorfairKing/cursor
+category: Cursor
+synopsis: Generators for Purely Functional Cursors
+description: Generators for Purely Functional Cursors for common data structures
 
 
 library:
@@ -12,7 +15,7 @@ library:
   ghc-options: -Wall
   dependencies:
   - QuickCheck 
-  - base 
+  - base <5
   - containers
   - cursor 
   - genvalidity

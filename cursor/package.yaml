@@ -3,15 +3,17 @@ version: '0.0.0.0'
 author: Tom Sydney Kerckhove
 maintainer: syd@cs-syd.eu
 copyright: ! 'Copyright: (c) 2018 Tom Sydney Kerckhove'
-license: AllRightsReserved
+license: MIT
 homepage: https://github.com/NorfairKing/cursor
-
+category: Editor
+synopsis: Purely Functional Cursors
+description: Purely Functional Cursors for common data structures
 
 library:
   source-dirs: src/
   ghc-options: -Wall
   dependencies:
-  - base 
+  - base  <5
   - containers
   - microlens
   - validity
