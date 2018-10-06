@@ -5,11 +5,12 @@
 
 module Cursor.TextField
     ( TextFieldCursor(..)
-    , emptyTextFieldCursor
     , makeTextFieldCursor
     , makeTextFieldCursorWithSelection
     , rebuildTextFieldCursorLines
     , rebuildTextFieldCursor
+    , emptyTextFieldCursor
+    , nullTextFieldCursor
     , textFieldCursorSelection
     , textFieldCursorNonEmptyCursorL
     , textFieldCursorSelectedL
@@ -34,6 +35,7 @@ module Cursor.TextField
 import GHC.Generics (Generic)
 
 import Data.Validity
+import Data.Validity.Text ()
 
 import Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NE
@@ -41,97 +43,82 @@ import Data.Maybe
 import qualified Data.Text as T
 import Data.Text (Text)
 
+import Control.Monad
+
 import Lens.Micro
 
-import Cursor.NonEmpty
+import Cursor.List.NonEmpty
 import Cursor.Text
+import Cursor.Types
 
 newtype TextFieldCursor = TextFieldCursor
-    { textFieldCursorNonEmpty :: NonEmptyCursor TextCursor
+    { textFieldCursorNonEmpty :: NonEmptyCursor TextCursor Text
     } deriving (Show, Eq, Generic)
 
 instance Validity TextFieldCursor where
     validate tfc@TextFieldCursor {..} =
         mconcat
             [ genericValidate tfc
-            , decorate "None of the textcursors contain newlines" $
+            , decorate "None of the texts contain newlines" $
               mconcat $
               NE.toList $
               flip
                   NE.map
                   (NE.zip (fromJust $ NE.nonEmpty [0 ..]) $
-                   rebuildNonEmptyCursor textFieldCursorNonEmpty) $ \(i, tc) ->
+                   rebuildNonEmptyCursor
+                       rebuildTextCursor
+                       textFieldCursorNonEmpty) $ \(i, tc) ->
                   declare
                       (unwords
-                           [ "The text cursor of the line at index"
+                           [ "The text of the line at index"
                            , show (i :: Int)
                            , "does not contain any newlines"
                            ]) $
-                  T.all (not . (== '\n')) $ rebuildTextCursor tc
-            , decorate "The index of all except the current textcursor is 0" $
-              mconcat
-                  [ decorate
-                        "The index of all text cursors of previous lines is 0" $
-                    mconcat $
-                    flip
-                        map
-                        (zip [0 ..] $ nonEmptyCursorPrev textFieldCursorNonEmpty) $ \(i, tc) ->
-                        declare
-                            (unwords
-                                 [ "The text cursor of the previous line at index"
-                                 , show (i :: Int)
-                                 , "has index 0"
-                                 ]) $
-                        textCursorIndex tc == 0
-                  , decorate "The index of all text cursors of next lines is 0" $
-                    mconcat $
-                    flip
-                        map
-                        (zip [0 ..] $ nonEmptyCursorNext textFieldCursorNonEmpty) $ \(i, tc) ->
-                        declare
-                            (unwords
-                                 [ "The text cursor of the next line at index"
-                                 , show (i :: Int)
-                                 , "has index 0"
-                                 ]) $
-                        textCursorIndex tc == 0
-                  ]
+                  T.all (/= '\n') tc
             ]
 
 makeTextFieldCursor :: Text -> TextFieldCursor
-makeTextFieldCursor = makeTextFieldCursorWithSelection 0 0
+makeTextFieldCursor = fromJust . makeTextFieldCursorWithSelection 0 0
 
-makeTextFieldCursorWithSelection :: Int -> Int -> Text -> TextFieldCursor
-makeTextFieldCursorWithSelection x y t =
-    (\tfc -> tfc & textFieldCursorSelectedL %~ textCursorSelectIndex y) $
-    TextFieldCursor
-        { textFieldCursorNonEmpty =
-              makeNonEmptyCursorWithSelection x $
-              let ls = T.splitOn "\n" t
-                -- This is safe because 'splitOn' always returns a nonempty list.
-               in fromJust $ NE.nonEmpty $ map makeTextCursor ls
-        }
+makeTextFieldCursorWithSelection :: Int -> Int -> Text -> Maybe TextFieldCursor
+makeTextFieldCursorWithSelection x y t = do
+    let ls
+    -- This is safe because 'splitOn' always returns a nonempty list.
+         = NE.fromList $ T.split (== '\n') t
+    guard (x >= 0)
+    guard (x < NE.length ls)
+    nec <-
+        makeNonEmptyCursorWithSelection
+                -- This is safe because we already checked that it would work above
+            (makeTextCursorWithSelection y)
+            x
+            ls
+    void $ nonEmptyCursorCurrent nec
+    pure $ TextFieldCursor (nec & nonEmptyCursorElemL %~ fromJust)
 
 rebuildTextFieldCursorLines :: TextFieldCursor -> NonEmpty Text
 rebuildTextFieldCursorLines =
-    NE.map rebuildTextCursor . rebuildNonEmptyCursor . textFieldCursorNonEmpty
+    rebuildNonEmptyCursor rebuildTextCursor . textFieldCursorNonEmpty
 
 rebuildTextFieldCursor :: TextFieldCursor -> Text
 rebuildTextFieldCursor =
     T.intercalate "\n" . NE.toList . rebuildTextFieldCursorLines
+
+emptyTextFieldCursor :: TextFieldCursor
+emptyTextFieldCursor =
+    TextFieldCursor
+        {textFieldCursorNonEmpty = singletonNonEmptyCursor emptyTextCursor}
+
+nullTextFieldCursor :: TextFieldCursor -> Bool
+nullTextFieldCursor = (== emptyTextFieldCursor)
 
 textFieldCursorSelection :: TextFieldCursor -> (Int, Int)
 textFieldCursorSelection tfc =
     ( nonEmptyCursorSelection $ textFieldCursorNonEmpty tfc
     , textCursorIndex $ textFieldCursorNonEmpty tfc ^. nonEmptyCursorElemL)
 
-emptyTextFieldCursor :: TextFieldCursor
-emptyTextFieldCursor =
-    TextFieldCursor
-        {textFieldCursorNonEmpty = singletonNonEmptyCursor $ makeTextCursor ""}
-
 textFieldCursorNonEmptyCursorL ::
-       Lens' TextFieldCursor (NonEmptyCursor TextCursor)
+       Lens' TextFieldCursor (NonEmptyCursor TextCursor Text)
 textFieldCursorNonEmptyCursorL =
     lens textFieldCursorNonEmpty $ \tfc lec ->
         tfc {textFieldCursorNonEmpty = lec}
@@ -141,14 +128,16 @@ textFieldCursorSelectedL = textFieldCursorNonEmptyCursorL . nonEmptyCursorElemL
 
 textFieldCursorSelectPrevLine :: TextFieldCursor -> Maybe TextFieldCursor
 textFieldCursorSelectPrevLine =
-    moveMWhileKeepingSelection nonEmptyCursorSelectPrev
+    moveMWhileKeepingSelection $
+    nonEmptyCursorSelectPrev rebuildTextCursor unsafeMakeTextCursor
 
 textFieldCursorSelectNextLine :: TextFieldCursor -> Maybe TextFieldCursor
 textFieldCursorSelectNextLine =
-    moveMWhileKeepingSelection nonEmptyCursorSelectNext
+    moveMWhileKeepingSelection $
+    nonEmptyCursorSelectNext rebuildTextCursor unsafeMakeTextCursor
 
 moveMWhileKeepingSelection ::
-       (NonEmptyCursor TextCursor -> Maybe (NonEmptyCursor TextCursor))
+       (NonEmptyCursor TextCursor Text -> Maybe (NonEmptyCursor TextCursor Text))
     -> TextFieldCursor
     -> Maybe TextFieldCursor
 moveMWhileKeepingSelection movement tfc = do
@@ -159,14 +148,16 @@ moveMWhileKeepingSelection movement tfc = do
 
 textFieldCursorSelectFirstLine :: TextFieldCursor -> TextFieldCursor
 textFieldCursorSelectFirstLine =
-    moveWhileKeepingSelection nonEmptyCursorSelectFirst
+    moveWhileKeepingSelection $
+    nonEmptyCursorSelectFirst rebuildTextCursor unsafeMakeTextCursor
 
 textFieldCursorSelectLastLine :: TextFieldCursor -> TextFieldCursor
 textFieldCursorSelectLastLine =
-    moveWhileKeepingSelection nonEmptyCursorSelectLast
+    moveWhileKeepingSelection $
+    nonEmptyCursorSelectLast rebuildTextCursor unsafeMakeTextCursor
 
 moveWhileKeepingSelection ::
-       (NonEmptyCursor TextCursor -> NonEmptyCursor TextCursor)
+       (NonEmptyCursor TextCursor Text -> NonEmptyCursor TextCursor Text)
     -> TextFieldCursor
     -> TextFieldCursor
 moveWhileKeepingSelection movement tfc =
@@ -189,76 +180,99 @@ textFieldCursorSelectIndexOnLine :: Int -> TextFieldCursor -> TextFieldCursor
 textFieldCursorSelectIndexOnLine ix_ =
     textFieldCursorSelectedL %~ textCursorSelectIndex ix_
 
-textFieldCursorInsertChar :: Char -> TextFieldCursor -> TextFieldCursor
-textFieldCursorInsertChar c =
+textFieldCursorInsertChar :: Char -> Maybe TextFieldCursor -> TextFieldCursor
+textFieldCursorInsertChar c mtfc =
     case c of
-        '\n' -> textFieldCursorInsertNewline
-        _ -> textFieldCursorSelectedL %~ textCursorInsert c
+        '\n' -> textFieldCursorInsertNewline mtfc
+        _ ->
+            (fromMaybe emptyTextFieldCursor mtfc) &
+            textFieldCursorSelectedL %~ (fromJust . textCursorInsert c)
 
-textFieldCursorAppendChar :: Char -> TextFieldCursor -> TextFieldCursor
-textFieldCursorAppendChar c =
+textFieldCursorAppendChar :: Char -> Maybe TextFieldCursor -> TextFieldCursor
+textFieldCursorAppendChar c mtfc =
     case c of
-        '\n' -> textFieldCursorAppendNewline
-        _ -> textFieldCursorSelectedL %~ textCursorAppend c
+        '\n' -> textFieldCursorAppendNewline mtfc
+        _ ->
+            (fromMaybe emptyTextFieldCursor mtfc) &
+            textFieldCursorSelectedL %~ (fromJust . textCursorAppend c)
 
-textFieldCursorInsertNewline :: TextFieldCursor -> TextFieldCursor
-textFieldCursorInsertNewline =
-    textFieldCursorNonEmptyCursorL %~
-    (\lec@NonEmptyCursor {..} ->
-         let (tc1, tc2) = textCursorSplit nonEmptyCursorCurrent
-          in lec
-                 { nonEmptyCursorPrev =
-                       textCursorSelectIndex 0 tc1 : nonEmptyCursorPrev
-                 , nonEmptyCursorCurrent = tc2
-                 })
-
-textFieldCursorAppendNewline :: TextFieldCursor -> TextFieldCursor
-textFieldCursorAppendNewline =
-    textFieldCursorNonEmptyCursorL %~
-    (\lec@NonEmptyCursor {..} ->
-         let (tc1, tc2) = textCursorSplit nonEmptyCursorCurrent
-          in lec
-                 { nonEmptyCursorCurrent = tc1
-                 , nonEmptyCursorNext = textCursorSelectIndex 0 tc2 : nonEmptyCursorNext
-                 })
-
-textFieldCursorRemove :: TextFieldCursor -> Maybe TextFieldCursor
-textFieldCursorRemove =
-    textFieldCursorNonEmptyCursorL
+textFieldCursorInsertNewline :: Maybe TextFieldCursor -> TextFieldCursor
+textFieldCursorInsertNewline mtfc =
+    let tfc = fromMaybe emptyTextFieldCursor mtfc
+     in tfc &
+        textFieldCursorNonEmptyCursorL %~
         (\lec@NonEmptyCursor {..} ->
-             case textCursorRemove nonEmptyCursorCurrent of
-                 Nothing ->
-                     case nonEmptyCursorPrev of
-                         [] -> Nothing
-                         (pl:pls) ->
-                             Just $
-                             lec
-                                 { nonEmptyCursorPrev = pls
-                                 , nonEmptyCursorCurrent =
-                                       textCursorCombine
-                                           pl
-                                           nonEmptyCursorCurrent
-                                 }
-                 Just ctc -> Just $ lec & nonEmptyCursorElemL .~ ctc)
+             let (tc1, tc2) = textCursorSplit nonEmptyCursorCurrent
+              in lec
+                     { nonEmptyCursorPrev =
+                           rebuildTextCursor tc1 : nonEmptyCursorPrev
+                     , nonEmptyCursorCurrent = tc2
+                     })
 
-textFieldCursorDelete :: TextFieldCursor -> Maybe TextFieldCursor
-textFieldCursorDelete =
-    textFieldCursorNonEmptyCursorL
+textFieldCursorAppendNewline :: Maybe TextFieldCursor -> TextFieldCursor
+textFieldCursorAppendNewline mtfc =
+    let tfc = fromMaybe emptyTextFieldCursor mtfc
+     in tfc &
+        textFieldCursorNonEmptyCursorL %~
         (\lec@NonEmptyCursor {..} ->
-             case textCursorDelete nonEmptyCursorCurrent of
-                 Nothing ->
-                     case nonEmptyCursorNext of
-                         [] -> Nothing
-                         (pl:pls) ->
-                             Just $
-                             lec
-                                 { nonEmptyCursorCurrent =
-                                       textCursorCombine
-                                           nonEmptyCursorCurrent
-                                           pl
-                                 , nonEmptyCursorNext = pls
-                                 }
-                 Just ctc -> Just $ lec & nonEmptyCursorElemL .~ ctc)
+             let (tc1, tc2) = textCursorSplit nonEmptyCursorCurrent
+              in lec
+                     { nonEmptyCursorCurrent = tc1
+                     , nonEmptyCursorNext =
+                           rebuildTextCursor tc2 : nonEmptyCursorNext
+                     })
+
+textFieldCursorRemove ::
+       TextFieldCursor -> Maybe (DeleteOrUpdate TextFieldCursor)
+textFieldCursorRemove tfc =
+    if nullTextFieldCursor tfc
+        then Just Deleted
+        else focusPossibleDeleteOrUpdate
+                 textFieldCursorNonEmptyCursorL
+                 (\lec@NonEmptyCursor {..} ->
+                      case textCursorRemove nonEmptyCursorCurrent of
+                          Nothing ->
+                              case nonEmptyCursorPrev of
+                                  [] -> Nothing
+                                  (pl:pls) ->
+                                      Just $
+                                      Updated $
+                                      lec
+                                          { nonEmptyCursorPrev = pls
+                                          , nonEmptyCursorCurrent =
+                                                textCursorCombine
+                                                    (unsafeMakeTextCursor pl)
+                                                    nonEmptyCursorCurrent
+                                          }
+                          Just ctc ->
+                              Just $ Updated $ lec & nonEmptyCursorElemL .~ ctc)
+                 tfc
+
+textFieldCursorDelete ::
+       TextFieldCursor -> Maybe (DeleteOrUpdate TextFieldCursor)
+textFieldCursorDelete tfc =
+    if nullTextFieldCursor tfc
+        then Just Deleted
+        else focusPossibleDeleteOrUpdate
+                 textFieldCursorNonEmptyCursorL
+                 (\lec@NonEmptyCursor {..} ->
+                      case textCursorDelete nonEmptyCursorCurrent of
+                          Nothing ->
+                              case nonEmptyCursorNext of
+                                  [] -> Nothing
+                                  (pl:pls) ->
+                                      Just $
+                                      Updated $
+                                      lec
+                                          { nonEmptyCursorCurrent =
+                                                textCursorCombine
+                                                    nonEmptyCursorCurrent
+                                                    (unsafeMakeTextCursor pl)
+                                          , nonEmptyCursorNext = pls
+                                          }
+                          Just ctc ->
+                              Just $ Updated $ lec & nonEmptyCursorElemL .~ ctc)
+                 tfc
 
 textFieldCursorSelectStartOfLine :: TextFieldCursor -> TextFieldCursor
 textFieldCursorSelectStartOfLine =
@@ -266,3 +280,7 @@ textFieldCursorSelectStartOfLine =
 
 textFieldCursorSelectEndOfLine :: TextFieldCursor -> TextFieldCursor
 textFieldCursorSelectEndOfLine = textFieldCursorSelectedL %~ textCursorSelectEnd
+
+-- Unsafe: only use for movements.
+unsafeMakeTextCursor :: Text -> TextCursor
+unsafeMakeTextCursor = fromJust . makeTextCursor

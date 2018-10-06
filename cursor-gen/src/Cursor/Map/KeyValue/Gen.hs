@@ -4,17 +4,17 @@ module Cursor.Map.KeyValue.Gen
     (
     ) where
 
-import Test.QuickCheck
-
 import Data.GenValidity
 
 import Cursor.Map.KeyValue
 
-instance (GenUnchecked k, GenUnchecked v) =>
-         GenUnchecked (KeyValueCursor k v)
+instance (GenUnchecked kc, GenUnchecked vc, GenUnchecked k, GenUnchecked v) =>
+         GenUnchecked (KeyValueCursor kc vc k v)
 
-instance (GenValid k, GenValid v) => GenValid (KeyValueCursor k v) where
-    genValid = (KeyValueCursor <$> genValid <*> genValid <*> genValid) `suchThat` isValid
+instance (GenValid kc, GenValid vc, GenValid k, GenValid v) =>
+         GenValid (KeyValueCursor kc vc k v) where
+    genValid = genValidStructurallyWithoutExtraChecking
+    shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
 instance GenUnchecked KeyValueToggle
 

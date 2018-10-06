@@ -28,10 +28,12 @@ spec = do
     describe "rebuildTextCursor" $ do
         it "produces valid lists" $ producesValidsOnValids rebuildTextCursor
         it "is the inverse of makeTextCursor" $
-            inverseFunctionsOnValid makeTextCursor rebuildTextCursor
+            inverseFunctionsIfFirstSucceedsOnValid
+                makeTextCursor
+                rebuildTextCursor
         it "is the inverse of makeTextCursorWithSelection for any index" $
             forAllUnchecked $ \i ->
-                inverseFunctionsOnValid
+                inverseFunctionsIfFirstSucceedsOnValid
                     (makeTextCursorWithSelection i)
                     rebuildTextCursor
     describe "textCursorNull" $
@@ -59,8 +61,7 @@ spec = do
         it
             "produces a cursor that has the given selection for valid selections in the cursor" $
             forAllValid $ \tc ->
-                forAll
-                    (choose (0, textCursorLength tc)) $ \i ->
+                forAll (choose (0, textCursorLength tc)) $ \i ->
                     textCursorIndex (textCursorSelectIndex i tc) `shouldBe` i
     describe "textCursorSelectStart" $ do
         it "produces valid cursors" $

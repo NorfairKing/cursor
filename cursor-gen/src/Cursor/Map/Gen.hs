@@ -5,17 +5,18 @@ module Cursor.Map.Gen
     (
     ) where
 
-import Test.QuickCheck
-
 import Data.GenValidity
 import Data.GenValidity.Containers ()
 
 import Cursor.Map
 
+import Cursor.List.NonEmpty.Gen ()
 import Cursor.Map.KeyValue.Gen ()
-import Cursor.NonEmpty.Gen ()
 
-instance (GenUnchecked k, GenUnchecked v) => GenUnchecked (MapCursor k v)
+instance (GenUnchecked kc, GenUnchecked vc, GenUnchecked k, GenUnchecked v) =>
+         GenUnchecked (MapCursor kc vc k v)
 
-instance (GenValid k, GenValid v) => GenValid (MapCursor k v) where
-    genValid = (MapCursor <$> genValid) `suchThat` isValid
+instance (GenValid kc, GenValid vc, GenValid k, GenValid v) =>
+         GenValid (MapCursor kc vc k v) where
+    genValid = genValidStructurallyWithoutExtraChecking
+    shrinkValid = shrinkValidStructurallyWithoutExtraFiltering

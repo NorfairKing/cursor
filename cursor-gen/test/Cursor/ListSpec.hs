@@ -35,16 +35,18 @@ spec = do
             inverseFunctions (makeListCursor @Int) rebuildListCursor
         it "is the inverse of makeListCursorWithSelection for any index" $
             forAllUnchecked $ \i ->
-                inverseFunctions
+                inverseFunctionsIfFirstSucceeds
                     (makeListCursorWithSelection @Int i)
                     rebuildListCursor
     describe "listCursorNull" $
-        it "produces valid bools" $ producesValidsOnValids (listCursorNull @Double)
+        it "produces valid bools" $
+        producesValidsOnValids (listCursorNull @Double)
     describe "listCursorLength" $
-        it "produces valid bools" $ producesValidsOnValids (listCursorLength @Double)
+        it "produces valid bools" $
+        producesValidsOnValids (listCursorLength @Double)
     describe "listCursorIndex" $
-        it "produces valid indices" $ producesValidsOnValids (listCursorIndex @Double)
-
+        it "produces valid indices" $
+        producesValidsOnValids (listCursorIndex @Double)
     describe "listCursorSelectPrev" $ do
         it "produces valid cursors" $
             producesValidsOnValids (listCursorSelectPrev @Double)
@@ -73,13 +75,13 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids (listCursorSelectStart @Double)
         it "is a movement" $ isMovement listCursorSelectStart
-        it "is idempotent" $ idempotent (listCursorSelectStart @Double)
+        it "is idempotent" $ idempotentOnValid (listCursorSelectStart @Double)
         it "selects the starting position" pending
     describe "listCursorSelectEnd" $ do
         it "produces valid cursors" $
             producesValidsOnValids (listCursorSelectEnd @Double)
         it "is a movement" $ isMovement listCursorSelectEnd
-        it "is idempotent" $ idempotent (listCursorSelectEnd @Double)
+        it "is idempotent" $ idempotentOnValid (listCursorSelectEnd @Double)
         it "selects the end position" pending
     describe "listCursorInsert" $ do
         it "produces valids" $

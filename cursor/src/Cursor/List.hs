@@ -42,12 +42,18 @@ emptyListCursor :: ListCursor a
 emptyListCursor = ListCursor {listCursorPrev = [], listCursorNext = []}
 
 makeListCursor :: [a] -> ListCursor a
-makeListCursor = makeListCursorWithSelection 0
+makeListCursor as = ListCursor {listCursorPrev = [], listCursorNext = as}
 
-makeListCursorWithSelection :: Int -> [a] -> ListCursor a
-makeListCursorWithSelection i ls =
-    ListCursor
-        {listCursorPrev = reverse $ take i ls, listCursorNext = drop i ls}
+makeListCursorWithSelection :: Int -> [a] -> Maybe (ListCursor a)
+makeListCursorWithSelection i as
+    | i < 0 = Nothing
+    | i > length as = Nothing
+    | otherwise =
+        Just
+            ListCursor
+                { listCursorPrev = reverse $ take i as
+                , listCursorNext = drop i as
+                }
 
 rebuildListCursor :: ListCursor a -> [a]
 rebuildListCursor ListCursor {..} = reverse listCursorPrev ++ listCursorNext
@@ -55,7 +61,7 @@ rebuildListCursor ListCursor {..} = reverse listCursorPrev ++ listCursorNext
 listCursorNull :: ListCursor a -> Bool
 listCursorNull ListCursor {..} = null listCursorPrev && null listCursorNext
 
-listCursorLength :: ListCursor a ->Int
+listCursorLength :: ListCursor a -> Int
 listCursorLength = length . rebuildListCursor
 
 listCursorIndex :: ListCursor a -> Int

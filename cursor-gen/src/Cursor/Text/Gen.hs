@@ -17,7 +17,8 @@ import Cursor.List.Gen
 instance GenUnchecked TextCursor
 
 instance GenValid TextCursor where
-    genValid = (TextCursor <$> genValid) `suchThat` isValid
+    genValid = genValidStructurally
+    shrinkValid = shrinkValidStructurally
 
 textCursorWithGen :: Gen Char -> Gen TextCursor
 textCursorWithGen gen = TextCursor <$> listCursorWithGen gen

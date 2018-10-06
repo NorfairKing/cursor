@@ -10,15 +10,6 @@ homepage: https://github.com/NorfairKing/cursor
 library:
   source-dirs: src/
   ghc-options: -Wall
-  exposed-modules:
-  - Cursor.Forest.Gen
-  - Cursor.List.Gen
-  - Cursor.Map.Gen
-  - Cursor.Map.KeyValue.Gen
-  - Cursor.NonEmpty.Gen
-  - Cursor.Text.Gen
-  - Cursor.TextField.Gen
-  - Cursor.Tree.Gen
   dependencies:
   - QuickCheck 
   - base 
@@ -27,6 +18,7 @@ library:
   - genvalidity
   - genvalidity-containers
   - genvalidity-text
+  - text
 
 tests:
   cursor-test:
@@ -40,10 +32,12 @@ tests:
     dependencies:
     - QuickCheck
     - base
+    - containers
     - cursor
     - cursor-gen
     - genvalidity-hspec
     - genvalidity-hspec-optics
     - hspec
-    - text
+    - microlens
     - pretty-show
+    - text

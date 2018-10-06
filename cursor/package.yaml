@@ -10,19 +10,11 @@ homepage: https://github.com/NorfairKing/cursor
 library:
   source-dirs: src/
   ghc-options: -Wall
-  exposed-modules:
-  - Cursor.Forest
-  - Cursor.List
-  - Cursor.Map
-  - Cursor.Map.KeyValue
-  - Cursor.NonEmpty
-  - Cursor.Text
-  - Cursor.TextField
-  - Cursor.Tree
   dependencies:
   - base 
   - containers
   - microlens
   - validity
   - validity-containers
+  - validity-text
   - text

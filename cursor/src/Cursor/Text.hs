@@ -41,17 +41,25 @@ newtype TextCursor = TextCursor
     { textCursorList :: ListCursor Char
     } deriving (Show, Eq, Generic)
 
-instance Validity TextCursor
+instance Validity TextCursor where
+    validate (TextCursor lc) =
+        mconcat
+            [ genericValidate lc
+            , decorateList (rebuildListCursor lc) $ \c ->
+                  declare "The character is not a newline character" $ c /= '\n'
+            ]
 
 emptyTextCursor :: TextCursor
 emptyTextCursor = TextCursor emptyListCursor
 
-makeTextCursor :: Text -> TextCursor
-makeTextCursor = makeTextCursorWithSelection 0
+makeTextCursor :: Text -> Maybe TextCursor
+makeTextCursor t = makeTextCursorWithSelection (T.length t) t
 
-makeTextCursorWithSelection :: Int -> Text -> TextCursor
-makeTextCursorWithSelection i =
-    TextCursor . makeListCursorWithSelection i . T.unpack
+makeTextCursorWithSelection :: Int -> Text -> Maybe TextCursor
+makeTextCursorWithSelection i t =
+    case T.split (== '\n') t of
+        [l] -> TextCursor <$> makeListCursorWithSelection i (T.unpack l)
+        _ -> Nothing
 
 rebuildTextCursor :: TextCursor -> Text
 rebuildTextCursor = T.pack . rebuildListCursor . textCursorList
@@ -93,11 +101,13 @@ textCursorPrevChar = listCursorPrevItem . textCursorList
 textCursorNextChar :: TextCursor -> Maybe Char
 textCursorNextChar = listCursorNextItem . textCursorList
 
-textCursorInsert :: Char -> TextCursor -> TextCursor
-textCursorInsert c = textCursorListCursorL %~ listCursorInsert c
+textCursorInsert :: Char -> TextCursor -> Maybe TextCursor
+textCursorInsert '\n' _ = Nothing
+textCursorInsert c tc = Just (tc & textCursorListCursorL %~ listCursorInsert c)
 
-textCursorAppend :: Char -> TextCursor -> TextCursor
-textCursorAppend c = textCursorListCursorL %~ listCursorAppend c
+textCursorAppend :: Char -> TextCursor -> Maybe TextCursor
+textCursorAppend '\n' _ = Nothing
+textCursorAppend c tc = Just (tc & textCursorListCursorL %~ listCursorAppend c)
 
 textCursorRemove :: TextCursor -> Maybe TextCursor
 textCursorRemove = textCursorListCursorL listCursorRemove
