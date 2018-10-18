@@ -25,3 +25,9 @@ spec = do
     describe "treeCursorToggleCurrentForest" $
         it "produces valid cursors" $
         producesValidsOnValids $ treeCursorToggleCurrentForest @Double @Double
+    describe "treeCursorOpenCurrentForestRecursively" $
+        it "produces valid cursors" $
+        producesValidsOnValids $ treeCursorOpenCurrentForestRecursively @Double @Double
+    describe "treeCursorToggleCurrentForestRecursively" $
+        it "produces valid cursors" $
+        producesValidsOnValids $ treeCursorToggleCurrentForestRecursively @Double @Double
