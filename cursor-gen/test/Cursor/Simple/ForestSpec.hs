@@ -12,7 +12,7 @@ import Data.Tree
 import Control.Monad (unless)
 
 import Test.Hspec
-
+import Test.Hspec.QuickCheck
 import Test.QuickCheck
 import Test.Validity
 import Test.Validity.Optics
@@ -29,31 +29,33 @@ import Cursor.Simple.Forest.Gen ()
 spec :: Spec
 spec = do
     eqSpec @(SFC.ForestCursor Int)
-    genValidSpec @(SFC.ForestCursor Double)
-    shrinkValidSpecWithLimit @(SFC.ForestCursor Double) 100
+    genValidSpec @(SFC.ForestCursor Rational)
+    modifyMaxSize (`quot` 2) $
+        modifyMaxSuccess (`quot` 2) $
+        shrinkValidSpecWithLimit @(SFC.ForestCursor Rational) 10
     describe "makeForestCursor" $
         it "produces valid cursors" $
-        producesValidsOnValids (makeForestCursor @Double)
+        producesValidsOnValids (makeForestCursor @Rational)
     describe "rebuildForestCursor" $ do
         it "produces valid forests" $
-            producesValidsOnValids (rebuildForestCursor @Double)
+            producesValidsOnValids (rebuildForestCursor @Rational)
         it "is the inverse of makeForestCursor for integers" $
             inverseFunctions (makeForestCursor @Int) rebuildForestCursor
     describe "forestCursorLestCursorL" $
-        lensSpecOnValid (forestCursorListCursorL @Double @Double)
+        lensSpecOnValid (forestCursorListCursorL @Rational @Rational)
     describe "forestCursorSelectedTreeL" $
-        lensSpecOnValid (forestCursorSelectedTreeL @Double @Double)
+        lensSpecOnValid (forestCursorSelectedTreeL @Rational @Rational)
     describe "forestCursorSelection" $ do
         it "produces valid ints" $
-            producesValidsOnValids (forestCursorSelection @Double @Double)
+            producesValidsOnValids (forestCursorSelection @Rational @Rational)
         it "returns the index of the currently selected element" pending
     describe "forestCursorSelectIndex" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorSelectIndex @Double)
+            producesValidsOnValids2 (forestCursorSelectIndex @Rational)
         it "is the identity function when given the current selection" $
             forAllValid $ \fc ->
                 forestCursorSelectIndex (forestCursorSelection fc) fc `shouldBe`
-                Just (fc :: SFC.ForestCursor Double)
+                Just (fc :: SFC.ForestCursor Rational)
         it "returns selects the element at the given index" pending
     movementsSpec
     collapseSpec
@@ -66,27 +68,27 @@ movementsSpec :: Spec
 movementsSpec = do
     describe "forestCursorSelectPrevTreeCursor" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectPrevTreeCursor @Double
+            producesValidsOnValids $ forestCursorSelectPrevTreeCursor @Rational
         it "is a movement" $ isMovementM forestCursorSelectPrevTreeCursor
         it "selects the previous tree cursor" pending
     describe "forestCursorSelectNextTreeCursor" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectNextTreeCursor @Double
+            producesValidsOnValids $ forestCursorSelectNextTreeCursor @Rational
         it "is a movement" $ isMovementM forestCursorSelectNextTreeCursor
         it "selects the next tree" pending
     describe "forestCursorSelectFirstTreeCursor" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectFirstTreeCursor @Double
+            producesValidsOnValids $ forestCursorSelectFirstTreeCursor @Rational
         it "is a movement" $ isMovement forestCursorSelectFirstTreeCursor
         it "selects the first tree" pending
     describe "forestCursorSelectLastTreeCursor" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectLastTreeCursor @Double
+            producesValidsOnValids $ forestCursorSelectLastTreeCursor @Rational
         it "is a movement" $ isMovement forestCursorSelectLastTreeCursor
         it "selects the last tree" pending
     describe "forestCursorSelectPrev" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectPrev @Double
+            producesValidsOnValids $ forestCursorSelectPrev @Rational
         it "is a movement" $ isMovementM forestCursorSelectPrev
         it "selects the previous node" pending
         -- TODO example with a collapsed tree
@@ -142,7 +144,7 @@ movementsSpec = do
                 Just actual -> actual `forestShouldBe` expected
     describe "forestCursorSelectNext" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectNext @Double
+            producesValidsOnValids $ forestCursorSelectNext @Rational
         it "is a movement" $ isMovementM forestCursorSelectNext
         it "selects the next node" pending
         it "Works for this classic example" $
@@ -197,29 +199,29 @@ movementsSpec = do
                 Just actual -> actual `forestShouldBe` expected
     describe "forestCursorSelectPrevOnSameLevel" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectPrevOnSameLevel @Double
+            producesValidsOnValids $ forestCursorSelectPrevOnSameLevel @Rational
         it "is a movement" $ isMovementM forestCursorSelectPrevOnSameLevel
         it
             "selects the previous node on the same level as the current node"
             pending
     describe "forestCursorSelectNextOnSameLevel" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectNextOnSameLevel @Double
+            producesValidsOnValids $ forestCursorSelectNextOnSameLevel @Rational
         it "is a movement" $ isMovementM forestCursorSelectNextOnSameLevel
         it "selects the next node on the same level as the current node" pending
     describe "forestCursorSelectFirst" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectFirst @Double
+            producesValidsOnValids $ forestCursorSelectFirst @Rational
         it "is a movement" $ isMovement forestCursorSelectFirst
         it "selects the first node in the forest" pending
     describe "forestCursorSelectLast" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectLast @Double
+            producesValidsOnValids $ forestCursorSelectLast @Rational
         it "is a movement" $ isMovement forestCursorSelectLast
         it "selects the last node in the forest" pending
     describe "forestCursorSelectBelowAtPos" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 $ forestCursorSelectBelowAtPos @Double
+            producesValidsOnValids2 $ forestCursorSelectBelowAtPos @Rational
         it "is a movement for any index" $
             forAllValid $ \i -> isMovementM $ forestCursorSelectBelowAtPos i
         it
@@ -227,12 +229,12 @@ movementsSpec = do
             pending
     describe "forestCursorSelectBelowAtStart" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectBelowAtStart @Double
+            producesValidsOnValids $ forestCursorSelectBelowAtStart @Rational
         it "is a movement" $ isMovementM forestCursorSelectBelowAtStart
         it "selects the first child of the selected node" pending
     describe "forestCursorSelectBelowAtEnd" $ do
         it "produces valid cursors" $
-            producesValidsOnValids $ forestCursorSelectBelowAtEnd @Double
+            producesValidsOnValids $ forestCursorSelectBelowAtEnd @Rational
         it "is a movement" $ isMovementM forestCursorSelectBelowAtEnd
         it "selects the first child of the selected node" pending
 
@@ -240,132 +242,135 @@ collapseSpec :: Spec
 collapseSpec = do
     describe "forestCursorOpenCurrentForest" $
         it "produces valid cursors" $
-        producesValidsOnValids $ forestCursorOpenCurrentForest @Double @Double
+        producesValidsOnValids $
+        forestCursorOpenCurrentForest @Rational @Rational
     describe "forestCursorCloseCurrentForest" $
         it "produces valid cursors" $
-        producesValidsOnValids $ forestCursorCloseCurrentForest @Double @Double
+        producesValidsOnValids $
+        forestCursorCloseCurrentForest @Rational @Rational
     describe "forestCursorToggleCurrentForest" $
         it "produces valid cursors" $
-        producesValidsOnValids $ forestCursorToggleCurrentForest @Double @Double
+        producesValidsOnValids $
+        forestCursorToggleCurrentForest @Rational @Rational
 
 insertSpec :: Spec
 insertSpec = do
     describe "forestCursorInsertEntireTree" $ do
         it "produces valid cursors" $
             producesValidsOnValids2
-                (forestCursorInsertEntireTree @Double @Double)
+                (forestCursorInsertEntireTree @Rational @Rational)
         it
             "inserts a tree cursor before the currently selected tree cursor"
             pending
     describe "forestCursorInsertAndSelectTreeCursor" $ do
         it "produces valid cursors" $
             producesValidsOnValids2
-                (forestCursorInsertAndSelectTreeCursor @Double)
+                (forestCursorInsertAndSelectTreeCursor @Rational)
         it
             "inserts a tree cursor before the currently selected tree cursor and selects it"
             pending
     describe "forestCursorAppendEntireTree" $ do
         it "produces valid cursors" $
             producesValidsOnValids2
-                (forestCursorAppendEntireTree @Double @Double)
+                (forestCursorAppendEntireTree @Rational @Rational)
         it "appends a tree after the currently selected tree cursor" pending
     describe "forestCursorAppendAndSelectTreeCursor" $ do
         it "produces valid cursors" $
             producesValidsOnValids2
-                (forestCursorAppendAndSelectTreeCursor @Double)
+                (forestCursorAppendAndSelectTreeCursor @Rational)
         it
             "appends a tree cursor after the currently selected tree cursor and selects it"
             pending
     describe "forestCursorInsertTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorInsertTree @Double @Double)
+            producesValidsOnValids2 (forestCursorInsertTree @Rational @Rational)
         it "inserts a tree before the currently selected tree" pending
     describe "forestCursorInsertAndSelectTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorInsertAndSelectTree @Double)
+            producesValidsOnValids2 (forestCursorInsertAndSelectTree @Rational)
         it
             "inserts a tree before the currently selected tree and selects it"
             pending
     describe "forestCursorAppendTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAppendTree @Double @Double)
+            producesValidsOnValids2 (forestCursorAppendTree @Rational @Rational)
         it "appends a tree after the currently selected tree " pending
     describe "forestCursorAppendAndSelectTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAppendAndSelectTree @Double)
+            producesValidsOnValids2 (forestCursorAppendAndSelectTree @Rational)
         it
             "appends a tree after the currently selected tree and selects it"
             pending
     describe "forestCursorInsert" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorInsert @Double @Double)
+            producesValidsOnValids2 (forestCursorInsert @Rational @Rational)
         it "inserts a node before the currently selected node" pending
     describe "forestCursorInsertAndSelect" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorInsertAndSelect @Double)
+            producesValidsOnValids2 (forestCursorInsertAndSelect @Rational)
         it
             "inserts a node before the currently selected node and selects it"
             pending
     describe "forestCursorAppend" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAppend @Double @Double)
+            producesValidsOnValids2 (forestCursorAppend @Rational @Rational)
         it "appends a node after the currently selected node" pending
     describe "forestCursorAppendAndSelect" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAppendAndSelect @Double)
+            producesValidsOnValids2 (forestCursorAppendAndSelect @Rational)
         it
             "appends a node after the currently selected node and selects it"
             pending
     describe "forestCursorAddChildTreeToNodeAtPos" $ do
         it "produces valid cursors" $
             producesValidsOnValids3 $
-            forestCursorAddChildTreeToNodeAtPos @Double @Double
+            forestCursorAddChildTreeToNodeAtPos @Rational @Rational
         it
             "adds a child tree to a node at the given position in the children of that node"
             pending
     describe "forestCursorAddChildTreeToNodeAtStart" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 $
-            forestCursorAddChildTreeToNodeAtStart @Double @Double
+            forestCursorAddChildTreeToNodeAtStart @Rational @Rational
         it
             "adds a child tree to a node at the start the children of that node"
             pending
     describe "forestCursorAddChildTreeToNodeAtEnd" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 $
-            forestCursorAddChildTreeToNodeAtEnd @Double @Double
+            forestCursorAddChildTreeToNodeAtEnd @Rational @Rational
         it
             "adds a child tree to a node at the end the children of that node"
             pending
     describe "forestCursorAddChildToNodeAtPos" $ do
         it "produces valid cursors" $
             producesValidsOnValids3 $
-            forestCursorAddChildToNodeAtPos @Double @Double
+            forestCursorAddChildToNodeAtPos @Rational @Rational
         it
             "adds a child to a node at the given position in the children of that node"
             pending
     describe "forestCursorAddChildToNodeAtStart" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 $
-            forestCursorAddChildToNodeAtStart @Double @Double
+            forestCursorAddChildToNodeAtStart @Rational @Rational
         it
             "adds a child to a node at the start the children of that node"
             pending
     describe "forestCursorAddChildToNodeAtEnd" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 $
-            forestCursorAddChildToNodeAtEnd @Double @Double
+            forestCursorAddChildToNodeAtEnd @Rational @Rational
         it "adds a child to a node at the end the children of that node" pending
     describe "forestCursorAddRoot" $ do
         it "produces valid cursors" $
-            producesValidsOnValids2 (forestCursorAddRoot @Double)
+            producesValidsOnValids2 (forestCursorAddRoot @Rational)
         it "houses the entire forest under the given node" pending
 
 swapSpec :: Spec
 swapSpec = do
     describe "forestCursorSwapPrev" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorSwapPrev @Double @Double)
+            producesValidsOnValids (forestCursorSwapPrev @Rational @Rational)
         it "works on the example from the docs" $
             let start =
                     ForestCursor
@@ -407,11 +412,11 @@ swapSpec = do
             pending
         it "reverts forestCursorSwapNext" $
             inverseFunctionsIfSucceedOnValid
-                (forestCursorSwapNext @Double @Double)
-                (forestCursorSwapPrev @Double @Double)
+                (forestCursorSwapNext @Rational @Rational)
+                (forestCursorSwapPrev @Rational @Rational)
     describe "forestCursorSwapNext" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorSwapNext @Double @Double)
+            producesValidsOnValids (forestCursorSwapNext @Rational @Rational)
         it "works on the example from the docs" $
             let start =
                     ForestCursor
@@ -451,14 +456,15 @@ swapSpec = do
         it "swaps the current node with the next node on the same level" pending
         it "reverts forestCursorSwapPrev" $
             inverseFunctionsIfSucceedOnValid
-                (forestCursorSwapPrev @Double @Double)
-                (forestCursorSwapNext @Double @Double)
+                (forestCursorSwapPrev @Rational @Rational)
+                (forestCursorSwapNext @Rational @Rational)
 
 deleteSpec :: Spec
 deleteSpec = do
     describe "forestCursorRemoveElemAndSelectPrev" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorRemoveElemAndSelectPrev @Double)
+            producesValidsOnValids
+                (forestCursorRemoveElemAndSelectPrev @Rational)
         it "works for this simple example" $
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
@@ -490,7 +496,8 @@ deleteSpec = do
             pending
     describe "forestCursorDeleteElemAndSelectNext" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorDeleteElemAndSelectNext @Double)
+            producesValidsOnValids
+                (forestCursorDeleteElemAndSelectNext @Rational)
         it "works for this simple example" $
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
@@ -535,7 +542,7 @@ deleteSpec = do
         it "deletes the selected element and selects the next element" pending
     describe "forestCursorRemoveElem" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorRemoveElem @Double)
+            producesValidsOnValids (forestCursorRemoveElem @Rational)
         it "works for this simple example" $
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
@@ -575,7 +582,7 @@ deleteSpec = do
         it "removes the selected element" pending
     describe "forestCursorDeleteElem" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorDeleteElem @Double)
+            producesValidsOnValids (forestCursorDeleteElem @Rational)
         it "works for this simple example" $
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
@@ -616,27 +623,27 @@ deleteSpec = do
     describe "forestCursorRemoveSubTreeAndSelectPrev" $ do
         it "produces valid cursors" $
             producesValidsOnValids
-                (forestCursorRemoveSubTreeAndSelectPrev @Double)
+                (forestCursorRemoveSubTreeAndSelectPrev @Rational)
         it "removes the selected subtree and selects the previous tree" pending
     describe "forestCursorDeleteSubTreeAndSelectNext" $ do
         it "produces valid cursors" $
             producesValidsOnValids
-                (forestCursorDeleteSubTreeAndSelectNext @Double)
+                (forestCursorDeleteSubTreeAndSelectNext @Rational)
         it "deletes the selected subtree and selects the next tree" pending
     describe "forestCursorRemoveSubTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorRemoveSubTree @Double)
+            producesValidsOnValids (forestCursorRemoveSubTree @Rational)
         it "removes the selected subtree" pending
     describe "forestCursorDeleteSubTree" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (forestCursorDeleteSubTree @Double)
+            producesValidsOnValids (forestCursorDeleteSubTree @Rational)
         it "deletes the selected subtree" pending
 
 shiftingSpec :: Spec
 shiftingSpec = do
     describe "forestCursorPromoteElem" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ forestCursorPromoteElem @Double
+            producesValidsOnValids $ forestCursorPromoteElem @Rational
         it "works on the example from the documentation" $
             let start =
                     ForestCursor
@@ -710,7 +717,7 @@ shiftingSpec = do
         it "promotes the current node to the level of its parent" pending
     describe "forestCursorDemoteElem" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ forestCursorDemoteElem @Double
+            producesValidsOnValids $ forestCursorDemoteElem @Rational
         it "works on the example from the documentation" $
             let start =
                     ForestCursor
@@ -766,7 +773,7 @@ shiftingSpec = do
         it "demotes the current node to the level of its children" pending
     describe "forestCursorPromoteSubTree" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ forestCursorPromoteSubTree @Double
+            producesValidsOnValids $ forestCursorPromoteSubTree @Rational
         it "works on the example from the documentation" $
             let start =
                     ForestCursor
@@ -838,7 +845,7 @@ shiftingSpec = do
         it "promotes the current subtree to the level of its parent" pending
     describe "forestCursorDemoteSubTree" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ forestCursorDemoteSubTree @Double
+            producesValidsOnValids $ forestCursorDemoteSubTree @Rational
         it "works on the example from the documentation" $
             let start =
                     ForestCursor
@@ -892,7 +899,7 @@ shiftingSpec = do
     describe "forestCursorDemoteElemUnder" $ do
         it "produces valids on valids" $
             producesValidsOnValids3 $
-            forestCursorDemoteElemUnder @Double @Double
+            forestCursorDemoteElemUnder @Rational @Rational
         it "Works on the example from the docs" $
             forAllValid $ \b1 ->
                 forAllValid $ \b2 ->
@@ -936,7 +943,7 @@ shiftingSpec = do
     describe "forestCursorDemoteSubTreeUnder" $ do
         it "produces valids on valids" $
             producesValidsOnValids2 $
-            forestCursorDemoteSubTreeUnder @Double @Double
+            forestCursorDemoteSubTreeUnder @Rational @Rational
         it "Works on the example from the docs" $
             forAllValid $ \v -> do
                 let demoteStart =

@@ -28,7 +28,7 @@ spec = do
     monadSpec @PromoteElemResult
     describe "treeCursorPromoteElem" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorPromoteElem @Double
+            producesValidsOnValids $ treeCursorPromoteElem @Rational
         it "Works on the example from the docs" $
             let promoteStart =
                     TreeCursor
@@ -85,7 +85,7 @@ spec = do
     monadSpec @PromoteResult
     describe "treeCursorPromoteSubTree" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorPromoteSubTree @Double
+            producesValidsOnValids $ treeCursorPromoteSubTree @Rational
         it "Works on the example from the docs" $
             let promoteStart =
                     TreeCursor

@@ -22,13 +22,13 @@ import Cursor.Tree (CTree(..), closedForest)
 
 testMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Spec
 testMovement func = do
-    it "produces valids on valids" $ producesValidsOnValids $ func @Double
+    it "produces valids on valids" $ producesValidsOnValids $ func @Rational
     it "is a movement" $ isMovement func
 
 testMovementM ::
        (forall a. STC.TreeCursor a -> Maybe (STC.TreeCursor a)) -> Spec
 testMovementM func = do
-    it "produces valids on valids" $ producesValidsOnValids $ func @Double
+    it "produces valids on valids" $ producesValidsOnValids $ func @Rational
     it "is a movement" $ isMovementM func
 
 isMovementM ::
