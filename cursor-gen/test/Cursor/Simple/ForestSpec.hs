@@ -250,8 +250,15 @@ collapseSpec = do
         forestCursorCloseCurrentForest @Rational @Rational
     describe "forestCursorToggleCurrentForest" $
         it "produces valid cursors" $
+        producesValidsOnValids $ forestCursorToggleCurrentForest @Double @Double
+    describe "forestCursorOpenCurrentForestRecursively" $
+        it "produces valid cursors" $
         producesValidsOnValids $
         forestCursorToggleCurrentForest @Rational @Rational
+    describe "forestCursorToggleCurrentForestRecursively" $
+        it "produces valid cursors" $
+        producesValidsOnValids $
+        forestCursorToggleCurrentForestRecursively @Rational @Rational
 
 insertSpec :: Spec
 insertSpec = do

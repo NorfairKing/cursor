@@ -26,9 +26,11 @@ module Cursor.Forest
     , forestCursorSelectBelowAtEnd
     , forestCursorSelection
     , forestCursorSelectIndex
-    , forestCursorCloseCurrentForest
     , forestCursorOpenCurrentForest
+    , forestCursorCloseCurrentForest
     , forestCursorToggleCurrentForest
+    , forestCursorOpenCurrentForestRecursively
+    , forestCursorToggleCurrentForestRecursively
     , forestCursorInsertEntireTree
     , forestCursorAppendEntireTree
     , forestCursorInsertAndSelectTreeCursor
@@ -237,6 +239,16 @@ forestCursorCloseCurrentForest =
 forestCursorToggleCurrentForest :: ForestCursor a b -> Maybe (ForestCursor a b)
 forestCursorToggleCurrentForest =
     forestCursorSelectedTreeL treeCursorToggleCurrentForest
+
+forestCursorOpenCurrentForestRecursively ::
+       ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorOpenCurrentForestRecursively =
+    forestCursorSelectedTreeL treeCursorOpenCurrentForestRecursively
+
+forestCursorToggleCurrentForestRecursively ::
+       ForestCursor a b -> Maybe (ForestCursor a b)
+forestCursorToggleCurrentForestRecursively =
+    forestCursorSelectedTreeL treeCursorToggleCurrentForestRecursively
 
 forestCursorInsertEntireTree :: Tree b -> ForestCursor a b -> ForestCursor a b
 forestCursorInsertEntireTree t =

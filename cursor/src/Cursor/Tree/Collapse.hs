@@ -1,7 +1,9 @@
 module Cursor.Tree.Collapse
-    ( treeCursorCloseCurrentForest
-    , treeCursorOpenCurrentForest
+    ( treeCursorOpenCurrentForest
+    , treeCursorCloseCurrentForest
     , treeCursorToggleCurrentForest
+    , treeCursorOpenCurrentForestRecursively
+    , treeCursorToggleCurrentForestRecursively
     ) where
 
 import qualified Data.List.NonEmpty as NE
@@ -30,5 +32,24 @@ treeCursorToggleCurrentForest tc =
         EmptyCForest -> Nothing
         ClosedForest ts ->
             Just $ tc {treeBelow = OpenForest $ NE.map makeCTree ts}
+        OpenForest ts ->
+            Just $ tc {treeBelow = ClosedForest $ NE.map rebuildCTree ts}
+
+treeCursorOpenCurrentForestRecursively ::
+       TreeCursor a b -> Maybe (TreeCursor a b)
+treeCursorOpenCurrentForestRecursively tc =
+    case treeBelow tc of
+        EmptyCForest -> Nothing
+        ClosedForest ts ->
+            Just $ tc {treeBelow = OpenForest $ NE.map (cTree True) ts}
+        OpenForest _ -> Nothing
+
+treeCursorToggleCurrentForestRecursively ::
+       TreeCursor a b -> Maybe (TreeCursor a b)
+treeCursorToggleCurrentForestRecursively tc =
+    case treeBelow tc of
+        EmptyCForest -> Nothing
+        ClosedForest ts ->
+            Just $ tc {treeBelow = OpenForest $ NE.map (cTree True) ts}
         OpenForest ts ->
             Just $ tc {treeBelow = ClosedForest $ NE.map rebuildCTree ts}
