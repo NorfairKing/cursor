@@ -25,7 +25,7 @@ spec = do
     functorSpec @DemoteResult
     describe "treeCursorDemoteElem" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorDemoteElem @Double
+            producesValidsOnValids $ treeCursorDemoteElem @Rational
         it "Works on the example from the docs" $
             let promoteStart =
                     TreeCursor
@@ -68,7 +68,7 @@ spec = do
         it "demotes the current node to the level of its children" pending
     describe "treeCursorDemoteSubTree" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorDemoteSubTree @Double
+            producesValidsOnValids $ treeCursorDemoteSubTree @Rational
         it "Works on the example from the docs" $
             let promoteStart =
                     TreeCursor
@@ -111,7 +111,7 @@ spec = do
         it "demotes the current subtree to the level of its children" pending
     describe "treeCursorDemoteElemUnder" $ do
         it "produces valids on valids" $
-            producesValidsOnValids3 $ treeCursorDemoteElemUnder @Double @Double
+            producesValidsOnValids3 $ treeCursorDemoteElemUnder @Rational @Rational
         it "Works on the example from the docs" $
             forAllValid $ \b1 ->
                 forAllValid $ \b2 ->
@@ -158,7 +158,7 @@ spec = do
     describe "treeCursorDemoteSubTreeUnder" $ do
         it "produces valids on valids" $
             producesValidsOnValids2 $
-            treeCursorDemoteSubTreeUnder @Double @Double
+            treeCursorDemoteSubTreeUnder @Rational @Rational
         it "Works on the example from the docs" $
             forAllValid $ \v -> do
                 let demoteStart =

@@ -20,34 +20,34 @@ spec = do
     describe "makeKeyValueCursorKey" $
         it "produces valid cursors" $
         producesValidsOnValids2
-            (makeKeyValueCursorKey @Double @Rational @Double @Rational)
+            (makeKeyValueCursorKey @Rational @Rational @Rational @Rational)
     describe "makeKeyValueCursorValue" $
         it "produces valid cursors" $
         producesValidsOnValids2
-            (makeKeyValueCursorValue @Double @Rational @Double @Rational)
+            (makeKeyValueCursorValue @Rational @Rational @Rational @Rational)
     describe "rebuildKeyValueCursor" $
         it "produces valid tuples" $
-        producesValidsOnValids (rebuildKeyValueCursor @Double @Rational)
+        producesValidsOnValids (rebuildKeyValueCursor @Rational @Rational)
     describe "keyValueCursorSelection" $
         it "produces valid selections" $
         producesValidsOnValids
-            (keyValueCursorSelection @Double @Rational @Double @Rational)
+            (keyValueCursorSelection @Rational @Rational @Rational @Rational)
     describe "keyValueCursorSelectKey" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (keyValueCursorSelectKey @Double @Rational)
+            producesValidsOnValids (keyValueCursorSelectKey @Rational @Rational)
         it "is a movement" $ isMovement keyValueCursorSelectKey
     describe "keyValueCursorSelectValue" $ do
         it "produces valid cursors" $
-            producesValidsOnValids (keyValueCursorSelectValue @Double @Rational)
+            producesValidsOnValids (keyValueCursorSelectValue @Rational @Rational)
         it "is a movement" $ isMovement keyValueCursorSelectValue
     describe "keyValueCursorToggleSelected" $ do
         it "produces valid cursors" $
             producesValidsOnValids
-                (keyValueCursorToggleSelected @Double @Rational)
+                (keyValueCursorToggleSelected @Rational @Rational)
         it "is a movement" $ isMovement keyValueCursorToggleSelected
 
 isMovement :: (forall k v. KeyValueCursor k v -> KeyValueCursor k v) -> Property
 isMovement func =
     forAllValid $ \lec ->
-        rebuildKeyValueCursor (lec :: KeyValueCursor Double Rational) `shouldBe`
+        rebuildKeyValueCursor (lec :: KeyValueCursor Rational Rational) `shouldBe`
         rebuildKeyValueCursor (func lec)

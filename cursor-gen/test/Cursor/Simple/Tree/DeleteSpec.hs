@@ -26,30 +26,30 @@ spec = do
     describe "treeCursorDeleteSubTreeAndSelectPrevious" $ do
         it "produces valids on valids" $
             producesValidsOnValids $
-            treeCursorDeleteSubTreeAndSelectPrevious @Double
+            treeCursorDeleteSubTreeAndSelectPrevious @Rational
         it "deletes the current subtree selects the previous subtree" pending
     describe "treeCursorDeleteSubTreeAndSelectNext" $ do
         it "produces valids on valids" $
             producesValidsOnValids $
-            treeCursorDeleteSubTreeAndSelectNext @Double
+            treeCursorDeleteSubTreeAndSelectNext @Rational
         it "deletes the current subtree selects the next subtree" pending
     describe "treeCursorDeleteSubTreeAndSelectAbove" $ do
         it "produces valids on valids" $
             producesValidsOnValids $
-            treeCursorDeleteSubTreeAndSelectAbove @Double
+            treeCursorDeleteSubTreeAndSelectAbove @Rational
         it "deletes the current subtree selects the above node" pending
     describe "treeCursorRemoveSubTree" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorRemoveSubTree @Double
+            producesValidsOnValids $ treeCursorRemoveSubTree @Rational
         it "removes the current subtree" pending
     describe "treeCursorDeleteSubTree" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorDeleteSubTree @Double
+            producesValidsOnValids $ treeCursorDeleteSubTree @Rational
         it "deletes the current subtree" pending
     describe "treeCursorDeleteElemAndSelectPrevious" $ do
         it "produces valids on valids" $
             producesValidsOnValids $
-            treeCursorDeleteElemAndSelectPrevious @Double
+            treeCursorDeleteElemAndSelectPrevious @Rational
         it "works for this simple example" $
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
@@ -72,7 +72,7 @@ spec = do
             pending
     describe "treeCursorDeleteElemAndSelectNext" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorDeleteElemAndSelectNext @Double
+            producesValidsOnValids $ treeCursorDeleteElemAndSelectNext @Rational
         it "works for this simple example" $
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
@@ -99,7 +99,7 @@ spec = do
         it "deletes the current element and selects the next element" pending
     describe "treeCursorDeleteElemAndSelectAbove" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorDeleteElemAndSelectAbove @Double
+            producesValidsOnValids $ treeCursorDeleteElemAndSelectAbove @Rational
         it "works for this simple example" $
             forAllValid $ \fs ->
                 let simpleDeleteElemStart =
@@ -119,9 +119,9 @@ spec = do
         it "deletes the current element and selects the above element" pending
     describe "treeCursorRemoveElem" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorRemoveElem @Double
+            producesValidsOnValids $ treeCursorRemoveElem @Rational
         it "removes the current element" pending
     describe "treeCursorDeleteElem" $ do
         it "produces valids on valids" $
-            producesValidsOnValids $ treeCursorDeleteElem @Double
+            producesValidsOnValids $ treeCursorDeleteElem @Rational
         it "deletes the current element" pending

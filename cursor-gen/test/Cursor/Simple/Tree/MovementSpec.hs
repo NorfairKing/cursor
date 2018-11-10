@@ -27,14 +27,14 @@ spec :: Spec
 spec = do
     describe "treeCursorSelection" $
         it "produces valids on valids" $
-        producesValidsOnValids (treeCursorSelection @Double @Double)
+        producesValidsOnValids (treeCursorSelection @Rational @Rational)
     describe "treeCursorSelect" $ do
         it "produces valids on valids" $
-            producesValidsOnValids2 (treeCursorSelect @Double)
+            producesValidsOnValids2 (treeCursorSelect @Rational)
         it "is identity with the current selection" $
             forAllValid $ \tc ->
                 let sel = treeCursorSelection tc
-                in case treeCursorSelect @Double sel tc of
+                in case treeCursorSelect @Rational sel tc of
                        Nothing ->
                            expectationFailure
                                "treeCursorSelect should not have failed."
@@ -55,16 +55,16 @@ spec = do
         it
             "after treeCursorSelectNextOnSameLevel is identity if they don't fail" $ do
             inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectNextOnSameLevel @Double)
-                (treeCursorSelectPrevOnSameLevel @Double)
+                (treeCursorSelectNextOnSameLevel @Rational)
+                (treeCursorSelectPrevOnSameLevel @Rational)
     describe "treeCursorSelectNextOnSameLevel" $ do
         testMovementM treeCursorSelectNextOnSameLevel
         it "selects the next element" pending
         it
             "after treeCursorSelectPrevOnSameLevel is identity if they don't fail" $ do
             inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectPrevOnSameLevel @Double)
-                (treeCursorSelectNextOnSameLevel @Double)
+                (treeCursorSelectPrevOnSameLevel @Rational)
+                (treeCursorSelectNextOnSameLevel @Rational)
     describe "treeCursorSelectAbovePrev" $ do
         testMovementM treeCursorSelectAbovePrev
         it "Works for this classic example" $
@@ -132,7 +132,7 @@ spec = do
         it "selects the previous element" pending
         it "after treeCursorSelectAboveNext is identity if they don't fail" $ do
             forAllValid $ \tc ->
-                case treeCursorSelectAboveNext @Double tc of
+                case treeCursorSelectAboveNext @Rational tc of
                     Nothing -> pure ()
                     Just tc' ->
                         case treeCursorSelectAbovePrev tc' of
@@ -217,7 +217,7 @@ spec = do
         it "selects the next element" pending
         it "after treeCursorSelectAbovePrev is identity if they don't fail" $ do
             forAllValid $ \tc ->
-                case treeCursorSelectAbovePrev @Double tc of
+                case treeCursorSelectAbovePrev @Rational tc of
                     Nothing -> pure ()
                     Just tc' ->
                         case treeCursorSelectAboveNext tc' of
@@ -241,33 +241,33 @@ spec = do
         it "selects the previous element" pending
         it "after treeCursorSelectNext is identity if they don't fail" $ do
             inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectNext @Double)
-                (treeCursorSelectPrev @Double)
+                (treeCursorSelectNext @Rational)
+                (treeCursorSelectPrev @Rational)
     describe "treeCursorSelectNext" $ do
         testMovementM treeCursorSelectNext
         it "selects the next element" pending
         it "after treeCursorSelectPrev is identity if they don't fail" $ do
             inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectPrev @Double)
-                (treeCursorSelectNext @Double)
+                (treeCursorSelectPrev @Rational)
+                (treeCursorSelectNext @Rational)
     describe "treeCursorSelectFirst" $ do
         testMovement treeCursorSelectFirst
         it "selects the first element" pending
-        it "is idempotent" $ idempotentOnValid $ treeCursorSelectFirst @Double
+        it "is idempotent" $ idempotentOnValid $ treeCursorSelectFirst @Rational
     describe "treeCursorSelectLast" $ do
         testMovement treeCursorSelectLast
         it "selects the last element" pending
-        it "is idempotent" $ idempotentOnValid $ treeCursorSelectLast @Double
+        it "is idempotent" $ idempotentOnValid $ treeCursorSelectLast @Rational
     describe "treeCursorSelectAbove" $ do
         testMovementM treeCursorSelectAbove
         it "selects the element above" pending
         it "after treeCursorSelectBelow is identity if they don't fail" $ do
             inverseFunctionsIfSucceedOnValid
-                (treeCursorSelectBelowAtStart @Double) $
-                treeCursorSelectAbove @Double
+                (treeCursorSelectBelowAtStart @Rational) $
+                treeCursorSelectAbove @Rational
     describe "treeCursorSelectBelowAtPos" $ do
         it "produces valids on valids" $
-            producesValidsOnValids2 $ treeCursorSelectBelowAtPos @Double
+            producesValidsOnValids2 $ treeCursorSelectBelowAtPos @Rational
         it "is a movement" $
             forAllValid $ \n -> isMovementM $ treeCursorSelectBelowAtPos n
         it "selects the element n-th below" pending

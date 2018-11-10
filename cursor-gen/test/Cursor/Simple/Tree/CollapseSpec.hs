@@ -18,10 +18,10 @@ spec :: Spec
 spec = do
     describe "treeCursorOpenCurrentForest" $
         it "produces valid cursors" $
-        producesValidsOnValids $ treeCursorOpenCurrentForest @Double @Double
+        producesValidsOnValids $ treeCursorOpenCurrentForest @Rational @Rational
     describe "treeCursorCloseCurrentForest" $
         it "produces valid cursors" $
-        producesValidsOnValids $ treeCursorCloseCurrentForest @Double @Double
+        producesValidsOnValids $ treeCursorCloseCurrentForest @Rational @Rational
     describe "treeCursorToggleCurrentForest" $
         it "produces valid cursors" $
-        producesValidsOnValids $ treeCursorToggleCurrentForest @Double @Double
+        producesValidsOnValids $ treeCursorToggleCurrentForest @Rational @Rational

@@ -22,26 +22,26 @@ import Cursor.Simple.Tree.TestUtils
 spec :: Spec
 spec = do
     eqSpec @(STC.TreeCursor Int)
-    genValidSpec @(STC.TreeCursor Double)
+    genValidSpec @(STC.TreeCursor Rational)
     describe "makeTreeCursor" $
         it "produces valid cursors" $
-        producesValidsOnValids (makeTreeCursor @Double)
+        producesValidsOnValids (makeTreeCursor @Rational)
     describe "makeTreeCursorWithSelection" $
         it "produces valid cursors" $
-        producesValidsOnValids2 (makeTreeCursorWithSelection @Double)
+        producesValidsOnValids2 (makeTreeCursorWithSelection @Rational)
     describe "singletonTreeCursor" $
         it "produces valid cursors" $
-        producesValidsOnValids (singletonTreeCursor @Double)
+        producesValidsOnValids (singletonTreeCursor @Rational)
     describe "rebuildTreeCursor" $ do
         it "produces valid trees" $
-            producesValidsOnValids (rebuildTreeCursor @Double)
+            producesValidsOnValids (rebuildTreeCursor @Rational)
         it "is the inverse of makeTreeCursor for integers" $
             inverseFunctions (makeTreeCursor @Int) rebuildTreeCursor
         it
             "is the inverse of makeTreeCursorWithSelection for the current selection" $
             forAllValid $ \tc ->
                 case makeTreeCursorWithSelection
-                         @Double
+                         @Rational
                          (treeCursorSelection tc)
                          (rebuildTreeCursor tc) of
                     Nothing ->

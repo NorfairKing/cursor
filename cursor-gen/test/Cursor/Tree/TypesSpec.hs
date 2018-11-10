@@ -20,40 +20,40 @@ spec :: Spec
 spec = do
     eqSpec @TreeCursorSelection
     genValidSpec @TreeCursorSelection
-    shrinkValidSpecWithLimit @TreeCursorSelection 100
+    shrinkValidSpecWithLimit @TreeCursorSelection 10
     eqSpec @(SwapResult Int)
-    genValidSpec @(SwapResult Double)
-    shrinkValidSpecWithLimit @(SwapResult Int) 100
+    genValidSpec @(SwapResult Rational)
+    shrinkValidSpecWithLimit @(SwapResult Int) 10
     eqSpec @(PromoteElemResult Int)
-    genValidSpec @(PromoteElemResult Double)
-    shrinkValidSpecWithLimit @(PromoteElemResult Int) 100
+    genValidSpec @(PromoteElemResult Rational)
+    shrinkValidSpecWithLimit @(PromoteElemResult Int) 10
     eqSpec @(PromoteResult Int)
-    genValidSpec @(PromoteResult Double)
-    shrinkValidSpecWithLimit @(PromoteResult Int) 100
+    genValidSpec @(PromoteResult Rational)
+    shrinkValidSpecWithLimit @(PromoteResult Int) 10
     eqSpec @(DemoteResult Int)
-    genValidSpec @(DemoteResult Double)
-    shrinkValidSpecWithLimit @(DemoteResult Int) 100
+    genValidSpec @(DemoteResult Rational)
+    shrinkValidSpecWithLimit @(DemoteResult Int) 10
     eqSpec @(CTree Int)
-    genValidSpec @(CTree Double)
-    shrinkValidSpecWithLimit @(CTree Int) 100
+    genValidSpec @(CTree Rational)
+    shrinkValidSpecWithLimit @(CTree Int) 10
     eqSpec @(CForest Int)
-    genValidSpec @(CForest Double)
-    shrinkValidSpecWithLimit @(CForest Int) 100
+    genValidSpec @(CForest Rational)
+    shrinkValidSpecWithLimit @(CForest Int) 10
     eqSpec @(TreeAbove Int)
-    genValidSpec @(TreeAbove Double)
-    shrinkValidSpecWithLimit @(TreeAbove Int) 100
-    describe "treeAboveLeftsL" $ lensSpecOnValid $ treeAboveLeftsL @Double
-    describe "treeAboveAboveL" $ lensSpecOnValid $ treeAboveAboveL @Double
-    describe "treeAboveNodeL" $ lensSpecOnValid $ treeAboveNodeL @Double
-    describe "treeAboveRightsL" $ lensSpecOnValid $ treeAboveRightsL @Double
+    genValidSpec @(TreeAbove Rational)
+    shrinkValidSpecWithLimit @(TreeAbove Int) 10
+    describe "treeAboveLeftsL" $ lensSpecOnValid $ treeAboveLeftsL @Rational
+    describe "treeAboveAboveL" $ lensSpecOnValid $ treeAboveAboveL @Rational
+    describe "treeAboveNodeL" $ lensSpecOnValid $ treeAboveNodeL @Rational
+    describe "treeAboveRightsL" $ lensSpecOnValid $ treeAboveRightsL @Rational
     eqSpec @(TreeCursor Int Word)
-    genValidSpec @(TreeCursor Float Double)
-    shrinkValidSpecWithLimit @(TreeCursor Word Int) 100
+    genValidSpec @(TreeCursor Rational Rational)
+    shrinkValidSpecWithLimit @(TreeCursor Word Int) 10
     describe "treeCursorAboveL" $
-        lensSpecOnValid $ treeCursorAboveL @Float @Double
+        lensSpecOnValid $ treeCursorAboveL @Rational @Rational
     describe "treeCursorCurrentL" $
-        lensSpecOnValid $ treeCursorCurrentL @Float @Double
+        lensSpecOnValid $ treeCursorCurrentL @Rational @Rational
     describe "treeCursorBelowL" $
-        lensSpecOnValid $ treeCursorBelowL @Float @Double
+        lensSpecOnValid $ treeCursorBelowL @Rational @Rational
     describe "treeCursorCurrentSubTreeL" $
-        lensSpecOnValid $ treeCursorCurrentSubTreeL @Float @Double
+        lensSpecOnValid $ treeCursorCurrentSubTreeL @Rational @Rational
