@@ -31,6 +31,8 @@ import GHC.Generics (Generic)
 
 import Data.Validity
 
+import Cursor.Types
+
 data ListCursor a = ListCursor
     { listCursorPrev :: [a] -- ^ In reverse order
     , listCursorNext :: [a]
@@ -126,17 +128,23 @@ listCursorInsert c lc = lc {listCursorPrev = c : listCursorPrev lc}
 listCursorAppend :: a -> ListCursor a -> ListCursor a
 listCursorAppend c lc = lc {listCursorNext = c : listCursorNext lc}
 
-listCursorRemove :: ListCursor a -> Maybe (ListCursor a)
+listCursorRemove :: ListCursor a -> Maybe (DeleteOrUpdate (ListCursor a))
 listCursorRemove tc =
     case listCursorPrev tc of
-        [] -> Nothing
-        (_:prev) -> Just $ tc {listCursorPrev = prev}
+        [] ->
+            case listCursorNext tc of
+                [] -> Just Deleted
+                _ -> Nothing
+        (_:prev) -> Just $ Updated $ tc {listCursorPrev = prev}
 
-listCursorDelete :: ListCursor a -> Maybe (ListCursor a)
+listCursorDelete :: ListCursor a -> Maybe (DeleteOrUpdate (ListCursor a))
 listCursorDelete tc =
     case listCursorNext tc of
-        [] -> Nothing
-        (_:next) -> Just $ tc {listCursorNext = next}
+        [] ->
+            case listCursorPrev tc of
+                [] -> Just Deleted
+                _ -> Nothing
+        (_:next) -> Just $ Updated $ tc {listCursorNext = next}
 
 listCursorSplit :: ListCursor a -> (ListCursor a, ListCursor a)
 listCursorSplit ListCursor {..} =

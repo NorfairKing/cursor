@@ -231,7 +231,9 @@ textFieldCursorRemove tfc =
                  textFieldCursorNonEmptyCursorL
                  (\lec@NonEmptyCursor {..} ->
                       case textCursorRemove nonEmptyCursorCurrent of
-                          Nothing ->
+                          Just (Updated ctc) ->
+                              Just $ Updated $ lec & nonEmptyCursorElemL .~ ctc
+                          _ ->
                               case nonEmptyCursorPrev of
                                   [] -> Nothing
                                   (pl:pls) ->
@@ -243,9 +245,7 @@ textFieldCursorRemove tfc =
                                                 textCursorCombine
                                                     (unsafeMakeTextCursor pl)
                                                     nonEmptyCursorCurrent
-                                          }
-                          Just ctc ->
-                              Just $ Updated $ lec & nonEmptyCursorElemL .~ ctc)
+                                          })
                  tfc
 
 textFieldCursorDelete ::
@@ -257,7 +257,9 @@ textFieldCursorDelete tfc =
                  textFieldCursorNonEmptyCursorL
                  (\lec@NonEmptyCursor {..} ->
                       case textCursorDelete nonEmptyCursorCurrent of
-                          Nothing ->
+                          Just (Updated ctc) ->
+                              Just $ Updated $ lec & nonEmptyCursorElemL .~ ctc
+                          _ ->
                               case nonEmptyCursorNext of
                                   [] -> Nothing
                                   (pl:pls) ->
@@ -269,9 +271,7 @@ textFieldCursorDelete tfc =
                                                     nonEmptyCursorCurrent
                                                     (unsafeMakeTextCursor pl)
                                           , nonEmptyCursorNext = pls
-                                          }
-                          Just ctc ->
-                              Just $ Updated $ lec & nonEmptyCursorElemL .~ ctc)
+                                          })
                  tfc
 
 textFieldCursorSelectStartOfLine :: TextFieldCursor -> TextFieldCursor

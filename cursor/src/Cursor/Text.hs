@@ -35,6 +35,7 @@ import Data.Text (Text)
 import Lens.Micro
 
 import Cursor.List
+import Cursor.Types
 
 -- | A cursor for single-line texts
 newtype TextCursor = TextCursor
@@ -109,11 +110,13 @@ textCursorAppend :: Char -> TextCursor -> Maybe TextCursor
 textCursorAppend '\n' _ = Nothing
 textCursorAppend c tc = Just (tc & textCursorListCursorL %~ listCursorAppend c)
 
-textCursorRemove :: TextCursor -> Maybe TextCursor
-textCursorRemove = textCursorListCursorL listCursorRemove
+textCursorRemove :: TextCursor -> Maybe (DeleteOrUpdate TextCursor)
+textCursorRemove =
+    focusPossibleDeleteOrUpdate textCursorListCursorL listCursorRemove
 
-textCursorDelete :: TextCursor -> Maybe TextCursor
-textCursorDelete = textCursorListCursorL listCursorDelete
+textCursorDelete :: TextCursor -> Maybe (DeleteOrUpdate TextCursor)
+textCursorDelete =
+    focusPossibleDeleteOrUpdate textCursorListCursorL listCursorDelete
 
 textCursorSplit :: TextCursor -> (TextCursor, TextCursor)
 textCursorSplit tc =
