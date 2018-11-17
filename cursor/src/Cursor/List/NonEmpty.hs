@@ -226,8 +226,6 @@ nonEmptyCursorRemoveElemAndSelectPrev g lec =
             Updated $
             lec {nonEmptyCursorPrev = rest, nonEmptyCursorCurrent = g e}
 
--- the first maybe: whether the operation succeeded
--- the second maybe: whether the list is still nonempty
 nonEmptyCursorDeleteElemAndSelectNext ::
        (b -> a)
     -> NonEmptyCursor a b

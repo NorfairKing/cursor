@@ -1,0 +1,22 @@
+- entry:
+    header: Tree
+    state-history:
+    - new-state: TODO
+      timestamp: 2018-11-17 18:14:26.497439501000+0000
+  forest:
+  - header: Make aboveNext and abovePrev symmetric
+    state-history:
+    - new-state: TODO
+      timestamp: 2018-11-17 18:14:26.497439501000+0000
+  - header: Make promote and demote symmetric
+    state-history:
+    - new-state: TODO
+      timestamp: 2018-11-17 18:14:26.497439501000+0000
+  - header: split up deleteAndSelectPrev
+    state-history:
+    - new-state: TODO
+      timestamp: 2018-11-17 18:14:26.497439501000+0000
+  - header: make forestCursorDemoteElemUnder and treeCursorDemoteElemUnder symmetric
+    state-history:
+    - new-state: TODO
+      timestamp: 2018-11-17 18:14:26.497439501000+0000
