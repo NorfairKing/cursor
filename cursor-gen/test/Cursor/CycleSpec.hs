@@ -10,6 +10,8 @@ import Test.Hspec
 import Test.QuickCheck
 import Test.Validity
 
+import Data.Maybe
+
 import Control.Monad
 
 import Cursor.Cycle
@@ -51,11 +53,37 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids (cycleCursorSelectPrev @Rational)
         it "is a movement" $ isMovementM cycleCursorSelectPrev
+        it "is the inverse of cycleCursorSelectNext" $
+            inverseFunctionsIfSucceed
+                (cycleCursorSelectNext @Rational)
+                cycleCursorSelectPrev
+        it "fails for an empty cycle cursor" $
+            cycleCursorSelectPrev (emptyCycleCursor @Rational) `shouldBe`
+            Nothing
+        it "succeeds for a nonempty cycle cursor" $
+            forAllValid $ \a ->
+                forAllValid $ \as ->
+                    cycleCursorSelectPrev
+                        (makeCycleCursor ((a :: Rational) : as)) `shouldSatisfy`
+                    isJust
         it "selects the previous position" pending
     describe "cycleCursorSelectNext" $ do
         it "produces valid cursors" $
             producesValidsOnValids (cycleCursorSelectNext @Rational)
         it "is a movement" $ isMovementM cycleCursorSelectNext
+        it "is the inverse of cycleCursorSelectPrev" $
+            inverseFunctionsIfSucceed
+                (cycleCursorSelectPrev @Rational)
+                cycleCursorSelectNext
+        it "fails for an empty cycle cursor" $
+            cycleCursorSelectNext (emptyCycleCursor @Rational) `shouldBe`
+            Nothing
+        it "succeeds for a nonempty cycle cursor" $
+            forAllValid $ \a ->
+                forAllValid $ \as ->
+                    cycleCursorSelectNext
+                        (makeCycleCursor ((a :: Rational) : as)) `shouldSatisfy`
+                    isJust
         it "selects the next position" pending
     describe "cycleCursorSelectIndex" $ do
         it "produces valid cursors" $
@@ -66,10 +94,24 @@ spec = do
     describe "cycleCursorPrevItem" $ do
         it "produces valid items" $
             producesValidsOnValids (cycleCursorPrevItem @Rational)
+        it "fails for an empty cycle cursor" $
+            cycleCursorPrevItem (emptyCycleCursor @Rational) `shouldBe` Nothing
+        it "succeeds for a nonempty cycle cursor" $
+            forAllValid $ \a ->
+                forAllValid $ \as ->
+                    cycleCursorPrevItem (makeCycleCursor ((a :: Rational) : as)) `shouldSatisfy`
+                    isJust
         it "returns the item before the position" pending
     describe "cycleCursorNextItem" $ do
         it "produces valid items" $
             producesValidsOnValids (cycleCursorNextItem @Rational)
+        it "fails for an empty cycle cursor" $
+            cycleCursorNextItem (emptyCycleCursor @Rational) `shouldBe` Nothing
+        it "succeeds for a nonempty cycle cursor" $
+            forAllValid $ \a ->
+                forAllValid $ \as ->
+                    cycleCursorNextItem (makeCycleCursor ((a :: Rational) : as)) `shouldSatisfy`
+                    isJust
         it "returns the item after the position" pending
     describe "cycleCursorSelectStart" $ do
         it "produces valid cursors" $

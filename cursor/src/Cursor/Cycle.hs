@@ -67,13 +67,60 @@ cycleCursorIndex :: CycleCursor a -> Int
 cycleCursorIndex = listCursorIndex . cycleCursorListCursor
 
 cycleCursorSelectPrev :: CycleCursor a -> Maybe (CycleCursor a)
-cycleCursorSelectPrev = undefined
+cycleCursorSelectPrev cc =
+    let ListCursor {..} = cycleCursorListCursor cc
+     in case listCursorPrev of
+            [] ->
+                case listCursorNext of
+                    [] -> Nothing
+                    _ ->
+                        Just $
+                        CycleCursor $
+                        ListCursor
+                            { listCursorPrev = reverse listCursorNext
+                            , listCursorNext = []
+                            }
+            (a:as) ->
+                Just $
+                CycleCursor
+                    ListCursor
+                        { listCursorPrev = as
+                        , listCursorNext = a : listCursorNext
+                        }
 
 cycleCursorSelectNext :: CycleCursor a -> Maybe (CycleCursor a)
-cycleCursorSelectNext = undefined
+cycleCursorSelectNext cc =
+    let ListCursor {..} = cycleCursorListCursor cc
+     in case listCursorNext of
+            [] ->
+                case listCursorPrev of
+                    [] -> Nothing
+                    _ ->
+                        Just $
+                        CycleCursor $
+                        ListCursor
+                            { listCursorPrev = []
+                            , listCursorNext = reverse listCursorPrev
+                            }
+            (a:as) ->
+                Just $
+                CycleCursor
+                    ListCursor
+                        { listCursorPrev = a : listCursorPrev
+                        , listCursorNext = as
+                        }
 
 cycleCursorSelectIndex :: Int -> CycleCursor a -> CycleCursor a
-cycleCursorSelectIndex ix_ = undefined
+cycleCursorSelectIndex ix_ cc@(CycleCursor lc) =
+    let ls = rebuildListCursor lc
+     in case ls of
+            [] -> cc
+            _ ->
+                case splitAt (ix_ `rem` length ls) ls of
+                    (l, r) ->
+                        CycleCursor
+                            ListCursor
+                                {listCursorPrev = reverse l, listCursorNext = r}
 
 cycleCursorSelectStart :: CycleCursor a -> CycleCursor a
 cycleCursorSelectStart = cycleCursorListCursorL %~ listCursorSelectStart
@@ -81,11 +128,25 @@ cycleCursorSelectStart = cycleCursorListCursorL %~ listCursorSelectStart
 cycleCursorSelectEnd :: CycleCursor a -> CycleCursor a
 cycleCursorSelectEnd = cycleCursorListCursorL %~ listCursorSelectEnd
 
-cycleCursorPrevItem :: CycleCursor a -> a
-cycleCursorPrevItem = undefined
+cycleCursorPrevItem :: CycleCursor a -> Maybe a
+cycleCursorPrevItem cc =
+    let ListCursor {..} = cycleCursorListCursor cc
+     in case listCursorPrev of
+            [] ->
+                case reverse listCursorNext of
+                    [] -> Nothing
+                    (a:_) -> Just a
+            (a:_) -> Just a
 
-cycleCursorNextItem :: CycleCursor a -> a
-cycleCursorNextItem = undefined
+cycleCursorNextItem :: CycleCursor a -> Maybe a
+cycleCursorNextItem cc =
+    let ListCursor {..} = cycleCursorListCursor cc
+     in case listCursorNext of
+            [] ->
+                case reverse listCursorPrev of
+                    [] -> Nothing
+                    (a:_) -> Just a
+            (a:_) -> Just a
 
 cycleCursorInsert :: a -> CycleCursor a -> CycleCursor a
 cycleCursorInsert a = cycleCursorListCursorL %~ listCursorInsert a

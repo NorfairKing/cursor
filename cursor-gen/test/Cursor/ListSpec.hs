@@ -51,11 +51,20 @@ spec = do
         it "produces valid cursors" $
             producesValidsOnValids (listCursorSelectPrev @Rational)
         it "is a movement" $ isMovementM listCursorSelectPrev
+        it "is the inverse of listCursorSelectNext" $
+            inverseFunctionsIfSucceed
+                (listCursorSelectNext @Rational)
+                listCursorSelectPrev
         it "selects the previous position" pending
     describe "listCursorSelectNext" $ do
         it "produces valid cursors" $
             producesValidsOnValids (listCursorSelectNext @Rational)
         it "is a movement" $ isMovementM listCursorSelectNext
+
+        it "is the inverse of listCursorSelectPrev" $
+            inverseFunctionsIfSucceed
+                (listCursorSelectPrev @Rational)
+                listCursorSelectNext
         it "selects the next position" pending
     describe "listCursorSelectIndex" $ do
         it "produces valid cursors" $
