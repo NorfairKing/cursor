@@ -219,6 +219,11 @@ movementsSpec = do
             producesValidsOnValids $ forestCursorSelectLast @Rational
         it "is a movement" $ isMovement forestCursorSelectLast
         it "selects the last node in the forest" pending
+    describe "forestCursorSelectAbove" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids $ forestCursorSelectAbove @Rational
+        it "is a movement" $ isMovementM forestCursorSelectAbove
+        it "selects the parent" pending
     describe "forestCursorSelectBelowAtPos" $ do
         it "produces valid cursors" $
             producesValidsOnValids2 $ forestCursorSelectBelowAtPos @Rational

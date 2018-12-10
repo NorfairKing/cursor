@@ -21,6 +21,7 @@ module Cursor.Simple.Forest
     , forestCursorSelectNextOnSameLevel
     , forestCursorSelectFirst
     , forestCursorSelectLast
+    , forestCursorSelectAbove
     , forestCursorSelectBelowAtPos
     , forestCursorSelectBelowAtStart
     , forestCursorSelectBelowAtEnd
@@ -125,6 +126,9 @@ forestCursorSelectFirst = FC.forestCursorSelectFirst id id
 
 forestCursorSelectLast :: ForestCursor a -> ForestCursor a
 forestCursorSelectLast = FC.forestCursorSelectLast id id
+
+forestCursorSelectAbove :: ForestCursor a -> Maybe (ForestCursor a)
+forestCursorSelectAbove = FC.forestCursorSelectAbove id id
 
 forestCursorSelectBelowAtPos :: Int -> ForestCursor a -> Maybe (ForestCursor a)
 forestCursorSelectBelowAtPos = FC.forestCursorSelectBelowAtPos id id
