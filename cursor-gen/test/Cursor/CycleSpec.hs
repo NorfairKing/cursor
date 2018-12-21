@@ -40,6 +40,11 @@ spec = do
                 inverseFunctionsIfFirstSucceeds
                     (makeCycleCursorWithSelection @Int i)
                     rebuildCycleCursor
+    describe "cycleCursorToList" $ do
+        it "produces valid cycles" $
+            producesValidsOnValids (cycleCursorToList @Rational)
+        it "is the inverse of makeCycleCursor" $
+            inverseFunctions (makeCycleCursor @Int) cycleCursorToList
     describe "cycleCursorNull" $
         it "produces valid bools" $
         producesValidsOnValids (cycleCursorNull @Rational)
@@ -144,6 +149,22 @@ spec = do
         it "produces valids" $
             validIfSucceedsOnValid (cycleCursorDelete @Rational)
         it "removes an item before the cursor" $ pending
+    describe "cycleCursorAllRotations" $ do
+        it "produces a valid list of cursors" $
+            producesValidsOnValids (cycleCursorAllRotations @Rational)
+    describe "cycleCursorCycleTo" $ do
+        it "produces valid cursors" $
+            producesValidsOnValids2 (cycleCursorCycleTo @Rational)
+        it "is just when the element is in the cycle" $
+            forAll (genValid `suchThat` (not . null)) $ \ls ->
+                forAll (elements ls) $ \e ->
+                    cycleCursorCycleTo (e :: Rational) (makeCycleCursor ls) `shouldSatisfy`
+                    isJust
+    describe "cycleCursorCycleUntil" $ do
+        it "produces valid cursors for equality checking finds" $
+            forAllValid $ \e ->
+                producesValidsOnValids
+                    (cycleCursorCycleUntil (== (e :: Rational)))
 
 isMovementM :: (forall a. CycleCursor a -> Maybe (CycleCursor a)) -> Property
 isMovementM func =
@@ -153,14 +174,14 @@ isMovementM func =
             Just lec' ->
                 let ne = rebuildCycleCursor lec
                     ne' = rebuildCycleCursor lec'
-                 in unless (ne == ne') $
-                    expectationFailure $
-                    unlines
-                        [ "Cursor before:\n" ++ show lec
-                        , "Cycle before:  \n" ++ show ne
-                        , "Cursor after: \n" ++ show lec'
-                        , "Cycle after:   \n" ++ show ne'
-                        ]
+                in unless (ne == ne') $
+                   expectationFailure $
+                   unlines
+                       [ "Cursor before:\n" ++ show lec
+                       , "Cycle before:  \n" ++ show ne
+                       , "Cursor after: \n" ++ show lec'
+                       , "Cycle after:   \n" ++ show ne'
+                       ]
 
 isMovement :: (forall a. CycleCursor a -> CycleCursor a) -> Property
 isMovement func =
