@@ -163,23 +163,6 @@ spec = do
             producesValidsOnValids textFieldCursorSelectEndOfLine
         it "selects the end of the current line" pending
 
-isMovementM :: (TextFieldCursor -> Maybe TextFieldCursor) -> Property
-isMovementM func =
-    forAllValid $ \tfc ->
-        case func tfc of
-            Nothing -> pure () -- Fine
-            Just tfc' ->
-                let tf = rebuildTextFieldCursor tfc
-                    tf' = rebuildTextFieldCursor tfc'
-                 in unless (tf == tf') $
-                    expectationFailure $
-                    unlines
-                        [ "Cursor before:\n" ++ show tfc
-                        , "TextField before:  \n" ++ show tf
-                        , "Cursor after: \n" ++ show tfc'
-                        , "TextField after:   \n" ++ show tf'
-                        ]
-
 isMovement :: (TextFieldCursor -> TextFieldCursor) -> Property
 isMovement func =
     forAllValid $ \tfc ->
