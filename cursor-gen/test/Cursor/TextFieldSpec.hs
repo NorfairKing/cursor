@@ -90,12 +90,12 @@ spec = do
     describe "textFieldCursorSelectPrevLine" $ do
         it "produces valid cursors" $
             producesValidsOnValids textFieldCursorSelectPrevLine
-        it "is a movement" $ isMovementM textFieldCursorSelectPrevLine
+        it "is a movement" $ isMovement textFieldCursorSelectPrevLine
         it "selects the previous line" pending
     describe "textFieldCursorSelectNextLine" $ do
         it "produces valid cursors" $
             producesValidsOnValids textFieldCursorSelectNextLine
-        it "is a movement" $ isMovementM textFieldCursorSelectNextLine
+        it "is a movement" $ isMovement textFieldCursorSelectNextLine
         it "selects the next line" pending
     describe "textFieldCursorSelectFirstLine" $ do
         it "produces valid cursors" $

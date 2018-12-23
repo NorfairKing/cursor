@@ -39,6 +39,7 @@ import Data.Validity.Text ()
 
 import Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NE
+import Cursor.List (ListCursor(..))
 import Data.Maybe
 import qualified Data.Text as T
 import Data.Text (Text)
@@ -126,15 +127,34 @@ textFieldCursorNonEmptyCursorL =
 textFieldCursorSelectedL :: Lens' TextFieldCursor TextCursor
 textFieldCursorSelectedL = textFieldCursorNonEmptyCursorL . nonEmptyCursorElemL
 
-textFieldCursorSelectPrevLine :: TextFieldCursor -> Maybe TextFieldCursor
-textFieldCursorSelectPrevLine =
-    moveMWhileKeepingSelection $
-    nonEmptyCursorSelectPrev rebuildTextCursor unsafeMakeTextCursor
+-- Select previous line if that exists. Otherwise, go to the start of the first line.
+textFieldCursorSelectPrevLine :: TextFieldCursor -> TextFieldCursor
+textFieldCursorSelectPrevLine tfc =
+    case moveMWhileKeepingSelection selectPrev tfc of
+        Nothing ->
+            let nonEmptyListCursor = textFieldCursorNonEmpty tfc
+            in TextFieldCursor nonEmptyListCursor
+                { nonEmptyCursorCurrent = textCursorSelectStart $
+                      nonEmptyCursorCurrent nonEmptyListCursor
+                }
+        Just tfc' -> tfc'
+  where
+    selectPrev = nonEmptyCursorSelectPrev rebuildTextCursor unsafeMakeTextCursor
 
-textFieldCursorSelectNextLine :: TextFieldCursor -> Maybe TextFieldCursor
-textFieldCursorSelectNextLine =
-    moveMWhileKeepingSelection $
-    nonEmptyCursorSelectNext rebuildTextCursor unsafeMakeTextCursor
+-- Select next line if that exists. Otherwise, go to the end of the last line.
+textFieldCursorSelectNextLine :: TextFieldCursor -> TextFieldCursor
+textFieldCursorSelectNextLine tfc =
+    case moveMWhileKeepingSelection selectNext tfc of
+        Nothing ->
+            let nonEmptyListCursor = textFieldCursorNonEmpty tfc
+            in TextFieldCursor nonEmptyListCursor
+                { nonEmptyCursorCurrent =
+                    textCursorSelectEnd $
+                    nonEmptyCursorCurrent nonEmptyListCursor
+                }
+        Just tfc' -> tfc'
+  where
+    selectNext = nonEmptyCursorSelectNext rebuildTextCursor unsafeMakeTextCursor
 
 moveMWhileKeepingSelection ::
        (NonEmptyCursor TextCursor Text -> Maybe (NonEmptyCursor TextCursor Text))
