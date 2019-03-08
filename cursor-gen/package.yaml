@@ -18,9 +18,9 @@ library:
   - base <5
   - containers
   - cursor 
-  - genvalidity
+  - genvalidity >=0.8
   - genvalidity-containers
-  - genvalidity-text
+  - genvalidity-text >=0.6
   - text
 
 tests:

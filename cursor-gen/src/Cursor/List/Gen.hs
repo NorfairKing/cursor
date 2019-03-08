@@ -19,6 +19,10 @@ instance GenUnchecked a => GenUnchecked (ListCursor a) where
             listCursorPrev <- resize a genUnchecked
             listCursorNext <- resize b genUnchecked
             pure ListCursor {..}
+    shrinkUnchecked (ListCursor prev next) =
+        [ ListCursor prev' next'
+        | (prev', next') <- shrinkUnchecked (prev, next)
+        ]
 
 instance GenValid a => GenValid (ListCursor a) where
     genValid =
@@ -27,6 +31,8 @@ instance GenValid a => GenValid (ListCursor a) where
             listCursorPrev <- resize a genValid
             listCursorNext <- resize b genValid
             pure ListCursor {..}
+    shrinkValid (ListCursor prev next) =
+        [ListCursor prev' next' | (prev', next') <- shrinkValid (prev, next)]
 
 listCursorWithGen :: Gen a -> Gen (ListCursor a)
 listCursorWithGen gen = ListCursor <$> genListOf gen <*> genListOf gen

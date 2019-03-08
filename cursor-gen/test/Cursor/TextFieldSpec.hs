@@ -28,7 +28,7 @@ import Cursor.Types
 
 spec :: Spec
 spec = do
-    eqSpec @TextFieldCursor
+    eqSpecOnValid @TextFieldCursor
     genValidSpec @TextFieldCursor
     describe "makeTextFieldCursor" $
         it "produces valid cursors" $ producesValidsOnValids makeTextFieldCursor

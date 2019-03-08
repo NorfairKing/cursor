@@ -14,8 +14,6 @@ import Cursor.TextField
 import Cursor.List.NonEmpty.Gen ()
 import Cursor.Text.Gen
 
-instance GenUnchecked TextFieldCursor
-
 instance GenValid TextFieldCursor where
     genValid = do
         let charGen = genValid `suchThat` (/= '\n')

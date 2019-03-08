@@ -33,6 +33,10 @@ instance (GenUnchecked a, GenUnchecked b) =>
                     nonEmptyCursorNext <-
                         forM bs $ \s_ -> resize s_ genUnchecked
                     pure NonEmptyCursor {..}
+    shrinkUnchecked (NonEmptyCursor prev cur next) =
+        [ NonEmptyCursor prev' cur' next'
+        | (prev', cur', next') <- shrinkUnchecked (prev, cur, next)
+        ]
 
 instance (GenValid a, GenValid b) => GenValid (NonEmptyCursor a b) where
     genValid =
@@ -47,6 +51,10 @@ instance (GenValid a, GenValid b) => GenValid (NonEmptyCursor a b) where
                     nonEmptyCursorCurrent <- resize s genValid
                     nonEmptyCursorNext <- forM bs $ \s_ -> resize s_ genValid
                     pure NonEmptyCursor {..}
+    shrinkValid (NonEmptyCursor prev cur next) =
+        [ NonEmptyCursor prev' cur' next'
+        | (prev', cur', next') <- shrinkValid (prev, cur, next)
+        ]
 
 nonEmptyElemOf :: NonEmptyCursor a a -> Gen a
 nonEmptyElemOf = elements . NE.toList . rebuildNonEmptyCursor id

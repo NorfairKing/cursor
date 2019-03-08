@@ -6,7 +6,7 @@ case $BUILD_KIND in
     stack --no-terminal $RESOLVER_FLAG test --pedantic
     ;;
   nix)
-    nix-build nix/release.nix --no-out-link
+    nix-build --no-out-link
     ;;
   *)
     echo "Unknown build kind."
