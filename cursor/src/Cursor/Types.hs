@@ -67,3 +67,11 @@ focusPossibleDeleteOrUpdate ::
     -> b
     -> Maybe (DeleteOrUpdate b)
 focusPossibleDeleteOrUpdate l func = getCompose . l (Compose . func)
+
+dullMDelete :: Maybe (DeleteOrUpdate a) -> Maybe a
+dullMDelete Nothing = Nothing
+dullMDelete (Just dou) = dullDelete dou
+
+dullDelete :: DeleteOrUpdate a -> Maybe a
+dullDelete Deleted = Nothing
+dullDelete (Updated a) = Just a

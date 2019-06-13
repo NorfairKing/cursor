@@ -31,6 +31,7 @@ module Cursor.List.NonEmpty
     , nonEmptyCursorDeleteElem
     , nonEmptyCursorSearch
     , nonEmptyCursorSelectOrAdd
+    , renderNonEmptyCursor
     , nonemptyPrepend
     , nonemptyAppend
     ) where
@@ -225,8 +226,6 @@ nonEmptyCursorRemoveElemAndSelectPrev g lec =
             Updated $
             lec {nonEmptyCursorPrev = rest, nonEmptyCursorCurrent = g e}
 
--- the first maybe: whether the operation succeeded
--- the second maybe: whether the list is still nonempty
 nonEmptyCursorDeleteElemAndSelectNext ::
        (b -> a)
     -> NonEmptyCursor a b
@@ -286,6 +285,10 @@ nonEmptyCursorSelectOrAdd f g p a nec =
     case nonEmptyCursorSearch f g p nec of
         Nothing -> nonEmptyCursorAppendAndSelect f a nec
         Just nec' -> nec'
+
+renderNonEmptyCursor :: ([b] -> a -> [b] -> c) -> NonEmptyCursor a b -> c
+renderNonEmptyCursor f NonEmptyCursor {..} =
+    f (reverse nonEmptyCursorPrev) nonEmptyCursorCurrent nonEmptyCursorNext
 
 nonemptyPrepend :: [a] -> NonEmpty a -> NonEmpty a
 nonemptyPrepend ls ne = foldr (<|) ne ls

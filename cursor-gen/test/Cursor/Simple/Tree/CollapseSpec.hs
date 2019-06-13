@@ -21,7 +21,17 @@ spec = do
         producesValidsOnValids $ treeCursorOpenCurrentForest @Rational @Rational
     describe "treeCursorCloseCurrentForest" $
         it "produces valid cursors" $
-        producesValidsOnValids $ treeCursorCloseCurrentForest @Rational @Rational
+        producesValidsOnValids $
+        treeCursorCloseCurrentForest @Rational @Rational
     describe "treeCursorToggleCurrentForest" $
         it "produces valid cursors" $
-        producesValidsOnValids $ treeCursorToggleCurrentForest @Rational @Rational
+        producesValidsOnValids $
+        treeCursorToggleCurrentForest @Rational @Rational
+    describe "treeCursorOpenCurrentForestRecursively" $
+        it "produces valid cursors" $
+        producesValidsOnValids $
+        treeCursorOpenCurrentForestRecursively @Double @Double
+    describe "treeCursorToggleCurrentForestRecursively" $
+        it "produces valid cursors" $
+        producesValidsOnValids $
+        treeCursorToggleCurrentForestRecursively @Double @Double

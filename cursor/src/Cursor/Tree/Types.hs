@@ -44,7 +44,7 @@ import Lens.Micro
 data TreeCursor a b = TreeCursor
     { treeAbove :: !(Maybe (TreeAbove b))
     , treeCurrent :: !a
-    , treeBelow :: !(CForest b)
+    , treeBelow :: (CForest b)
     } deriving (Show, Eq, Generic)
 
 treeCursorAboveL :: Lens' (TreeCursor a b) (Maybe (TreeAbove b))
@@ -95,7 +95,7 @@ instance Validity TreeCursorSelection
 
 data CTree a =
     CNode !a
-          !(CForest a)
+          (CForest a)
     deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (CTree a)
