@@ -23,6 +23,7 @@ import Cursor.Simple.Forest hiding (ForestCursor)
 import qualified Cursor.Simple.Forest as SFC (ForestCursor)
 import Cursor.Tree
 import Cursor.Types
+import qualified Data.Sequence as S
 
 import Cursor.Simple.Forest.Gen ()
 
@@ -31,27 +32,21 @@ spec = do
   eqSpec @(SFC.ForestCursor Int)
   genValidSpec @(SFC.ForestCursor Rational)
   modifyMaxSize (`quot` 2) $
-    modifyMaxSuccess (`quot` 2) $
-    shrinkValidSpecWithLimit @(SFC.ForestCursor Rational) 10
+    modifyMaxSuccess (`quot` 2) $ shrinkValidSpecWithLimit @(SFC.ForestCursor Rational) 10
   describe "makeForestCursor" $
-    it "produces valid cursors" $
-    producesValidsOnValids (makeForestCursor @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (makeForestCursor @Rational)
   describe "rebuildForestCursor" $ do
-    it "produces valid forests" $
-      producesValidsOnValids (rebuildForestCursor @Rational)
+    it "produces valid forests" $ producesValidsOnValids (rebuildForestCursor @Rational)
     it "is the inverse of makeForestCursor for integers" $
       inverseFunctions (makeForestCursor @Int) rebuildForestCursor
-  describe "forestCursorLestCursorL" $
-    lensSpecOnValid (forestCursorListCursorL @Rational @Rational)
+  describe "forestCursorLestCursorL" $ lensSpecOnValid (forestCursorListCursorL @Rational @Rational)
   describe "forestCursorSelectedTreeL" $
     lensSpecOnValid (forestCursorSelectedTreeL @Rational @Rational)
   describe "forestCursorSelection" $ do
-    it "produces valid ints" $
-      producesValidsOnValids (forestCursorSelection @Rational @Rational)
+    it "produces valid ints" $ producesValidsOnValids (forestCursorSelection @Rational @Rational)
     it "returns the index of the currently selected element" pending
   describe "forestCursorSelectIndex" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 (forestCursorSelectIndex @Rational)
+    it "produces valid cursors" $ producesValidsOnValids2 (forestCursorSelectIndex @Rational)
     it "is the identity function when given the current selection" $
       forAllValid $ \fc ->
         forestCursorSelectIndex (forestCursorSelection fc) fc `shouldBe`
@@ -87,36 +82,32 @@ movementsSpec = do
     it "is a movement" $ isMovement forestCursorSelectLastTreeCursor
     it "selects the last tree" pending
   describe "forestCursorSelectPrev" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids $ forestCursorSelectPrev @Rational
+    it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectPrev @Rational
     it "is a movement" $ isMovementM forestCursorSelectPrev
     it "selects the previous node" pending
-        -- TODO example with a collapsed tree
+      -- TODO example with a collapsed tree
     it "Works for this classic example without any collapsing" $
-            --   > 1
-            --     > 2 <- expected end cursor
-            --   > 3 <- start cursor
+      --   > 1
+      --     > 2 <- expected end cursor
+      --   > 3 <- start cursor
      do
       let start =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
                     { nonEmptyCursorPrev =
-                        [CNode 1 $ openForest [CNode 2 $ emptyCForest]]
+                        S.singleton $ CNode 1 $ openForest [CNode 2 $ emptyCForest]
                     , nonEmptyCursorCurrent =
                         TreeCursor
-                          { treeAbove = Nothing
-                          , treeCurrent = 3 :: Int
-                          , treeBelow = emptyCForest
-                          }
-                    , nonEmptyCursorNext = []
+                          {treeAbove = Nothing, treeCurrent = 3 :: Int, treeBelow = emptyCForest}
+                    , nonEmptyCursorNext = S.empty
                     }
               }
           expected =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
+                    { nonEmptyCursorPrev = S.empty
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove =
@@ -130,16 +121,14 @@ movementsSpec = do
                           , treeCurrent = 2
                           , treeBelow = emptyCForest
                           }
-                    , nonEmptyCursorNext = [CNode 3 $ emptyCForest]
+                    , nonEmptyCursorNext = S.singleton (CNode 3 $ emptyCForest)
                     }
               }
       case forestCursorSelectPrev start of
-        Nothing ->
-          expectationFailure "forestCursorSelectPrev should not have failed."
+        Nothing -> expectationFailure "forestCursorSelectPrev should not have failed."
         Just actual -> actual `forestShouldBe` expected
   describe "forestCursorSelectNext" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids $ forestCursorSelectNext @Rational
+    it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectNext @Rational
     it "is a movement" $ isMovementM forestCursorSelectNext
     it "selects the next node" pending
     it "Works for this classic example" $
@@ -151,7 +140,7 @@ movementsSpec = do
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
+                    { nonEmptyCursorPrev = S.empty
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove =
@@ -165,7 +154,7 @@ movementsSpec = do
                           , treeCurrent = 2
                           , treeBelow = emptyCForest
                           }
-                    , nonEmptyCursorNext = [CNode 3 $ emptyCForest]
+                    , nonEmptyCursorNext = S.singleton $ CNode 3 $ emptyCForest
                     }
               }
           expected =
@@ -173,19 +162,15 @@ movementsSpec = do
               { forestCursorListCursor =
                   NonEmptyCursor
                     { nonEmptyCursorPrev =
-                        [CNode 1 $ openForest [CNode 2 $ emptyCForest]]
+                        S.singleton $ CNode 1 $ openForest [CNode 2 $ emptyCForest]
                     , nonEmptyCursorCurrent =
                         TreeCursor
-                          { treeAbove = Nothing
-                          , treeCurrent = 3 :: Int
-                          , treeBelow = emptyCForest
-                          }
-                    , nonEmptyCursorNext = []
+                          {treeAbove = Nothing, treeCurrent = 3 :: Int, treeBelow = emptyCForest}
+                    , nonEmptyCursorNext = S.empty
                     }
               }
       case forestCursorSelectNext start of
-        Nothing ->
-          expectationFailure "forestCursorSelectNext should not have failed."
+        Nothing -> expectationFailure "forestCursorSelectNext should not have failed."
         Just actual -> actual `forestShouldBe` expected
   describe "forestCursorSelectPrevOnSameLevel" $ do
     it "produces valid cursors" $
@@ -198,34 +183,28 @@ movementsSpec = do
     it "is a movement" $ isMovementM forestCursorSelectNextOnSameLevel
     it "selects the next node on the same level as the current node" pending
   describe "forestCursorSelectFirst" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids $ forestCursorSelectFirst @Rational
+    it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectFirst @Rational
     it "is a movement" $ isMovement forestCursorSelectFirst
     it "selects the first node in the forest" pending
   describe "forestCursorSelectLast" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids $ forestCursorSelectLast @Rational
+    it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectLast @Rational
     it "is a movement" $ isMovement forestCursorSelectLast
     it "selects the last node in the forest" pending
   describe "forestCursorSelectAbove" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids $ forestCursorSelectAbove @Rational
+    it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectAbove @Rational
     it "is a movement" $ isMovementM forestCursorSelectAbove
     it "selects the parent" pending
   describe "forestCursorSelectBelowAtPos" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 $ forestCursorSelectBelowAtPos @Rational
+    it "produces valid cursors" $ producesValidsOnValids2 $ forestCursorSelectBelowAtPos @Rational
     it "is a movement for any index" $
       forAllValid $ \i -> isMovementM $ forestCursorSelectBelowAtPos i
     it "selects the child of the selected node at the given position" pending
   describe "forestCursorSelectBelowAtStart" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids $ forestCursorSelectBelowAtStart @Rational
+    it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectBelowAtStart @Rational
     it "is a movement" $ isMovementM forestCursorSelectBelowAtStart
     it "selects the first child of the selected node" pending
   describe "forestCursorSelectBelowAtEnd" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids $ forestCursorSelectBelowAtEnd @Rational
+    it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectBelowAtEnd @Rational
     it "is a movement" $ isMovementM forestCursorSelectBelowAtEnd
     it "selects the first child of the selected node" pending
 
@@ -245,8 +224,7 @@ collapseSpec = do
     producesValidsOnValids $ forestCursorToggleCurrentForest @Rational @Rational
   describe "forestCursorToggleCurrentForestRecursively" $
     it "produces valid cursors" $
-    producesValidsOnValids $
-    forestCursorToggleCurrentForestRecursively @Rational @Rational
+    producesValidsOnValids $ forestCursorToggleCurrentForestRecursively @Rational @Rational
 
 insertSpec :: Spec
 insertSpec = do
@@ -257,9 +235,7 @@ insertSpec = do
   describe "forestCursorInsertAndSelectTreeCursor" $ do
     it "produces valid cursors" $
       producesValidsOnValids2 (forestCursorInsertAndSelectTreeCursor @Rational)
-    it
-      "inserts a tree cursor before the currently selected tree cursor and selects it"
-      pending
+    it "inserts a tree cursor before the currently selected tree cursor and selects it" pending
   describe "forestCursorAppendEntireTree" $ do
     it "produces valid cursors" $
       producesValidsOnValids2 (forestCursorAppendEntireTree @Rational @Rational)
@@ -267,9 +243,7 @@ insertSpec = do
   describe "forestCursorAppendAndSelectTreeCursor" $ do
     it "produces valid cursors" $
       producesValidsOnValids2 (forestCursorAppendAndSelectTreeCursor @Rational)
-    it
-      "appends a tree cursor after the currently selected tree cursor and selects it"
-      pending
+    it "appends a tree cursor after the currently selected tree cursor and selects it" pending
   describe "forestCursorInsertTree" $ do
     it "produces valid cursors" $
       producesValidsOnValids2 (forestCursorInsertTree @Rational @Rational)
@@ -277,9 +251,7 @@ insertSpec = do
   describe "forestCursorInsertAndSelectTree" $ do
     it "produces valid cursors" $
       producesValidsOnValids2 (forestCursorInsertAndSelectTree @Rational)
-    it
-      "inserts a tree before the currently selected tree and selects it"
-      pending
+    it "inserts a tree before the currently selected tree and selects it" pending
   describe "forestCursorAppendTree" $ do
     it "produces valid cursors" $
       producesValidsOnValids2 (forestCursorAppendTree @Rational @Rational)
@@ -289,103 +261,74 @@ insertSpec = do
       producesValidsOnValids2 (forestCursorAppendAndSelectTree @Rational)
     it "appends a tree after the currently selected tree and selects it" pending
   describe "forestCursorInsert" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 (forestCursorInsert @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids2 (forestCursorInsert @Rational @Rational)
     it "inserts a node before the currently selected node" pending
   describe "forestCursorInsertAndSelect" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 (forestCursorInsertAndSelect @Rational)
-    it
-      "inserts a node before the currently selected node and selects it"
-      pending
+    it "produces valid cursors" $ producesValidsOnValids2 (forestCursorInsertAndSelect @Rational)
+    it "inserts a node before the currently selected node and selects it" pending
   describe "forestCursorAppend" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 (forestCursorAppend @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAppend @Rational @Rational)
     it "appends a node after the currently selected node" pending
   describe "forestCursorAppendAndSelect" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 (forestCursorAppendAndSelect @Rational)
+    it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAppendAndSelect @Rational)
     it "appends a node after the currently selected node and selects it" pending
   describe "forestCursorAddChildTreeToNodeAtPos" $ do
     it "produces valid cursors" $
-      producesValidsOnValids3 $
-      forestCursorAddChildTreeToNodeAtPos @Rational @Rational
-    it
-      "adds a child tree to a node at the given position in the children of that node"
-      pending
+      producesValidsOnValids3 $ forestCursorAddChildTreeToNodeAtPos @Rational @Rational
+    it "adds a child tree to a node at the given position in the children of that node" pending
   describe "forestCursorAddChildTreeToNodeAtStart" $ do
     it "produces valid cursors" $
-      producesValidsOnValids2 $
-      forestCursorAddChildTreeToNodeAtStart @Rational @Rational
-    it
-      "adds a child tree to a node at the start the children of that node"
-      pending
+      producesValidsOnValids2 $ forestCursorAddChildTreeToNodeAtStart @Rational @Rational
+    it "adds a child tree to a node at the start the children of that node" pending
   describe "forestCursorAddChildTreeToNodeAtEnd" $ do
     it "produces valid cursors" $
-      producesValidsOnValids2 $
-      forestCursorAddChildTreeToNodeAtEnd @Rational @Rational
-    it
-      "adds a child tree to a node at the end the children of that node"
-      pending
+      producesValidsOnValids2 $ forestCursorAddChildTreeToNodeAtEnd @Rational @Rational
+    it "adds a child tree to a node at the end the children of that node" pending
   describe "forestCursorAddChildToNodeAtPos" $ do
     it "produces valid cursors" $
-      producesValidsOnValids3 $
-      forestCursorAddChildToNodeAtPos @Rational @Rational
-    it
-      "adds a child to a node at the given position in the children of that node"
-      pending
+      producesValidsOnValids3 $ forestCursorAddChildToNodeAtPos @Rational @Rational
+    it "adds a child to a node at the given position in the children of that node" pending
   describe "forestCursorAddChildToNodeAtStart" $ do
     it "produces valid cursors" $
-      producesValidsOnValids2 $
-      forestCursorAddChildToNodeAtStart @Rational @Rational
+      producesValidsOnValids2 $ forestCursorAddChildToNodeAtStart @Rational @Rational
     it "adds a child to a node at the start the children of that node" pending
   describe "forestCursorAddChildToNodeAtEnd" $ do
     it "produces valid cursors" $
-      producesValidsOnValids2 $
-      forestCursorAddChildToNodeAtEnd @Rational @Rational
+      producesValidsOnValids2 $ forestCursorAddChildToNodeAtEnd @Rational @Rational
     it "adds a child to a node at the end the children of that node" pending
   describe "forestCursorAddRoot" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 (forestCursorAddRoot @Rational)
+    it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAddRoot @Rational)
     it "houses the entire forest under the given node" pending
 
 swapSpec :: Spec
 swapSpec = do
   describe "forestCursorSwapPrev" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (forestCursorSwapPrev @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (forestCursorSwapPrev @Rational @Rational)
     it "works on the example from the docs" $
       let start =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 'a' $ emptyCForest]
+                    { nonEmptyCursorPrev = S.singleton $ CNode 'a' $ emptyCForest
                     , nonEmptyCursorCurrent =
                         TreeCursor
-                          { treeAbove = Nothing
-                          , treeCurrent = 'b'
-                          , treeBelow = emptyCForest
-                          }
-                    , nonEmptyCursorNext = []
+                          {treeAbove = Nothing, treeCurrent = 'b', treeBelow = emptyCForest}
+                    , nonEmptyCursorNext = S.empty
                     }
               }
           end =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
+                    { nonEmptyCursorPrev = S.empty
                     , nonEmptyCursorCurrent =
                         TreeCursor
-                          { treeAbove = Nothing
-                          , treeCurrent = 'b'
-                          , treeBelow = emptyCForest
-                          }
-                    , nonEmptyCursorNext = [CNode 'a' $ emptyCForest]
+                          {treeAbove = Nothing, treeCurrent = 'b', treeBelow = emptyCForest}
+                    , nonEmptyCursorNext = S.singleton $ CNode 'a' $ emptyCForest
                     }
               }
        in case forestCursorSwapPrev start of
-            Nothing ->
-              expectationFailure "forestCursorSwapPrev should not have failed."
+            Nothing -> expectationFailure "forestCursorSwapPrev should not have failed."
             Just r -> r `forestShouldBe` end
     it "swaps the current node with the previous node on the same level" pending
     it "reverts forestCursorSwapNext" $
@@ -393,40 +336,32 @@ swapSpec = do
         (forestCursorSwapNext @Rational @Rational)
         (forestCursorSwapPrev @Rational @Rational)
   describe "forestCursorSwapNext" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (forestCursorSwapNext @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (forestCursorSwapNext @Rational @Rational)
     it "works on the example from the docs" $
       let start =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
+                    { nonEmptyCursorPrev = S.empty
                     , nonEmptyCursorCurrent =
                         TreeCursor
-                          { treeAbove = Nothing
-                          , treeCurrent = 'a'
-                          , treeBelow = emptyCForest
-                          }
-                    , nonEmptyCursorNext = [CNode 'b' $ emptyCForest]
+                          {treeAbove = Nothing, treeCurrent = 'a', treeBelow = emptyCForest}
+                    , nonEmptyCursorNext = S.singleton $ CNode 'b' $ emptyCForest
                     }
               }
           end =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 'b' $ emptyCForest]
+                    { nonEmptyCursorPrev = S.singleton $ CNode 'b' $ emptyCForest
                     , nonEmptyCursorCurrent =
                         TreeCursor
-                          { treeAbove = Nothing
-                          , treeCurrent = 'a'
-                          , treeBelow = emptyCForest
-                          }
-                    , nonEmptyCursorNext = []
+                          {treeAbove = Nothing, treeCurrent = 'a', treeBelow = emptyCForest}
+                    , nonEmptyCursorNext = S.empty
                     }
               }
        in case forestCursorSwapNext start of
-            Nothing ->
-              expectationFailure "forestCursorSwapNext should not have failed."
+            Nothing -> expectationFailure "forestCursorSwapNext should not have failed."
             Just r -> r `forestShouldBe` end
     it "swaps the current node with the next node on the same level" pending
     it "reverts forestCursorSwapPrev" $
@@ -445,14 +380,14 @@ deleteSpec = do
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
+                      { nonEmptyCursorPrev = S.empty
                       , nonEmptyCursorCurrent =
                           TreeCursor
                             { treeAbove = Nothing
                             , treeCurrent = 1 :: Int
                             , treeBelow = closedForest [Node 2 fs]
                             }
-                      , nonEmptyCursorNext = []
+                      , nonEmptyCursorNext = S.empty
                       }
                 }
          in case forestCursorRemoveElemAndSelectPrev simpleDeleteElemStart of
@@ -473,70 +408,68 @@ deleteSpec = do
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
+                      { nonEmptyCursorPrev = S.empty
                       , nonEmptyCursorCurrent =
                           TreeCursor
                             { treeAbove = Nothing
                             , treeCurrent = 1
                             , treeBelow = closedForest [Node 2 fs]
                             }
-                      , nonEmptyCursorNext = []
+                      , nonEmptyCursorNext = S.empty
                       }
                 }
             simpleDeleteElemExpected =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
+                      { nonEmptyCursorPrev = S.empty
                       , nonEmptyCursorCurrent =
                           TreeCursor
                             { treeAbove = Nothing
                             , treeCurrent = 2 :: Int
                             , treeBelow = closedForest fs
                             }
-                      , nonEmptyCursorNext = []
+                      , nonEmptyCursorNext = S.empty
                       }
                 }
          in case forestCursorDeleteElemAndSelectNext simpleDeleteElemStart of
               Nothing ->
-                expectationFailure
-                  "forestCursorDeleteElemAndSelectNext should not have failed."
+                expectationFailure "forestCursorDeleteElemAndSelectNext should not have failed."
               Just Deleted ->
                 expectationFailure
                   "forestCursorDeleteElemAndSelectNext should not have deleted the entire example forest."
               Just (Updated f) -> f `shouldBe` simpleDeleteElemExpected
     it "deletes the selected element and selects the next element" pending
   describe "forestCursorRemoveElem" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (forestCursorRemoveElem @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (forestCursorRemoveElem @Rational)
     it "works for this simple example" $
       forAllValid $ \fs ->
         let simpleDeleteElemStart =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
+                      { nonEmptyCursorPrev = S.empty
                       , nonEmptyCursorCurrent =
                           TreeCursor
                             { treeAbove = Nothing
                             , treeCurrent = 1
                             , treeBelow = closedForest [Node 2 fs]
                             }
-                      , nonEmptyCursorNext = []
+                      , nonEmptyCursorNext = S.empty
                       }
                 }
             simpleDeleteElemExpected =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
+                      { nonEmptyCursorPrev = S.empty
                       , nonEmptyCursorCurrent =
                           TreeCursor
                             { treeAbove = Nothing
                             , treeCurrent = 2 :: Int
                             , treeBelow = closedForest fs
                             }
-                      , nonEmptyCursorNext = []
+                      , nonEmptyCursorNext = S.empty
                       }
                 }
          in case forestCursorRemoveElem simpleDeleteElemStart of
@@ -546,36 +479,35 @@ deleteSpec = do
               Updated f -> f `shouldBe` simpleDeleteElemExpected
     it "removes the selected element" pending
   describe "forestCursorDeleteElem" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (forestCursorDeleteElem @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (forestCursorDeleteElem @Rational)
     it "works for this simple example" $
       forAllValid $ \fs ->
         let simpleDeleteElemStart =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
+                      { nonEmptyCursorPrev = S.empty
                       , nonEmptyCursorCurrent =
                           TreeCursor
                             { treeAbove = Nothing
                             , treeCurrent = 1
                             , treeBelow = closedForest [Node 2 fs]
                             }
-                      , nonEmptyCursorNext = []
+                      , nonEmptyCursorNext = S.empty
                       }
                 }
             simpleDeleteElemExpected =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
+                      { nonEmptyCursorPrev = S.empty
                       , nonEmptyCursorCurrent =
                           TreeCursor
                             { treeAbove = Nothing
                             , treeCurrent = 2 :: Int
                             , treeBelow = closedForest fs
                             }
-                      , nonEmptyCursorNext = []
+                      , nonEmptyCursorNext = S.empty
                       }
                 }
          in case forestCursorDeleteElem simpleDeleteElemStart of
@@ -593,41 +525,36 @@ deleteSpec = do
       producesValidsOnValids (forestCursorDeleteSubTreeAndSelectNext @Rational)
     it "deletes the selected subtree and selects the next tree" pending
   describe "forestCursorRemoveSubTree" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (forestCursorRemoveSubTree @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (forestCursorRemoveSubTree @Rational)
     it "removes the selected subtree" pending
   describe "forestCursorDeleteSubTree" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (forestCursorDeleteSubTree @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (forestCursorDeleteSubTree @Rational)
     it "deletes the selected subtree" pending
 
 shiftingSpec :: Spec
 shiftingSpec = do
   describe "forestCursorPromoteElem" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ forestCursorPromoteElem @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ forestCursorPromoteElem @Rational
     it "works on the example from the documentation" $
       let start =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
+                    { nonEmptyCursorPrev = S.empty
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove =
                               Just
                                 TreeAbove
-                                  { treeAboveLefts =
-                                      [CNode 'b' $ closedForest [Node 'c' []]]
+                                  { treeAboveLefts = [CNode 'b' $ closedForest [Node 'c' []]]
                                   , treeAboveAbove = Nothing
                                   , treeAboveNode = 'a'
-                                  , treeAboveRights =
-                                      [CNode 'f' $ closedForest [Node 'g' []]]
+                                  , treeAboveRights = [CNode 'f' $ closedForest [Node 'g' []]]
                                   }
                           , treeCurrent = 'd'
                           , treeBelow = closedForest [Node 'e' []]
                           }
-                    , nonEmptyCursorNext = [CNode 'h' $ emptyCForest]
+                    , nonEmptyCursorNext = S.singleton $ CNode 'h' $ emptyCForest
                     }
               }
           expected =
@@ -635,53 +562,44 @@ shiftingSpec = do
               { forestCursorListCursor =
                   NonEmptyCursor
                     { nonEmptyCursorPrev =
-                        [ CNode 'a' $
-                          openForest
-                            [ CNode 'b' $
-                              openForest
-                                [CNode 'c' emptyCForest, CNode 'e' emptyCForest]
-                            , CNode 'f' $ closedForest [Node 'g' []]
-                            ]
-                        ]
+                        S.singleton $
+                        CNode 'a' $
+                        openForest
+                          [ CNode 'b' $ openForest [CNode 'c' emptyCForest, CNode 'e' emptyCForest]
+                          , CNode 'f' $ closedForest [Node 'g' []]
+                          ]
                     , nonEmptyCursorCurrent =
                         TreeCursor
-                          { treeAbove = Nothing
-                          , treeCurrent = 'd'
-                          , treeBelow = emptyCForest
-                          }
-                    , nonEmptyCursorNext = [CNode 'h' emptyCForest]
+                          {treeAbove = Nothing, treeCurrent = 'd', treeBelow = emptyCForest}
+                    , nonEmptyCursorNext = S.singleton $ CNode 'h' emptyCForest
                     }
               }
        in case forestCursorPromoteElem start of
-            Nothing ->
-              expectationFailure
-                "forestCursorPromoteElem should not have failed."
+            Nothing -> expectationFailure "forestCursorPromoteElem should not have failed."
             Just f -> f `forestShouldBe` expected
     it "promotes the current node to the level of its parent" pending
   describe "forestCursorDemoteElem" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ forestCursorDemoteElem @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ forestCursorDemoteElem @Rational
     it "works on the example from the documentation" $
       let start =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev =
-                        [CNode 'a' $ closedForest [Node 'b' []]]
+                    { nonEmptyCursorPrev = S.singleton $ CNode 'a' $ closedForest [Node 'b' []]
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove = Nothing
                           , treeCurrent = 'c'
                           , treeBelow = closedForest [Node 'd' []]
                           }
-                    , nonEmptyCursorNext = [CNode 'e' emptyCForest]
+                    , nonEmptyCursorNext = S.singleton $ CNode 'e' emptyCForest
                     }
               }
           expected =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
+                    { nonEmptyCursorPrev = S.empty
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove =
@@ -695,40 +613,35 @@ shiftingSpec = do
                           , treeCurrent = 'c'
                           , treeBelow = emptyCForest
                           }
-                    , nonEmptyCursorNext = [CNode 'e' $ emptyCForest]
+                    , nonEmptyCursorNext = S.singleton $ CNode 'e' $ emptyCForest
                     }
               }
        in case forestCursorDemoteElem start of
-            Nothing ->
-              expectationFailure
-                "forestCursorDemoteElem should not have failed."
+            Nothing -> expectationFailure "forestCursorDemoteElem should not have failed."
             Just f -> f `forestShouldBe` expected
     it "demotes the current node to the level of its children" pending
   describe "forestCursorPromoteSubTree" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ forestCursorPromoteSubTree @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ forestCursorPromoteSubTree @Rational
     it "works on the example from the documentation" $
       let start =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
+                    { nonEmptyCursorPrev = S.empty
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove =
                               Just
                                 TreeAbove
-                                  { treeAboveLefts =
-                                      [CNode 'b' $ closedForest [Node 'c' []]]
+                                  { treeAboveLefts = [CNode 'b' $ closedForest [Node 'c' []]]
                                   , treeAboveAbove = Nothing
                                   , treeAboveNode = 'a'
-                                  , treeAboveRights =
-                                      [CNode 'f' $ closedForest [Node 'g' []]]
+                                  , treeAboveRights = [CNode 'f' $ closedForest [Node 'g' []]]
                                   }
                           , treeCurrent = 'd'
                           , treeBelow = closedForest [Node 'e' []]
                           }
-                    , nonEmptyCursorNext = [CNode 'h' emptyCForest]
+                    , nonEmptyCursorNext = S.singleton $ CNode 'h' emptyCForest
                     }
               }
           expected =
@@ -736,51 +649,47 @@ shiftingSpec = do
               { forestCursorListCursor =
                   NonEmptyCursor
                     { nonEmptyCursorPrev =
-                        [ CNode 'a' $
-                          openForest
-                            [ CNode 'b' $ closedForest [Node 'c' []]
-                            , CNode 'f' $ closedForest [Node 'g' []]
-                            ]
-                        ]
+                        S.singleton $
+                        CNode 'a' $
+                        openForest
+                          [ CNode 'b' $ closedForest [Node 'c' []]
+                          , CNode 'f' $ closedForest [Node 'g' []]
+                          ]
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove = Nothing
                           , treeCurrent = 'd'
                           , treeBelow = closedForest [Node 'e' []]
                           }
-                    , nonEmptyCursorNext = [CNode 'h' emptyCForest]
+                    , nonEmptyCursorNext = S.singleton $ CNode 'h' emptyCForest
                     }
               }
        in case forestCursorPromoteSubTree start of
-            Nothing ->
-              expectationFailure
-                "forestCursorPromoteSubTree should not have failed."
+            Nothing -> expectationFailure "forestCursorPromoteSubTree should not have failed."
             Just f -> f `forestShouldBe` expected
     it "promotes the current subtree to the level of its parent" pending
   describe "forestCursorDemoteSubTree" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ forestCursorDemoteSubTree @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ forestCursorDemoteSubTree @Rational
     it "works on the example from the documentation" $
       let start =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev =
-                        [CNode 'a' $ closedForest [Node 'b' []]]
+                    { nonEmptyCursorPrev = S.singleton $ CNode 'a' $ closedForest [Node 'b' []]
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove = Nothing
                           , treeCurrent = 'c'
                           , treeBelow = closedForest [Node 'd' []]
                           }
-                    , nonEmptyCursorNext = []
+                    , nonEmptyCursorNext = S.empty
                     }
               }
           expected =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
+                    { nonEmptyCursorPrev = S.empty
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove =
@@ -794,13 +703,11 @@ shiftingSpec = do
                           , treeCurrent = 'c'
                           , treeBelow = closedForest [Node 'd' []]
                           }
-                    , nonEmptyCursorNext = []
+                    , nonEmptyCursorNext = S.empty
                     }
               }
        in case forestCursorDemoteSubTree start of
-            Nothing ->
-              expectationFailure
-                "forestCursorDemoteSubTree should not have failed."
+            Nothing -> expectationFailure "forestCursorDemoteSubTree should not have failed."
             Just f -> f `forestShouldBe` expected
     it "demotes the current subtree to the level of its children" pending
   describe "forestCursorDemoteElemUnder" $ do
@@ -812,19 +719,19 @@ shiftingSpec = do
           let demoteStart =
                 ForestCursor $
                 NonEmptyCursor
-                  { nonEmptyCursorPrev = []
+                  { nonEmptyCursorPrev = S.empty
                   , nonEmptyCursorCurrent =
                       TreeCursor
                         { treeAbove = Nothing
                         , treeCurrent = 'a'
                         , treeBelow = closedForest [Node 'b' []]
                         }
-                  , nonEmptyCursorNext = []
+                  , nonEmptyCursorNext = S.empty
                   }
               demoteEnd =
                 ForestCursor $
                 NonEmptyCursor
-                  { nonEmptyCursorPrev = []
+                  { nonEmptyCursorPrev = S.empty
                   , nonEmptyCursorCurrent =
                       TreeCursor
                         { treeAbove =
@@ -838,33 +745,31 @@ shiftingSpec = do
                         , treeCurrent = 'a'
                         , treeBelow = emptyCForest
                         }
-                  , nonEmptyCursorNext = [CNode b2 $ closedForest [Node 'b' []]]
+                  , nonEmptyCursorNext = S.singleton $ CNode b2 $ closedForest [Node 'b' []]
                   }
-           in forestCursorDemoteElemUnder b1 b2 demoteStart `forestShouldBe`
-              demoteEnd
+           in forestCursorDemoteElemUnder b1 b2 demoteStart `forestShouldBe` demoteEnd
     it "demotes the current node to the level of its children" pending
   describe "forestCursorDemoteSubTreeUnder" $ do
     it "produces valids on valids" $
-      producesValidsOnValids2 $
-      forestCursorDemoteSubTreeUnder @Rational @Rational
+      producesValidsOnValids2 $ forestCursorDemoteSubTreeUnder @Rational @Rational
     it "Works on the example from the docs" $
       forAllValid $ \v -> do
         let demoteStart =
               ForestCursor $
               NonEmptyCursor
-                { nonEmptyCursorPrev = []
+                { nonEmptyCursorPrev = S.empty
                 , nonEmptyCursorCurrent =
                     TreeCursor
                       { treeAbove = Nothing
                       , treeCurrent = 'a'
                       , treeBelow = closedForest [Node 'b' []]
                       }
-                , nonEmptyCursorNext = []
+                , nonEmptyCursorNext = S.empty
                 }
             demoteEnd =
               ForestCursor $
               NonEmptyCursor
-                { nonEmptyCursorPrev = []
+                { nonEmptyCursorPrev = S.empty
                 , nonEmptyCursorCurrent =
                     TreeCursor
                       { treeAbove =
@@ -878,15 +783,12 @@ shiftingSpec = do
                       , treeCurrent = 'a'
                       , treeBelow = closedForest [Node 'b' []]
                       }
-                , nonEmptyCursorNext = []
+                , nonEmptyCursorNext = S.empty
                 }
         forestCursorDemoteSubTreeUnder v demoteStart `forestShouldBe` demoteEnd
-    it
-      "demotes the current subtree to the level of its children, by adding a root"
-      pending
+    it "demotes the current subtree to the level of its children, by adding a root" pending
 
-isMovementM ::
-     (forall a. SFC.ForestCursor a -> Maybe (SFC.ForestCursor a)) -> Property
+isMovementM :: (forall a. SFC.ForestCursor a -> Maybe (SFC.ForestCursor a)) -> Property
 isMovementM func =
   forAllValid @(SFC.ForestCursor Int) $ \lec ->
     case func lec of
@@ -906,11 +808,9 @@ isMovementM func =
 isMovement :: (forall a. SFC.ForestCursor a -> SFC.ForestCursor a) -> Property
 isMovement func =
   forAllValid $ \lec ->
-    rebuildForestCursor (lec :: SFC.ForestCursor Int) `shouldBe`
-    rebuildForestCursor (func lec)
+    rebuildForestCursor (lec :: SFC.ForestCursor Int) `shouldBe` rebuildForestCursor (func lec)
 
-forestShouldBe ::
-     (Show a, Eq a) => SFC.ForestCursor a -> SFC.ForestCursor a -> Expectation
+forestShouldBe :: (Show a, Eq a) => SFC.ForestCursor a -> SFC.ForestCursor a -> Expectation
 forestShouldBe actual expected =
   unless (actual == expected) $
   expectationFailure $

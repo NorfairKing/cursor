@@ -38,6 +38,7 @@ tests:
     - containers
     - cursor
     - cursor-gen
+    - genvalidity-containers
     - genvalidity-hspec
     - genvalidity-hspec-optics
     - hspec
