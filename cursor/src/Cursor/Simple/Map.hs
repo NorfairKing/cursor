@@ -5,39 +5,39 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Simple.Map
-    ( MapCursor
-    , MC.mapCursorList
-    , makeMapCursor
-    , makeMapCursorWithSelection
-    , MC.singletonMapCursorKey
-    , MC.singletonMapCursorValue
-    , rebuildMapCursor
-    , mapMapCursor
-    , MC.mapCursorNonEmptyCursorL
-    , MC.mapCursorElemL
-    , mapCursorSelectKey
-    , mapCursorSelectValue
-    , mapCursorToggleSelected
-    , mapCursorSelectPrev
-    , mapCursorSelectNext
-    , mapCursorSelectFirst
-    , mapCursorSelectLast
-    , MC.mapCursorSelection
-    , mapCursorSelectIndex
-    , MC.mapCursorInsert
-    , MC.mapCursorAppend
-    , mapCursorInsertAndSelectKey
-    , mapCursorAppendAndSelectKey
-    , mapCursorInsertAndSelectValue
-    , mapCursorAppendAndSelectValue
-    , mapCursorRemoveElemAndSelectPrev
-    , mapCursorDeleteElemAndSelectNext
-    , mapCursorRemoveElem
-    , mapCursorDeleteElem
-    , mapCursorSearch
-    , mapCursorSelectOrAdd
-    , module Cursor.Simple.Map.KeyValue
-    ) where
+  ( MapCursor
+  , MC.mapCursorList
+  , makeMapCursor
+  , makeMapCursorWithSelection
+  , MC.singletonMapCursorKey
+  , MC.singletonMapCursorValue
+  , rebuildMapCursor
+  , mapMapCursor
+  , MC.mapCursorNonEmptyCursorL
+  , MC.mapCursorElemL
+  , mapCursorSelectKey
+  , mapCursorSelectValue
+  , mapCursorToggleSelected
+  , mapCursorSelectPrev
+  , mapCursorSelectNext
+  , mapCursorSelectFirst
+  , mapCursorSelectLast
+  , MC.mapCursorSelection
+  , mapCursorSelectIndex
+  , MC.mapCursorInsert
+  , MC.mapCursorAppend
+  , mapCursorInsertAndSelectKey
+  , mapCursorAppendAndSelectKey
+  , mapCursorInsertAndSelectValue
+  , mapCursorAppendAndSelectValue
+  , mapCursorRemoveElemAndSelectPrev
+  , mapCursorDeleteElemAndSelectNext
+  , mapCursorRemoveElem
+  , mapCursorDeleteElem
+  , mapCursorSearch
+  , mapCursorSelectOrAdd
+  , module Cursor.Simple.Map.KeyValue
+  ) where
 
 import Data.List.NonEmpty (NonEmpty(..))
 
@@ -96,11 +96,11 @@ mapCursorAppendAndSelectValue :: k -> v -> MapCursor k v -> MapCursor k v
 mapCursorAppendAndSelectValue = MC.mapCursorAppendAndSelectValue id id
 
 mapCursorRemoveElemAndSelectPrev ::
-       MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
+     MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
 mapCursorRemoveElemAndSelectPrev = MC.mapCursorRemoveElemAndSelectPrev id
 
 mapCursorDeleteElemAndSelectNext ::
-       MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
+     MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
 mapCursorDeleteElemAndSelectNext = MC.mapCursorDeleteElemAndSelectNext id
 
 mapCursorRemoveElem :: MapCursor k v -> DeleteOrUpdate (MapCursor k v)
@@ -113,5 +113,5 @@ mapCursorSearch :: (k -> v -> Bool) -> MapCursor k v -> Maybe (MapCursor k v)
 mapCursorSearch = MC.mapCursorSearch id id id
 
 mapCursorSelectOrAdd ::
-       (k -> v -> Bool) -> KeyValueCursor k v -> MapCursor k v -> MapCursor k v
+     (k -> v -> Bool) -> KeyValueCursor k v -> MapCursor k v -> MapCursor k v
 mapCursorSelectOrAdd = MC.mapCursorSelectOrAdd id id id

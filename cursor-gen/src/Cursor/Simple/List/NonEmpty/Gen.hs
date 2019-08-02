@@ -1,8 +1,8 @@
 module Cursor.Simple.List.NonEmpty.Gen
-    ( nonEmptyElemOf
-    , nonEmptyWithIndex0
-    , nonEmptyWith
-    ) where
+  ( nonEmptyElemOf
+  , nonEmptyWithIndex0
+  , nonEmptyWith
+  ) where
 
 import Test.QuickCheck
 

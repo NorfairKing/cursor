@@ -4,32 +4,32 @@
 {-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.Tree.Types
-    ( TreeCursor(..)
-    , treeCursorAboveL
-    , treeCursorCurrentL
-    , treeCursorBelowL
-    , treeCursorCurrentSubTreeL
-    , TreeAbove(..)
-    , treeAboveLeftsL
-    , treeAboveAboveL
-    , treeAboveNodeL
-    , treeAboveRightsL
-    , TreeCursorSelection(..)
+  ( TreeCursor(..)
+  , treeCursorAboveL
+  , treeCursorCurrentL
+  , treeCursorBelowL
+  , treeCursorCurrentSubTreeL
+  , TreeAbove(..)
+  , treeAboveLeftsL
+  , treeAboveAboveL
+  , treeAboveNodeL
+  , treeAboveRightsL
+  , TreeCursorSelection(..)
     -- * CTree
-    , CTree(..)
-    , makeCTree
-    , cTree
-    , rebuildCTree
-    , CForest(..)
-    , makeCForest
-    , cForest
-    , rebuildCForest
-    , emptyCForest
-    , openForest
-    , closedForest
-    , lengthCForest
-    , unpackCForest
-    ) where
+  , CTree(..)
+  , makeCTree
+  , cTree
+  , rebuildCTree
+  , CForest(..)
+  , makeCForest
+  , cForest
+  , rebuildCForest
+  , emptyCForest
+  , openForest
+  , closedForest
+  , lengthCForest
+  , unpackCForest
+  ) where
 
 import Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NE
@@ -41,11 +41,13 @@ import GHC.Generics (Generic)
 
 import Lens.Micro
 
-data TreeCursor a b = TreeCursor
+data TreeCursor a b =
+  TreeCursor
     { treeAbove :: !(Maybe (TreeAbove b))
     , treeCurrent :: !a
     , treeBelow :: (CForest b)
-    } deriving (Show, Eq, Generic)
+    }
+  deriving (Show, Eq, Generic)
 
 treeCursorAboveL :: Lens' (TreeCursor a b) (Maybe (TreeAbove b))
 treeCursorAboveL = lens treeAbove $ \tc ta -> tc {treeAbove = ta}
@@ -58,18 +60,20 @@ treeCursorBelowL = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
 
 treeCursorCurrentSubTreeL :: Lens' (TreeCursor a b) (a, CForest b)
 treeCursorCurrentSubTreeL =
-    lens
+  lens
     (\tc -> (treeCurrent tc, treeBelow tc))
     (\tc (a, cf) -> tc {treeCurrent = a, treeBelow = cf})
 
 instance (Validity a, Validity b) => Validity (TreeCursor a b)
 
-data TreeAbove b = TreeAbove
+data TreeAbove b =
+  TreeAbove
     { treeAboveLefts :: ![CTree b] -- In reverse order
     , treeAboveAbove :: !(Maybe (TreeAbove b))
     , treeAboveNode :: !b
     , treeAboveRights :: ![CTree b]
-    } deriving (Show, Eq, Generic, Functor)
+    }
+  deriving (Show, Eq, Generic, Functor)
 
 instance Validity b => Validity (TreeAbove b)
 
@@ -86,17 +90,15 @@ treeAboveRightsL :: Lens' (TreeAbove b) [CTree b]
 treeAboveRightsL = lens treeAboveRights $ \ta tar -> ta {treeAboveRights = tar}
 
 data TreeCursorSelection
-    = SelectNode
-    | SelectChild !Int
-                  !TreeCursorSelection
-    deriving (Show, Eq, Generic)
+  = SelectNode
+  | SelectChild !Int !TreeCursorSelection
+  deriving (Show, Eq, Generic)
 
 instance Validity TreeCursorSelection
 
 data CTree a =
-    CNode !a
-          (CForest a)
-    deriving (Show, Eq, Generic, Functor)
+  CNode !a (CForest a)
+  deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (CTree a)
 
@@ -110,10 +112,10 @@ rebuildCTree :: CTree a -> Tree a
 rebuildCTree (CNode v cf) = Node v $ rebuildCForest cf
 
 data CForest a
-    = EmptyCForest
-    | ClosedForest !(NonEmpty (Tree a))
-    | OpenForest !(NonEmpty (CTree a))
-    deriving (Show, Eq, Generic, Functor)
+  = EmptyCForest
+  | ClosedForest !(NonEmpty (Tree a))
+  | OpenForest !(NonEmpty (CTree a))
+  deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (CForest a)
 
@@ -122,9 +124,9 @@ makeCForest = cForest True
 
 cForest :: Bool -> Forest a -> CForest a
 cForest b f =
-    if b
-        then openForest $ map (cTree b) f
-        else closedForest f
+  if b
+    then openForest $ map (cTree b) f
+    else closedForest f
 
 rebuildCForest :: CForest a -> Forest a
 rebuildCForest EmptyCForest = []
@@ -136,15 +138,15 @@ emptyCForest = EmptyCForest
 
 openForest :: [CTree a] -> CForest a
 openForest ts =
-    case NE.nonEmpty ts of
-        Nothing -> emptyCForest
-        Just ne -> OpenForest ne
+  case NE.nonEmpty ts of
+    Nothing -> emptyCForest
+    Just ne -> OpenForest ne
 
 closedForest :: [Tree a] -> CForest a
 closedForest ts =
-    case NE.nonEmpty ts of
-        Nothing -> emptyCForest
-        Just ne -> ClosedForest ne
+  case NE.nonEmpty ts of
+    Nothing -> emptyCForest
+    Just ne -> ClosedForest ne
 
 lengthCForest :: CForest a -> Int
 lengthCForest EmptyCForest = 0

@@ -1,8 +1,8 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.Map.KeyValue.Gen
-    (
-    ) where
+  (
+  ) where
 
 import Data.GenValidity
 
@@ -13,8 +13,8 @@ instance (GenUnchecked kc, GenUnchecked vc, GenUnchecked k, GenUnchecked v) =>
 
 instance (GenValid kc, GenValid vc, GenValid k, GenValid v) =>
          GenValid (KeyValueCursor kc vc k v) where
-    genValid = genValidStructurallyWithoutExtraChecking
-    shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
+  genValid = genValidStructurallyWithoutExtraChecking
+  shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
 instance GenUnchecked KeyValueToggle
 

@@ -1,8 +1,8 @@
 {-# LANGUAGE TypeApplications #-}
 
 module Cursor.Map.KeyValueSpec
-    ( spec
-    ) where
+  ( spec
+  ) where
 
 import Test.Hspec
 
@@ -13,7 +13,7 @@ import Cursor.Map.KeyValue.Gen ()
 
 spec :: Spec
 spec = do
-    eqSpec @(KeyValueCursor Int Int Int Int)
-    genValidSpec @(KeyValueCursor Double Double Double Double)
-    eqSpec @KeyValueToggle
-    genValidSpec @KeyValueToggle
+  eqSpec @(KeyValueCursor Int Int Int Int)
+  genValidSpec @(KeyValueCursor Double Double Double Double)
+  eqSpec @KeyValueToggle
+  genValidSpec @KeyValueToggle

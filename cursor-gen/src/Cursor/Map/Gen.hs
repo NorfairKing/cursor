@@ -2,8 +2,8 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.Map.Gen
-    (
-    ) where
+  (
+  ) where
 
 import Data.GenValidity
 import Data.GenValidity.Containers ()
@@ -18,5 +18,5 @@ instance (GenUnchecked kc, GenUnchecked vc, GenUnchecked k, GenUnchecked v) =>
 
 instance (GenValid kc, GenValid vc, GenValid k, GenValid v) =>
          GenValid (MapCursor kc vc k v) where
-    genValid = genValidStructurallyWithoutExtraChecking
-    shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
+  genValid = genValidStructurallyWithoutExtraChecking
+  shrinkValid = shrinkValidStructurallyWithoutExtraFiltering

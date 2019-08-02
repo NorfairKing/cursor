@@ -4,13 +4,13 @@
 {-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.Tree.Draw
-    ( drawTreeCursor
-    , treeCursorWithPointer
-    , showCForest
-    , showCTree
-    , showForest
-    , showTree
-    ) where
+  ( drawTreeCursor
+  , treeCursorWithPointer
+  , showCForest
+  , showCTree
+  , showForest
+  , showTree
+  ) where
 
 import qualified Data.List.NonEmpty as NE
 import Data.Tree
@@ -22,24 +22,24 @@ drawTreeCursor = drawTree . treeCursorWithPointer
 
 treeCursorWithPointer :: (Show a, Show b) => TreeCursor a b -> Tree String
 treeCursorWithPointer TreeCursor {..} =
-    wrapAbove treeAbove $
-    Node (show treeCurrent ++ " <---") $ showCForest treeBelow
+  wrapAbove treeAbove $
+  Node (show treeCurrent ++ " <---") $ showCForest treeBelow
   where
     wrapAbove :: (Show b) => Maybe (TreeAbove b) -> Tree String -> Tree String
     wrapAbove Nothing t = t
     wrapAbove (Just TreeAbove {..}) t =
-        wrapAbove treeAboveAbove $
-        Node (show treeAboveNode) $
-        concat
-            [ map showCTree $ reverse treeAboveLefts
-            , [t]
-            , map showCTree treeAboveRights
-            ]
+      wrapAbove treeAboveAbove $
+      Node (show treeAboveNode) $
+      concat
+        [ map showCTree $ reverse treeAboveLefts
+        , [t]
+        , map showCTree treeAboveRights
+        ]
 
 showCForest :: Show a => CForest a -> Forest String
 showCForest EmptyCForest = []
 showCForest (ClosedForest ts) =
-    map (fmap ("hidden: " ++)) $ map showTree $ NE.toList ts
+  map (fmap ("hidden: " ++)) $ map showTree $ NE.toList ts
 showCForest (OpenForest ts) = map showCTree $ NE.toList ts
 
 showCTree :: Show a => CTree a -> Tree String

@@ -1,19 +1,19 @@
 {-# LANGUAGE PatternSynonyms #-}
 
 module Cursor.Simple.Map.KeyValue
-    ( KeyValueCursor
-    , pattern KVC.KeyValueCursorKey
-    , pattern KVC.KeyValueCursorValue
-    , KVC.makeKeyValueCursorKey
-    , KVC.makeKeyValueCursorValue
-    , rebuildKeyValueCursor
-    , KVC.keyValueCursorSelection
-    , mapKeyValueCursor
-    , keyValueCursorSelectKey
-    , keyValueCursorSelectValue
-    , keyValueCursorToggleSelected
-    , KVC.KeyValueToggle(..)
-    ) where
+  ( KeyValueCursor
+  , pattern KVC.KeyValueCursorKey
+  , pattern KVC.KeyValueCursorValue
+  , KVC.makeKeyValueCursorKey
+  , KVC.makeKeyValueCursorValue
+  , rebuildKeyValueCursor
+  , KVC.keyValueCursorSelection
+  , mapKeyValueCursor
+  , keyValueCursorSelectKey
+  , keyValueCursorSelectValue
+  , keyValueCursorToggleSelected
+  , KVC.KeyValueToggle(..)
+  ) where
 
 import qualified Cursor.Map.KeyValue as KVC
 
@@ -23,7 +23,7 @@ rebuildKeyValueCursor :: KeyValueCursor k v -> (k, v)
 rebuildKeyValueCursor = KVC.rebuildKeyValueCursor id id
 
 mapKeyValueCursor ::
-       (k -> l) -> (v -> w) -> KeyValueCursor k v -> KeyValueCursor l w
+     (k -> l) -> (v -> w) -> KeyValueCursor k v -> KeyValueCursor l w
 mapKeyValueCursor f g = KVC.mapKeyValueCursor f g f g
 
 keyValueCursorSelectKey :: KeyValueCursor k v -> KeyValueCursor k v

@@ -3,28 +3,28 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Text
-    ( TextCursor(..)
-    , emptyTextCursor
-    , makeTextCursor
-    , makeTextCursorWithSelection
-    , rebuildTextCursor
-    , textCursorNull
-    , textCursorLength
-    , textCursorIndex
-    , textCursorSelectPrev
-    , textCursorSelectNext
-    , textCursorSelectIndex
-    , textCursorSelectStart
-    , textCursorSelectEnd
-    , textCursorPrevChar
-    , textCursorNextChar
-    , textCursorInsert
-    , textCursorAppend
-    , textCursorRemove
-    , textCursorDelete
-    , textCursorSplit
-    , textCursorCombine
-    ) where
+  ( TextCursor(..)
+  , emptyTextCursor
+  , makeTextCursor
+  , makeTextCursorWithSelection
+  , rebuildTextCursor
+  , textCursorNull
+  , textCursorLength
+  , textCursorIndex
+  , textCursorSelectPrev
+  , textCursorSelectNext
+  , textCursorSelectIndex
+  , textCursorSelectStart
+  , textCursorSelectEnd
+  , textCursorPrevChar
+  , textCursorNextChar
+  , textCursorInsert
+  , textCursorAppend
+  , textCursorRemove
+  , textCursorDelete
+  , textCursorSplit
+  , textCursorCombine
+  ) where
 
 import Data.Validity
 import GHC.Generics (Generic)
@@ -38,17 +38,19 @@ import Cursor.List
 import Cursor.Types
 
 -- | A cursor for single-line texts
-newtype TextCursor = TextCursor
+newtype TextCursor =
+  TextCursor
     { textCursorList :: ListCursor Char
-    } deriving (Show, Eq, Generic)
+    }
+  deriving (Show, Eq, Generic)
 
 instance Validity TextCursor where
-    validate (TextCursor lc) =
-        mconcat
-            [ genericValidate lc
-            , decorateList (rebuildListCursor lc) $ \c ->
-                  declare "The character is not a newline character" $ c /= '\n'
-            ]
+  validate (TextCursor lc) =
+    mconcat
+      [ genericValidate lc
+      , decorateList (rebuildListCursor lc) $ \c ->
+          declare "The character is not a newline character" $ c /= '\n'
+      ]
 
 emptyTextCursor :: TextCursor
 emptyTextCursor = TextCursor emptyListCursor
@@ -58,18 +60,18 @@ makeTextCursor t = makeTextCursorWithSelection (T.length t) t
 
 makeTextCursorWithSelection :: Int -> Text -> Maybe TextCursor
 makeTextCursorWithSelection i t =
-    case T.split (== '\n') t of
-        [l] -> TextCursor <$> makeListCursorWithSelection i (T.unpack l)
-        _ -> Nothing
+  case T.split (== '\n') t of
+    [l] -> TextCursor <$> makeListCursorWithSelection i (T.unpack l)
+    _ -> Nothing
 
 rebuildTextCursor :: TextCursor -> Text
 rebuildTextCursor = T.pack . rebuildListCursor . textCursorList
 
 textCursorListCursorL ::
-       Functor f
-    => (ListCursor Char -> f (ListCursor Char))
-    -> TextCursor
-    -> f TextCursor
+     Functor f
+  => (ListCursor Char -> f (ListCursor Char))
+  -> TextCursor
+  -> f TextCursor
 textCursorListCursorL = lens textCursorList (\tc lc -> tc {textCursorList = lc})
 
 textCursorNull :: TextCursor -> Bool
@@ -112,17 +114,17 @@ textCursorAppend c tc = Just (tc & textCursorListCursorL %~ listCursorAppend c)
 
 textCursorRemove :: TextCursor -> Maybe (DeleteOrUpdate TextCursor)
 textCursorRemove =
-    focusPossibleDeleteOrUpdate textCursorListCursorL listCursorRemove
+  focusPossibleDeleteOrUpdate textCursorListCursorL listCursorRemove
 
 textCursorDelete :: TextCursor -> Maybe (DeleteOrUpdate TextCursor)
 textCursorDelete =
-    focusPossibleDeleteOrUpdate textCursorListCursorL listCursorDelete
+  focusPossibleDeleteOrUpdate textCursorListCursorL listCursorDelete
 
 textCursorSplit :: TextCursor -> (TextCursor, TextCursor)
 textCursorSplit tc =
-    let (lc1, lc2) = listCursorSplit $ textCursorList tc
-     in (TextCursor lc1, TextCursor lc2)
+  let (lc1, lc2) = listCursorSplit $ textCursorList tc
+   in (TextCursor lc1, TextCursor lc2)
 
 textCursorCombine :: TextCursor -> TextCursor -> TextCursor
 textCursorCombine (TextCursor lc1) (TextCursor lc2) =
-    TextCursor {textCursorList = listCursorCombine lc1 lc2}
+  TextCursor {textCursorList = listCursorCombine lc1 lc2}

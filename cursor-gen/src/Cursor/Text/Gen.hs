@@ -1,9 +1,9 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.Text.Gen
-    ( textCursorWithGen
-    , textCursorWithIndex0
-    ) where
+  ( textCursorWithGen
+  , textCursorWithIndex0
+  ) where
 
 import Test.QuickCheck
 
@@ -17,8 +17,8 @@ import Cursor.List.Gen
 instance GenUnchecked TextCursor
 
 instance GenValid TextCursor where
-    genValid = genValidStructurally
-    shrinkValid = shrinkValidStructurally
+  genValid = genValidStructurally
+  shrinkValid = shrinkValidStructurally
 
 textCursorWithGen :: Gen Char -> Gen TextCursor
 textCursorWithGen gen = TextCursor <$> listCursorWithGen gen

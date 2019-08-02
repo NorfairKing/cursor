@@ -4,79 +4,79 @@
 {-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.Simple.Tree
-    ( TreeCursor
-    , TreeAbove(..)
-    , singletonTreeCursor
-    , makeTreeCursor
-    , makeTreeCursorWithSelection
-    , rebuildTreeCursor
-    , TC.drawTreeCursor
-    , mapTreeCursor
-    , TC.treeCursorAboveL
-    , TC.treeCursorCurrentL
-    , TC.treeCursorBelowL
-    , TC.treeAboveLeftsL
-    , TC.treeAboveAboveL
-    , TC.treeAboveNodeL
-    , TC.treeAboveRightsL
-    , TC.treeCursorWithPointer
-    , TC.treeCursorSelection
-    , TC.TreeCursorSelection(..)
-    , treeCursorSelect
-    , treeCursorSelectPrev
-    , treeCursorSelectNext
-    , treeCursorSelectFirst
-    , treeCursorSelectLast
-    , treeCursorSelectAbove
-    , treeCursorSelectBelowAtPos
-    , treeCursorSelectBelowAtStart
-    , treeCursorSelectBelowAtEnd
-    , treeCursorSelectBelowAtStartRecursively
-    , treeCursorSelectBelowAtEndRecursively
-    , treeCursorSelectPrevOnSameLevel
-    , treeCursorSelectNextOnSameLevel
-    , treeCursorSelectAbovePrev
-    , treeCursorSelectAboveNext
-    , TC.treeCursorOpenCurrentForest
-    , TC.treeCursorCloseCurrentForest
-    , TC.treeCursorToggleCurrentForest
-    , TC.treeCursorOpenCurrentForestRecursively
-    , TC.treeCursorToggleCurrentForestRecursively
-    , TC.treeCursorInsert
-    , treeCursorInsertAndSelect
-    , TC.treeCursorAppend
-    , treeCursorAppendAndSelect
-    , TC.treeCursorAddChildAtPos
-    , TC.treeCursorAddChildAtStart
-    , TC.treeCursorAddChildAtEnd
-    , treeCursorDeleteSubTreeAndSelectPrevious
-    , treeCursorDeleteSubTreeAndSelectNext
-    , treeCursorDeleteSubTreeAndSelectAbove
-    , treeCursorRemoveSubTree
-    , treeCursorDeleteSubTree
-    , treeCursorDeleteElemAndSelectPrevious
-    , treeCursorDeleteElemAndSelectNext
-    , treeCursorDeleteElemAndSelectAbove
-    , treeCursorRemoveElem
-    , treeCursorDeleteElem
-    , TC.treeCursorSwapPrev
-    , TC.treeCursorSwapNext
-    , TC.SwapResult(..)
-    , treeCursorPromoteElem
-    , TC.PromoteElemResult(..)
-    , treeCursorPromoteSubTree
-    , TC.PromoteResult(..)
-    , treeCursorDemoteElem
-    , treeCursorDemoteSubTree
-    , TC.DemoteResult(..)
-    , TC.treeCursorDemoteElemUnder
-    , TC.treeCursorDemoteSubTreeUnder
-    , TC.CTree(..)
-    , TC.CForest
-    , TC.makeCTree
-    , TC.cTree
-    , TC.rebuildCTree
-    ) where
+  ( TreeCursor
+  , TreeAbove(..)
+  , singletonTreeCursor
+  , makeTreeCursor
+  , makeTreeCursorWithSelection
+  , rebuildTreeCursor
+  , TC.drawTreeCursor
+  , mapTreeCursor
+  , TC.treeCursorAboveL
+  , TC.treeCursorCurrentL
+  , TC.treeCursorBelowL
+  , TC.treeAboveLeftsL
+  , TC.treeAboveAboveL
+  , TC.treeAboveNodeL
+  , TC.treeAboveRightsL
+  , TC.treeCursorWithPointer
+  , TC.treeCursorSelection
+  , TC.TreeCursorSelection(..)
+  , treeCursorSelect
+  , treeCursorSelectPrev
+  , treeCursorSelectNext
+  , treeCursorSelectFirst
+  , treeCursorSelectLast
+  , treeCursorSelectAbove
+  , treeCursorSelectBelowAtPos
+  , treeCursorSelectBelowAtStart
+  , treeCursorSelectBelowAtEnd
+  , treeCursorSelectBelowAtStartRecursively
+  , treeCursorSelectBelowAtEndRecursively
+  , treeCursorSelectPrevOnSameLevel
+  , treeCursorSelectNextOnSameLevel
+  , treeCursorSelectAbovePrev
+  , treeCursorSelectAboveNext
+  , TC.treeCursorOpenCurrentForest
+  , TC.treeCursorCloseCurrentForest
+  , TC.treeCursorToggleCurrentForest
+  , TC.treeCursorOpenCurrentForestRecursively
+  , TC.treeCursorToggleCurrentForestRecursively
+  , TC.treeCursorInsert
+  , treeCursorInsertAndSelect
+  , TC.treeCursorAppend
+  , treeCursorAppendAndSelect
+  , TC.treeCursorAddChildAtPos
+  , TC.treeCursorAddChildAtStart
+  , TC.treeCursorAddChildAtEnd
+  , treeCursorDeleteSubTreeAndSelectPrevious
+  , treeCursorDeleteSubTreeAndSelectNext
+  , treeCursorDeleteSubTreeAndSelectAbove
+  , treeCursorRemoveSubTree
+  , treeCursorDeleteSubTree
+  , treeCursorDeleteElemAndSelectPrevious
+  , treeCursorDeleteElemAndSelectNext
+  , treeCursorDeleteElemAndSelectAbove
+  , treeCursorRemoveElem
+  , treeCursorDeleteElem
+  , TC.treeCursorSwapPrev
+  , TC.treeCursorSwapNext
+  , TC.SwapResult(..)
+  , treeCursorPromoteElem
+  , TC.PromoteElemResult(..)
+  , treeCursorPromoteSubTree
+  , TC.PromoteResult(..)
+  , treeCursorDemoteElem
+  , treeCursorDemoteSubTree
+  , TC.DemoteResult(..)
+  , TC.treeCursorDemoteElemUnder
+  , TC.treeCursorDemoteSubTreeUnder
+  , TC.CTree(..)
+  , TC.CForest
+  , TC.makeCTree
+  , TC.cTree
+  , TC.rebuildCTree
+  ) where
 
 import Data.Tree
 
@@ -91,7 +91,7 @@ makeTreeCursor :: CTree a -> TreeCursor a
 makeTreeCursor = TC.makeTreeCursor id
 
 makeTreeCursorWithSelection ::
-       TC.TreeCursorSelection -> CTree a -> Maybe (TreeCursor a)
+     TC.TreeCursorSelection -> CTree a -> Maybe (TreeCursor a)
 makeTreeCursorWithSelection = TC.makeTreeCursorWithSelection id id
 
 singletonTreeCursor :: a -> TreeCursor a
@@ -104,7 +104,7 @@ mapTreeCursor :: (a -> b) -> TreeCursor a -> TreeCursor b
 mapTreeCursor f = TC.mapTreeCursor f f
 
 treeCursorSelect ::
-       TC.TreeCursorSelection -> TreeCursor a -> Maybe (TreeCursor a)
+     TC.TreeCursorSelection -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelect = TC.treeCursorSelect id id
 
 treeCursorSelectPrev :: TreeCursor a -> Maybe (TreeCursor a)
@@ -133,11 +133,11 @@ treeCursorSelectBelowAtEnd = TC.treeCursorSelectBelowAtEnd id id
 
 treeCursorSelectBelowAtStartRecursively :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectBelowAtStartRecursively =
-    TC.treeCursorSelectBelowAtStartRecursively id id
+  TC.treeCursorSelectBelowAtStartRecursively id id
 
 treeCursorSelectBelowAtEndRecursively :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectBelowAtEndRecursively =
-    TC.treeCursorSelectBelowAtEndRecursively id id
+  TC.treeCursorSelectBelowAtEndRecursively id id
 
 treeCursorSelectPrevOnSameLevel :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectPrevOnSameLevel = TC.treeCursorSelectPrevOnSameLevel id id
@@ -162,19 +162,19 @@ treeCursorAppendAndSelect :: Tree a -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorAppendAndSelect = TC.treeCursorAppendAndSelect id id
 
 treeCursorDeleteSubTreeAndSelectPrevious ::
-       TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
+     TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
 treeCursorDeleteSubTreeAndSelectPrevious =
-    TC.treeCursorDeleteSubTreeAndSelectPrevious id
+  TC.treeCursorDeleteSubTreeAndSelectPrevious id
 
 treeCursorDeleteSubTreeAndSelectNext ::
-       TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
+     TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
 treeCursorDeleteSubTreeAndSelectNext =
-    TC.treeCursorDeleteSubTreeAndSelectNext id
+  TC.treeCursorDeleteSubTreeAndSelectNext id
 
 treeCursorDeleteSubTreeAndSelectAbove ::
-       TreeCursor a -> DeleteOrUpdate (TreeCursor a)
+     TreeCursor a -> DeleteOrUpdate (TreeCursor a)
 treeCursorDeleteSubTreeAndSelectAbove =
-    TC.treeCursorDeleteSubTreeAndSelectAbove id
+  TC.treeCursorDeleteSubTreeAndSelectAbove id
 
 treeCursorRemoveSubTree :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)
 treeCursorRemoveSubTree = TC.treeCursorRemoveSubTree id
@@ -183,16 +183,16 @@ treeCursorDeleteSubTree :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)
 treeCursorDeleteSubTree = TC.treeCursorDeleteSubTree id
 
 treeCursorDeleteElemAndSelectPrevious ::
-       TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
+     TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
 treeCursorDeleteElemAndSelectPrevious =
-    TC.treeCursorDeleteElemAndSelectPrevious id
+  TC.treeCursorDeleteElemAndSelectPrevious id
 
 treeCursorDeleteElemAndSelectNext ::
-       TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
+     TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
 treeCursorDeleteElemAndSelectNext = TC.treeCursorDeleteElemAndSelectNext id
 
 treeCursorDeleteElemAndSelectAbove ::
-       TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
+     TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
 treeCursorDeleteElemAndSelectAbove = TC.treeCursorDeleteElemAndSelectAbove id
 
 treeCursorRemoveElem :: TreeCursor a -> DeleteOrUpdate (TreeCursor a)
