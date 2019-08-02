@@ -8,9 +8,13 @@ module Cursor.List.Gen
 
 import Test.QuickCheck
 
+import qualified Data.Sequence as S
+import Data.Sequence (Seq(..))
+
 import Cursor.List
 
 import Data.GenValidity
+import Data.GenValidity.Sequence ()
 
 instance GenUnchecked a => GenUnchecked (ListCursor a) where
   genUnchecked =
@@ -33,7 +37,10 @@ instance GenValid a => GenValid (ListCursor a) where
     [ListCursor prev' next' | (prev', next') <- shrinkValid (prev, next)]
 
 listCursorWithGen :: Gen a -> Gen (ListCursor a)
-listCursorWithGen gen = ListCursor <$> genListOf gen <*> genListOf gen
+listCursorWithGen gen = ListCursor <$> genSeqOf gen <*> genSeqOf gen
 
 listCursorWithIndex0 :: Gen a -> Gen (ListCursor a)
-listCursorWithIndex0 gen = ListCursor [] <$> genListOf gen
+listCursorWithIndex0 gen = ListCursor S.empty <$> genSeqOf gen
+
+genSeqOf :: Gen a -> Gen (Seq a)
+genSeqOf = fmap S.fromList . genListOf
