@@ -36,12 +36,15 @@ module Cursor.Map
   , mapCursorSearch
   , mapCursorSelectOrAdd
   , traverseMapCursor
+  , traverseMapCursorSeq
   , foldMapCursor
+  , foldMapCursorSeq
   , module Cursor.Map.KeyValue
   ) where
 
 import GHC.Generics (Generic)
 
+import Data.Foldable
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe
 import Data.Sequence (Seq(..))
@@ -214,9 +217,17 @@ make :: (k -> kc) -> (k, v) -> KeyValueCursor kc vc k v
 make g (k, v) = makeKeyValueCursorKey (g k) v
 
 traverseMapCursor ::
-     (Seq (k, v) -> KeyValueCursor kc vc k v -> Seq (k, v) -> f c) -> MapCursor kc vc k v -> f c
-traverseMapCursor combFunc = foldNonEmptyCursor combFunc . mapCursorList
+     ([(k, v)] -> KeyValueCursor kc vc k v -> [(k, v)] -> f c) -> MapCursor kc vc k v -> f c
+traverseMapCursor = foldMapCursor
 
-foldMapCursor ::
+traverseMapCursorSeq ::
+     (Seq (k, v) -> KeyValueCursor kc vc k v -> Seq (k, v) -> f c) -> MapCursor kc vc k v -> f c
+traverseMapCursorSeq = foldMapCursorSeq
+
+foldMapCursor :: ([(k, v)] -> KeyValueCursor kc vc k v -> [(k, v)] -> c) -> MapCursor kc vc k v -> c
+foldMapCursor combFunc =
+  foldMapCursorSeq $ \befores cur afters -> combFunc (toList befores) cur (toList afters)
+
+foldMapCursorSeq ::
      (Seq (k, v) -> KeyValueCursor kc vc k v -> Seq (k, v) -> c) -> MapCursor kc vc k v -> c
-foldMapCursor combFunc = foldNonEmptyCursor combFunc . mapCursorList
+foldMapCursorSeq combFunc = foldNonEmptyCursorSeq combFunc . mapCursorList

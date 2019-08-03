@@ -34,7 +34,9 @@ module Cursor.List.NonEmpty
   , nonemptyPrepend
   , nonemptyAppend
   , traverseNonEmptyCursor
+  , traverseNonEmptyCursorSeq
   , foldNonEmptyCursor
+  , foldNonEmptyCursorSeq
   ) where
 
 import GHC.Generics (Generic)
@@ -252,9 +254,16 @@ nonemptyPrepend ls ne = foldr NE.cons ne ls
 nonemptyAppend :: NonEmpty a -> [a] -> NonEmpty a
 nonemptyAppend (x :| xs) ls = x :| (xs ++ ls)
 
-traverseNonEmptyCursor :: (Seq b -> a -> Seq b -> f c) -> NonEmptyCursor a b -> f c
+traverseNonEmptyCursor :: ([ b] -> a -> [ b] -> f c) -> NonEmptyCursor a b -> f c
 traverseNonEmptyCursor = foldNonEmptyCursor
 
-foldNonEmptyCursor :: (Seq b -> a -> Seq b -> c) -> NonEmptyCursor a b -> c
-foldNonEmptyCursor func NonEmptyCursor {..} =
+traverseNonEmptyCursorSeq :: (Seq b -> a -> Seq b -> f c) -> NonEmptyCursor a b -> f c
+traverseNonEmptyCursorSeq = foldNonEmptyCursorSeq
+
+foldNonEmptyCursor :: ([b] -> a -> [b] -> c) -> NonEmptyCursor a b -> c
+foldNonEmptyCursor func =
+  foldNonEmptyCursorSeq $ \befores cur afters -> func (toList befores) cur (toList afters)
+
+foldNonEmptyCursorSeq :: (Seq b -> a -> Seq b -> c) -> NonEmptyCursor a b -> c
+foldNonEmptyCursorSeq func NonEmptyCursor {..} =
   func nonEmptyCursorPrev nonEmptyCursorCurrent nonEmptyCursorNext

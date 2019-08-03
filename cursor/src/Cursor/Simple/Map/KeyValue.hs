@@ -13,6 +13,8 @@ module Cursor.Simple.Map.KeyValue
   , keyValueCursorSelectValue
   , keyValueCursorToggleSelected
   , KVC.KeyValueToggle(..)
+  , KVC.traverseKeyValueCursor
+  , KVC.foldKeyValueCursor
   ) where
 
 import qualified Cursor.Map.KeyValue as KVC
@@ -22,8 +24,7 @@ type KeyValueCursor k v = KVC.KeyValueCursor k v k v
 rebuildKeyValueCursor :: KeyValueCursor k v -> (k, v)
 rebuildKeyValueCursor = KVC.rebuildKeyValueCursor id id
 
-mapKeyValueCursor ::
-     (k -> l) -> (v -> w) -> KeyValueCursor k v -> KeyValueCursor l w
+mapKeyValueCursor :: (k -> l) -> (v -> w) -> KeyValueCursor k v -> KeyValueCursor l w
 mapKeyValueCursor f g = KVC.mapKeyValueCursor f g f g
 
 keyValueCursorSelectKey :: KeyValueCursor k v -> KeyValueCursor k v

@@ -75,6 +75,10 @@ module Cursor.Simple.Forest
   , FC.makeCForest
   , FC.cForest
   , FC.rebuildCForest
+  , FC.traverseForestCursor
+  , FC.traverseForestCursorSeq
+  , FC.foldForestCursor
+  , FC.foldForestCursorSeq
   ) where
 
 import Data.Validity.Tree ()

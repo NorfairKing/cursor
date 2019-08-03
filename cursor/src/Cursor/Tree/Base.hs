@@ -13,7 +13,9 @@ module Cursor.Tree.Base
   , currentTree
   , makeTreeCursorWithAbove
   , traverseTreeCursor
+  , traverseTreeCursorSeq
   , foldTreeCursor
+  , foldTreeCursorSeq
   ) where
 
 import Control.Monad
@@ -71,11 +73,20 @@ makeTreeCursorWithAbove g (CNode a forest) mta =
 
 traverseTreeCursor ::
      forall a b m c. Monad m
+  => ([CTree b] -> b -> [CTree b] -> c -> m c)
+  -> (a -> CForest b -> m c)
+  -> TreeCursor a b
+  -> m c
+traverseTreeCursor wf =
+  traverseTreeCursorSeq $ \befores cur afters -> wf (toList befores) cur (toList afters)
+
+traverseTreeCursorSeq ::
+     forall a b m c. Monad m
   => (Seq (CTree b) -> b -> Seq (CTree b) -> c -> m c)
   -> (a -> CForest b -> m c)
   -> TreeCursor a b
   -> m c
-traverseTreeCursor wrapFunc currentFunc TreeCursor {..} =
+traverseTreeCursorSeq wrapFunc currentFunc TreeCursor {..} =
   currentFunc treeCurrent treeBelow >>= wrapAbove treeAbove
   where
     wrapAbove :: Maybe (TreeAbove b) -> c -> m c
@@ -87,11 +98,20 @@ traverseTreeCursor wrapFunc currentFunc TreeCursor {..} =
 
 foldTreeCursor ::
      forall a b c.
+     ([CTree b] -> b -> [CTree b] -> c -> c)
+  -> (a -> CForest b -> c)
+  -> TreeCursor a b
+  -> c
+foldTreeCursor wf =
+  foldTreeCursorSeq $ \befores cur afters -> wf (toList befores) cur (toList afters)
+
+foldTreeCursorSeq ::
+     forall a b c.
      (Seq (CTree b) -> b -> Seq (CTree b) -> c -> c)
   -> (a -> CForest b -> c)
   -> TreeCursor a b
   -> c
-foldTreeCursor wrapFunc currentFunc TreeCursor {..} =
+foldTreeCursorSeq wrapFunc currentFunc TreeCursor {..} =
   wrapAbove treeAbove $ currentFunc treeCurrent treeBelow
   where
     wrapAbove :: Maybe (TreeAbove b) -> c -> c

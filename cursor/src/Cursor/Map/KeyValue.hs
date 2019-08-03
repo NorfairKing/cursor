@@ -24,8 +24,8 @@ import GHC.Generics (Generic)
 import Data.Validity
 
 data KeyValueCursor kc vc k v
-  = KeyValueCursorKey kc v
-  | KeyValueCursorValue k vc
+  = KeyValueCursorKey !kc !v
+  | KeyValueCursorValue !k !vc
   deriving (Show, Eq, Generic)
 
 instance (Validity kc, Validity vc, Validity k, Validity v) =>
@@ -37,8 +37,7 @@ makeKeyValueCursorKey = KeyValueCursorKey
 makeKeyValueCursorValue :: k -> vc -> KeyValueCursor kc vc k v
 makeKeyValueCursorValue = KeyValueCursorValue
 
-rebuildKeyValueCursor ::
-     (kc -> k) -> (vc -> v) -> KeyValueCursor kc vc k v -> (k, v)
+rebuildKeyValueCursor :: (kc -> k) -> (vc -> v) -> KeyValueCursor kc vc k v -> (k, v)
 rebuildKeyValueCursor f _ (KeyValueCursorKey kc v) = (f kc, v)
 rebuildKeyValueCursor _ g (KeyValueCursorValue k vc) = (k, g vc)
 
@@ -59,20 +58,14 @@ mapKeyValueCursor a b c d kvc =
     KeyValueCursorValue k vc -> KeyValueCursorValue (c k) (b vc)
 
 keyValueCursorSelectKey ::
-     (k -> kc)
-  -> (vc -> v)
-  -> KeyValueCursor kc vc k v
-  -> KeyValueCursor kc vc k v
+     (k -> kc) -> (vc -> v) -> KeyValueCursor kc vc k v -> KeyValueCursor kc vc k v
 keyValueCursorSelectKey g h kvc =
   case kvc of
     KeyValueCursorValue k vc -> KeyValueCursorKey (g k) (h vc)
     _ -> kvc
 
 keyValueCursorSelectValue ::
-     (kc -> k)
-  -> (v -> vc)
-  -> KeyValueCursor kc vc k v
-  -> KeyValueCursor kc vc k v
+     (kc -> k) -> (v -> vc) -> KeyValueCursor kc vc k v -> KeyValueCursor kc vc k v
 keyValueCursorSelectValue f i kvc =
   case kvc of
     KeyValueCursorKey kc v -> KeyValueCursorValue (f kc) (i v)
@@ -97,12 +90,10 @@ data KeyValueToggle
 
 instance Validity KeyValueToggle
 
-traverseKeyValueCursor ::
-     (kc -> v -> f c) -> (k -> vc -> f c) -> KeyValueCursor kc vc k v -> f c
+traverseKeyValueCursor :: (kc -> v -> f c) -> (k -> vc -> f c) -> KeyValueCursor kc vc k v -> f c
 traverseKeyValueCursor = foldKeyValueCursor
 
-foldKeyValueCursor ::
-     (kc -> v -> c) -> (k -> vc -> c) -> KeyValueCursor kc vc k v -> c
+foldKeyValueCursor :: (kc -> v -> c) -> (k -> vc -> c) -> KeyValueCursor kc vc k v -> c
 foldKeyValueCursor keyFunc valFunc kvc =
   case kvc of
     KeyValueCursorKey kc v -> keyFunc kc v

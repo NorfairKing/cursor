@@ -76,7 +76,9 @@ module Cursor.Forest
   , cForest
   , rebuildCForest
   , traverseForestCursor
+  , traverseForestCursorSeq
   , foldForestCursor
+  , foldForestCursorSeq
   ) where
 
 import GHC.Generics (Generic)
@@ -645,9 +647,16 @@ forestCursorDemoteElemUnder b1 b2 fc@(ForestCursor ne) =
 forestCursorDemoteSubTreeUnder :: b -> ForestCursor a b -> ForestCursor a b
 forestCursorDemoteSubTreeUnder b = forestCursorSelectedTreeL %~ treeCursorDemoteSubTreeUnder b
 
-traverseForestCursor ::
-     (Seq (CTree b) -> TreeCursor a b -> Seq (CTree b) -> f c) -> ForestCursor a b -> f c
+traverseForestCursor :: ([CTree b] -> TreeCursor a b -> [CTree b] -> f c) -> ForestCursor a b -> f c
 traverseForestCursor = foldForestCursor
 
-foldForestCursor :: (Seq (CTree b) -> TreeCursor a b -> Seq (CTree b) -> c) -> ForestCursor a b -> c
+traverseForestCursorSeq ::
+     (Seq (CTree b) -> TreeCursor a b -> Seq (CTree b) -> f c) -> ForestCursor a b -> f c
+traverseForestCursorSeq = foldForestCursorSeq
+
+foldForestCursor :: ([CTree b] -> TreeCursor a b -> [CTree b] -> c) -> ForestCursor a b -> c
 foldForestCursor func (ForestCursor ne) = foldNonEmptyCursor func ne
+
+foldForestCursorSeq ::
+     (Seq (CTree b) -> TreeCursor a b -> Seq (CTree b) -> c) -> ForestCursor a b -> c
+foldForestCursorSeq func (ForestCursor ne) = foldNonEmptyCursorSeq func ne

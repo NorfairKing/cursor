@@ -29,7 +29,9 @@ module Cursor.List
   , listCursorSplit
   , listCursorCombine
   , traverseListCursor
+  , traverseListCursorSeq
   , foldListCursor
+  , foldListCursorSeq
   ) where
 
 import GHC.Generics (Generic)
@@ -159,8 +161,14 @@ listCursorCombine :: ListCursor a -> ListCursor a -> ListCursor a
 listCursorCombine lc1 lc2 =
   ListCursor {listCursorPrev = rebuildListCursorSeq lc1, listCursorNext = rebuildListCursorSeq lc2}
 
-traverseListCursor :: (Seq a -> Seq a -> f b) -> ListCursor a -> f b
+traverseListCursor :: ([a] -> [a] -> f b) -> ListCursor a -> f b
 traverseListCursor = foldListCursor
 
-foldListCursor :: (Seq a -> Seq a -> b) -> ListCursor a -> b
-foldListCursor func ListCursor {..} = func listCursorPrev listCursorNext
+traverseListCursorSeq :: (Seq a -> Seq a -> f b) -> ListCursor a -> f b
+traverseListCursorSeq = foldListCursorSeq
+
+foldListCursor :: ([a] -> [a] -> b) -> ListCursor a -> b
+foldListCursor func = foldListCursorSeq $ \befores afters -> func (toList befores) (toList afters)
+
+foldListCursorSeq :: (Seq a -> Seq a -> b) -> ListCursor a -> b
+foldListCursorSeq func ListCursor {..} = func listCursorPrev listCursorNext

@@ -34,6 +34,10 @@ module Cursor.Simple.List.NonEmpty
   , nonEmptyCursorDeleteElem
   , nonEmptyCursorSearch
   , nonEmptyCursorSelectOrAdd
+  , NEC.traverseNonEmptyCursor
+  , NEC.traverseNonEmptyCursorSeq
+  , NEC.foldNonEmptyCursor
+  , NEC.foldNonEmptyCursorSeq
   ) where
 
 import Data.List.NonEmpty (NonEmpty(..))
@@ -78,37 +82,28 @@ nonEmptyCursorInsertAndSelect = NEC.nonEmptyCursorInsertAndSelect id
 nonEmptyCursorAppendAndSelect :: a -> NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorAppendAndSelect = NEC.nonEmptyCursorAppendAndSelect id
 
-nonEmptyCursorInsertAtStartAndSelect ::
-     a -> NonEmptyCursor a -> NonEmptyCursor a
-nonEmptyCursorInsertAtStartAndSelect =
-  NEC.nonEmptyCursorInsertAtStartAndSelect id id
+nonEmptyCursorInsertAtStartAndSelect :: a -> NonEmptyCursor a -> NonEmptyCursor a
+nonEmptyCursorInsertAtStartAndSelect = NEC.nonEmptyCursorInsertAtStartAndSelect id id
 
 nonEmptyCursorAppendAtEndAndSelect :: a -> NonEmptyCursor a -> NonEmptyCursor a
-nonEmptyCursorAppendAtEndAndSelect =
-  NEC.nonEmptyCursorAppendAtEndAndSelect id id
+nonEmptyCursorAppendAtEndAndSelect = NEC.nonEmptyCursorAppendAtEndAndSelect id id
 
 nonEmptyCursorRemoveElemAndSelectPrev ::
      NonEmptyCursor a -> Maybe (DeleteOrUpdate (NonEmptyCursor a))
-nonEmptyCursorRemoveElemAndSelectPrev =
-  NEC.nonEmptyCursorRemoveElemAndSelectPrev id
+nonEmptyCursorRemoveElemAndSelectPrev = NEC.nonEmptyCursorRemoveElemAndSelectPrev id
 
 nonEmptyCursorDeleteElemAndSelectNext ::
      NonEmptyCursor a -> Maybe (DeleteOrUpdate (NonEmptyCursor a))
-nonEmptyCursorDeleteElemAndSelectNext =
-  NEC.nonEmptyCursorDeleteElemAndSelectNext id
+nonEmptyCursorDeleteElemAndSelectNext = NEC.nonEmptyCursorDeleteElemAndSelectNext id
 
-nonEmptyCursorRemoveElem ::
-     NonEmptyCursor a -> DeleteOrUpdate (NonEmptyCursor a)
+nonEmptyCursorRemoveElem :: NonEmptyCursor a -> DeleteOrUpdate (NonEmptyCursor a)
 nonEmptyCursorRemoveElem = NEC.nonEmptyCursorRemoveElem id
 
-nonEmptyCursorDeleteElem ::
-     NonEmptyCursor a -> DeleteOrUpdate (NonEmptyCursor a)
+nonEmptyCursorDeleteElem :: NonEmptyCursor a -> DeleteOrUpdate (NonEmptyCursor a)
 nonEmptyCursorDeleteElem = NEC.nonEmptyCursorDeleteElem id
 
-nonEmptyCursorSearch ::
-     (a -> Bool) -> NonEmptyCursor a -> Maybe (NonEmptyCursor a)
+nonEmptyCursorSearch :: (a -> Bool) -> NonEmptyCursor a -> Maybe (NonEmptyCursor a)
 nonEmptyCursorSearch = NEC.nonEmptyCursorSearch id id
 
-nonEmptyCursorSelectOrAdd ::
-     (a -> Bool) -> a -> NonEmptyCursor a -> NonEmptyCursor a
+nonEmptyCursorSelectOrAdd :: (a -> Bool) -> a -> NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorSelectOrAdd = NEC.nonEmptyCursorSelectOrAdd id id
