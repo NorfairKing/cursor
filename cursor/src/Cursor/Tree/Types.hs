@@ -33,8 +33,10 @@ module Cursor.Tree.Types
 
 import Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NE
+import Data.Sequence (Seq)
 import Data.Tree
 import Data.Validity
+import Data.Validity.Sequence ()
 import Data.Validity.Tree ()
 
 import GHC.Generics (Generic)
@@ -60,24 +62,22 @@ treeCursorBelowL = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
 
 treeCursorCurrentSubTreeL :: Lens' (TreeCursor a b) (a, CForest b)
 treeCursorCurrentSubTreeL =
-  lens
-    (\tc -> (treeCurrent tc, treeBelow tc))
-    (\tc (a, cf) -> tc {treeCurrent = a, treeBelow = cf})
+  lens (\tc -> (treeCurrent tc, treeBelow tc)) (\tc (a, cf) -> tc {treeCurrent = a, treeBelow = cf})
 
 instance (Validity a, Validity b) => Validity (TreeCursor a b)
 
 data TreeAbove b =
   TreeAbove
-    { treeAboveLefts :: ![CTree b] -- In reverse order
+    { treeAboveLefts :: !(Seq (CTree b))
     , treeAboveAbove :: !(Maybe (TreeAbove b))
     , treeAboveNode :: !b
-    , treeAboveRights :: ![CTree b]
+    , treeAboveRights :: !(Seq (CTree b))
     }
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity b => Validity (TreeAbove b)
 
-treeAboveLeftsL :: Lens' (TreeAbove b) [CTree b]
+treeAboveLeftsL :: Lens' (TreeAbove b) (Seq (CTree b))
 treeAboveLeftsL = lens treeAboveLefts $ \ta tal -> ta {treeAboveLefts = tal}
 
 treeAboveAboveL :: Lens' (TreeAbove b) (Maybe (TreeAbove b))
@@ -86,7 +86,7 @@ treeAboveAboveL = lens treeAboveAbove $ \ta taa -> ta {treeAboveAbove = taa}
 treeAboveNodeL :: Lens' (TreeAbove b) b
 treeAboveNodeL = lens treeAboveNode $ \ta a -> ta {treeAboveNode = a}
 
-treeAboveRightsL :: Lens' (TreeAbove b) [CTree b]
+treeAboveRightsL :: Lens' (TreeAbove b) (Seq (CTree b))
 treeAboveRightsL = lens treeAboveRights $ \ta tar -> ta {treeAboveRights = tar}
 
 data TreeCursorSelection

@@ -11,6 +11,8 @@ module Cursor.Tree.Demote
   , treeCursorDemoteSubTreeUnder
   ) where
 
+import qualified Data.Sequence as S
+import Data.Sequence (ViewR(..), (<|))
 import Data.Validity
 
 import GHC.Generics (Generic)
@@ -39,23 +41,22 @@ import Cursor.Tree.Types
 -- >  |  |- c <--
 -- >  |  |- d
 -- >  |- e
-treeCursorDemoteElem ::
-     (a -> b) -> (b -> a) -> TreeCursor a b -> DemoteResult (TreeCursor a b)
+treeCursorDemoteElem :: (a -> b) -> (b -> a) -> TreeCursor a b -> DemoteResult (TreeCursor a b)
 treeCursorDemoteElem f g tc =
   case treeAbove tc of
     Nothing -> CannotDemoteTopNode
     Just ta ->
-      case treeAboveLefts ta of
-        [] -> NoSiblingsToDemoteUnder
-        (CNode t ls:ts) ->
+      case S.viewr $ treeAboveLefts ta of
+        EmptyR -> NoSiblingsToDemoteUnder
+        ts :> CNode t ls ->
           Demoted $
           makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) emptyCForest) $
           Just
             TreeAbove
-              { treeAboveLefts = reverse $ unpackCForest ls
+              { treeAboveLefts = S.fromList $ unpackCForest ls
               , treeAboveAbove = Just ta {treeAboveLefts = ts}
               , treeAboveNode = t
-              , treeAboveRights = unpackCForest $ treeBelow tc
+              , treeAboveRights = S.fromList $ unpackCForest $ treeBelow tc
               }
 
 -- | Demotes the current subtree to the level of its children.
@@ -79,23 +80,22 @@ treeCursorDemoteElem f g tc =
 -- >  |  |- c <--
 -- >  |     |- d
 -- >  |- e
-treeCursorDemoteSubTree ::
-     (a -> b) -> (b -> a) -> TreeCursor a b -> DemoteResult (TreeCursor a b)
+treeCursorDemoteSubTree :: (a -> b) -> (b -> a) -> TreeCursor a b -> DemoteResult (TreeCursor a b)
 treeCursorDemoteSubTree f g tc =
   case treeAbove tc of
     Nothing -> CannotDemoteTopNode
     Just ta ->
-      case treeAboveLefts ta of
-        [] -> NoSiblingsToDemoteUnder
-        (CNode t ls:ts) ->
+      case S.viewr $ treeAboveLefts ta of
+        EmptyR -> NoSiblingsToDemoteUnder
+        ts :> CNode t ls ->
           Demoted $
           makeTreeCursorWithAbove g (currentTree f tc) $
           Just
             TreeAbove
-              { treeAboveLefts = reverse $ unpackCForest ls
+              { treeAboveLefts = S.fromList $ unpackCForest ls
               , treeAboveAbove = Just ta {treeAboveLefts = ts}
               , treeAboveNode = t
-              , treeAboveRights = []
+              , treeAboveRights = S.empty
               }
 
 data DemoteResult a
@@ -127,16 +127,16 @@ instance Validity a => Validity (DemoteResult a)
 treeCursorDemoteElemUnder :: b -> b -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorDemoteElemUnder b1 b2 tc = do
   ta <- treeAbove tc
-  let ta' = ta {treeAboveRights = CNode b2 (treeBelow tc) : treeAboveRights ta}
+  let ta' = ta {treeAboveRights = CNode b2 (treeBelow tc) <| treeAboveRights ta}
   pure
     tc
       { treeAbove =
           Just
             TreeAbove
-              { treeAboveLefts = []
+              { treeAboveLefts = S.empty
               , treeAboveAbove = Just ta'
               , treeAboveNode = b1
-              , treeAboveRights = []
+              , treeAboveRights = S.empty
               }
       , treeBelow = emptyCForest
       }
@@ -161,9 +161,9 @@ treeCursorDemoteSubTreeUnder b tc =
     { treeAbove =
         Just
           TreeAbove
-            { treeAboveLefts = []
+            { treeAboveLefts = S.empty
             , treeAboveAbove = treeAbove tc
             , treeAboveNode = b
-            , treeAboveRights = []
+            , treeAboveRights = S.empty
             }
     }

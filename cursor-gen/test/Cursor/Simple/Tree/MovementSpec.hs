@@ -7,23 +7,17 @@ module Cursor.Simple.Tree.MovementSpec
   ( spec
   ) where
 
+import Test.Hspec
+import Test.Validity
+
 import Control.Monad (unless)
 
+import qualified Data.Sequence as S
 import Text.Show.Pretty
-
-import Test.Hspec
-
-import Test.Validity
 
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
-import Cursor.Tree
-  ( CTree(..)
-  , TreeAbove(..)
-  , TreeCursor(..)
-  , emptyCForest
-  , openForest
-  )
+import Cursor.Tree (CTree(..), TreeAbove(..), TreeCursor(..), emptyCForest, openForest)
 
 import Cursor.Simple.Tree.TestUtils
 
@@ -33,14 +27,12 @@ spec = do
     it "produces valids on valids" $
     producesValidsOnValids (treeCursorSelection @Rational @Rational)
   describe "treeCursorSelect" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids2 (treeCursorSelect @Rational)
+    it "produces valids on valids" $ producesValidsOnValids2 (treeCursorSelect @Rational)
     it "is identity with the current selection" $
       forAllValid $ \tc ->
         let sel = treeCursorSelection tc
          in case treeCursorSelect @Rational sel tc of
-              Nothing ->
-                expectationFailure "treeCursorSelect should not have failed."
+              Nothing -> expectationFailure "treeCursorSelect should not have failed."
               Just r ->
                 unless (r == tc) $
                 expectationFailure $
@@ -81,13 +73,11 @@ spec = do
                   Just
                     (TreeAbove
                        { treeAboveLefts =
-                           [ CNode 1 $
-                             openForest
-                               [CNode 2 $ openForest [CNode 3 emptyCForest]]
-                           ]
+                           S.singleton $
+                           CNode 1 $ openForest [CNode 2 $ openForest [CNode 3 emptyCForest]]
                        , treeAboveAbove = Nothing
                        , treeAboveNode = 0
-                       , treeAboveRights = []
+                       , treeAboveRights = S.empty
                        })
               , treeCurrent = 4 :: Int
               , treeBelow = emptyCForest
@@ -97,32 +87,30 @@ spec = do
               { treeAbove =
                   Just
                     (TreeAbove
-                       { treeAboveLefts = []
+                       { treeAboveLefts = S.empty
                        , treeAboveAbove =
                            Just
                              (TreeAbove
-                                { treeAboveLefts = []
+                                { treeAboveLefts = S.empty
                                 , treeAboveAbove =
                                     Just
                                       (TreeAbove
-                                         { treeAboveLefts = []
+                                         { treeAboveLefts = S.empty
                                          , treeAboveAbove = Nothing
                                          , treeAboveNode = 0
-                                         , treeAboveRights =
-                                             [CNode 4 emptyCForest]
+                                         , treeAboveRights = S.singleton $ CNode 4 emptyCForest
                                          })
                                 , treeAboveNode = 1
-                                , treeAboveRights = []
+                                , treeAboveRights = S.empty
                                 })
                        , treeAboveNode = 2
-                       , treeAboveRights = []
+                       , treeAboveRights = S.empty
                        })
               , treeCurrent = 3
               , treeBelow = emptyCForest
               }
       case treeCursorSelectAbovePrev start of
-        Nothing ->
-          expectationFailure "treeCursorSelectAbovePrev should not have failed"
+        Nothing -> expectationFailure "treeCursorSelectAbovePrev should not have failed"
         Just r -> r `treeShouldBe` expected
     it "selects the previous element" pending
     it "after treeCursorSelectAboveNext is identity if they don't fail" $ do
@@ -131,9 +119,7 @@ spec = do
           Nothing -> pure ()
           Just tc' ->
             case treeCursorSelectAbovePrev tc' of
-              Nothing ->
-                expectationFailure
-                  "treeCursorSelectAbovePrev should not have failed."
+              Nothing -> expectationFailure "treeCursorSelectAbovePrev should not have failed."
               Just tc'' ->
                 unless (tc == tc'') $
                 expectationFailure $
@@ -162,24 +148,24 @@ spec = do
               { treeAbove =
                   Just
                     (TreeAbove
-                       { treeAboveLefts = []
+                       { treeAboveLefts = S.empty
                        , treeAboveAbove =
                            Just
                              (TreeAbove
-                                { treeAboveLefts = []
+                                { treeAboveLefts = S.empty
                                 , treeAboveAbove =
                                     Just
                                       (TreeAbove
-                                         { treeAboveLefts = []
+                                         { treeAboveLefts = S.empty
                                          , treeAboveAbove = Nothing
                                          , treeAboveNode = 0
-                                         , treeAboveRights = [node 4 []]
+                                         , treeAboveRights = S.singleton $ node 4 []
                                          })
                                 , treeAboveNode = 1
-                                , treeAboveRights = []
+                                , treeAboveRights = S.empty
                                 })
                        , treeAboveNode = 2
-                       , treeAboveRights = []
+                       , treeAboveRights = S.empty
                        })
               , treeCurrent = 3
               , treeBelow = emptyCForest
@@ -190,20 +176,17 @@ spec = do
                   Just
                     (TreeAbove
                        { treeAboveLefts =
-                           [ CNode 1 $
-                             openForest
-                               [CNode 2 $ openForest [CNode 3 emptyCForest]]
-                           ]
+                           S.singleton $
+                           CNode 1 $ openForest [CNode 2 $ openForest [CNode 3 emptyCForest]]
                        , treeAboveAbove = Nothing
                        , treeAboveNode = 0
-                       , treeAboveRights = []
+                       , treeAboveRights = S.empty
                        })
               , treeCurrent = 4 :: Int
               , treeBelow = emptyCForest
               }
       case treeCursorSelectAboveNext start of
-        Nothing ->
-          expectationFailure "treeCursorSelectAboveNext should not have failed."
+        Nothing -> expectationFailure "treeCursorSelectAboveNext should not have failed."
         Just r -> r `treeShouldBe` expected
     it "selects the next element" pending
     it "after treeCursorSelectAbovePrev is identity if they don't fail" $ do
@@ -256,10 +239,8 @@ spec = do
       inverseFunctionsIfSucceedOnValid (treeCursorSelectBelowAtStart @Rational) $
         treeCursorSelectAbove @Rational
   describe "treeCursorSelectBelowAtPos" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids2 $ treeCursorSelectBelowAtPos @Rational
-    it "is a movement" $
-      forAllValid $ \n -> isMovementM $ treeCursorSelectBelowAtPos n
+    it "produces valids on valids" $ producesValidsOnValids2 $ treeCursorSelectBelowAtPos @Rational
+    it "is a movement" $ forAllValid $ \n -> isMovementM $ treeCursorSelectBelowAtPos n
     it "selects the element n-th below" pending
   describe "treeCursorSelectBelowAtStart" $ do
     testMovementM treeCursorSelectBelowAtStart

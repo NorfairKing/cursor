@@ -460,10 +460,10 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
         case (treeBelow tc) of
           EmptyCForest -> pure $ treeAboveLefts ta
           _ ->
-            case treeAboveLefts ta of
-              [] -> Nothing
-              (CNode t ls:ts) ->
-                pure $ CNode t (openForest $ unpackCForest ls ++ unpackCForest (treeBelow tc)) : ts
+            case S.viewr $ treeAboveLefts ta of
+              EmptyR -> Nothing
+              ts :> CNode t ls ->
+                pure $ CNode t (openForest $ unpackCForest ls ++ unpackCForest (treeBelow tc)) <| ts
       let ta' = ta {treeAboveLefts = lefts}
       let tc' = tc {treeAbove = Just ta'}
       tc'' <-
@@ -617,10 +617,10 @@ forestCursorDemoteElemUnder b1 b2 fc@(ForestCursor ne) =
                   { treeAbove =
                       Just
                         TreeAbove
-                          { treeAboveLefts = []
+                          { treeAboveLefts = S.empty
                           , treeAboveAbove = Nothing
                           , treeAboveNode = b1
-                          , treeAboveRights = []
+                          , treeAboveRights = S.empty
                           }
                   , treeCurrent = treeCurrent t
                   , treeBelow = emptyCForest

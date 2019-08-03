@@ -114,9 +114,9 @@ movementsSpec = do
                               Just
                                 TreeAbove
                                   { treeAboveAbove = Nothing
-                                  , treeAboveLefts = []
+                                  , treeAboveLefts = S.empty
                                   , treeAboveNode = 1
-                                  , treeAboveRights = []
+                                  , treeAboveRights = S.empty
                                   }
                           , treeCurrent = 2
                           , treeBelow = emptyCForest
@@ -147,9 +147,9 @@ movementsSpec = do
                               Just
                                 TreeAbove
                                   { treeAboveAbove = Nothing
-                                  , treeAboveLefts = []
+                                  , treeAboveLefts = S.empty
                                   , treeAboveNode = 1
-                                  , treeAboveRights = []
+                                  , treeAboveRights = S.empty
                                   }
                           , treeCurrent = 2
                           , treeBelow = emptyCForest
@@ -546,10 +546,12 @@ shiftingSpec = do
                           { treeAbove =
                               Just
                                 TreeAbove
-                                  { treeAboveLefts = [CNode 'b' $ closedForest [Node 'c' []]]
+                                  { treeAboveLefts =
+                                      S.singleton $ CNode 'b' $ closedForest [Node 'c' []]
                                   , treeAboveAbove = Nothing
                                   , treeAboveNode = 'a'
-                                  , treeAboveRights = [CNode 'f' $ closedForest [Node 'g' []]]
+                                  , treeAboveRights =
+                                      S.singleton $ CNode 'f' $ closedForest [Node 'g' []]
                                   }
                           , treeCurrent = 'd'
                           , treeBelow = closedForest [Node 'e' []]
@@ -605,10 +607,10 @@ shiftingSpec = do
                           { treeAbove =
                               Just
                                 TreeAbove
-                                  { treeAboveLefts = [CNode 'b' $ emptyCForest]
+                                  { treeAboveLefts = S.singleton $ CNode 'b' $ emptyCForest
                                   , treeAboveAbove = Nothing
                                   , treeAboveNode = 'a'
-                                  , treeAboveRights = [CNode 'd' $ emptyCForest]
+                                  , treeAboveRights = S.singleton $ CNode 'd' $ emptyCForest
                                   }
                           , treeCurrent = 'c'
                           , treeBelow = emptyCForest
@@ -633,10 +635,12 @@ shiftingSpec = do
                           { treeAbove =
                               Just
                                 TreeAbove
-                                  { treeAboveLefts = [CNode 'b' $ closedForest [Node 'c' []]]
+                                  { treeAboveLefts =
+                                      S.singleton $ CNode 'b' $ closedForest [Node 'c' []]
                                   , treeAboveAbove = Nothing
                                   , treeAboveNode = 'a'
-                                  , treeAboveRights = [CNode 'f' $ closedForest [Node 'g' []]]
+                                  , treeAboveRights =
+                                      S.singleton $ CNode 'f' $ closedForest [Node 'g' []]
                                   }
                           , treeCurrent = 'd'
                           , treeBelow = closedForest [Node 'e' []]
@@ -695,10 +699,10 @@ shiftingSpec = do
                           { treeAbove =
                               Just
                                 TreeAbove
-                                  { treeAboveLefts = [CNode 'b' emptyCForest]
+                                  { treeAboveLefts = S.singleton $ CNode 'b' emptyCForest
                                   , treeAboveAbove = Nothing
                                   , treeAboveNode = 'a'
-                                  , treeAboveRights = []
+                                  , treeAboveRights = S.empty
                                   }
                           , treeCurrent = 'c'
                           , treeBelow = closedForest [Node 'd' []]
@@ -737,10 +741,10 @@ shiftingSpec = do
                         { treeAbove =
                             Just
                               TreeAbove
-                                { treeAboveLefts = []
+                                { treeAboveLefts = S.empty
                                 , treeAboveAbove = Nothing
                                 , treeAboveNode = b1
-                                , treeAboveRights = []
+                                , treeAboveRights = S.empty
                                 }
                         , treeCurrent = 'a'
                         , treeBelow = emptyCForest
@@ -775,10 +779,10 @@ shiftingSpec = do
                       { treeAbove =
                           Just
                             TreeAbove
-                              { treeAboveLefts = []
+                              { treeAboveLefts = S.empty
                               , treeAboveAbove = Nothing
                               , treeAboveNode = v
-                              , treeAboveRights = []
+                              , treeAboveRights = S.empty
                               }
                       , treeCurrent = 'a'
                       , treeBelow = closedForest [Node 'b' []]

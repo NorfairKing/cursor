@@ -12,6 +12,9 @@ module Cursor.Tree.Promote
 
 import Data.Validity
 
+import Data.Foldable
+import qualified Data.Sequence as S
+import Data.Sequence (ViewR(..), (<|), (><), (|>))
 import GHC.Generics (Generic)
 
 import Cursor.Tree.Base
@@ -45,10 +48,7 @@ import Cursor.Tree.Types
 -- >  |- d <--
 -- >  |- h
 treeCursorPromoteElem ::
-     (a -> b)
-  -> (b -> a)
-  -> TreeCursor a b
-  -> PromoteElemResult (TreeCursor a b)
+     (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteElemResult (TreeCursor a b)
 treeCursorPromoteElem f g tc = do
   ta <-
     case treeAbove tc of
@@ -59,14 +59,10 @@ treeCursorPromoteElem f g tc = do
     case (treeBelow tc) of
       EmptyCForest -> pure $ treeAboveLefts ta
       _ ->
-        case treeAboveLefts ta of
-          [] -> NoSiblingsToAdoptChildren
-          (CNode t ls:ts) ->
-            pure $
-            CNode
-              t
-              (openForest $ unpackCForest ls ++ unpackCForest (treeBelow tc)) :
-            ts
+        case S.viewr $ treeAboveLefts ta of
+          EmptyR -> NoSiblingsToAdoptChildren
+          ts :> CNode t ls ->
+            pure $ CNode t (openForest $ unpackCForest ls ++ unpackCForest (treeBelow tc)) <| ts
   taa <-
     case treeAboveAbove ta of
       Nothing -> NoGrandparentToPromoteElemUnder
@@ -76,10 +72,8 @@ treeCursorPromoteElem f g tc = do
     Just $
     taa
       { treeAboveLefts =
-          CNode
-            (treeAboveNode ta)
-            (openForest $ reverse lefts ++ treeAboveRights ta) :
-          treeAboveLefts taa
+          treeAboveLefts taa |>
+          CNode (treeAboveNode ta) (openForest $ toList $ lefts >< treeAboveRights ta)
       }
 
 data PromoteElemResult a
@@ -99,8 +93,7 @@ instance Applicative PromoteElemResult where
   PromotedElem f <*> PromotedElem a = PromotedElem $ f a
   PromotedElem _ <*> CannotPromoteTopElem = CannotPromoteTopElem
   PromotedElem _ <*> NoSiblingsToAdoptChildren = NoSiblingsToAdoptChildren
-  PromotedElem _ <*> NoGrandparentToPromoteElemUnder =
-    NoGrandparentToPromoteElemUnder
+  PromotedElem _ <*> NoGrandparentToPromoteElemUnder = NoGrandparentToPromoteElemUnder
 
 instance Monad PromoteElemResult where
   CannotPromoteTopElem >>= _ = CannotPromoteTopElem
@@ -135,8 +128,7 @@ instance Monad PromoteElemResult where
 -- >  |- d <--
 -- >  |  |- e
 -- >  |- h
-treeCursorPromoteSubTree ::
-     (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteResult (TreeCursor a b)
+treeCursorPromoteSubTree :: (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteResult (TreeCursor a b)
 treeCursorPromoteSubTree f g tc = do
   ta <-
     case treeAbove tc of
@@ -151,10 +143,8 @@ treeCursorPromoteSubTree f g tc = do
     Just $
     taa
       { treeAboveLefts =
-          CNode
-            (treeAboveNode ta)
-            (openForest $ reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
-          treeAboveLefts taa
+          treeAboveLefts taa |>
+          CNode (treeAboveNode ta) (openForest $ toList $ treeAboveLefts ta >< treeAboveRights ta)
       }
 
 data PromoteResult a

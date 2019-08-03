@@ -9,6 +9,8 @@ module Cursor.Tree.Swap
   , SwapResult(..)
   ) where
 
+import qualified Data.Sequence as S
+import Data.Sequence (ViewL(..), ViewR(..), (<|), (|>))
 import Data.Validity
 
 import GHC.Generics (Generic)
@@ -35,18 +37,11 @@ treeCursorSwapPrev tc = do
   case treeAbove tc of
     Nothing -> SwapperIsTopNode
     Just ta ->
-      case treeAboveLefts ta of
-        [] -> NoSiblingsToSwapWith
-        (t:ts) ->
+      case S.viewr $ treeAboveLefts ta of
+        EmptyR -> NoSiblingsToSwapWith
+        ts :> t ->
           Swapped $
-          tc
-            { treeAbove =
-                Just
-                  ta
-                    { treeAboveLefts = ts
-                    , treeAboveRights = t : treeAboveRights ta
-                    }
-            }
+          tc {treeAbove = Just ta {treeAboveLefts = ts, treeAboveRights = t <| treeAboveRights ta}}
 
 -- | Swaps the current node with the next node on the same level
 --
@@ -68,18 +63,11 @@ treeCursorSwapNext tc =
   case treeAbove tc of
     Nothing -> SwapperIsTopNode
     Just ta ->
-      case treeAboveRights ta of
-        [] -> NoSiblingsToSwapWith
-        (t:ts) ->
+      case S.viewl $ treeAboveRights ta of
+        EmptyL -> NoSiblingsToSwapWith
+        t :< ts ->
           Swapped $
-          tc
-            { treeAbove =
-                Just
-                  ta
-                    { treeAboveLefts = t : treeAboveLefts ta
-                    , treeAboveRights = ts
-                    }
-            }
+          tc {treeAbove = Just ta {treeAboveLefts = treeAboveLefts ta |> t, treeAboveRights = ts}}
 
 data SwapResult a
   = SwapperIsTopNode

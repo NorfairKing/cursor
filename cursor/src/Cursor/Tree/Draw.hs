@@ -12,6 +12,7 @@ module Cursor.Tree.Draw
   , showTree
   ) where
 
+import Data.Foldable
 import qualified Data.List.NonEmpty as NE
 import Data.Tree
 
@@ -22,8 +23,7 @@ drawTreeCursor = drawTree . treeCursorWithPointer
 
 treeCursorWithPointer :: (Show a, Show b) => TreeCursor a b -> Tree String
 treeCursorWithPointer TreeCursor {..} =
-  wrapAbove treeAbove $
-  Node (show treeCurrent ++ " <---") $ showCForest treeBelow
+  wrapAbove treeAbove $ Node (show treeCurrent ++ " <---") $ showCForest treeBelow
   where
     wrapAbove :: (Show b) => Maybe (TreeAbove b) -> Tree String -> Tree String
     wrapAbove Nothing t = t
@@ -31,15 +31,11 @@ treeCursorWithPointer TreeCursor {..} =
       wrapAbove treeAboveAbove $
       Node (show treeAboveNode) $
       concat
-        [ map showCTree $ reverse treeAboveLefts
-        , [t]
-        , map showCTree treeAboveRights
-        ]
+        [map showCTree $ toList $ treeAboveLefts, [t], map showCTree $ toList $ treeAboveRights]
 
 showCForest :: Show a => CForest a -> Forest String
 showCForest EmptyCForest = []
-showCForest (ClosedForest ts) =
-  map (fmap ("hidden: " ++)) $ map showTree $ NE.toList ts
+showCForest (ClosedForest ts) = map (fmap ("hidden: " ++)) $ map showTree $ NE.toList ts
 showCForest (OpenForest ts) = map showCTree $ NE.toList ts
 
 showCTree :: Show a => CTree a -> Tree String

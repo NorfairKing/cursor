@@ -8,8 +8,9 @@ module Cursor.Simple.Tree.SwapSpec
   ) where
 
 import Test.Hspec
-
 import Test.Validity
+
+import qualified Data.Sequence as S
 
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
@@ -21,18 +22,17 @@ spec :: Spec
 spec = do
   functorSpec @SwapResult
   describe "treeCursorSwapPrev" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorSwapPrev @Rational @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ treeCursorSwapPrev @Rational @Rational
     it "works on the example from the docs" $
       let start =
             TreeCursor
               { treeAbove =
                   Just
                     TreeAbove
-                      { treeAboveLefts = [node 'a' []]
+                      { treeAboveLefts = S.singleton $ node 'a' []
                       , treeAboveAbove = Nothing
                       , treeAboveNode = 'p'
-                      , treeAboveRights = []
+                      , treeAboveRights = S.empty
                       }
               , treeCurrent = 'b'
               , treeBelow = emptyCForest
@@ -42,10 +42,10 @@ spec = do
               { treeAbove =
                   Just
                     TreeAbove
-                      { treeAboveLefts = []
+                      { treeAboveLefts = S.empty
                       , treeAboveAbove = Nothing
                       , treeAboveNode = 'p'
-                      , treeAboveRights = [node 'a' []]
+                      , treeAboveRights = S.singleton $ node 'a' []
                       }
               , treeCurrent = 'b'
               , treeBelow = emptyCForest
@@ -59,18 +59,17 @@ spec = do
         (treeCursorSwapPrev @Rational @Rational)
     it "swaps the current node with the previous node" pending
   describe "treeCursorSwapNext" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorSwapNext @Rational @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ treeCursorSwapNext @Rational @Rational
     it "works on the example from the docs" $
       let start =
             TreeCursor
               { treeAbove =
                   Just
                     TreeAbove
-                      { treeAboveLefts = []
+                      { treeAboveLefts = S.empty
                       , treeAboveAbove = Nothing
                       , treeAboveNode = 'p'
-                      , treeAboveRights = [node 'b' []]
+                      , treeAboveRights = S.singleton $ node 'b' []
                       }
               , treeCurrent = 'a'
               , treeBelow = emptyCForest
@@ -80,10 +79,10 @@ spec = do
               { treeAbove =
                   Just
                     TreeAbove
-                      { treeAboveLefts = [node 'b' []]
+                      { treeAboveLefts = S.singleton $ node 'b' []
                       , treeAboveAbove = Nothing
                       , treeAboveNode = 'p'
-                      , treeAboveRights = []
+                      , treeAboveRights = S.empty
                       }
               , treeCurrent = 'a'
               , treeBelow = emptyCForest
