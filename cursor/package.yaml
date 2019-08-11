@@ -7,7 +7,10 @@ license: MIT
 homepage: https://github.com/NorfairKing/cursor
 category: Editor
 synopsis: Purely Functional Cursors
-description: Purely Functional Cursors for common data structures
+description: |
+  Purely Functional Cursors for common data structures
+  
+  See https://cs-syd.eu/tags/cursors for more information.
 
 library:
   source-dirs: src/
