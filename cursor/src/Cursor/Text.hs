@@ -31,6 +31,7 @@ import GHC.Generics (Generic)
 
 import qualified Data.Text as T
 import Data.Text (Text)
+import qualified Data.Text.Internal as T
 
 import Lens.Micro
 
@@ -49,7 +50,10 @@ instance Validity TextCursor where
     mconcat
       [ genericValidate lc
       , decorateList (rebuildListCursor lc) $ \c ->
-          declare "The character is not a newline character" $ c /= '\n'
+          mconcat
+            [ declare "The character is not a newline character" $ c /= '\n'
+            , declare "The character is a safe character" $ T.safe c == c
+            ]
       ]
 
 emptyTextCursor :: TextCursor
@@ -68,10 +72,7 @@ rebuildTextCursor :: TextCursor -> Text
 rebuildTextCursor = T.pack . rebuildListCursor . textCursorList
 
 textCursorListCursorL ::
-     Functor f
-  => (ListCursor Char -> f (ListCursor Char))
-  -> TextCursor
-  -> f TextCursor
+     Functor f => (ListCursor Char -> f (ListCursor Char)) -> TextCursor -> f TextCursor
 textCursorListCursorL = lens textCursorList (\tc lc -> tc {textCursorList = lc})
 
 textCursorNull :: TextCursor -> Bool
@@ -113,12 +114,10 @@ textCursorAppend '\n' _ = Nothing
 textCursorAppend c tc = Just (tc & textCursorListCursorL %~ listCursorAppend c)
 
 textCursorRemove :: TextCursor -> Maybe (DeleteOrUpdate TextCursor)
-textCursorRemove =
-  focusPossibleDeleteOrUpdate textCursorListCursorL listCursorRemove
+textCursorRemove = focusPossibleDeleteOrUpdate textCursorListCursorL listCursorRemove
 
 textCursorDelete :: TextCursor -> Maybe (DeleteOrUpdate TextCursor)
-textCursorDelete =
-  focusPossibleDeleteOrUpdate textCursorListCursorL listCursorDelete
+textCursorDelete = focusPossibleDeleteOrUpdate textCursorListCursorL listCursorDelete
 
 textCursorSplit :: TextCursor -> (TextCursor, TextCursor)
 textCursorSplit tc =

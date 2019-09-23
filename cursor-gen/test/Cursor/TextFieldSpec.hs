@@ -22,6 +22,7 @@ import qualified Data.List.NonEmpty as NE
 
 import Control.Monad
 
+import Cursor.List.NonEmpty
 import Cursor.TextField
 import Cursor.TextField.Gen ()
 import Cursor.Types
@@ -30,13 +31,34 @@ spec :: Spec
 spec = do
   eqSpecOnValid @TextFieldCursor
   genValidSpec @TextFieldCursor
+  describe "Validity TextFieldCursor" $ do
+    it "consider a textfield with a newline in the previous lines invalid" $
+      forAllValid $ \tc ->
+        shouldBeInvalid $
+        TextFieldCursor
+          { textFieldCursorNonEmpty =
+              NonEmptyCursor
+                {nonEmptyCursorPrev = ["\n"], nonEmptyCursorCurrent = tc, nonEmptyCursorNext = []}
+          }
+    it "consider a textfield with a newline in the next lines invalid" $
+      forAllValid $ \tc ->
+        shouldBeInvalid $
+        TextFieldCursor
+          { textFieldCursorNonEmpty =
+              NonEmptyCursor
+                {nonEmptyCursorPrev = [], nonEmptyCursorCurrent = tc, nonEmptyCursorNext = ["\n"]}
+          }
   describe "makeTextFieldCursor" $ do
-    it "fails on \"\\n\"" $ shouldBeValid $ makeTextFieldCursor "\n"
+    it "produces a valid cursor for \"\\n\"" $ shouldBeValid $ makeTextFieldCursor "\n"
+    it "produces a valid cursor for \"\\n\\n\"" $ shouldBeValid $ makeTextFieldCursor "\n\n"
     it "produces valid cursors" $ producesValidsOnValids makeTextFieldCursor
   describe "makeTextFieldCursorWithSelection" $ do
-    it "fails on \"\\n\"" $
+    it "produces a valid cursor for \"\\n\"" $
       forAllValid $ \x ->
         forAllValid $ \y -> shouldBeValid $ makeTextFieldCursorWithSelection x y "\n"
+    it "produces a valid cursor for \"\\n\\n\"" $
+      forAllValid $ \x ->
+        forAllValid $ \y -> shouldBeValid $ makeTextFieldCursorWithSelection x y "\n\n"
     it "produces valid cursors" $ producesValidsOnValids3 makeTextFieldCursorWithSelection
     it "is the inverse of rebuildTextFieldCursor when using the current selection" $
       forAllValid $ \tfc -> do
@@ -67,7 +89,7 @@ spec = do
           unlines $ "Some of the following lines contain a newline:" : map show ls
   describe "rebuildTextFieldCursor" $ do
     it "produces valid texts" $ producesValidsOnValids rebuildTextFieldCursor
-    it "is the inverse of makeTextFieldCursor for integers" $
+    it "is the inverse of makeTextFieldCursor" $
       inverseFunctionsOnValid makeTextFieldCursor rebuildTextFieldCursor
     it "is the inverse of makeTextFieldCursorWithSelection for integers, for any index" $
       forAllValid $ \x ->
