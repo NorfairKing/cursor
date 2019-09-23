@@ -152,21 +152,33 @@ textFieldCursorIndexOnLine tfc = textCursorIndex $ tfc ^. textFieldCursorSelecte
 textFieldCursorSelectIndexOnLine :: Int -> TextFieldCursor -> TextFieldCursor
 textFieldCursorSelectIndexOnLine ix_ = textFieldCursorSelectedL %~ textCursorSelectIndex ix_
 
-textFieldCursorInsertChar :: Char -> Maybe TextFieldCursor -> TextFieldCursor
+-- |
+--
+-- returns 'Nothing' when given unsafe characters.
+textFieldCursorInsertChar :: Char -> Maybe TextFieldCursor -> Maybe TextFieldCursor
 textFieldCursorInsertChar c mtfc =
   case c of
-    '\n' -> textFieldCursorInsertNewline mtfc
-    _ ->
-      (fromMaybe emptyTextFieldCursor mtfc) &
-      textFieldCursorSelectedL %~ (fromJust . textCursorInsert c)
+    '\n' -> Just $ textFieldCursorInsertNewline mtfc
+    _
+      | isSafeChar c ->
+        Just $
+        (fromMaybe emptyTextFieldCursor mtfc) &
+        textFieldCursorSelectedL %~ (fromJust . textCursorInsert c)
+      | otherwise -> Nothing
 
-textFieldCursorAppendChar :: Char -> Maybe TextFieldCursor -> TextFieldCursor
+-- |
+--
+-- returns 'Nothing' when given unsafe characters.
+textFieldCursorAppendChar :: Char -> Maybe TextFieldCursor -> Maybe TextFieldCursor
 textFieldCursorAppendChar c mtfc =
   case c of
-    '\n' -> textFieldCursorAppendNewline mtfc
-    _ ->
-      (fromMaybe emptyTextFieldCursor mtfc) &
-      textFieldCursorSelectedL %~ (fromJust . textCursorAppend c)
+    '\n' -> Just $ textFieldCursorAppendNewline mtfc
+    _
+      | isSafeChar c ->
+        Just $
+        (fromMaybe emptyTextFieldCursor mtfc) &
+        textFieldCursorSelectedL %~ (fromJust . textCursorAppend c)
+      | otherwise -> Nothing
 
 textFieldCursorInsertNewline :: Maybe TextFieldCursor -> TextFieldCursor
 textFieldCursorInsertNewline mtfc =

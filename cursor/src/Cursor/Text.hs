@@ -31,7 +31,6 @@ import GHC.Generics (Generic)
 
 import qualified Data.Text as T
 import Data.Text (Text)
-import qualified Data.Text.Internal as T
 
 import Lens.Micro
 
@@ -52,7 +51,7 @@ instance Validity TextCursor where
       , decorateList (rebuildListCursor lc) $ \c ->
           mconcat
             [ declare "The character is not a newline character" $ c /= '\n'
-            , declare "The character is a safe character" $ T.safe c == c
+            , declare "The character is a safe character" $ isSafeChar c
             ]
       ]
 
@@ -107,11 +106,17 @@ textCursorNextChar = listCursorNextItem . textCursorList
 
 textCursorInsert :: Char -> TextCursor -> Maybe TextCursor
 textCursorInsert '\n' _ = Nothing
-textCursorInsert c tc = Just (tc & textCursorListCursorL %~ listCursorInsert c)
+textCursorInsert c tc =
+  if isSafeChar c
+    then Just (tc & textCursorListCursorL %~ listCursorInsert c)
+    else Nothing
 
 textCursorAppend :: Char -> TextCursor -> Maybe TextCursor
 textCursorAppend '\n' _ = Nothing
-textCursorAppend c tc = Just (tc & textCursorListCursorL %~ listCursorAppend c)
+textCursorAppend c tc =
+  if isSafeChar c
+    then Just (tc & textCursorListCursorL %~ listCursorAppend c)
+    else Nothing
 
 textCursorRemove :: TextCursor -> Maybe (DeleteOrUpdate TextCursor)
 textCursorRemove = focusPossibleDeleteOrUpdate textCursorListCursorL listCursorRemove

@@ -5,6 +5,7 @@ module Cursor.Types where
 
 import GHC.Generics (Generic)
 
+import qualified Data.Text.Internal as T
 import Data.Validity
 
 import Data.Functor.Compose
@@ -12,6 +13,9 @@ import Data.Functor.Compose
 import Control.Applicative
 
 import Lens.Micro
+
+isSafeChar :: Char -> Bool
+isSafeChar c = T.safe c == c
 
 data DeleteOrUpdate a
   = Deleted
@@ -35,8 +39,7 @@ instance Alternative DeleteOrUpdate where
   Updated a <|> _ = Updated a
   Deleted <|> doua = doua
 
-joinDeletes ::
-     Maybe (DeleteOrUpdate a) -> Maybe (DeleteOrUpdate a) -> DeleteOrUpdate a
+joinDeletes :: Maybe (DeleteOrUpdate a) -> Maybe (DeleteOrUpdate a) -> DeleteOrUpdate a
 joinDeletes m1 m2 =
   case (m1, m2) of
     (Nothing, Nothing) -> Deleted
@@ -56,16 +59,11 @@ joinDeletes3 m1 m2 m3 =
     (Just a, _, _) -> a
 
 joinPossibleDeletes ::
-     Maybe (DeleteOrUpdate a)
-  -> Maybe (DeleteOrUpdate a)
-  -> Maybe (DeleteOrUpdate a)
+     Maybe (DeleteOrUpdate a) -> Maybe (DeleteOrUpdate a) -> Maybe (DeleteOrUpdate a)
 joinPossibleDeletes d1 d2 = getCompose $ Compose d1 <|> Compose d2
 
 focusPossibleDeleteOrUpdate ::
-     Lens' b a
-  -> (a -> Maybe (DeleteOrUpdate a))
-  -> b
-  -> Maybe (DeleteOrUpdate b)
+     Lens' b a -> (a -> Maybe (DeleteOrUpdate a)) -> b -> Maybe (DeleteOrUpdate b)
 focusPossibleDeleteOrUpdate l func = getCompose . l (Compose . func)
 
 dullMDelete :: Maybe (DeleteOrUpdate a) -> Maybe a

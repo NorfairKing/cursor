@@ -1,5 +1,5 @@
 name: cursor-gen
-version: '0.1.0.0'
+version: '0.2.0.0'
 author: Tom Sydney Kerckhove
 maintainer: syd@cs-syd.eu
 copyright: ! 'Copyright: (c) 2018 Tom Sydney Kerckhove'
@@ -8,6 +8,8 @@ homepage: https://github.com/NorfairKing/cursor
 category: Cursor
 synopsis: Generators for Purely Functional Cursors
 description: Generators for Purely Functional Cursors for common data structures
+extra-source-files:
+- CHANGELOG.md
 
 
 library:
@@ -17,7 +19,7 @@ library:
   - QuickCheck 
   - base <5
   - containers
-  - cursor 
+  - cursor >=0.2
   - genvalidity >=0.8
   - genvalidity-containers
   - genvalidity-text >=0.6

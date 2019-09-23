@@ -1,5 +1,5 @@
 name: cursor
-version: '0.1.0.1'
+version: '0.2.0.0'
 author: Tom Sydney Kerckhove
 maintainer: syd@cs-syd.eu
 copyright: ! 'Copyright: (c) 2018 Tom Sydney Kerckhove'
@@ -11,6 +11,8 @@ description: |
   Purely Functional Cursors for common data structures
   
   See https://cs-syd.eu/tags/cursors for more information.
+extra-source-files:
+- CHANGELOG.md
 
 library:
   source-dirs: src/
