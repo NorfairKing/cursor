@@ -10,9 +10,11 @@ module Cursor.Tree.Promote
   , PromoteResult(..)
   ) where
 
+import GHC.Generics (Generic)
+
 import Data.Validity
 
-import GHC.Generics (Generic)
+import Control.DeepSeq
 
 import Cursor.Tree.Base
 import Cursor.Tree.Types
@@ -45,10 +47,7 @@ import Cursor.Tree.Types
 -- >  |- d <--
 -- >  |- h
 treeCursorPromoteElem ::
-     (a -> b)
-  -> (b -> a)
-  -> TreeCursor a b
-  -> PromoteElemResult (TreeCursor a b)
+     (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteElemResult (TreeCursor a b)
 treeCursorPromoteElem f g tc = do
   ta <-
     case treeAbove tc of
@@ -62,11 +61,7 @@ treeCursorPromoteElem f g tc = do
         case treeAboveLefts ta of
           [] -> NoSiblingsToAdoptChildren
           (CNode t ls:ts) ->
-            pure $
-            CNode
-              t
-              (openForest $ unpackCForest ls ++ unpackCForest (treeBelow tc)) :
-            ts
+            pure $ CNode t (openForest $ unpackCForest ls ++ unpackCForest (treeBelow tc)) : ts
   taa <-
     case treeAboveAbove ta of
       Nothing -> NoGrandparentToPromoteElemUnder
@@ -76,9 +71,7 @@ treeCursorPromoteElem f g tc = do
     Just $
     taa
       { treeAboveLefts =
-          CNode
-            (treeAboveNode ta)
-            (openForest $ reverse lefts ++ treeAboveRights ta) :
+          CNode (treeAboveNode ta) (openForest $ reverse lefts ++ treeAboveRights ta) :
           treeAboveLefts taa
       }
 
@@ -91,6 +84,8 @@ data PromoteElemResult a
 
 instance Validity a => Validity (PromoteElemResult a)
 
+instance NFData a => NFData (PromoteElemResult a)
+
 instance Applicative PromoteElemResult where
   pure = PromotedElem
   CannotPromoteTopElem <*> _ = CannotPromoteTopElem
@@ -99,8 +94,7 @@ instance Applicative PromoteElemResult where
   PromotedElem f <*> PromotedElem a = PromotedElem $ f a
   PromotedElem _ <*> CannotPromoteTopElem = CannotPromoteTopElem
   PromotedElem _ <*> NoSiblingsToAdoptChildren = NoSiblingsToAdoptChildren
-  PromotedElem _ <*> NoGrandparentToPromoteElemUnder =
-    NoGrandparentToPromoteElemUnder
+  PromotedElem _ <*> NoGrandparentToPromoteElemUnder = NoGrandparentToPromoteElemUnder
 
 instance Monad PromoteElemResult where
   CannotPromoteTopElem >>= _ = CannotPromoteTopElem
@@ -135,8 +129,7 @@ instance Monad PromoteElemResult where
 -- >  |- d <--
 -- >  |  |- e
 -- >  |- h
-treeCursorPromoteSubTree ::
-     (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteResult (TreeCursor a b)
+treeCursorPromoteSubTree :: (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteResult (TreeCursor a b)
 treeCursorPromoteSubTree f g tc = do
   ta <-
     case treeAbove tc of
@@ -151,9 +144,7 @@ treeCursorPromoteSubTree f g tc = do
     Just $
     taa
       { treeAboveLefts =
-          CNode
-            (treeAboveNode ta)
-            (openForest $ reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
+          CNode (treeAboveNode ta) (openForest $ reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
           treeAboveLefts taa
       }
 
@@ -164,6 +155,7 @@ data PromoteResult a
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (PromoteResult a)
+instance NFData a => NFData (PromoteResult a)
 
 instance Applicative PromoteResult where
   pure = Promoted

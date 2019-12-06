@@ -13,6 +13,8 @@ import Data.Validity
 
 import GHC.Generics (Generic)
 
+import Control.DeepSeq
+
 import Cursor.Tree.Types
 
 -- | Swaps the current node with the previous node on the same level
@@ -39,14 +41,7 @@ treeCursorSwapPrev tc = do
         [] -> NoSiblingsToSwapWith
         (t:ts) ->
           Swapped $
-          tc
-            { treeAbove =
-                Just
-                  ta
-                    { treeAboveLefts = ts
-                    , treeAboveRights = t : treeAboveRights ta
-                    }
-            }
+          tc {treeAbove = Just ta {treeAboveLefts = ts, treeAboveRights = t : treeAboveRights ta}}
 
 -- | Swaps the current node with the next node on the same level
 --
@@ -72,14 +67,7 @@ treeCursorSwapNext tc =
         [] -> NoSiblingsToSwapWith
         (t:ts) ->
           Swapped $
-          tc
-            { treeAbove =
-                Just
-                  ta
-                    { treeAboveLefts = t : treeAboveLefts ta
-                    , treeAboveRights = ts
-                    }
-            }
+          tc {treeAbove = Just ta {treeAboveLefts = t : treeAboveLefts ta, treeAboveRights = ts}}
 
 data SwapResult a
   = SwapperIsTopNode
@@ -88,3 +76,5 @@ data SwapResult a
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (SwapResult a)
+
+instance NFData a => NFData (SwapResult a)

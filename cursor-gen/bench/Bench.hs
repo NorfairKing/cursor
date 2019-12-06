@@ -30,6 +30,13 @@ main =
     , genValidBench @(NonEmptyCursor Bool)
     , genValidBench @(KeyValueCursor Bool Bool)
     , genValidBench @(MapCursor Bool Bool)
+    , genValidBench @(SwapResult Bool)
+    , genValidBench @(PromoteElemResult Bool)
+    , genValidBench @(PromoteResult Bool)
+    , genValidBench @(DemoteResult Bool)
+    , genValidBench @(CTree Bool)
+    , genValidBench @(CForest Bool)
+    , genValidBench @(TreeAbove Bool)
     , genValidBench @(TreeCursor Bool)
     , genValidBench @(ForestCursor Bool)
     , genValidBench @TextCursor

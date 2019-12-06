@@ -19,49 +19,46 @@ import Cursor.Tree
 instance GenUnchecked TreeCursorSelection
 
 instance GenValid TreeCursorSelection where
-  genValid = genValidStructurally
-  shrinkValid = shrinkValidStructurally
+  genValid = genValidStructurallyWithoutExtraChecking
+  shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
 instance GenUnchecked a => GenUnchecked (SwapResult a)
 
 instance GenValid a => GenValid (SwapResult a) where
-  genValid = genValidStructurally
-  shrinkValid = shrinkValidStructurally
+  genValid = genValidStructurallyWithoutExtraChecking
+  shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
 instance GenUnchecked a => GenUnchecked (PromoteElemResult a)
 
 instance GenValid a => GenValid (PromoteElemResult a) where
-  genValid = genValidStructurally
-  shrinkValid = shrinkValidStructurally
+  genValid = genValidStructurallyWithoutExtraChecking
+  shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
 instance GenUnchecked a => GenUnchecked (PromoteResult a)
 
 instance GenValid a => GenValid (PromoteResult a) where
-  genValid = genValidStructurally
-  shrinkValid = shrinkValidStructurally
+  genValid = genValidStructurallyWithoutExtraChecking
+  shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
 instance GenUnchecked a => GenUnchecked (DemoteResult a)
 
 instance GenValid a => GenValid (DemoteResult a) where
-  genValid = genValidStructurally
-  shrinkValid = shrinkValidStructurally
+  genValid = genValidStructurallyWithoutExtraChecking
+  shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
 instance GenUnchecked a => GenUnchecked (CTree a) where
   genUnchecked =
     sized $ \n -> do
-      s <- upTo n
-      (a, b) <- genSplit s
+      (a, b) <- genSplit n
       val <- resize a genUnchecked
       for <- resize b genUnchecked
       pure $ CNode val for
-  shrinkUnchecked (CNode a cf) =
-    [CNode a' cf' | (a', cf') <- shrinkUnchecked (a, cf)]
+  shrinkUnchecked (CNode a cf) = [CNode a' cf' | (a', cf') <- shrinkUnchecked (a, cf)]
 
 instance GenValid a => GenValid (CTree a) where
   genValid =
     sized $ \n -> do
-      s <- upTo n
-      (a, b) <- genSplit s
+      (a, b) <- genSplit n
       val <- resize a genValid
       for <- resize b genValid
       pure $ CNode val for
@@ -72,34 +69,22 @@ instance GenUnchecked a => GenUnchecked (CForest a) where
     sized $ \n ->
       case n of
         0 -> pure EmptyCForest
-        _ ->
-          oneof
-            [ ClosedForest <$> resize n genUnchecked
-            , OpenForest <$> resize n genUnchecked
-            ]
+        _ -> oneof [ClosedForest <$> genUnchecked, OpenForest <$>  genUnchecked]
   shrinkUnchecked EmptyCForest = []
-  shrinkUnchecked (ClosedForest ne) =
-    EmptyCForest : (ClosedForest <$> shrinkUnchecked ne)
+  shrinkUnchecked (ClosedForest ne) = EmptyCForest : (ClosedForest <$> shrinkUnchecked ne)
   shrinkUnchecked (OpenForest ne) =
-    EmptyCForest :
-    ClosedForest (NE.map rebuildCTree ne) : (OpenForest <$> shrinkUnchecked ne)
+    EmptyCForest : ClosedForest (NE.map rebuildCTree ne) : (OpenForest <$> shrinkUnchecked ne)
 
 instance GenValid a => GenValid (CForest a) where
   genValid =
     sized $ \n ->
       case n of
         0 -> pure EmptyCForest
-        _ ->
-          oneof
-            [ ClosedForest <$> resize n genValid
-            , OpenForest <$> resize n genValid
-            ]
+        _ -> oneof [ClosedForest <$> genValid, OpenForest <$> genValid]
   shrinkValid EmptyCForest = []
-  shrinkValid (ClosedForest ne) =
-    EmptyCForest : (ClosedForest <$> shrinkValid ne)
+  shrinkValid (ClosedForest ne) = EmptyCForest : (ClosedForest <$> shrinkValid ne)
   shrinkValid (OpenForest ne) =
-    EmptyCForest :
-    ClosedForest (NE.map rebuildCTree ne) : (OpenForest <$> shrinkValid ne)
+    EmptyCForest : ClosedForest (NE.map rebuildCTree ne) : (OpenForest <$> shrinkValid ne)
 
 instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (TreeCursor a b) where
   genUnchecked =

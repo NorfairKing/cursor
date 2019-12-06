@@ -11,9 +11,11 @@ module Cursor.Tree.Demote
   , treeCursorDemoteSubTreeUnder
   ) where
 
+import GHC.Generics (Generic)
+
 import Data.Validity
 
-import GHC.Generics (Generic)
+import Control.DeepSeq
 
 import Cursor.Tree.Base
 import Cursor.Tree.Types
@@ -39,8 +41,7 @@ import Cursor.Tree.Types
 -- >  |  |- c <--
 -- >  |  |- d
 -- >  |- e
-treeCursorDemoteElem ::
-     (a -> b) -> (b -> a) -> TreeCursor a b -> DemoteResult (TreeCursor a b)
+treeCursorDemoteElem :: (a -> b) -> (b -> a) -> TreeCursor a b -> DemoteResult (TreeCursor a b)
 treeCursorDemoteElem f g tc =
   case treeAbove tc of
     Nothing -> CannotDemoteTopNode
@@ -79,8 +80,7 @@ treeCursorDemoteElem f g tc =
 -- >  |  |- c <--
 -- >  |     |- d
 -- >  |- e
-treeCursorDemoteSubTree ::
-     (a -> b) -> (b -> a) -> TreeCursor a b -> DemoteResult (TreeCursor a b)
+treeCursorDemoteSubTree :: (a -> b) -> (b -> a) -> TreeCursor a b -> DemoteResult (TreeCursor a b)
 treeCursorDemoteSubTree f g tc =
   case treeAbove tc of
     Nothing -> CannotDemoteTopNode
@@ -105,6 +105,8 @@ data DemoteResult a
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (DemoteResult a)
+
+instance NFData a => NFData (DemoteResult a)
 
 -- | Demotes the current node to the level of its children, by adding two roots.
 -- One for the current node and one for its children that are left behind.

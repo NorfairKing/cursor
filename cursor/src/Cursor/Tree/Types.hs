@@ -99,6 +99,7 @@ data TreeCursorSelection
   deriving (Show, Eq, Generic)
 
 instance Validity TreeCursorSelection
+
 instance NFData TreeCursorSelection
 
 data CTree a =
@@ -106,6 +107,7 @@ data CTree a =
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (CTree a)
+
 instance NFData a => NFData (CTree a)
 
 makeCTree :: Tree a -> CTree a
@@ -124,6 +126,7 @@ data CForest a
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (CForest a)
+
 instance NFData a => NFData (CForest a)
 
 makeCForest :: Forest a -> CForest a
