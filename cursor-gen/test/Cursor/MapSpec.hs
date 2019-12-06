@@ -14,6 +14,5 @@ import Cursor.Map.Gen ()
 
 spec :: Spec
 spec = do
-  eqSpec @(MapCursor Word Int Bool Ordering)
-  genValidSpec @(MapCursor Double Rational Int Bool)
-  shrinkValidSpec @(MapCursor Double Rational Int Bool)
+  eqSpec @(MapCursor Bool Bool Bool Bool)
+  genValidSpec @(MapCursor Bool Bool Bool Bool)

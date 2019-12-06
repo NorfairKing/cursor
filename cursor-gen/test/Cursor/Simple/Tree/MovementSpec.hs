@@ -17,30 +17,21 @@ import Test.Validity
 
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
-import Cursor.Tree
-  ( CTree(..)
-  , TreeAbove(..)
-  , TreeCursor(..)
-  , emptyCForest
-  , openForest
-  )
+import Cursor.Tree (CTree(..), TreeAbove(..), TreeCursor(..), emptyCForest, openForest)
 
 import Cursor.Simple.Tree.TestUtils
 
 spec :: Spec
 spec = do
   describe "treeCursorSelection" $
-    it "produces valids on valids" $
-    producesValidsOnValids (treeCursorSelection @Rational @Rational)
+    it "produces valids on valids" $ producesValidsOnValids (treeCursorSelection @Bool @Bool)
   describe "treeCursorSelect" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids2 (treeCursorSelect @Rational)
+    it "produces valids on valids" $ producesValidsOnValids2 (treeCursorSelect @Bool)
     it "is identity with the current selection" $
       forAllValid $ \tc ->
         let sel = treeCursorSelection tc
-         in case treeCursorSelect @Rational sel tc of
-              Nothing ->
-                expectationFailure "treeCursorSelect should not have failed."
+         in case treeCursorSelect @Bool sel tc of
+              Nothing -> expectationFailure "treeCursorSelect should not have failed."
               Just r ->
                 unless (r == tc) $
                 expectationFailure $
@@ -57,15 +48,15 @@ spec = do
     it "selects the previous element" pending
     it "after treeCursorSelectNextOnSameLevel is identity if they don't fail" $ do
       inverseFunctionsIfSucceedOnValid
-        (treeCursorSelectNextOnSameLevel @Rational)
-        (treeCursorSelectPrevOnSameLevel @Rational)
+        (treeCursorSelectNextOnSameLevel @Bool)
+        (treeCursorSelectPrevOnSameLevel @Bool)
   describe "treeCursorSelectNextOnSameLevel" $ do
     testMovementM treeCursorSelectNextOnSameLevel
     it "selects the next element" pending
     it "after treeCursorSelectPrevOnSameLevel is identity if they don't fail" $ do
       inverseFunctionsIfSucceedOnValid
-        (treeCursorSelectPrevOnSameLevel @Rational)
-        (treeCursorSelectNextOnSameLevel @Rational)
+        (treeCursorSelectPrevOnSameLevel @Bool)
+        (treeCursorSelectNextOnSameLevel @Bool)
   describe "treeCursorSelectAbovePrev" $ do
     testMovementM treeCursorSelectAbovePrev
     it "Works for this classic example" $
@@ -81,10 +72,7 @@ spec = do
                   Just
                     (TreeAbove
                        { treeAboveLefts =
-                           [ CNode 1 $
-                             openForest
-                               [CNode 2 $ openForest [CNode 3 emptyCForest]]
-                           ]
+                           [CNode 1 $ openForest [CNode 2 $ openForest [CNode 3 emptyCForest]]]
                        , treeAboveAbove = Nothing
                        , treeAboveNode = 0
                        , treeAboveRights = []
@@ -108,8 +96,7 @@ spec = do
                                          { treeAboveLefts = []
                                          , treeAboveAbove = Nothing
                                          , treeAboveNode = 0
-                                         , treeAboveRights =
-                                             [CNode 4 emptyCForest]
+                                         , treeAboveRights = [CNode 4 emptyCForest]
                                          })
                                 , treeAboveNode = 1
                                 , treeAboveRights = []
@@ -121,19 +108,16 @@ spec = do
               , treeBelow = emptyCForest
               }
       case treeCursorSelectAbovePrev start of
-        Nothing ->
-          expectationFailure "treeCursorSelectAbovePrev should not have failed"
+        Nothing -> expectationFailure "treeCursorSelectAbovePrev should not have failed"
         Just r -> r `treeShouldBe` expected
     it "selects the previous element" pending
     it "after treeCursorSelectAboveNext is identity if they don't fail" $ do
       forAllValid $ \tc ->
-        case treeCursorSelectAboveNext @Rational tc of
+        case treeCursorSelectAboveNext @Bool tc of
           Nothing -> pure ()
           Just tc' ->
             case treeCursorSelectAbovePrev tc' of
-              Nothing ->
-                expectationFailure
-                  "treeCursorSelectAbovePrev should not have failed."
+              Nothing -> expectationFailure "treeCursorSelectAbovePrev should not have failed."
               Just tc'' ->
                 unless (tc == tc'') $
                 expectationFailure $
@@ -190,10 +174,7 @@ spec = do
                   Just
                     (TreeAbove
                        { treeAboveLefts =
-                           [ CNode 1 $
-                             openForest
-                               [CNode 2 $ openForest [CNode 3 emptyCForest]]
-                           ]
+                           [CNode 1 $ openForest [CNode 2 $ openForest [CNode 3 emptyCForest]]]
                        , treeAboveAbove = Nothing
                        , treeAboveNode = 0
                        , treeAboveRights = []
@@ -202,13 +183,12 @@ spec = do
               , treeBelow = emptyCForest
               }
       case treeCursorSelectAboveNext start of
-        Nothing ->
-          expectationFailure "treeCursorSelectAboveNext should not have failed."
+        Nothing -> expectationFailure "treeCursorSelectAboveNext should not have failed."
         Just r -> r `treeShouldBe` expected
     it "selects the next element" pending
     it "after treeCursorSelectAbovePrev is identity if they don't fail" $ do
       forAllValid $ \tc ->
-        case treeCursorSelectAbovePrev @Rational tc of
+        case treeCursorSelectAbovePrev @Bool tc of
           Nothing -> pure ()
           Just tc' ->
             case treeCursorSelectAboveNext tc' of
@@ -231,35 +211,29 @@ spec = do
     testMovementM treeCursorSelectPrev
     it "selects the previous element" pending
     it "after treeCursorSelectNext is identity if they don't fail" $ do
-      inverseFunctionsIfSucceedOnValid
-        (treeCursorSelectNext @Rational)
-        (treeCursorSelectPrev @Rational)
+      inverseFunctionsIfSucceedOnValid (treeCursorSelectNext @Bool) (treeCursorSelectPrev @Bool)
   describe "treeCursorSelectNext" $ do
     testMovementM treeCursorSelectNext
     it "selects the next element" pending
     it "after treeCursorSelectPrev is identity if they don't fail" $ do
-      inverseFunctionsIfSucceedOnValid
-        (treeCursorSelectPrev @Rational)
-        (treeCursorSelectNext @Rational)
+      inverseFunctionsIfSucceedOnValid (treeCursorSelectPrev @Bool) (treeCursorSelectNext @Bool)
   describe "treeCursorSelectFirst" $ do
     testMovement treeCursorSelectFirst
     it "selects the first element" pending
-    it "is idempotent" $ idempotentOnValid $ treeCursorSelectFirst @Rational
+    it "is idempotent" $ idempotentOnValid $ treeCursorSelectFirst @Bool
   describe "treeCursorSelectLast" $ do
     testMovement treeCursorSelectLast
     it "selects the last element" pending
-    it "is idempotent" $ idempotentOnValid $ treeCursorSelectLast @Rational
+    it "is idempotent" $ idempotentOnValid $ treeCursorSelectLast @Bool
   describe "treeCursorSelectAbove" $ do
     testMovementM treeCursorSelectAbove
     it "selects the element above" pending
     it "after treeCursorSelectBelow is identity if they don't fail" $ do
-      inverseFunctionsIfSucceedOnValid (treeCursorSelectBelowAtStart @Rational) $
-        treeCursorSelectAbove @Rational
+      inverseFunctionsIfSucceedOnValid (treeCursorSelectBelowAtStart @Bool) $
+        treeCursorSelectAbove @Bool
   describe "treeCursorSelectBelowAtPos" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids2 $ treeCursorSelectBelowAtPos @Rational
-    it "is a movement" $
-      forAllValid $ \n -> isMovementM $ treeCursorSelectBelowAtPos n
+    it "produces valids on valids" $ producesValidsOnValids2 $ treeCursorSelectBelowAtPos @Bool
+    it "is a movement" $ forAllValid $ \n -> isMovementM $ treeCursorSelectBelowAtPos n
     it "selects the element n-th below" pending
   describe "treeCursorSelectBelowAtStart" $ do
     testMovementM treeCursorSelectBelowAtStart

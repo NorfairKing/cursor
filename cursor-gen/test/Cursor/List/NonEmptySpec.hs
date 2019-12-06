@@ -21,9 +21,9 @@ spec = do
     it "is equivalent to regular prepend" $
     equivalentWhenFirstSucceeds
       (\(ls1, ls2) -> (NE.toList . nonemptyPrepend ls1) <$> NE.nonEmpty ls2)
-      (uncurry (++) :: ([Int], [Int]) -> [Int])
+      (uncurry (++) :: ([Bool], [Bool]) -> [Bool])
   describe "nonemptyAppend" $
     it "is equivalent to regular append" $
     equivalentWhenFirstSucceeds
       (\(ls1, ls2) -> (NE.toList . (`nonemptyAppend` ls2)) <$> NE.nonEmpty ls1)
-      (uncurry (++) :: ([Int], [Int]) -> [Int])
+      (uncurry (++) :: ([Bool], [Bool]) -> [Bool])

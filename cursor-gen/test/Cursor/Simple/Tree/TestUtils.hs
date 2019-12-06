@@ -22,17 +22,15 @@ import Cursor.Tree (CTree(..), closedForest)
 
 testMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Spec
 testMovement func = do
-  it "produces valids on valids" $ producesValidsOnValids $ func @Rational
+  it "produces valids on valids" $ producesValidsOnValids $ func @Bool
   it "is a movement" $ isMovement func
 
-testMovementM ::
-     (forall a. STC.TreeCursor a -> Maybe (STC.TreeCursor a)) -> Spec
+testMovementM :: (forall a. STC.TreeCursor a -> Maybe (STC.TreeCursor a)) -> Spec
 testMovementM func = do
-  it "produces valids on valids" $ producesValidsOnValids $ func @Rational
+  it "produces valids on valids" $ producesValidsOnValids $ func @Bool
   it "is a movement" $ isMovementM func
 
-isMovementM ::
-     (forall a. STC.TreeCursor a -> Maybe (STC.TreeCursor a)) -> Property
+isMovementM :: (forall a. STC.TreeCursor a -> Maybe (STC.TreeCursor a)) -> Property
 isMovementM func =
   forAllValid @(STC.TreeCursor Int) $ \lec ->
     case func lec of
@@ -52,11 +50,9 @@ isMovementM func =
 isMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Property
 isMovement func =
   forAllValid $ \lec ->
-    rebuildTreeCursor (lec :: STC.TreeCursor Int) `shouldBe`
-    rebuildTreeCursor (func lec)
+    rebuildTreeCursor (lec :: STC.TreeCursor Int) `shouldBe` rebuildTreeCursor (func lec)
 
-treeShouldBe ::
-     (Show a, Eq a) => STC.TreeCursor a -> STC.TreeCursor a -> Expectation
+treeShouldBe :: (Show a, Eq a) => STC.TreeCursor a -> STC.TreeCursor a -> Expectation
 treeShouldBe actual expected =
   unless (actual == expected) $
   expectationFailure $

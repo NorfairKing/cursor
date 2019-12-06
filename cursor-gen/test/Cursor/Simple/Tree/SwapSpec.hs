@@ -21,8 +21,7 @@ spec :: Spec
 spec = do
   functorSpec @SwapResult
   describe "treeCursorSwapPrev" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorSwapPrev @Rational @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ treeCursorSwapPrev @Bool @Bool
     it "works on the example from the docs" $
       let start =
             TreeCursor
@@ -55,12 +54,11 @@ spec = do
             _ -> expectationFailure "treeCursorSwapPrev should not have failed."
     it "reverts treeCursorSwapNext" $
       inverseFunctionsIfSucceedOnValid
-        (treeCursorSwapNext @Rational @Rational)
-        (treeCursorSwapPrev @Rational @Rational)
+        (treeCursorSwapNext @Bool @Bool)
+        (treeCursorSwapPrev @Bool @Bool)
     it "swaps the current node with the previous node" pending
   describe "treeCursorSwapNext" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorSwapNext @Rational @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ treeCursorSwapNext @Bool @Bool
     it "works on the example from the docs" $
       let start =
             TreeCursor
@@ -93,6 +91,6 @@ spec = do
             _ -> expectationFailure "treeCursorSwapNext should not have failed."
     it "reverts treeCursorSwapNext" $
       inverseFunctionsIfSucceedOnValid
-        (treeCursorSwapPrev @Rational @Rational)
-        (treeCursorSwapNext @Rational @Rational)
+        (treeCursorSwapPrev @Bool @Bool)
+        (treeCursorSwapNext @Bool @Bool)
     it "swaps the current node with the next node" pending

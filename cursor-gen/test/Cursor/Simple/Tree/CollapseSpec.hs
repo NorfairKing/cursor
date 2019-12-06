@@ -17,19 +17,14 @@ import Cursor.Simple.Tree.Gen ()
 spec :: Spec
 spec = do
   describe "treeCursorOpenCurrentForest" $
-    it "produces valid cursors" $
-    producesValidsOnValids $ treeCursorOpenCurrentForest @Rational @Rational
+    it "produces valid cursors" $ producesValidsOnValids $ treeCursorOpenCurrentForest @Bool @Bool
   describe "treeCursorCloseCurrentForest" $
-    it "produces valid cursors" $
-    producesValidsOnValids $ treeCursorCloseCurrentForest @Rational @Rational
+    it "produces valid cursors" $ producesValidsOnValids $ treeCursorCloseCurrentForest @Bool @Bool
   describe "treeCursorToggleCurrentForest" $
-    it "produces valid cursors" $
-    producesValidsOnValids $ treeCursorToggleCurrentForest @Rational @Rational
+    it "produces valid cursors" $ producesValidsOnValids $ treeCursorToggleCurrentForest @Bool @Bool
   describe "treeCursorOpenCurrentForestRecursively" $
     it "produces valid cursors" $
-    producesValidsOnValids $
-    treeCursorOpenCurrentForestRecursively @Double @Double
+    producesValidsOnValids $ treeCursorOpenCurrentForestRecursively @Bool @Bool
   describe "treeCursorToggleCurrentForestRecursively" $
     it "produces valid cursors" $
-    producesValidsOnValids $
-    treeCursorToggleCurrentForestRecursively @Double @Double
+    producesValidsOnValids $ treeCursorToggleCurrentForestRecursively @Bool @Bool

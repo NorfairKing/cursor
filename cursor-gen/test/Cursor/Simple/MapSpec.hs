@@ -21,133 +21,100 @@ import Cursor.Simple.Map.Gen ()
 spec :: Spec
 spec = do
   describe "makeMapCursor" $
-    it "produces valid cursors" $
-    producesValidsOnValids (makeMapCursor @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (makeMapCursor @Bool @Bool)
   describe "makeMapCursorWithSelection" $
-    it "produces valid cursors" $
-    producesValidsOnValids2 (makeMapCursorWithSelection @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids2 (makeMapCursorWithSelection @Bool @Bool)
   describe "singletonMapCursorKey" $
     it "produces valid cursors" $
-    producesValidsOnValids2
-      (singletonMapCursorKey @Rational @Rational @Rational @Rational)
+    producesValidsOnValids2 (singletonMapCursorKey @Bool @Bool @Bool @Bool)
   describe "singletonMapCursorValue" $
     it "produces valid cursors" $
-    producesValidsOnValids2
-      (singletonMapCursorValue @Rational @Rational @Rational @Rational)
+    producesValidsOnValids2 (singletonMapCursorValue @Bool @Bool @Bool @Bool)
   describe "rebuildMapCursor" $ do
-    it "produces valid Nonempty lists" $
-      producesValidsOnValids (rebuildMapCursor @Rational @Rational)
+    it "produces valid Nonempty lists" $ producesValidsOnValids (rebuildMapCursor @Bool @Bool)
     it "is the inverse of makeMapCursor for integers" $
-      inverseFunctions (makeMapCursor @Int @Int) rebuildMapCursor
+      inverseFunctions (makeMapCursor @Bool @Bool) rebuildMapCursor
   describe "mapCursorNonEmptyCursorL" $
-    lensSpecOnValid
-      (mapCursorNonEmptyCursorL @Rational @Rational @Rational @Rational)
-  describe "mapCursorElemL" $
-    lensSpecOnValid (mapCursorElemL @Rational @Rational @Rational @Rational)
+    lensSpecOnValid (mapCursorNonEmptyCursorL @Bool @Bool @Bool @Bool)
+  describe "mapCursorElemL" $ lensSpecOnValid (mapCursorElemL @Bool @Bool @Bool @Bool)
   describe "mapCursorSelectKey" $
-    it "produces valid cursors" $
-    producesValidsOnValids (mapCursorSelectKey @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (mapCursorSelectKey @Bool @Bool)
   describe "mapCursorSelectValue" $
-    it "produces valid cursors" $
-    producesValidsOnValids (mapCursorSelectValue @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (mapCursorSelectValue @Bool @Bool)
   describe "mapCursorToggleSelected" $
-    it "produces valid cursors" $
-    producesValidsOnValids (mapCursorToggleSelected @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (mapCursorToggleSelected @Bool @Bool)
   describe "mapCursorSelectPrev" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (mapCursorSelectPrev @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (mapCursorSelectPrev @Bool @Bool)
     it "is a movement" $ isMovementM mapCursorSelectPrev
     it "selects the previous element" pending
   describe "mapCursorSelectNext" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (mapCursorSelectNext @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (mapCursorSelectNext @Bool @Bool)
     it "is a movement" $ isMovementM mapCursorSelectNext
     it "selects the next element" pending
   describe "mapCursorSelectFirst" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (mapCursorSelectFirst @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (mapCursorSelectFirst @Bool @Bool)
     it "is a movement" $ isMovement mapCursorSelectFirst
-    it "is idempotent" $
-      idempotentOnValid (mapCursorSelectFirst @Rational @Rational)
+    it "is idempotent" $ idempotentOnValid (mapCursorSelectFirst @Bool @Bool)
     it "selects the first element" pending
   describe "mapCursorSelectLast" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (mapCursorSelectLast @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (mapCursorSelectLast @Bool @Bool)
     it "is a movement" $ isMovement mapCursorSelectLast
-    it "is idempotent" $
-      idempotentOnValid (mapCursorSelectLast @Rational @Rational)
+    it "is idempotent" $ idempotentOnValid (mapCursorSelectLast @Bool @Bool)
     it "selects the last element" pending
   describe "mapCursorSelection" $ do
-    it "produces valid ints" $
-      producesValidsOnValids
-        (mapCursorSelection @Rational @Rational @Rational @Rational)
+    it "produces valid ints" $ producesValidsOnValids (mapCursorSelection @Bool @Bool @Bool @Bool)
     it "returns the index of the currently selected element" pending
   describe "mapCursorSelectIndex" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 (mapCursorSelectIndex @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids2 (mapCursorSelectIndex @Bool @Bool)
     it "is the identity function when given the current selection" $
       forAllValid $ \nec ->
         mapCursorSelectIndex (mapCursorSelection nec) nec `shouldBe`
-        Just (nec :: MapCursor Rational Rational)
+        Just (nec :: MapCursor Bool Bool)
     it "returns selects the element at the given index" pending
   describe "mapCursorInsert" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids3
-        (mapCursorInsert @Rational @Rational @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids3 (mapCursorInsert @Bool @Bool @Bool @Bool)
     it "inserts a character before the cursor" pending
   describe "mapCursorAppend" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids3
-        (mapCursorAppend @Rational @Rational @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids3 (mapCursorAppend @Bool @Bool @Bool @Bool)
     it "inserts a character after the cursor" pending
   describe "mapCursorInsertAndSelectKey" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids3 (mapCursorInsertAndSelectKey @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids3 (mapCursorInsertAndSelectKey @Bool @Bool)
   describe "mapCursorAppendAndSelectKey" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids3 (mapCursorAppendAndSelectKey @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids3 (mapCursorAppendAndSelectKey @Bool @Bool)
   describe "mapCursorInsertAndSelectValue" $ do
     it "produces valid cursors" $
-      producesValidsOnValids3
-        (mapCursorInsertAndSelectValue @Rational @Rational)
+      producesValidsOnValids3 (mapCursorInsertAndSelectValue @Bool @Bool)
   describe "mapCursorAppendAndSelectValue" $ do
     it "produces valid cursors" $
-      producesValidsOnValids3
-        (mapCursorAppendAndSelectValue @Rational @Rational)
+      producesValidsOnValids3 (mapCursorAppendAndSelectValue @Bool @Bool)
   describe "mapCursorRemoveElem" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (mapCursorRemoveElem @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (mapCursorRemoveElem @Bool @Bool)
     it "removes an element" pending
   describe "mapCursorDeleteElem" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids (mapCursorDeleteElem @Rational @Rational)
+    it "produces valid cursors" $ producesValidsOnValids (mapCursorDeleteElem @Bool @Bool)
     it "deletes an element" pending
   describe "mapCursorSearch" $ do
     it "produces valid cursors when looking for an equal pair" $
       forAllValid $ \(k, v) ->
-        producesValidsOnValids $
-        mapCursorSearch @Rational @Rational (\k_ v_ -> k_ == k && v_ == v)
-    it
-      "is indeed the right value when it finds a value and is looking for an equal element" $
+        producesValidsOnValids $ mapCursorSearch @Bool @Bool (\k_ v_ -> k_ == k && v_ == v)
+    it "is indeed the right value when it finds a value and is looking for an equal element" $
       forAllValid $ \(k, v) ->
         forAllValid $ \nec ->
           case mapCursorSearch (\k_ v_ -> k_ == k && v_ == v) nec of
             Nothing -> pure ()
-            Just e ->
-              rebuildKeyValueCursor (e ^. mapCursorElemL) `shouldBe`
-              (k :: Rational, v :: Rational)
+            Just e -> rebuildKeyValueCursor (e ^. mapCursorElemL) `shouldBe` (k :: Bool, v :: Bool)
   describe "mapCursorSelectOrAdd" $ do
     it "produces valid cursors when looking for an equal element" $
       forAllValid $ \(k, v) ->
         producesValidsOnValids $
         mapCursorSelectOrAdd
           (\k_ v_ -> k_ == k && v_ == v)
-          (makeKeyValueCursorKey (k :: Rational) (v :: Rational))
+          (makeKeyValueCursorKey (k :: Bool) (v :: Bool))
 
 isMovementM :: (forall k v. MapCursor k v -> Maybe (MapCursor k v)) -> Property
 isMovementM func =
   forAllValid $ \lec ->
-    case func (lec :: MapCursor Rational Rational) of
+    case func (lec :: MapCursor Bool Bool) of
       Nothing -> pure () -- Fine
       Just lec' ->
         let ne = rebuildMapCursor lec
@@ -164,5 +131,4 @@ isMovementM func =
 isMovement :: (forall k v. MapCursor k v -> MapCursor k v) -> Property
 isMovement func =
   forAllValid $ \lec ->
-    rebuildMapCursor (lec :: MapCursor Int Int) `shouldBe`
-    rebuildMapCursor (func lec)
+    rebuildMapCursor (lec :: MapCursor Bool Bool) `shouldBe` rebuildMapCursor (func lec)

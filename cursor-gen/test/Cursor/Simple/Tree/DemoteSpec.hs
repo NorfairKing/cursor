@@ -23,8 +23,7 @@ spec :: Spec
 spec = do
   functorSpec @DemoteResult
   describe "treeCursorDemoteElem" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorDemoteElem @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ treeCursorDemoteElem @Bool
     it "Works on the example from the docs" $
       let promoteStart =
             TreeCursor
@@ -61,12 +60,10 @@ spec = do
               }
        in case treeCursorDemoteElem promoteStart of
             Demoted tc' -> tc' `treeShouldBe` promoteEnd
-            _ ->
-              expectationFailure "treeCursorDemoteElem should not have failed"
+            _ -> expectationFailure "treeCursorDemoteElem should not have failed"
     it "demotes the current node to the level of its children" pending
   describe "treeCursorDemoteSubTree" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorDemoteSubTree @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ treeCursorDemoteSubTree @Bool
     it "Works on the example from the docs" $
       let promoteStart =
             TreeCursor
@@ -103,13 +100,10 @@ spec = do
               }
        in case treeCursorDemoteSubTree promoteStart of
             Demoted tc' -> tc' `treeShouldBe` promoteEnd
-            _ ->
-              expectationFailure
-                "treeCursorDemoteSubTree should not have failed"
+            _ -> expectationFailure "treeCursorDemoteSubTree should not have failed"
     it "demotes the current subtree to the level of its children" pending
   describe "treeCursorDemoteElemUnder" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids3 $ treeCursorDemoteElemUnder @Rational @Rational
+    it "produces valids on valids" $ producesValidsOnValids3 $ treeCursorDemoteElemUnder @Bool @Bool
     it "Works on the example from the docs" $
       forAllValid $ \b1 ->
         forAllValid $ \b2 ->
@@ -148,21 +142,16 @@ spec = do
                   }
            in case treeCursorDemoteElemUnder b1 b2 demoteStart of
                 Just tc' -> tc' `treeShouldBe` demoteEnd
-                _ ->
-                  expectationFailure
-                    "treeCursorDemoteElemUnder should not have failed"
+                _ -> expectationFailure "treeCursorDemoteElemUnder should not have failed"
     it "demotes the current node to the level of its children" pending
   describe "treeCursorDemoteSubTreeUnder" $ do
     it "produces valids on valids" $
-      producesValidsOnValids2 $ treeCursorDemoteSubTreeUnder @Rational @Rational
+      producesValidsOnValids2 $ treeCursorDemoteSubTreeUnder @Bool @Bool
     it "Works on the example from the docs" $
       forAllValid $ \v -> do
         let demoteStart =
               TreeCursor
-                { treeAbove = Nothing
-                , treeCurrent = 'a'
-                , treeBelow = closedForest [Node 'b' []]
-                }
+                {treeAbove = Nothing, treeCurrent = 'a', treeBelow = closedForest [Node 'b' []]}
             demoteEnd =
               TreeCursor
                 { treeAbove =
@@ -177,6 +166,4 @@ spec = do
                 , treeBelow = closedForest [Node 'b' []]
                 }
         treeCursorDemoteSubTreeUnder v demoteStart `treeShouldBe` demoteEnd
-    it
-      "demotes the current subtree to the level of its children, by adding a root"
-      pending
+    it "demotes the current subtree to the level of its children, by adding a root" pending

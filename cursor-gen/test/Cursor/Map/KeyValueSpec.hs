@@ -13,7 +13,7 @@ import Cursor.Map.KeyValue.Gen ()
 
 spec :: Spec
 spec = do
-  eqSpec @(KeyValueCursor Int Int Int Int)
-  genValidSpec @(KeyValueCursor Double Double Double Double)
+  eqSpec @(KeyValueCursor Bool Bool Bool Bool)
+  genValidSpec @(KeyValueCursor Bool Bool Bool Bool)
   eqSpec @KeyValueToggle
   genValidSpec @KeyValueToggle

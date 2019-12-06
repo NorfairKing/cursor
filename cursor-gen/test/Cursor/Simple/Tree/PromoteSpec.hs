@@ -32,8 +32,7 @@ spec = do
   applicativeSpec @PromoteElemResult
   monadSpec @PromoteElemResult
   describe "treeCursorPromoteElem" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorPromoteElem @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ treeCursorPromoteElem @Bool
     it "Works on the example from the docs" $
       let promoteStart =
             TreeCursor
@@ -64,10 +63,7 @@ spec = do
                           [ CNode 'a' $
                             openForest
                               [ CNode 'b' $
-                                openForest
-                                  [ CNode 'c' emptyCForest
-                                  , CNode 'e' emptyCForest
-                                  ]
+                                openForest [CNode 'c' emptyCForest, CNode 'e' emptyCForest]
                               , CNode 'f' $ closedForest [Node 'g' []]
                               ]
                           ]
@@ -80,23 +76,20 @@ spec = do
               }
        in case treeCursorPromoteElem promoteStart of
             PromotedElem tc' -> tc' `treeShouldBe` promoteEnd
-            _ ->
-              expectationFailure "treeCursorPromoteElem should not have failed"
+            _ -> expectationFailure "treeCursorPromoteElem should not have failed"
     it "promotes the current node to the level of its parent" pending
   functorSpec @PromoteResult
   applicativeSpec @PromoteResult
   monadSpec @PromoteResult
   describe "treeCursorPromoteSubTree" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorPromoteSubTree @Rational
+    it "produces valids on valids" $ producesValidsOnValids $ treeCursorPromoteSubTree @Bool
     it "Works on the example from the docs" $
       let promoteStart =
             TreeCursor
               { treeAbove =
                   Just
                     TreeAbove
-                      { treeAboveLefts =
-                          [CNode 'b' $ closedForest [Node 'c' []]]
+                      { treeAboveLefts = [CNode 'b' $ closedForest [Node 'c' []]]
                       , treeAboveAbove =
                           Just
                             TreeAbove
@@ -106,8 +99,7 @@ spec = do
                               , treeAboveRights = [node 'h' []]
                               }
                       , treeAboveNode = 'a'
-                      , treeAboveRights =
-                          [CNode 'f' $ closedForest [Node 'g' []]]
+                      , treeAboveRights = [CNode 'f' $ closedForest [Node 'g' []]]
                       }
               , treeCurrent = 'd'
               , treeBelow = closedForest [Node 'e' []]
@@ -133,7 +125,5 @@ spec = do
               }
        in case treeCursorPromoteSubTree promoteStart of
             Promoted tc' -> tc' `treeShouldBe` promoteEnd
-            _ ->
-              expectationFailure
-                "treeCursorPromoteSubTree should not have failed"
+            _ -> expectationFailure "treeCursorPromoteSubTree should not have failed"
     it "promotes the current subtree to the level of its parent" pending
