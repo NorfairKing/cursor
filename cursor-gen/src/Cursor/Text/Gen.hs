@@ -1,7 +1,9 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.Text.Gen
-  ( textCursorWithGen
+  ( genSafeChar
+  , genTextCursorChar
+  , textCursorWithGen
   , textCursorWithIndex0
   ) where
 
@@ -11,14 +13,21 @@ import Data.GenValidity
 import Data.GenValidity.Text ()
 
 import Cursor.Text
+import Cursor.Types
 
 import Cursor.List.Gen
 
 instance GenUnchecked TextCursor
 
 instance GenValid TextCursor where
-  genValid = genValidStructurally
+  genValid = TextCursor <$> listCursorWithGen genTextCursorChar
   shrinkValid = shrinkValidStructurally
+
+genSafeChar :: Gen Char
+genSafeChar = choose (minBound, maxBound) `suchThat` isSafeChar
+
+genTextCursorChar :: Gen Char
+genTextCursorChar = genSafeChar `suchThat` (/= '\n')
 
 textCursorWithGen :: Gen Char -> Gen TextCursor
 textCursorWithGen gen = TextCursor <$> listCursorWithGen gen
