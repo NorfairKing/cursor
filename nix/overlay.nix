@@ -4,7 +4,7 @@ final:
     {
       cursorPackages = 
             let cursorPkg = name:
-                (failOnAllWarnings (final.haskellPackages.callCabal2nix name (../. + "/${name}") {}));
+                (failOnAllWarnings (final.haskellPackages.callCabal2nix name (final.gitignoreSource (../. + "/${name}")) {}));
             in final.lib.genAttrs [
               "cursor"
               "cursor-gen"
