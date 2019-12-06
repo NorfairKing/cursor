@@ -57,6 +57,19 @@ packages:
     git: https://github.com/NorfairKing/validity.git
     commit: c5a6efb92d96941308f55220a6f42f399acb1951
 - completed:
+    subdir: genvalidity-criterion
+    name: genvalidity-criterion
+    version: 0.0.0.0
+    git: https://github.com/NorfairKing/validity.git
+    pantry-tree:
+      size: 283
+      sha256: b6fb165ebc3ab144e137672d9bf81e0faad59385198fbce34ae844f7620569cf
+    commit: c5a6efb92d96941308f55220a6f42f399acb1951
+  original:
+    subdir: genvalidity-criterion
+    git: https://github.com/NorfairKing/validity.git
+    commit: c5a6efb92d96941308f55220a6f42f399acb1951
+- completed:
     subdir: genvalidity-hspec
     name: genvalidity-hspec
     version: 0.7.0.2

@@ -33,6 +33,8 @@ import GHC.Generics (Generic)
 
 import Data.Validity
 
+import Control.DeepSeq
+
 import Cursor.Types
 
 data ListCursor a =
@@ -44,6 +46,8 @@ data ListCursor a =
 
 instance Validity a => Validity (ListCursor a)
 
+instance NFData a => NFData (ListCursor a)
+
 emptyListCursor :: ListCursor a
 emptyListCursor = ListCursor {listCursorPrev = [], listCursorNext = []}
 
@@ -54,10 +58,7 @@ makeListCursorWithSelection :: Int -> [a] -> Maybe (ListCursor a)
 makeListCursorWithSelection i as
   | i < 0 = Nothing
   | i > length as = Nothing
-  | otherwise =
-    Just
-      ListCursor
-        {listCursorPrev = reverse $ take i as, listCursorNext = drop i as}
+  | otherwise = Just ListCursor {listCursorPrev = reverse $ take i as, listCursorNext = drop i as}
 
 rebuildListCursor :: ListCursor a -> [a]
 rebuildListCursor ListCursor {..} = reverse listCursorPrev ++ listCursorNext
@@ -75,17 +76,13 @@ listCursorSelectPrev :: ListCursor a -> Maybe (ListCursor a)
 listCursorSelectPrev tc =
   case listCursorPrev tc of
     [] -> Nothing
-    (c:cs) ->
-      Just
-        ListCursor {listCursorPrev = cs, listCursorNext = c : listCursorNext tc}
+    (c:cs) -> Just ListCursor {listCursorPrev = cs, listCursorNext = c : listCursorNext tc}
 
 listCursorSelectNext :: ListCursor a -> Maybe (ListCursor a)
 listCursorSelectNext tc =
   case listCursorNext tc of
     [] -> Nothing
-    (c:cs) ->
-      Just
-        ListCursor {listCursorPrev = c : listCursorPrev tc, listCursorNext = cs}
+    (c:cs) -> Just ListCursor {listCursorPrev = c : listCursorPrev tc, listCursorNext = cs}
 
 listCursorSelectIndex :: Int -> ListCursor a -> ListCursor a
 listCursorSelectIndex ix_ lc =
@@ -149,13 +146,10 @@ listCursorSplit ListCursor {..} =
 listCursorCombine :: ListCursor a -> ListCursor a -> ListCursor a
 listCursorCombine lc1 lc2 =
   ListCursor
-    { listCursorPrev = reverse $ rebuildListCursor lc1
-    , listCursorNext = rebuildListCursor lc2
-    }
+    {listCursorPrev = reverse $ rebuildListCursor lc1, listCursorNext = rebuildListCursor lc2}
 
 traverseListCursor :: ([a] -> [a] -> f b) -> ListCursor a -> f b
 traverseListCursor = foldListCursor
 
 foldListCursor :: ([a] -> [a] -> b) -> ListCursor a -> b
-foldListCursor func ListCursor {..} =
-  func (reverse listCursorPrev) listCursorNext
+foldListCursor func ListCursor {..} = func (reverse listCursorPrev) listCursorNext

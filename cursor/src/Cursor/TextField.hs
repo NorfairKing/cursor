@@ -43,6 +43,7 @@ import Data.Maybe
 import qualified Data.Text as T
 import Data.Text (Text)
 
+import Control.DeepSeq
 import Control.Monad
 
 import Lens.Micro
@@ -65,6 +66,8 @@ instance Validity TextFieldCursor where
         decorateList (NE.toList $ rebuildNonEmptyCursor rebuildTextCursor textFieldCursorNonEmpty) $ \tc ->
           declare "The text of this line does not contain any newlines" $ T.all (/= '\n') tc
       ]
+
+instance NFData TextFieldCursor
 
 makeTextFieldCursor :: Text -> TextFieldCursor
 makeTextFieldCursor = fromJust . makeTextFieldCursorWithSelection 0 0

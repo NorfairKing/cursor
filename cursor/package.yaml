@@ -20,8 +20,9 @@ library:
   dependencies:
   - base  <5
   - containers
+  - deepseq
   - microlens
+  - text
   - validity >= 0.8.0.0
   - validity-containers
   - validity-text
-  - text

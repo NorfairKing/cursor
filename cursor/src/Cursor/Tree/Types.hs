@@ -31,13 +31,15 @@ module Cursor.Tree.Types
   , unpackCForest
   ) where
 
+import GHC.Generics (Generic)
+
 import Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NE
 import Data.Tree
 import Data.Validity
 import Data.Validity.Tree ()
 
-import GHC.Generics (Generic)
+import Control.DeepSeq
 
 import Lens.Micro
 
@@ -48,6 +50,10 @@ data TreeCursor a b =
     , treeBelow :: (CForest b)
     }
   deriving (Show, Eq, Generic)
+
+instance (Validity a, Validity b) => Validity (TreeCursor a b)
+
+instance (NFData a, NFData b) => NFData (TreeCursor a b)
 
 treeCursorAboveL :: Lens' (TreeCursor a b) (Maybe (TreeAbove b))
 treeCursorAboveL = lens treeAbove $ \tc ta -> tc {treeAbove = ta}
@@ -60,11 +66,7 @@ treeCursorBelowL = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
 
 treeCursorCurrentSubTreeL :: Lens' (TreeCursor a b) (a, CForest b)
 treeCursorCurrentSubTreeL =
-  lens
-    (\tc -> (treeCurrent tc, treeBelow tc))
-    (\tc (a, cf) -> tc {treeCurrent = a, treeBelow = cf})
-
-instance (Validity a, Validity b) => Validity (TreeCursor a b)
+  lens (\tc -> (treeCurrent tc, treeBelow tc)) (\tc (a, cf) -> tc {treeCurrent = a, treeBelow = cf})
 
 data TreeAbove b =
   TreeAbove
@@ -76,6 +78,8 @@ data TreeAbove b =
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity b => Validity (TreeAbove b)
+
+instance NFData b => NFData (TreeAbove b)
 
 treeAboveLeftsL :: Lens' (TreeAbove b) [CTree b]
 treeAboveLeftsL = lens treeAboveLefts $ \ta tal -> ta {treeAboveLefts = tal}
@@ -95,12 +99,14 @@ data TreeCursorSelection
   deriving (Show, Eq, Generic)
 
 instance Validity TreeCursorSelection
+instance NFData TreeCursorSelection
 
 data CTree a =
   CNode !a (CForest a)
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (CTree a)
+instance NFData a => NFData (CTree a)
 
 makeCTree :: Tree a -> CTree a
 makeCTree = cTree False
@@ -118,6 +124,7 @@ data CForest a
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (CForest a)
+instance NFData a => NFData (CForest a)
 
 makeCForest :: Forest a -> CForest a
 makeCForest = cForest True

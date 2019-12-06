@@ -32,6 +32,8 @@ import GHC.Generics (Generic)
 import qualified Data.Text as T
 import Data.Text (Text)
 
+import Control.DeepSeq
+
 import Lens.Micro
 
 import Cursor.List
@@ -54,6 +56,8 @@ instance Validity TextCursor where
             , declare "The character is a safe character" $ isSafeChar c
             ]
       ]
+
+instance NFData TextCursor
 
 emptyTextCursor :: TextCursor
 emptyTextCursor = TextCursor emptyListCursor
