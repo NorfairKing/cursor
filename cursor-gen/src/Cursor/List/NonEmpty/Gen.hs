@@ -2,7 +2,8 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.List.NonEmpty.Gen
-  ( nonEmptyElemOf
+  ( genNonEmptyCursorBy
+  , nonEmptyElemOf
   , nonEmptyWithIndex0
   , nonEmptyWith
   ) where
@@ -17,42 +18,29 @@ import qualified Data.List.NonEmpty as NE
 
 import Cursor.List.NonEmpty
 
-instance (GenUnchecked a, GenUnchecked b) =>
-         GenUnchecked (NonEmptyCursor a b) where
-  genUnchecked =
-    sized $ \n -> do
-      part <- arbPartition n
-      case part of
-        [] -> singletonNonEmptyCursor <$> resize 0 genUnchecked
-        (s:ss) -> do
-          i <- choose (0, length ss)
-          let (as, bs) = splitAt i ss
-          nonEmptyCursorPrev <- forM as $ \s_ -> resize s_ genUnchecked
-          nonEmptyCursorCurrent <- resize s genUnchecked
-          nonEmptyCursorNext <- forM bs $ \s_ -> resize s_ genUnchecked
-          pure NonEmptyCursor {..}
+instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (NonEmptyCursor a b) where
+  genUnchecked =genNonEmptyCursorBy genUnchecked genUnchecked
   shrinkUnchecked (NonEmptyCursor prev cur next) =
-    [ NonEmptyCursor prev' cur' next'
-    | (prev', cur', next') <- shrinkUnchecked (prev, cur, next)
-    ]
+    [NonEmptyCursor prev' cur' next' | (prev', cur', next') <- shrinkUnchecked (prev, cur, next)]
 
 instance (GenValid a, GenValid b) => GenValid (NonEmptyCursor a b) where
-  genValid =
-    sized $ \n -> do
-      part <- arbPartition n
-      case part of
-        [] -> singletonNonEmptyCursor <$> resize 0 genValid
-        (s:ss) -> do
-          i <- choose (0, length ss)
-          let (as, bs) = splitAt i ss
-          nonEmptyCursorPrev <- forM as $ \s_ -> resize s_ genValid
-          nonEmptyCursorCurrent <- resize s genValid
-          nonEmptyCursorNext <- forM bs $ \s_ -> resize s_ genValid
-          pure NonEmptyCursor {..}
+  genValid = genNonEmptyCursorBy genValid genValid
   shrinkValid (NonEmptyCursor prev cur next) =
-    [ NonEmptyCursor prev' cur' next'
-    | (prev', cur', next') <- shrinkValid (prev, cur, next)
-    ]
+    [NonEmptyCursor prev' cur' next' | (prev', cur', next') <- shrinkValid (prev, cur, next)]
+
+genNonEmptyCursorBy :: Gen a -> Gen b -> Gen (NonEmptyCursor a b)
+genNonEmptyCursorBy genA genB =
+  sized $ \n -> do
+    part <- arbPartition n
+    case part of
+      [] -> singletonNonEmptyCursor <$> resize 0 genA
+      (s:ss) -> do
+        i <- choose (0, length ss)
+        let (as, bs) = splitAt i ss
+        nonEmptyCursorPrev <- forM as $ \s_ -> resize s_ genB
+        nonEmptyCursorCurrent <- resize s genA
+        nonEmptyCursorNext <- forM bs $ \s_ -> resize s_ genB
+        pure NonEmptyCursor {..}
 
 nonEmptyElemOf :: NonEmptyCursor a a -> Gen a
 nonEmptyElemOf = elements . NE.toList . rebuildNonEmptyCursor id
