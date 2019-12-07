@@ -48,6 +48,8 @@ import Data.Validity.Tree ()
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe
 
+import Control.DeepSeq
+
 import Lens.Micro
 
 import Cursor.List.NonEmpty
@@ -61,6 +63,8 @@ newtype MapCursor kc vc k v =
   deriving (Show, Eq, Generic)
 
 instance (Validity kc, Validity vc, Validity k, Validity v) => Validity (MapCursor kc vc k v)
+
+instance (NFData kc, NFData vc, NFData k, NFData v) => NFData (MapCursor kc vc k v)
 
 makeMapCursor :: (k -> kc) -> NonEmpty (k, v) -> MapCursor kc vc k v
 makeMapCursor h = fromJust . makeMapCursorWithSelection h 0
