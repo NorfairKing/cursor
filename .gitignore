@@ -1,2 +1,4 @@
 .stack-work/
 result*
+.pre-commit-hooks/
+.pre-commit-config.yaml
