@@ -58,13 +58,13 @@ instance (NFData a, NFData b) => NFData (TreeCursor a b)
 treeCursorAboveL :: Lens' (TreeCursor a b) (Maybe (TreeAbove b))
 treeCursorAboveL = lens treeAbove $ \tc ta -> tc {treeAbove = ta}
 
-treeCursorCurrentL :: Lens' (TreeCursor a b) a
+treeCursorCurrentL :: Lens (TreeCursor a b) (TreeCursor a' b) a a'
 treeCursorCurrentL = lens treeCurrent $ \tc a -> tc {treeCurrent = a}
 
 treeCursorBelowL :: Lens' (TreeCursor a b) (CForest b)
 treeCursorBelowL = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
 
-treeCursorCurrentSubTreeL :: Lens' (TreeCursor a b) (a, CForest b)
+treeCursorCurrentSubTreeL :: Lens (TreeCursor a b)  (TreeCursor a' b) (a, CForest b)(a', CForest b)
 treeCursorCurrentSubTreeL =
   lens (\tc -> (treeCurrent tc, treeBelow tc)) (\tc (a, cf) -> tc {treeCurrent = a, treeBelow = cf})
 
