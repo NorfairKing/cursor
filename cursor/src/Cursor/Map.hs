@@ -48,8 +48,6 @@ import Data.Validity.Tree ()
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe
 
-import Control.DeepSeq
-
 import Lens.Micro
 
 import Cursor.List.NonEmpty
@@ -63,8 +61,6 @@ newtype MapCursor kc vc k v =
   deriving (Show, Eq, Generic)
 
 instance (Validity kc, Validity vc, Validity k, Validity v) => Validity (MapCursor kc vc k v)
-
-instance (NFData kc, NFData vc, NFData k, NFData v) => NFData (MapCursor kc vc k v)
 
 makeMapCursor :: (k -> kc) -> NonEmpty (k, v) -> MapCursor kc vc k v
 makeMapCursor h = fromJust . makeMapCursorWithSelection h 0
@@ -95,7 +91,8 @@ mapCursorNonEmptyCursorL ::
                                                                                                                                                   , w))
 mapCursorNonEmptyCursorL = lens mapCursorList $ \mc ne -> mc {mapCursorList = ne}
 
-mapCursorElemL :: Lens' (MapCursor kc vc k v) (KeyValueCursor kc vc k v)
+mapCursorElemL ::
+     Lens (MapCursor kc vc k v) (MapCursor kc' vc' k v) (KeyValueCursor kc vc k v) (KeyValueCursor kc' vc' k v)
 mapCursorElemL = mapCursorNonEmptyCursorL . nonEmptyCursorElemL
 
 mapCursorSelectKey :: (k -> kc) -> (vc -> v) -> MapCursor kc vc k v -> MapCursor kc vc k v
