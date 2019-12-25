@@ -3,8 +3,8 @@ packages:
 - cursor
 - cursor-gen
 extra-deps:
-- git: https://github.com/NorfairKing/validity.git
-  commit: c5a6efb92d96941308f55220a6f42f399acb1951
+- github: NorfairKing/validity
+  commit: a0fcd782138dac7200e6544c2f40208649ecb0e9
   subdirs:
   - genvalidity
   - genvalidity-aeson
@@ -37,6 +37,3 @@ extra-deps:
   - validity-unordered-containers
   - validity-uuid
   - validity-vector
-
-nix:
-  path: [ "nixpkgs=https://github.com/NixOS/nixpkgs/archive/886871538c15681575925a990a3f1b68ed9d5477.tar.gz" ]

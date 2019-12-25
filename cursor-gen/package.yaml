@@ -23,6 +23,7 @@ library:
   - cursor >=0.2
   - genvalidity >=0.8
   - genvalidity-containers
+  - genvalidity-text
   - genvalidity-text >=0.6
   - text
 
