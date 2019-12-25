@@ -3,7 +3,7 @@ packages:
 - cursor
 - cursor-gen
 extra-deps:
-- git: NorfairKing/validity
+- github: NorfairKing/validity
   commit: a0fcd782138dac7200e6544c2f40208649ecb0e9
   subdirs:
   - genvalidity
