@@ -1,5 +1,4 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DeriveFunctor #-}
 
@@ -49,23 +48,17 @@ import Cursor.Tree.Types
 treeCursorPromoteElem ::
      (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteElemResult (TreeCursor a b)
 treeCursorPromoteElem f g tc = do
-  ta <-
-    case treeAbove tc of
-      Nothing -> CannotPromoteTopElem
-      Just ta -> pure ta
+  ta <- maybe CannotPromoteTopElem pure $ treeAbove tc
     -- We need to put the below under the above lefts at the end
   lefts <-
-    case (treeBelow tc) of
+    case treeBelow tc of
       EmptyCForest -> pure $ treeAboveLefts ta
       _ ->
         case treeAboveLefts ta of
           [] -> NoSiblingsToAdoptChildren
           (CNode t ls:ts) ->
             pure $ CNode t (openForest $ unpackCForest ls ++ unpackCForest (treeBelow tc)) : ts
-  taa <-
-    case treeAboveAbove ta of
-      Nothing -> NoGrandparentToPromoteElemUnder
-      Just taa -> pure taa
+  taa <- maybe NoGrandparentToPromoteElemUnder pure $ treeAboveAbove ta
   pure $
     makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) emptyCForest) $
     Just $
@@ -131,14 +124,8 @@ instance Monad PromoteElemResult where
 -- >  |- h
 treeCursorPromoteSubTree :: (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteResult (TreeCursor a b)
 treeCursorPromoteSubTree f g tc = do
-  ta <-
-    case treeAbove tc of
-      Nothing -> CannotPromoteTopNode
-      Just ta -> pure ta
-  taa <-
-    case treeAboveAbove ta of
-      Nothing -> NoGrandparentToPromoteUnder
-      Just taa -> pure taa
+  ta <- maybe CannotPromoteTopNode pure $ treeAbove tc
+  taa <- maybe NoGrandparentToPromoteUnder pure $ treeAboveAbove ta
   pure $
     makeTreeCursorWithAbove g (currentTree f tc) $
     Just $
@@ -155,6 +142,7 @@ data PromoteResult a
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (PromoteResult a)
+
 instance NFData a => NFData (PromoteResult a)
 
 instance Applicative PromoteResult where

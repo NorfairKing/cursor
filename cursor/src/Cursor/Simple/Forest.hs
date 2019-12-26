@@ -1,7 +1,4 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.Simple.Forest
   ( ForestCursor
@@ -142,15 +139,11 @@ forestCursorSelectBelowAtEnd = FC.forestCursorSelectBelowAtEnd id id
 forestCursorSelectIndex :: Int -> ForestCursor a -> Maybe (ForestCursor a)
 forestCursorSelectIndex = FC.forestCursorSelectIndex id id
 
-forestCursorInsertAndSelectTreeCursor ::
-     TreeCursor a -> ForestCursor a -> ForestCursor a
-forestCursorInsertAndSelectTreeCursor =
-  FC.forestCursorInsertAndSelectTreeCursor id
+forestCursorInsertAndSelectTreeCursor :: TreeCursor a -> ForestCursor a -> ForestCursor a
+forestCursorInsertAndSelectTreeCursor = FC.forestCursorInsertAndSelectTreeCursor id
 
-forestCursorAppendAndSelectTreeCursor ::
-     TreeCursor a -> ForestCursor a -> ForestCursor a
-forestCursorAppendAndSelectTreeCursor =
-  FC.forestCursorAppendAndSelectTreeCursor id
+forestCursorAppendAndSelectTreeCursor :: TreeCursor a -> ForestCursor a -> ForestCursor a
+forestCursorAppendAndSelectTreeCursor = FC.forestCursorAppendAndSelectTreeCursor id
 
 forestCursorInsertAndSelectTree :: Tree a -> ForestCursor a -> ForestCursor a
 forestCursorInsertAndSelectTree = FC.forestCursorInsertAndSelectTree id id
@@ -164,12 +157,10 @@ forestCursorInsertAndSelect = FC.forestCursorInsertAndSelect id id
 forestCursorAppendAndSelect :: a -> ForestCursor a -> ForestCursor a
 forestCursorAppendAndSelect = FC.forestCursorAppendAndSelect id id
 
-forestCursorRemoveElemAndSelectPrev ::
-     ForestCursor a -> Maybe (DeleteOrUpdate (ForestCursor a))
+forestCursorRemoveElemAndSelectPrev :: ForestCursor a -> Maybe (DeleteOrUpdate (ForestCursor a))
 forestCursorRemoveElemAndSelectPrev = FC.forestCursorRemoveElemAndSelectPrev id
 
-forestCursorDeleteElemAndSelectNext ::
-     ForestCursor a -> Maybe (DeleteOrUpdate (ForestCursor a))
+forestCursorDeleteElemAndSelectNext :: ForestCursor a -> Maybe (DeleteOrUpdate (ForestCursor a))
 forestCursorDeleteElemAndSelectNext = FC.forestCursorDeleteElemAndSelectNext id
 
 forestCursorRemoveElem :: ForestCursor a -> DeleteOrUpdate (ForestCursor a)
@@ -178,15 +169,11 @@ forestCursorRemoveElem = FC.forestCursorRemoveElem id
 forestCursorDeleteElem :: ForestCursor a -> DeleteOrUpdate (ForestCursor a)
 forestCursorDeleteElem = FC.forestCursorDeleteElem id
 
-forestCursorRemoveSubTreeAndSelectPrev ::
-     ForestCursor a -> Maybe (DeleteOrUpdate (ForestCursor a))
-forestCursorRemoveSubTreeAndSelectPrev =
-  FC.forestCursorRemoveSubTreeAndSelectPrev id
+forestCursorRemoveSubTreeAndSelectPrev :: ForestCursor a -> Maybe (DeleteOrUpdate (ForestCursor a))
+forestCursorRemoveSubTreeAndSelectPrev = FC.forestCursorRemoveSubTreeAndSelectPrev id
 
-forestCursorDeleteSubTreeAndSelectNext ::
-     ForestCursor a -> Maybe (DeleteOrUpdate (ForestCursor a))
-forestCursorDeleteSubTreeAndSelectNext =
-  FC.forestCursorDeleteSubTreeAndSelectNext id
+forestCursorDeleteSubTreeAndSelectNext :: ForestCursor a -> Maybe (DeleteOrUpdate (ForestCursor a))
+forestCursorDeleteSubTreeAndSelectNext = FC.forestCursorDeleteSubTreeAndSelectNext id
 
 forestCursorRemoveSubTree :: ForestCursor a -> DeleteOrUpdate (ForestCursor a)
 forestCursorRemoveSubTree = FC.forestCursorRemoveSubTree id

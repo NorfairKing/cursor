@@ -122,7 +122,7 @@ moveMWhileKeepingSelection ::
 moveMWhileKeepingSelection movement tfc = do
   let i = textFieldCursorIndexOnLine tfc
   let tfc' = textFieldCursorSelectIndexOnLine 0 tfc
-  tfc'' <- textFieldCursorNonEmptyCursorL movement $ tfc'
+  tfc'' <- textFieldCursorNonEmptyCursorL movement tfc'
   pure $ textFieldCursorSelectIndexOnLine i tfc''
 
 textFieldCursorSelectFirstLine :: TextFieldCursor -> TextFieldCursor
@@ -165,7 +165,7 @@ textFieldCursorInsertChar c mtfc =
     _
       | isSafeChar c ->
         Just $
-        (fromMaybe emptyTextFieldCursor mtfc) &
+        fromMaybe emptyTextFieldCursor mtfc &
         textFieldCursorSelectedL %~ (fromJust . textCursorInsert c)
       | otherwise -> Nothing
 
@@ -179,7 +179,7 @@ textFieldCursorAppendChar c mtfc =
     _
       | isSafeChar c ->
         Just $
-        (fromMaybe emptyTextFieldCursor mtfc) &
+        fromMaybe emptyTextFieldCursor mtfc &
         textFieldCursorSelectedL %~ (fromJust . textCursorAppend c)
       | otherwise -> Nothing
 

@@ -77,16 +77,16 @@ spec = do
   describe "mapCursorAppend" $ do
     it "produces valid cursors" $ producesValidsOnValids3 (mapCursorAppend @Bool @Bool @Bool @Bool)
     it "inserts a character after the cursor" pending
-  describe "mapCursorInsertAndSelectKey" $ do
+  describe "mapCursorInsertAndSelectKey" $
     it "produces valid cursors" $ producesValidsOnValids3 (mapCursorInsertAndSelectKey @Bool @Bool)
-  describe "mapCursorAppendAndSelectKey" $ do
+  describe "mapCursorAppendAndSelectKey" $
     it "produces valid cursors" $ producesValidsOnValids3 (mapCursorAppendAndSelectKey @Bool @Bool)
-  describe "mapCursorInsertAndSelectValue" $ do
+  describe "mapCursorInsertAndSelectValue" $
     it "produces valid cursors" $
-      producesValidsOnValids3 (mapCursorInsertAndSelectValue @Bool @Bool)
-  describe "mapCursorAppendAndSelectValue" $ do
+    producesValidsOnValids3 (mapCursorInsertAndSelectValue @Bool @Bool)
+  describe "mapCursorAppendAndSelectValue" $
     it "produces valid cursors" $
-      producesValidsOnValids3 (mapCursorAppendAndSelectValue @Bool @Bool)
+    producesValidsOnValids3 (mapCursorAppendAndSelectValue @Bool @Bool)
   describe "mapCursorRemoveElem" $ do
     it "produces valid cursors" $ producesValidsOnValids (mapCursorRemoveElem @Bool @Bool)
     it "removes an element" pending
@@ -103,13 +103,13 @@ spec = do
           case mapCursorSearch (\k_ v_ -> k_ == k && v_ == v) nec of
             Nothing -> pure ()
             Just e -> rebuildKeyValueCursor (e ^. mapCursorElemL) `shouldBe` (k :: Bool, v :: Bool)
-  describe "mapCursorSelectOrAdd" $ do
+  describe "mapCursorSelectOrAdd" $
     it "produces valid cursors when looking for an equal element" $
-      forAllValid $ \(k, v) ->
-        producesValidsOnValids $
-        mapCursorSelectOrAdd
-          (\k_ v_ -> k_ == k && v_ == v)
-          (makeKeyValueCursorKey (k :: Bool) (v :: Bool))
+    forAllValid $ \(k, v) ->
+      producesValidsOnValids $
+      mapCursorSelectOrAdd
+        (\k_ v_ -> k_ == k && v_ == v)
+        (makeKeyValueCursorKey (k :: Bool) (v :: Bool))
 
 isMovementM :: (forall k v. MapCursor k v -> Maybe (MapCursor k v)) -> Property
 isMovementM func =

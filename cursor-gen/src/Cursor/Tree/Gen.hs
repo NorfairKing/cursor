@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -66,10 +66,9 @@ instance GenValid a => GenValid (CTree a) where
 
 instance GenUnchecked a => GenUnchecked (CForest a) where
   genUnchecked =
-    sized $ \n ->
-      case n of
-        0 -> pure EmptyCForest
-        _ -> oneof [ClosedForest <$> genUnchecked, OpenForest <$>  genUnchecked]
+    sized $ \case
+      0 -> pure EmptyCForest
+      _ -> oneof [ClosedForest <$> genUnchecked, OpenForest <$> genUnchecked]
   shrinkUnchecked EmptyCForest = []
   shrinkUnchecked (ClosedForest ne) = EmptyCForest : (ClosedForest <$> shrinkUnchecked ne)
   shrinkUnchecked (OpenForest ne) =
@@ -77,10 +76,9 @@ instance GenUnchecked a => GenUnchecked (CForest a) where
 
 instance GenValid a => GenValid (CForest a) where
   genValid =
-    sized $ \n ->
-      case n of
-        0 -> pure EmptyCForest
-        _ -> oneof [ClosedForest <$> genValid, OpenForest <$> genValid]
+    sized $ \case
+      0 -> pure EmptyCForest
+      _ -> oneof [ClosedForest <$> genValid, OpenForest <$> genValid]
   shrinkValid EmptyCForest = []
   shrinkValid (ClosedForest ne) = EmptyCForest : (ClosedForest <$> shrinkValid ne)
   shrinkValid (OpenForest ne) =

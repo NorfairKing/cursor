@@ -46,14 +46,14 @@ spec = do
   describe "treeCursorSelectPrevOnSameLevel" $ do
     testMovementM treeCursorSelectPrevOnSameLevel
     it "selects the previous element" pending
-    it "after treeCursorSelectNextOnSameLevel is identity if they don't fail" $ do
+    it "after treeCursorSelectNextOnSameLevel is identity if they don't fail" $
       inverseFunctionsIfSucceedOnValid
         (treeCursorSelectNextOnSameLevel @Bool)
         (treeCursorSelectPrevOnSameLevel @Bool)
   describe "treeCursorSelectNextOnSameLevel" $ do
     testMovementM treeCursorSelectNextOnSameLevel
     it "selects the next element" pending
-    it "after treeCursorSelectPrevOnSameLevel is identity if they don't fail" $ do
+    it "after treeCursorSelectPrevOnSameLevel is identity if they don't fail" $
       inverseFunctionsIfSucceedOnValid
         (treeCursorSelectPrevOnSameLevel @Bool)
         (treeCursorSelectNextOnSameLevel @Bool)
@@ -111,7 +111,7 @@ spec = do
         Nothing -> expectationFailure "treeCursorSelectAbovePrev should not have failed"
         Just r -> r `treeShouldBe` expected
     it "selects the previous element" pending
-    it "after treeCursorSelectAboveNext is identity if they don't fail" $ do
+    it "after treeCursorSelectAboveNext is identity if they don't fail" $
       forAllValid $ \tc ->
         case treeCursorSelectAboveNext @Bool tc of
           Nothing -> pure ()
@@ -186,7 +186,7 @@ spec = do
         Nothing -> expectationFailure "treeCursorSelectAboveNext should not have failed."
         Just r -> r `treeShouldBe` expected
     it "selects the next element" pending
-    it "after treeCursorSelectAbovePrev is identity if they don't fail" $ do
+    it "after treeCursorSelectAbovePrev is identity if they don't fail" $
       forAllValid $ \tc ->
         case treeCursorSelectAbovePrev @Bool tc of
           Nothing -> pure ()
@@ -210,12 +210,12 @@ spec = do
   describe "treeCursorSelectPrev" $ do
     testMovementM treeCursorSelectPrev
     it "selects the previous element" pending
-    it "after treeCursorSelectNext is identity if they don't fail" $ do
+    it "after treeCursorSelectNext is identity if they don't fail" $
       inverseFunctionsIfSucceedOnValid (treeCursorSelectNext @Bool) (treeCursorSelectPrev @Bool)
   describe "treeCursorSelectNext" $ do
     testMovementM treeCursorSelectNext
     it "selects the next element" pending
-    it "after treeCursorSelectPrev is identity if they don't fail" $ do
+    it "after treeCursorSelectPrev is identity if they don't fail" $
       inverseFunctionsIfSucceedOnValid (treeCursorSelectPrev @Bool) (treeCursorSelectNext @Bool)
   describe "treeCursorSelectFirst" $ do
     testMovement treeCursorSelectFirst
@@ -228,9 +228,9 @@ spec = do
   describe "treeCursorSelectAbove" $ do
     testMovementM treeCursorSelectAbove
     it "selects the element above" pending
-    it "after treeCursorSelectBelow is identity if they don't fail" $ do
+    it "after treeCursorSelectBelow is identity if they don't fail" $
       inverseFunctionsIfSucceedOnValid (treeCursorSelectBelowAtStart @Bool) $
-        treeCursorSelectAbove @Bool
+      treeCursorSelectAbove @Bool
   describe "treeCursorSelectBelowAtPos" $ do
     it "produces valids on valids" $ producesValidsOnValids2 $ treeCursorSelectBelowAtPos @Bool
     it "is a movement" $ forAllValid $ \n -> isMovementM $ treeCursorSelectBelowAtPos n

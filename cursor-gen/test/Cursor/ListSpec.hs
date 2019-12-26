@@ -68,16 +68,16 @@ spec = do
     it "selects the end position" pending
   describe "listCursorInsert" $ do
     it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (listCursorInsert @Bool d)
-    it "inserts an item before the cursor" $ pending
+    it "inserts an item before the cursor" pending
   describe "listCursorAppend" $ do
     it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (listCursorAppend @Bool d)
-    it "inserts an item after the cursor" $ pending
+    it "inserts an item after the cursor" pending
   describe "listCursorRemove" $ do
     it "produces valids" $ validIfSucceedsOnValid (listCursorRemove @Bool)
-    it "removes an item before the cursor" $ pending
+    it "removes an item before the cursor" pending
   describe "listCursorDelete" $ do
     it "produces valids" $ validIfSucceedsOnValid (listCursorDelete @Bool)
-    it "removes an item before the cursor" $ pending
+    it "removes an item before the cursor" pending
   describe "listCursorSplit" $ do
     it "produces valids" $ producesValidsOnValids (listCursorSplit @Bool)
     it "produces two list cursors that rebuild to the rebuilding of the original" $

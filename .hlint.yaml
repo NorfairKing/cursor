@@ -1,0 +1,4 @@
+- ignore:
+    name: "Replace case with maybe"
+- ignore:
+    name: "Use bimap"

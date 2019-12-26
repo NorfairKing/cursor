@@ -1,5 +1,4 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DeriveFunctor #-}
 
@@ -33,7 +32,7 @@ import Cursor.Tree.Types
 -- > |- b <--
 -- > |- a
 treeCursorSwapPrev :: TreeCursor a b -> SwapResult (TreeCursor a b)
-treeCursorSwapPrev tc = do
+treeCursorSwapPrev tc =
   case treeAbove tc of
     Nothing -> SwapperIsTopNode
     Just ta ->

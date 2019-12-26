@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
@@ -107,7 +106,7 @@ spec = do
   describe "nonEmptyCursorRemoveElem" $ do
     it "produces valid cursors" $ producesValidsOnValids (nonEmptyCursorRemoveElem @Bool)
     it "removes an element" pending
-  describe "nonEmptyCursorDeleteElem" $ do
+  describe "nonEmptyCursorDeleteElem" $
     it "produces valid cursors" $ producesValidsOnValids (nonEmptyCursorDeleteElem @Bool)
   describe "nonEmptyCursorSearch" $ do
     it "produces valid cursors when looking for an equal element" $
@@ -124,9 +123,9 @@ spec = do
           case nonEmptyCursorSearch (== (a :: Bool)) nec of
             Nothing -> expectationFailure "Should not have failed to find the element."
             Just e -> nonEmptyCursorCurrent e `shouldBe` a
-  describe "nonEmptyCursorSelectOrAdd" $ do
+  describe "nonEmptyCursorSelectOrAdd" $
     it "produces valid cursors when looking for an equal element" $
-      forAllValid $ \a -> producesValidsOnValids $ nonEmptyCursorSelectOrAdd (== a) (a :: Bool)
+    forAllValid $ \a -> producesValidsOnValids $ nonEmptyCursorSelectOrAdd (== a) (a :: Bool)
 
 isMovementM :: (forall a. NonEmptyCursor a -> Maybe (NonEmptyCursor a)) -> Property
 isMovementM func =

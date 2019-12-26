@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.Forest
   ( ForestCursor(..)
@@ -116,9 +115,9 @@ rebuildForestCursor f = rebuildNonEmptyCursor (rebuildTreeCursor f) . forestCurs
 drawForestCursor :: (Show a, Show b) => ForestCursor a b -> String
 drawForestCursor ForestCursor {..} =
   drawForest $
-  (map showCTree $ reverse $ nonEmptyCursorPrev forestCursorListCursor) ++
+  map showCTree (reverse $ nonEmptyCursorPrev forestCursorListCursor) ++
   [treeCursorWithPointer $ nonEmptyCursorCurrent forestCursorListCursor] ++
-  (map showCTree $ nonEmptyCursorNext forestCursorListCursor)
+  map showCTree (nonEmptyCursorNext forestCursorListCursor)
 
 mapForestCursor :: (a -> c) -> (b -> d) -> ForestCursor a b -> ForestCursor c d
 mapForestCursor f g = forestCursorListCursorL %~ mapNonEmptyCursor (mapTreeCursor f g) (fmap g)
@@ -142,11 +141,11 @@ forestCursorSelectNextTreeCursor f g =
 
 forestCursorSelectFirstTreeCursor :: (a -> b) -> (b -> a) -> ForestCursor a b -> ForestCursor a b
 forestCursorSelectFirstTreeCursor f g =
-  forestCursorListCursorL %~ (nonEmptyCursorSelectFirst (rebuildTreeCursor f) (makeTreeCursor g))
+  forestCursorListCursorL %~ nonEmptyCursorSelectFirst (rebuildTreeCursor f) (makeTreeCursor g)
 
 forestCursorSelectLastTreeCursor :: (a -> b) -> (b -> a) -> ForestCursor a b -> ForestCursor a b
 forestCursorSelectLastTreeCursor f g =
-  forestCursorListCursorL %~ (nonEmptyCursorSelectLast (rebuildTreeCursor f) (makeTreeCursor g))
+  forestCursorListCursorL %~ nonEmptyCursorSelectLast (rebuildTreeCursor f) (makeTreeCursor g)
 
 forestCursorSelectNext :: (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
 forestCursorSelectNext f g fc =
@@ -158,7 +157,7 @@ forestCursorSelectPrev f g fc =
   (fc & forestCursorSelectedTreeL (treeCursorSelectPrev f g)) <|>
   (forestCursorSelectPrevTreeCursor f g fc >>=
    forestCursorSelectedTreeL (treeCursorSelectBelowAtEndRecursively f g)) <|>
-  (forestCursorSelectPrevTreeCursor f g fc)
+  forestCursorSelectPrevTreeCursor f g fc
 
 forestCursorSelectNextOnSameLevel ::
      (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
@@ -301,27 +300,27 @@ forestCursorAddChildToNodeAtEnd b = forestCursorAddChildTreeToNodeAtEnd $ Node b
 forestCursorRemoveElemAndSelectPrev ::
      (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
 forestCursorRemoveElemAndSelectPrev g fc =
-  case (fc &
-        focusPossibleDeleteOrUpdate
-          forestCursorSelectedTreeL
-          (treeCursorDeleteElemAndSelectPrevious g)) of
-    Just Deleted ->
-      (fc &
+  case fc &
        focusPossibleDeleteOrUpdate
-         forestCursorListCursorL
-         (nonEmptyCursorRemoveElemAndSelectPrev (makeTreeCursor g)))
+         forestCursorSelectedTreeL
+         (treeCursorDeleteElemAndSelectPrevious g) of
+    Just Deleted ->
+      fc &
+      focusPossibleDeleteOrUpdate
+        forestCursorListCursorL
+        (nonEmptyCursorRemoveElemAndSelectPrev (makeTreeCursor g))
     r -> r
 
 forestCursorDeleteElemAndSelectNext ::
      (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))
 forestCursorDeleteElemAndSelectNext g fc =
-  case (fc &
-        focusPossibleDeleteOrUpdate forestCursorSelectedTreeL (treeCursorDeleteElemAndSelectNext g)) of
+  case fc &
+       focusPossibleDeleteOrUpdate forestCursorSelectedTreeL (treeCursorDeleteElemAndSelectNext g) of
     Just Deleted ->
-      (fc &
-       focusPossibleDeleteOrUpdate
-         forestCursorListCursorL
-         (nonEmptyCursorDeleteElemAndSelectNext (makeTreeCursor g)))
+      fc &
+      focusPossibleDeleteOrUpdate
+        forestCursorListCursorL
+        (nonEmptyCursorDeleteElemAndSelectNext (makeTreeCursor g))
     r -> r
 
 forestCursorRemoveElem :: (b -> a) -> ForestCursor a b -> DeleteOrUpdate (ForestCursor a b)
@@ -457,7 +456,7 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
       let tc = fc ^. forestCursorSelectedTreeL
       ta <- treeAbove tc
       lefts <-
-        case (treeBelow tc) of
+        case treeBelow tc of
           EmptyCForest -> pure $ treeAboveLefts ta
           _ ->
             case treeAboveLefts ta of
@@ -541,7 +540,7 @@ forestCursorPromoteSubTree f g fc@(ForestCursor ne) =
 -- > - e
 forestCursorDemoteElem :: (a -> b) -> (b -> a) -> ForestCursor a b -> Maybe (ForestCursor a b)
 forestCursorDemoteElem f g fc@(ForestCursor ne) =
-  case (fc & forestCursorSelectedTreeL (treeCursorDemoteElem f g)) of
+  case fc & forestCursorSelectedTreeL (treeCursorDemoteElem f g) of
     Demoted fc' -> pure fc'
     CannotDemoteTopNode ->
       case nonEmptyCursorPrev ne of
@@ -550,7 +549,7 @@ forestCursorDemoteElem f g fc@(ForestCursor ne) =
           let CNode v' vts' = rebuildTreeCursor f (fc ^. forestCursorSelectedTreeL)
           let n' =
                 CNode v $
-                openForest $ unpackCForest vts ++ (CNode v' emptyCForest) : unpackCForest vts'
+                openForest $ unpackCForest vts ++ CNode v' emptyCForest : unpackCForest vts'
           tc <- makeTreeCursorWithSelection f g (SelectChild (lengthCForest vts) SelectNode) n'
           pure $ ForestCursor ne {nonEmptyCursorPrev = ts, nonEmptyCursorCurrent = tc}
     NoSiblingsToDemoteUnder -> Nothing

@@ -82,16 +82,16 @@ spec = do
     it "returns the item after the position" pending
   describe "textCursorInsert" $ do
     it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorInsert d)
-    it "inserts an item before the cursor" $ pending
+    it "inserts an item before the cursor" pending
   describe "textCursorAppend" $ do
     it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorAppend d)
-    it "inserts an item after the cursor" $ pending
+    it "inserts an item after the cursor" pending
   describe "textCursorRemove" $ do
     it "produces valids" $ validIfSucceedsOnValid textCursorRemove
-    it "removes an item before the cursor" $ pending
+    it "removes an item before the cursor" pending
   describe "textCursorDelete" $ do
     it "produces valids" $ validIfSucceedsOnValid textCursorDelete
-    it "removes an item before the cursor" $ pending
+    it "removes an item before the cursor" pending
   describe "textCursorSplit" $ do
     it "produces valids" $ producesValidsOnValids textCursorSplit
     it "produces two list cursors that rebuild to the rebuilding of the original" $

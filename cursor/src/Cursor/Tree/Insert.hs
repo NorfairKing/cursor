@@ -1,7 +1,5 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.Tree.Insert
   ( treeCursorInsert
@@ -30,8 +28,7 @@ treeCursorInsertAndSelect ::
      (a -> b) -> (b -> a) -> Tree b -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorInsertAndSelect f g tree tc@TreeCursor {..} = do
   ta <- treeAbove
-  let newTreeAbove =
-        ta {treeAboveRights = currentTree f tc : treeAboveRights ta}
+  let newTreeAbove = ta {treeAboveRights = currentTree f tc : treeAboveRights ta}
   pure $ makeTreeCursorWithAbove g (makeCTree tree) $ Just newTreeAbove
 
 treeCursorAppend :: Tree b -> TreeCursor a b -> Maybe (TreeCursor a b)
@@ -70,6 +67,5 @@ treeCursorAddChildAtEnd :: Tree b -> TreeCursor a b -> TreeCursor a b
 treeCursorAddChildAtEnd t tc =
   case treeBelow tc of
     EmptyCForest -> tc {treeBelow = openForest [makeCTree t]}
-    ClosedForest ts ->
-      tc {treeBelow = openForest $ map makeCTree $ NE.toList ts ++ [t]}
+    ClosedForest ts -> tc {treeBelow = openForest $ map makeCTree $ NE.toList ts ++ [t]}
     OpenForest ts -> tc {treeBelow = openForest $ NE.toList ts ++ [makeCTree t]}

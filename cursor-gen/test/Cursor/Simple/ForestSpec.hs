@@ -89,7 +89,7 @@ movementsSpec = do
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 1 $ openForest [CNode 2 $ emptyCForest]]
+                    { nonEmptyCursorPrev = [CNode 1 $ openForest [CNode 2 emptyCForest]]
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           {treeAbove = Nothing, treeCurrent = 3 :: Int, treeBelow = emptyCForest}
@@ -114,7 +114,7 @@ movementsSpec = do
                           , treeCurrent = 2
                           , treeBelow = emptyCForest
                           }
-                    , nonEmptyCursorNext = [CNode 3 $ emptyCForest]
+                    , nonEmptyCursorNext = [CNode 3 emptyCForest]
                     }
               }
       case forestCursorSelectPrev start of
@@ -147,14 +147,14 @@ movementsSpec = do
                           , treeCurrent = 2
                           , treeBelow = emptyCForest
                           }
-                    , nonEmptyCursorNext = [CNode 3 $ emptyCForest]
+                    , nonEmptyCursorNext = [CNode 3 emptyCForest]
                     }
               }
           expected =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 1 $ openForest [CNode 2 $ emptyCForest]]
+                    { nonEmptyCursorPrev = [CNode 1 $ openForest [CNode 2 emptyCForest]]
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           {treeAbove = Nothing, treeCurrent = 3 :: Int, treeBelow = emptyCForest}
@@ -292,7 +292,7 @@ swapSpec = do
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 'a' $ emptyCForest]
+                    { nonEmptyCursorPrev = [CNode 'a' emptyCForest]
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           {treeAbove = Nothing, treeCurrent = 'b', treeBelow = emptyCForest}
@@ -307,7 +307,7 @@ swapSpec = do
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           {treeAbove = Nothing, treeCurrent = 'b', treeBelow = emptyCForest}
-                    , nonEmptyCursorNext = [CNode 'a' $ emptyCForest]
+                    , nonEmptyCursorNext = [CNode 'a' emptyCForest]
                     }
               }
        in case forestCursorSwapPrev start of
@@ -329,14 +329,14 @@ swapSpec = do
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           {treeAbove = Nothing, treeCurrent = 'a', treeBelow = emptyCForest}
-                    , nonEmptyCursorNext = [CNode 'b' $ emptyCForest]
+                    , nonEmptyCursorNext = [CNode 'b' emptyCForest]
                     }
               }
           end =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 'b' $ emptyCForest]
+                    { nonEmptyCursorPrev = [CNode 'b' emptyCForest]
                     , nonEmptyCursorCurrent =
                         TreeCursor
                           {treeAbove = Nothing, treeCurrent = 'a', treeBelow = emptyCForest}
@@ -535,7 +535,7 @@ shiftingSpec = do
                           , treeCurrent = 'd'
                           , treeBelow = closedForest [Node 'e' []]
                           }
-                    , nonEmptyCursorNext = [CNode 'h' $ emptyCForest]
+                    , nonEmptyCursorNext = [CNode 'h' emptyCForest]
                     }
               }
           expected =
@@ -587,15 +587,15 @@ shiftingSpec = do
                           { treeAbove =
                               Just
                                 TreeAbove
-                                  { treeAboveLefts = [CNode 'b' $ emptyCForest]
+                                  { treeAboveLefts = [CNode 'b' emptyCForest]
                                   , treeAboveAbove = Nothing
                                   , treeAboveNode = 'a'
-                                  , treeAboveRights = [CNode 'd' $ emptyCForest]
+                                  , treeAboveRights = [CNode 'd' emptyCForest]
                                   }
                           , treeCurrent = 'c'
                           , treeBelow = emptyCForest
                           }
-                    , nonEmptyCursorNext = [CNode 'e' $ emptyCForest]
+                    , nonEmptyCursorNext = [CNode 'e' emptyCForest]
                     }
               }
        in case forestCursorDemoteElem start of

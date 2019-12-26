@@ -17,8 +17,8 @@ instance GenValid TextFieldCursor where
   genValid =
     sized $ \n -> do
       (a, b, c) <- genSplit3 n
-      prevs <- resize a$  genListOf $ genTextBy genTextCursorChar
-      nexts <- resize b$  genListOf $ genTextBy genTextCursorChar
+      prevs <- resize a $ genListOf $ genTextBy genTextCursorChar
+      nexts <- resize b $ genListOf $ genTextBy genTextCursorChar
       cur <- resize c $ textCursorWithGen genTextCursorChar
       let nec = NonEmptyCursor prevs cur nexts
       pure $ TextFieldCursor nec

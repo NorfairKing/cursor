@@ -19,7 +19,7 @@ import qualified Data.List.NonEmpty as NE
 import Cursor.List.NonEmpty
 
 instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (NonEmptyCursor a b) where
-  genUnchecked =genNonEmptyCursorBy genUnchecked genUnchecked
+  genUnchecked = genNonEmptyCursorBy genUnchecked genUnchecked
   shrinkUnchecked (NonEmptyCursor prev cur next) =
     [NonEmptyCursor prev' cur' next' | (prev', cur', next') <- shrinkUnchecked (prev, cur, next)]
 

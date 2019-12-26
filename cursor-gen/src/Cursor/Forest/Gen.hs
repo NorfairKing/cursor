@@ -1,4 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.Forest.Gen
@@ -13,8 +12,7 @@ import Cursor.Forest
 import Cursor.List.NonEmpty.Gen ()
 import Cursor.Tree.Gen ()
 
-instance (GenUnchecked a, GenUnchecked b) =>
-         GenUnchecked (ForestCursor a b) where
+instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (ForestCursor a b) where
   genUnchecked = ForestCursor <$> genUnchecked
   shrinkUnchecked (ForestCursor ne) = ForestCursor <$> shrinkUnchecked ne
 

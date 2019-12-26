@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
@@ -143,7 +142,7 @@ spec = do
   describe "textFieldCursorInsertNewline" $ do
     it "produces valid cursors" $ producesValidsOnValids textFieldCursorInsertNewline
     it "inserts a new line" pending
-  describe "textFieldCursorAppendNewline" $ do
+  describe "textFieldCursorAppendNewline" $
     it "produces valid cursors" $ producesValidsOnValids textFieldCursorAppendNewline
   describe "textFieldCursorRemove" $ do
     it "produces valid cursors" $ producesValidsOnValids textFieldCursorRemove

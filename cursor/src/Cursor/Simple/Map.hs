@@ -1,7 +1,4 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Simple.Map
@@ -95,12 +92,10 @@ mapCursorInsertAndSelectValue = MC.mapCursorInsertAndSelectValue id id
 mapCursorAppendAndSelectValue :: k -> v -> MapCursor k v -> MapCursor k v
 mapCursorAppendAndSelectValue = MC.mapCursorAppendAndSelectValue id id
 
-mapCursorRemoveElemAndSelectPrev ::
-     MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
+mapCursorRemoveElemAndSelectPrev :: MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
 mapCursorRemoveElemAndSelectPrev = MC.mapCursorRemoveElemAndSelectPrev id
 
-mapCursorDeleteElemAndSelectNext ::
-     MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
+mapCursorDeleteElemAndSelectNext :: MapCursor k v -> Maybe (DeleteOrUpdate (MapCursor k v))
 mapCursorDeleteElemAndSelectNext = MC.mapCursorDeleteElemAndSelectNext id
 
 mapCursorRemoveElem :: MapCursor k v -> DeleteOrUpdate (MapCursor k v)
@@ -112,6 +107,5 @@ mapCursorDeleteElem = MC.mapCursorDeleteElem id
 mapCursorSearch :: (k -> v -> Bool) -> MapCursor k v -> Maybe (MapCursor k v)
 mapCursorSearch = MC.mapCursorSearch id id id
 
-mapCursorSelectOrAdd ::
-     (k -> v -> Bool) -> KeyValueCursor k v -> MapCursor k v -> MapCursor k v
+mapCursorSelectOrAdd :: (k -> v -> Bool) -> KeyValueCursor k v -> MapCursor k v -> MapCursor k v
 mapCursorSelectOrAdd = MC.mapCursorSelectOrAdd id id id

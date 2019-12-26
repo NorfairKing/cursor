@@ -1,5 +1,4 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DeriveFunctor #-}
 
@@ -47,7 +46,7 @@ data TreeCursor a b =
   TreeCursor
     { treeAbove :: !(Maybe (TreeAbove b))
     , treeCurrent :: !a
-    , treeBelow :: (CForest b)
+    , treeBelow :: !(CForest b)
     }
   deriving (Show, Eq, Generic)
 
@@ -64,7 +63,7 @@ treeCursorCurrentL = lens treeCurrent $ \tc a -> tc {treeCurrent = a}
 treeCursorBelowL :: Lens' (TreeCursor a b) (CForest b)
 treeCursorBelowL = lens treeBelow $ \tc tb -> tc {treeBelow = tb}
 
-treeCursorCurrentSubTreeL :: Lens (TreeCursor a b)  (TreeCursor a' b) (a, CForest b)(a', CForest b)
+treeCursorCurrentSubTreeL :: Lens (TreeCursor a b) (TreeCursor a' b) (a, CForest b) (a', CForest b)
 treeCursorCurrentSubTreeL =
   lens (\tc -> (treeCurrent tc, treeBelow tc)) (\tc (a, cf) -> tc {treeCurrent = a, treeBelow = cf})
 
@@ -147,16 +146,10 @@ emptyCForest :: CForest a
 emptyCForest = EmptyCForest
 
 openForest :: [CTree a] -> CForest a
-openForest ts =
-  case NE.nonEmpty ts of
-    Nothing -> emptyCForest
-    Just ne -> OpenForest ne
+openForest ts = maybe emptyCForest OpenForest $ NE.nonEmpty ts
 
 closedForest :: [Tree a] -> CForest a
-closedForest ts =
-  case NE.nonEmpty ts of
-    Nothing -> emptyCForest
-    Just ne -> ClosedForest ne
+closedForest ts = maybe emptyCForest ClosedForest $ NE.nonEmpty ts
 
 lengthCForest :: CForest a -> Int
 lengthCForest EmptyCForest = 0
