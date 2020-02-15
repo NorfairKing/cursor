@@ -4,7 +4,7 @@ packages:
 - cursor-gen
 extra-deps:
 - github: NorfairKing/validity
-  commit: sha256:0yi03b48xvqa0vl56ggjr1sfpfdpbi47fp4fsd9miibmr16wv7q9
+  commit: 902bcff3456b3b9a65f59d0d5176e8aadba12c26
   subdirs:
   - genvalidity
   - genvalidity-aeson
