@@ -12,6 +12,7 @@ module Cursor.Map
   , mapMapCursor
   , mapCursorNonEmptyCursorL
   , mapCursorElemL
+  , mapCursorElemSelection
   , mapCursorSelectKey
   , mapCursorSelectValue
   , mapCursorToggleSelected
@@ -34,6 +35,8 @@ module Cursor.Map
   , mapCursorSearch
   , mapCursorSelectOrAdd
   , traverseMapCursor
+  , mapCursorTraverseKeyCase
+  , mapCursorTraverseValueCase
   , foldMapCursor
   , module Cursor.Map.KeyValue
   ) where
@@ -96,6 +99,9 @@ mapCursorNonEmptyCursorL = lens mapCursorList $ \mc ne -> mc {mapCursorList = ne
 mapCursorElemL ::
      Lens (MapCursor kc vc k v) (MapCursor kc' vc' k v) (KeyValueCursor kc vc k v) (KeyValueCursor kc' vc' k v)
 mapCursorElemL = mapCursorNonEmptyCursorL . nonEmptyCursorElemL
+
+mapCursorElemSelection :: MapCursor kc vc k v -> KeyValueToggle
+mapCursorElemSelection mc = keyValueCursorSelection $ mc ^. mapCursorElemL
 
 mapCursorSelectKey :: (k -> kc) -> (vc -> v) -> MapCursor kc vc k v -> MapCursor kc vc k v
 mapCursorSelectKey g h = mapCursorElemL %~ keyValueCursorSelectKey g h
@@ -219,6 +225,12 @@ make g (k, v) = makeKeyValueCursorKey (g k) v
 traverseMapCursor ::
      ([(k, v)] -> KeyValueCursor kc vc k v -> [(k, v)] -> f c) -> MapCursor kc vc k v -> f c
 traverseMapCursor combFunc = foldNonEmptyCursor combFunc . mapCursorList
+
+mapCursorTraverseKeyCase :: Applicative f => (kc -> v -> f (kc', v)) -> MapCursor kc vc k v -> f (MapCursor kc' vc k v)
+mapCursorTraverseKeyCase func = mapCursorElemL $ keyValueCursorTraverseKeyCase func
+
+mapCursorTraverseValueCase :: Applicative f => (k -> vc -> f (k, vc')) -> MapCursor kc vc k v -> f (MapCursor kc vc' k v)
+mapCursorTraverseValueCase func = mapCursorElemL $ keyValueCursorTraverseValueCase func
 
 foldMapCursor :: ([(k, v)] -> KeyValueCursor kc vc k v -> [(k, v)] -> c) -> MapCursor kc vc k v -> c
 foldMapCursor combFunc = foldNonEmptyCursor combFunc . mapCursorList
