@@ -172,6 +172,14 @@ movementsSpec = do
     it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectNextOnSameLevel @Bool
     it "is a movement" $ isMovementM forestCursorSelectNextOnSameLevel
     it "selects the next node on the same level as the current node" pending
+  describe "forestCursorSelectFirstOnSameLevel" $ do
+    it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectFirstOnSameLevel @Bool
+    it "is a movement" $ isMovement forestCursorSelectFirstOnSameLevel
+    it "selects the previous node on the same level as the current node" pending
+  describe "forestCursorSelectLastOnSameLevel" $ do
+    it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectLastOnSameLevel @Bool
+    it "is a movement" $ isMovement forestCursorSelectLastOnSameLevel
+    it "selects the next node on the same level as the current node" pending
   describe "forestCursorSelectFirst" $ do
     it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectFirst @Bool
     it "is a movement" $ isMovement forestCursorSelectFirst

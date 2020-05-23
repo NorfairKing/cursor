@@ -32,6 +32,8 @@ module Cursor.Simple.Tree
   , treeCursorSelectBelowAtEndRecursively
   , treeCursorSelectPrevOnSameLevel
   , treeCursorSelectNextOnSameLevel
+  , treeCursorSelectFirstOnSameLevel
+  , treeCursorSelectLastOnSameLevel
   , treeCursorSelectAbovePrev
   , treeCursorSelectAboveNext
   , TC.treeCursorOpenCurrentForest
@@ -137,6 +139,12 @@ treeCursorSelectPrevOnSameLevel = TC.treeCursorSelectPrevOnSameLevel id id
 
 treeCursorSelectNextOnSameLevel :: TreeCursor a -> Maybe (TreeCursor a)
 treeCursorSelectNextOnSameLevel = TC.treeCursorSelectNextOnSameLevel id id
+
+treeCursorSelectFirstOnSameLevel :: TreeCursor a -> TreeCursor a
+treeCursorSelectFirstOnSameLevel = TC.treeCursorSelectFirstOnSameLevel id id
+
+treeCursorSelectLastOnSameLevel :: TreeCursor a -> TreeCursor a
+treeCursorSelectLastOnSameLevel = TC.treeCursorSelectLastOnSameLevel id id
 
 -- | Go back and down as far as necessary to find a previous element on a level below
 treeCursorSelectAbovePrev :: TreeCursor a -> Maybe (TreeCursor a)

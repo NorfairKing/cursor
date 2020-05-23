@@ -28,7 +28,6 @@ genMapCursorBy genKC genVC genK genV =
   MapCursor <$>
   genNonEmptyCursorBy (genKeyValueCursorBy genKC genVC genK genV) ((,) <$> genK <*> genV)
 
-genMapCursorByDependent :: Gen (kc, v) -> Gen (k, vc) -> Gen (k,v)-> Gen (MapCursor kc vc k v)
+genMapCursorByDependent :: Gen (kc, v) -> Gen (k, vc) -> Gen (k, v) -> Gen (MapCursor kc vc k v)
 genMapCursorByDependent genKVCK genKVCV genKV =
-  MapCursor <$>
-  genNonEmptyCursorBy (genKeyValueCursorByDependent genKVCK genKVCV) genKV
+  MapCursor <$> genNonEmptyCursorBy (genKeyValueCursorByDependent genKVCK genKVCV) genKV

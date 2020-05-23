@@ -57,6 +57,12 @@ spec = do
       inverseFunctionsIfSucceedOnValid
         (treeCursorSelectPrevOnSameLevel @Bool)
         (treeCursorSelectNextOnSameLevel @Bool)
+  describe "treeCursorSelectFirstOnSameLevel" $ do
+    testMovement treeCursorSelectFirstOnSameLevel
+    it "selects the previous element" pending
+  describe "treeCursorSelectNextOnSameLevel" $ do
+    testMovement treeCursorSelectLastOnSameLevel
+    it "selects the next element" pending
   describe "treeCursorSelectAbovePrev" $ do
     testMovementM treeCursorSelectAbovePrev
     it "Works for this classic example" $

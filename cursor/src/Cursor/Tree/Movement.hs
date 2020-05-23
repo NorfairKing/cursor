@@ -17,6 +17,8 @@ module Cursor.Tree.Movement
   , treeCursorSelectBelowAtEndRecursively
   , treeCursorSelectPrevOnSameLevel
   , treeCursorSelectNextOnSameLevel
+  , treeCursorSelectFirstOnSameLevel
+  , treeCursorSelectLastOnSameLevel
   , treeCursorSelectAbovePrev
   , treeCursorSelectAboveNext
   ) where
@@ -125,6 +127,18 @@ treeCursorSelectNextOnSameLevel f g tc@TreeCursor {..} = do
     tree:xs ->
       Just . makeTreeCursorWithAbove g tree . Just $
       ta {treeAboveLefts = currentTree f tc : treeAboveLefts ta, treeAboveRights = xs}
+
+treeCursorSelectFirstOnSameLevel :: (a -> b) -> (b -> a) -> TreeCursor a b -> TreeCursor a b
+treeCursorSelectFirstOnSameLevel f g tc =
+  case treeCursorSelectPrevOnSameLevel f g tc of
+    Nothing -> tc
+    Just tc' -> treeCursorSelectFirstOnSameLevel f g tc'
+
+treeCursorSelectLastOnSameLevel :: (a -> b) -> (b -> a) -> TreeCursor a b -> TreeCursor a b
+treeCursorSelectLastOnSameLevel f g tc =
+  case treeCursorSelectNextOnSameLevel f g tc of
+    Nothing -> tc
+    Just tc' -> treeCursorSelectLastOnSameLevel f g tc'
 
 -- | Go back and down as far as necessary to find a previous element on a level below
 treeCursorSelectAbovePrev :: (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
