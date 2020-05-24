@@ -1,10 +1,10 @@
-resolver: lts-14.7
+resolver: lts-14.23
 packages:
 - cursor
 - cursor-gen
 extra-deps:
 - github: NorfairKing/validity
-  commit: 902bcff3456b3b9a65f59d0d5176e8aadba12c26
+  commit: b8c4cb4cafef7eb2feabaf767eb0d96c5fb5b573
   subdirs:
   - genvalidity
   - genvalidity-aeson
@@ -37,3 +37,10 @@ extra-deps:
   - validity-unordered-containers
   - validity-uuid
   - validity-vector
+nix:
+  path: [ "nixpkgs=https://github.com/NixOS/nixpkgs/archive/323fe92057bb38475a446ff5e18d3b388c2e4403.tar.gz" ]
+  add-gc-roots: true
+  packages:
+  - zlib
+  - haskellPackages.autoexporter
+  - killall
