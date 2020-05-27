@@ -1,30 +1,26 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Cursor.Simple.ForestSpec
   ( spec
   ) where
 
-import Data.Tree
-
 import Control.Monad (unless)
-
+import Cursor.Forest (ForestCursor(..))
+import Cursor.List.NonEmpty
+import Cursor.Simple.Forest hiding (ForestCursor)
+import qualified Cursor.Simple.Forest as SFC (ForestCursor)
+import Cursor.Simple.Forest.Gen ()
+import Cursor.Tree
+import Cursor.Types
+import Data.Tree
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
 import Test.Validity
 import Test.Validity.Optics
-
-import Cursor.Forest (ForestCursor(..))
-import Cursor.List.NonEmpty
-import Cursor.Simple.Forest hiding (ForestCursor)
-import qualified Cursor.Simple.Forest as SFC (ForestCursor)
-import Cursor.Tree
-import Cursor.Types
-
-import Cursor.Simple.Forest.Gen ()
 
 spec :: Spec
 spec = do
@@ -79,11 +75,11 @@ movementsSpec = do
     it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectPrev @Bool
     it "is a movement" $ isMovementM forestCursorSelectPrev
     it "selects the previous node" pending
-        -- TODO example with a collapsed tree
+    -- TODO example with a collapsed tree
     it "Works for this classic example without any collapsing" $
-            --   > 1
-            --     > 2 <- expected end cursor
-            --   > 3 <- start cursor
+      --   > 1
+      --     > 2 <- expected end cursor
+      --   > 3 <- start cursor
      do
       let start =
             ForestCursor
@@ -125,9 +121,9 @@ movementsSpec = do
     it "is a movement" $ isMovementM forestCursorSelectNext
     it "selects the next node" pending
     it "Works for this classic example" $
-            --   > 1
-            --     > 2 <- start cursor
-            --   > 3 <- expected end cursor
+      --   > 1
+      --     > 2 <- start cursor
+      --   > 3 <- expected end cursor
      do
       let start =
             ForestCursor
@@ -286,6 +282,30 @@ insertSpec = do
   describe "forestCursorAddChildToNodeAtEnd" $ do
     it "produces valid cursors" $
       producesValidsOnValids2 $ forestCursorAddChildToNodeAtEnd @Bool @Bool
+    it "adds a child to a node at the end the children of that node" pending
+  describe "forestCursorAddChildTreeToNodeAtPosAndSelect" $ do
+    it "produces valid cursors" $
+      producesValidsOnValids3 $ forestCursorAddChildTreeToNodeAtPosAndSelect @Bool
+    it "adds a child tree to a node at the given position in the children of that node" pending
+  describe "forestCursorAddChildTreeToNodeAtStartAndSelect" $ do
+    it "produces valid cursors" $
+      producesValidsOnValids2 $ forestCursorAddChildTreeToNodeAtStartAndSelect @Bool
+    it "adds a child tree to a node at the start the children of that node" pending
+  describe "forestCursorAddChildTreeToNodeAtEndAndSelect" $ do
+    it "produces valid cursors" $
+      producesValidsOnValids2 $ forestCursorAddChildTreeToNodeAtEndAndSelect @Bool
+    it "adds a child tree to a node at the end the children of that node" pending
+  describe "forestCursorAddChildToNodeAtPosAndSelect" $ do
+    it "produces valid cursors" $
+      producesValidsOnValids3 $ forestCursorAddChildToNodeAtPosAndSelect @Bool
+    it "adds a child to a node at the given position in the children of that node" pending
+  describe "forestCursorAddChildToNodeAtStartAndSelect" $ do
+    it "produces valid cursors" $
+      producesValidsOnValids2 $ forestCursorAddChildToNodeAtStartAndSelect @Bool
+    it "adds a child to a node at the start the children of that node" pending
+  describe "forestCursorAddChildToNodeAtEndAndSelect" $ do
+    it "produces valid cursors" $
+      producesValidsOnValids2 $ forestCursorAddChildToNodeAtEndAndSelect @Bool
     it "adds a child to a node at the end the children of that node" pending
   describe "forestCursorAddRoot" $ do
     it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAddRoot @Bool)

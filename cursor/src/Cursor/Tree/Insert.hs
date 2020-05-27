@@ -9,14 +9,16 @@ module Cursor.Tree.Insert
   , treeCursorAddChildAtPos
   , treeCursorAddChildAtStart
   , treeCursorAddChildAtEnd
+  , treeCursorAddChildAtPosAndSelect
+  , treeCursorAddChildAtStartAndSelect
+  , treeCursorAddChildAtEndAndSelect
   ) where
-
-import qualified Data.List.NonEmpty as NE
-import Data.List.NonEmpty ((<|))
-import Data.Tree
 
 import Cursor.Tree.Base
 import Cursor.Tree.Types
+import qualified Data.List.NonEmpty as NE
+import Data.List.NonEmpty ((<|))
+import Data.Tree
 
 treeCursorInsert :: Tree b -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorInsert tree tc@TreeCursor {..} = do
@@ -69,3 +71,52 @@ treeCursorAddChildAtEnd t tc =
     EmptyCForest -> tc {treeBelow = openForest [makeCTree t]}
     ClosedForest ts -> tc {treeBelow = openForest $ map makeCTree $ NE.toList ts ++ [t]}
     OpenForest ts -> tc {treeBelow = openForest $ NE.toList ts ++ [makeCTree t]}
+
+treeCursorAddChildAtPosAndSelect ::
+     (a -> b) -> (b -> a) -> Int -> Tree b -> TreeCursor a b -> TreeCursor a b
+treeCursorAddChildAtPosAndSelect f g i (Node t ts) tc =
+  let (before, after) = splitAt i $ unpackCForest $ treeBelow tc
+   in TreeCursor
+        { treeAbove =
+            Just
+              TreeAbove
+                { treeAboveLefts = before
+                , treeAboveAbove = treeAbove tc
+                , treeAboveNode = f (treeCurrent tc)
+                , treeAboveRights = after
+                }
+        , treeCurrent = g t
+        , treeBelow = makeCForest ts
+        }
+
+treeCursorAddChildAtStartAndSelect ::
+     (a -> b) -> (b -> a) -> Tree b -> TreeCursor a b -> TreeCursor a b
+treeCursorAddChildAtStartAndSelect f g (Node t ts) tc =
+  TreeCursor
+    { treeAbove =
+        Just
+          TreeAbove
+            { treeAboveLefts = []
+            , treeAboveAbove = treeAbove tc
+            , treeAboveNode = f (treeCurrent tc)
+            , treeAboveRights = unpackCForest $ treeBelow tc
+            }
+    , treeCurrent = g t
+    , treeBelow = makeCForest ts
+    }
+
+treeCursorAddChildAtEndAndSelect ::
+     (a -> b) -> (b -> a) -> Tree b -> TreeCursor a b -> TreeCursor a b
+treeCursorAddChildAtEndAndSelect f g (Node t ts) tc =
+  TreeCursor
+    { treeAbove =
+        Just
+          TreeAbove
+            { treeAboveLefts = unpackCForest $ treeBelow tc
+            , treeAboveAbove = treeAbove tc
+            , treeAboveNode = f (treeCurrent tc)
+            , treeAboveRights = []
+            }
+    , treeCurrent = g t
+    , treeBelow = makeCForest ts
+    }

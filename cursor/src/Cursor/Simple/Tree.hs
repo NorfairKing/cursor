@@ -48,6 +48,9 @@ module Cursor.Simple.Tree
   , TC.treeCursorAddChildAtPos
   , TC.treeCursorAddChildAtStart
   , TC.treeCursorAddChildAtEnd
+  , treeCursorAddChildAtPosAndSelect
+  , treeCursorAddChildAtStartAndSelect
+  , treeCursorAddChildAtEndAndSelect
   , treeCursorDeleteSubTreeAndSelectPrevious
   , treeCursorDeleteSubTreeAndSelectNext
   , treeCursorDeleteSubTreeAndSelectAbove
@@ -77,12 +80,10 @@ module Cursor.Simple.Tree
   , TC.rebuildCTree
   ) where
 
-import Data.Tree
-
-import Cursor.Types
-
 import qualified Cursor.Tree as TC
 import Cursor.Tree (CTree, TreeAbove(..))
+import Cursor.Types
+import Data.Tree
 
 type TreeCursor a = TC.TreeCursor a a
 
@@ -161,6 +162,15 @@ treeCursorInsertAndSelect = TC.treeCursorInsertAndSelect id id
 
 treeCursorAppendAndSelect :: Tree a -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorAppendAndSelect = TC.treeCursorAppendAndSelect id id
+
+treeCursorAddChildAtPosAndSelect :: Int -> Tree a -> TreeCursor a -> TreeCursor a
+treeCursorAddChildAtPosAndSelect = TC.treeCursorAddChildAtPosAndSelect id id
+
+treeCursorAddChildAtStartAndSelect :: Tree a -> TreeCursor a -> TreeCursor a
+treeCursorAddChildAtStartAndSelect = TC.treeCursorAddChildAtStartAndSelect id id
+
+treeCursorAddChildAtEndAndSelect :: Tree a -> TreeCursor a -> TreeCursor a
+treeCursorAddChildAtEndAndSelect = TC.treeCursorAddChildAtEndAndSelect id id
 
 treeCursorDeleteSubTreeAndSelectPrevious :: TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
 treeCursorDeleteSubTreeAndSelectPrevious = TC.treeCursorDeleteSubTreeAndSelectPrevious id

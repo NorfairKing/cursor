@@ -51,6 +51,12 @@ module Cursor.Forest
   , forestCursorAddChildToNodeAtPos
   , forestCursorAddChildToNodeAtStart
   , forestCursorAddChildToNodeAtEnd
+  , forestCursorAddChildTreeToNodeAtPosAndSelect
+  , forestCursorAddChildTreeToNodeAtStartAndSelect
+  , forestCursorAddChildTreeToNodeAtEndAndSelect
+  , forestCursorAddChildToNodeAtPosAndSelect
+  , forestCursorAddChildToNodeAtStartAndSelect
+  , forestCursorAddChildToNodeAtEndAndSelect
   , forestCursorRemoveElemAndSelectPrev
   , forestCursorDeleteElemAndSelectNext
   , forestCursorRemoveElem
@@ -80,23 +86,18 @@ module Cursor.Forest
   , foldForestCursor
   ) where
 
-import GHC.Generics (Generic)
-
-import Data.Validity
-import Data.Validity.Tree ()
-
-import Data.List.NonEmpty (NonEmpty)
-import Data.Maybe
-import Data.Tree
-
 import Control.Applicative
 import Control.DeepSeq
-
-import Lens.Micro
-
 import Cursor.List.NonEmpty
 import Cursor.Tree
 import Cursor.Types
+import Data.List.NonEmpty (NonEmpty)
+import Data.Maybe
+import Data.Tree
+import Data.Validity
+import Data.Validity.Tree ()
+import GHC.Generics (Generic)
+import Lens.Micro
 
 newtype ForestCursor a b =
   ForestCursor
@@ -310,6 +311,36 @@ forestCursorAddChildToNodeAtStart b = forestCursorAddChildTreeToNodeAtStart $ No
 
 forestCursorAddChildToNodeAtEnd :: b -> ForestCursor a b -> ForestCursor a b
 forestCursorAddChildToNodeAtEnd b = forestCursorAddChildTreeToNodeAtEnd $ Node b []
+
+forestCursorAddChildTreeToNodeAtPosAndSelect ::
+     (a -> b) -> (b -> a) -> Int -> Tree b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildTreeToNodeAtPosAndSelect f g i t =
+  forestCursorSelectedTreeL %~ treeCursorAddChildAtPosAndSelect f g i t
+
+forestCursorAddChildTreeToNodeAtStartAndSelect ::
+     (a -> b) -> (b -> a) -> Tree b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildTreeToNodeAtStartAndSelect f g t =
+  forestCursorSelectedTreeL %~ treeCursorAddChildAtStartAndSelect f g t
+
+forestCursorAddChildTreeToNodeAtEndAndSelect ::
+     (a -> b) -> (b -> a) -> Tree b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildTreeToNodeAtEndAndSelect f g t fc =
+  fc & forestCursorSelectedTreeL %~ treeCursorAddChildAtEndAndSelect f g t
+
+forestCursorAddChildToNodeAtPosAndSelect ::
+     (a -> b) -> (b -> a) -> Int -> b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildToNodeAtPosAndSelect f g i b =
+  forestCursorAddChildTreeToNodeAtPosAndSelect f g i $ Node b []
+
+forestCursorAddChildToNodeAtStartAndSelect ::
+     (a -> b) -> (b -> a) -> b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildToNodeAtStartAndSelect f g b =
+  forestCursorAddChildTreeToNodeAtStartAndSelect f g $ Node b []
+
+forestCursorAddChildToNodeAtEndAndSelect ::
+     (a -> b) -> (b -> a) -> b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildToNodeAtEndAndSelect f g b =
+  forestCursorAddChildTreeToNodeAtEndAndSelect f g $ Node b []
 
 forestCursorRemoveElemAndSelectPrev ::
      (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))

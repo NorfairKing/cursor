@@ -1,18 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Cursor.Simple.Tree.InsertSpec
   ( spec
   ) where
 
-import Test.Hspec
-
-import Test.Validity
-
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
+import Test.Hspec
+import Test.Validity
 
 spec :: Spec
 spec = do
@@ -36,4 +34,14 @@ spec = do
     it "adds a tree at the start of the children of the current node" pending
   describe "treeCursorAddChildAtEnd" $ do
     it "produces valid cursors " $ producesValidsOnValids2 $ treeCursorAddChildAtEnd @Bool @Bool
+    it "adds a tree at the end of the children of the current node" pending
+  describe "treeCursorAddChildAtPosAndSelect" $ do
+    it "produces valid cursors " $ producesValidsOnValids3 $ treeCursorAddChildAtPosAndSelect @Bool
+    it "adds a tree at the given index in theAndSelect children of the current node" pending
+  describe "treeCursorAddChildAtStartAndSelect" $ do
+    it "producesAndSelect valid cursors " $
+      producesValidsOnValids2 $ treeCursorAddChildAtStartAndSelect @Bool
+    it "adds a tree at the start of the children of the current node" pending
+  describe "treeCursorAddChildAtEndAndSelect" $ do
+    it "produces valid cursors " $ producesValidsOnValids2 $ treeCursorAddChildAtEndAndSelect @Bool
     it "adds a tree at the end of the children of the current node" pending
