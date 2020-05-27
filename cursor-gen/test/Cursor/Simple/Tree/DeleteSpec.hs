@@ -1,38 +1,38 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Cursor.Simple.Tree.DeleteSpec
-  ( spec
-  ) where
-
-import Data.Tree
-
-import Test.Hspec
-
-import Test.Validity
+  ( spec,
+  )
+where
 
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
-import Cursor.Tree (CTree(..), TreeCursor(..), closedForest, openForest)
-import Cursor.Types
-
 import Cursor.Simple.Tree.TestUtils
+import Cursor.Tree (CTree (..), TreeCursor (..), closedForest, openForest)
+import Cursor.Types
+import Data.Tree
+import Test.Hspec
+import Test.Validity
 
 spec :: Spec
 spec = do
   describe "treeCursorDeleteSubTreeAndSelectPrevious" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorDeleteSubTreeAndSelectPrevious @Bool
+    it "produces valids on valids"
+      $ producesValidsOnValids
+      $ treeCursorDeleteSubTreeAndSelectPrevious @Bool
     it "deletes the current subtree selects the previous subtree" pending
   describe "treeCursorDeleteSubTreeAndSelectNext" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorDeleteSubTreeAndSelectNext @Bool
+    it "produces valids on valids"
+      $ producesValidsOnValids
+      $ treeCursorDeleteSubTreeAndSelectNext @Bool
     it "deletes the current subtree selects the next subtree" pending
   describe "treeCursorDeleteSubTreeAndSelectAbove" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorDeleteSubTreeAndSelectAbove @Bool
+    it "produces valids on valids"
+      $ producesValidsOnValids
+      $ treeCursorDeleteSubTreeAndSelectAbove @Bool
     it "deletes the current subtree selects the above node" pending
   describe "treeCursorRemoveSubTree" $ do
     it "produces valids on valids" $ producesValidsOnValids $ treeCursorRemoveSubTree @Bool
@@ -41,13 +41,18 @@ spec = do
     it "produces valids on valids" $ producesValidsOnValids $ treeCursorDeleteSubTree @Bool
     it "deletes the current subtree" pending
   describe "treeCursorDeleteElemAndSelectPrevious" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorDeleteElemAndSelectPrevious @Bool
-    it "works for this simple example" $
-      forAllValid $ \fs ->
+    it "produces valids on valids"
+      $ producesValidsOnValids
+      $ treeCursorDeleteElemAndSelectPrevious @Bool
+    it "works for this simple example"
+      $ forAllValid
+      $ \fs ->
         let simpleDeleteElemStart =
               TreeCursor
-                {treeAbove = Nothing, treeCurrent = 1 :: Int, treeBelow = closedForest [Node 2 fs]}
+                { treeAbove = Nothing,
+                  treeCurrent = 1 :: Int,
+                  treeBelow = closedForest [Node 2 fs]
+                }
          in case treeCursorDeleteElemAndSelectPrevious simpleDeleteElemStart of
               Nothing -> pure ()
               Just Deleted ->
@@ -58,10 +63,12 @@ spec = do
                   "treeCursorDeleteElemAndSelectPrevious should not have updated the example tree, but failed instead."
     it "deletes the current element and selects the previous element" pending
   describe "treeCursorDeleteElemAndSelectNext" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorDeleteElemAndSelectNext @Bool
-    it "works for this simple example" $
-      forAllValid $ \fs ->
+    it "produces valids on valids"
+      $ producesValidsOnValids
+      $ treeCursorDeleteElemAndSelectNext @Bool
+    it "works for this simple example"
+      $ forAllValid
+      $ \fs ->
         let simpleDeleteElemStart =
               TreeCursor {treeAbove = Nothing, treeCurrent = 1, treeBelow = openForest [CNode 2 fs]}
             simpleDeleteElemExpected =
@@ -75,13 +82,18 @@ spec = do
               Just (Updated f) -> f `treeShouldBe` simpleDeleteElemExpected
     it "deletes the current element and selects the next element" pending
   describe "treeCursorDeleteElemAndSelectAbove" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids $ treeCursorDeleteElemAndSelectAbove @Bool
-    it "works for this simple example" $
-      forAllValid $ \fs ->
+    it "produces valids on valids"
+      $ producesValidsOnValids
+      $ treeCursorDeleteElemAndSelectAbove @Bool
+    it "works for this simple example"
+      $ forAllValid
+      $ \fs ->
         let simpleDeleteElemStart =
               TreeCursor
-                {treeAbove = Nothing, treeCurrent = 1 :: Int, treeBelow = closedForest [Node 2 fs]}
+                { treeAbove = Nothing,
+                  treeCurrent = 1 :: Int,
+                  treeBelow = closedForest [Node 2 fs]
+                }
          in case treeCursorDeleteElemAndSelectAbove simpleDeleteElemStart of
               Nothing -> pure ()
               Just Deleted ->

@@ -1,15 +1,15 @@
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Cursor.MapSpec
-  ( spec
-  ) where
-
-import Test.Hspec
-import Test.Validity
+  ( spec,
+  )
+where
 
 import Cursor.Map
 import Cursor.Map.Gen ()
+import Test.Hspec
+import Test.Validity
 
 spec :: Spec
 spec = do

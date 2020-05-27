@@ -1,13 +1,13 @@
 module Cursor.Simple.List.NonEmpty.Gen
-  ( nonEmptyElemOf
-  , nonEmptyWithIndex0
-  , nonEmptyWith
-  ) where
-
-import Test.QuickCheck
+  ( nonEmptyElemOf,
+    nonEmptyWithIndex0,
+    nonEmptyWith,
+  )
+where
 
 import qualified Cursor.List.NonEmpty.Gen as NEC
 import Cursor.Simple.List.NonEmpty
+import Test.QuickCheck
 
 nonEmptyElemOf :: NonEmptyCursor a -> Gen a
 nonEmptyElemOf = NEC.nonEmptyElemOf

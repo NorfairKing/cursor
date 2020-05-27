@@ -3,8 +3,9 @@
 {-# LANGUAGE TypeApplications #-}
 
 module Cursor.TextSpec
-  ( spec
-  ) where
+  ( spec,
+  )
+where
 
 import Control.Monad
 import Cursor.List
@@ -19,29 +20,32 @@ spec = do
   eqSpec @TextCursor
   genValidSpec @TextCursor
   describe "Validity TextCursor" $ do
-    it "considers a text cursor with a newline in the previous characters invalid" $
-      shouldBeInvalid $
-      TextCursor {textCursorList = ListCursor {listCursorPrev = "\n", listCursorNext = ""}}
-    it "considers a text cursor with a newline in the next characters invalid" $
-      shouldBeInvalid $
-      TextCursor {textCursorList = ListCursor {listCursorPrev = "", listCursorNext = "\n"}}
-    it "considers a text cursor with an unsafe character in the previous characters invalid" $
-      shouldBeInvalid $
-      TextCursor {textCursorList = ListCursor {listCursorPrev = "\55810", listCursorNext = ""}}
-    it "considers a text cursor with an unsafe character in the next characters invalid" $
-      shouldBeInvalid $
-      TextCursor {textCursorList = ListCursor {listCursorPrev = "\55810", listCursorNext = "\n"}}
+    it "considers a text cursor with a newline in the previous characters invalid"
+      $ shouldBeInvalid
+      $ TextCursor {textCursorList = ListCursor {listCursorPrev = "\n", listCursorNext = ""}}
+    it "considers a text cursor with a newline in the next characters invalid"
+      $ shouldBeInvalid
+      $ TextCursor {textCursorList = ListCursor {listCursorPrev = "", listCursorNext = "\n"}}
+    it "considers a text cursor with an unsafe character in the previous characters invalid"
+      $ shouldBeInvalid
+      $ TextCursor {textCursorList = ListCursor {listCursorPrev = "\55810", listCursorNext = ""}}
+    it "considers a text cursor with an unsafe character in the next characters invalid"
+      $ shouldBeInvalid
+      $ TextCursor {textCursorList = ListCursor {listCursorPrev = "\55810", listCursorNext = "\n"}}
   describe "emptyTextCursor" $ it "is valid" $ shouldBeValid emptyTextCursor
-  describe "makeTextCursor" $
-    it "produces valid list cursors" $ producesValidsOnValids makeTextCursor
-  describe "makeTextCursorWithSelection" $
-    it "produces valid list cursors" $ producesValidsOnValids2 makeTextCursorWithSelection
+  describe "makeTextCursor"
+    $ it "produces valid list cursors"
+    $ producesValidsOnValids makeTextCursor
+  describe "makeTextCursorWithSelection"
+    $ it "produces valid list cursors"
+    $ producesValidsOnValids2 makeTextCursorWithSelection
   describe "rebuildTextCursor" $ do
     it "produces valid lists" $ producesValidsOnValids rebuildTextCursor
     it "is the inverse of makeTextCursor" $
       inverseFunctionsIfFirstSucceedsOnValid makeTextCursor rebuildTextCursor
-    it "is the inverse of makeTextCursorWithSelection for any index" $
-      forAllUnchecked $ \i ->
+    it "is the inverse of makeTextCursorWithSelection for any index"
+      $ forAllUnchecked
+      $ \i ->
         inverseFunctionsIfFirstSucceedsOnValid (makeTextCursorWithSelection i) rebuildTextCursor
   describe "textCursorNull" $ it "produces valid bools" $ producesValidsOnValids textCursorNull
   describe "textCursorLength" $ it "produces valid ints" $ producesValidsOnValids textCursorLength
@@ -58,8 +62,9 @@ spec = do
     it "produces valid cursors" $ producesValidsOnValids2 textCursorSelectIndex
     it "is a movement" $ forAllUnchecked $ \ix -> isMovement (textCursorSelectIndex ix)
     it "selects the position at the given index" pending
-    it "produces a cursor that has the given selection for valid selections in the cursor" $
-      forAllValid $ \tc ->
+    it "produces a cursor that has the given selection for valid selections in the cursor"
+      $ forAllValid
+      $ \tc ->
         forAll (choose (0, textCursorLength tc)) $ \i ->
           textCursorIndex (textCursorSelectIndex i tc) `shouldBe` i
   describe "textCursorSelectStart" $ do
@@ -87,14 +92,20 @@ spec = do
   describe "textCursorInsertString" $ do
     it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorInsertString d)
     it "works for this example" $
-      (makeTextCursor "hello" >>= textCursorInsertString " world") `shouldBe`
-      makeTextCursor "hello world"
-  describe "textCursorAppendString" $
-    it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorAppendString d)
-  describe "textCursorInsertText" $
-    it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorInsertText d)
-  describe "textCursorAppendText" $
-    it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorAppendText d)
+      (makeTextCursor "hello" >>= textCursorInsertString " world")
+        `shouldBe` makeTextCursor "hello world"
+  describe "textCursorAppendString"
+    $ it "produces valids"
+    $ forAllValid
+    $ \d -> producesValidsOnValids (textCursorAppendString d)
+  describe "textCursorInsertText"
+    $ it "produces valids"
+    $ forAllValid
+    $ \d -> producesValidsOnValids (textCursorInsertText d)
+  describe "textCursorAppendText"
+    $ it "produces valids"
+    $ forAllValid
+    $ \d -> producesValidsOnValids (textCursorAppendText d)
   describe "textCursorRemove" $ do
     it "produces valids" $ validIfSucceedsOnValid textCursorRemove
     it "removes an item before the cursor" pending
@@ -103,14 +114,16 @@ spec = do
     it "removes an item before the cursor" pending
   describe "textCursorSplit" $ do
     it "produces valids" $ producesValidsOnValids textCursorSplit
-    it "produces two list cursors that rebuild to the rebuilding of the original" $
-      forAllValid $ \lc ->
+    it "produces two list cursors that rebuild to the rebuilding of the original"
+      $ forAllValid
+      $ \lc ->
         let (lc1, lc2) = textCursorSplit lc
          in (rebuildTextCursor lc1 <> rebuildTextCursor lc2) `shouldBe` rebuildTextCursor lc
   describe "textCursorCombine" $ do
     it "produces valids" $ producesValidsOnValids2 textCursorCombine
-    it "produces a list that rebuilds to the rebuilding of the original two cursors" $
-      forAllValid $ \lc1 ->
+    it "produces a list that rebuilds to the rebuilding of the original two cursors"
+      $ forAllValid
+      $ \lc1 ->
         forAllValid $ \lc2 ->
           let lc = textCursorCombine lc1 lc2
            in rebuildTextCursor lc `shouldBe` (rebuildTextCursor lc1 <> rebuildTextCursor lc2)
@@ -123,14 +136,14 @@ isMovementM func =
       Just tc' ->
         let t = rebuildTextCursor tc
             t' = rebuildTextCursor tc'
-         in unless (t == t') $
-            expectationFailure $
-            unlines
-              [ "Cursor before:\n" ++ show tc
-              , "Text before:  \n" ++ show t
-              , "Cursor after: \n" ++ show tc'
-              , "Text after:   \n" ++ show t'
-              ]
+         in unless (t == t')
+              $ expectationFailure
+              $ unlines
+                [ "Cursor before:\n" ++ show tc,
+                  "Text before:  \n" ++ show t,
+                  "Cursor after: \n" ++ show tc',
+                  "Text after:   \n" ++ show t'
+                ]
 
 isMovement :: (TextCursor -> TextCursor) -> Property
 isMovement func =

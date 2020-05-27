@@ -2,18 +2,18 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Tree.Draw
-  ( drawTreeCursor
-  , treeCursorWithPointer
-  , showCForest
-  , showCTree
-  , showForest
-  , showTree
-  ) where
-
-import qualified Data.List.NonEmpty as NE
-import Data.Tree
+  ( drawTreeCursor,
+    treeCursorWithPointer,
+    showCForest,
+    showCTree,
+    showForest,
+    showTree,
+  )
+where
 
 import Cursor.Tree.Types
+import qualified Data.List.NonEmpty as NE
+import Data.Tree
 
 drawTreeCursor :: (Show a, Show b) => TreeCursor a b -> String
 drawTreeCursor = drawTree . treeCursorWithPointer
@@ -25,9 +25,9 @@ treeCursorWithPointer TreeCursor {..} =
     wrapAbove :: (Show b) => Maybe (TreeAbove b) -> Tree String -> Tree String
     wrapAbove Nothing t = t
     wrapAbove (Just TreeAbove {..}) t =
-      wrapAbove treeAboveAbove $
-      Node (show treeAboveNode) $
-      concat [map showCTree $ reverse treeAboveLefts, [t], map showCTree treeAboveRights]
+      wrapAbove treeAboveAbove
+        $ Node (show treeAboveNode)
+        $ concat [map showCTree $ reverse treeAboveLefts, [t], map showCTree treeAboveRights]
 
 showCForest :: Show a => CForest a -> Forest String
 showCForest EmptyCForest = []

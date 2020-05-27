@@ -10,7 +10,7 @@ with final.haskell.lib;
         name:
           (
             failOnAllWarnings (
-              final.haskellPackages.callCabal2nix name ( final.gitignoreSource ( ../. + "/${name}" ) ) {}
+              final.haskellPackages.callCabal2nix name (final.gitignoreSource (../. + "/${name}")) {}
             )
           );
     in
@@ -23,7 +23,7 @@ with final.haskell.lib;
       old:
         {
           overrides =
-            final.lib.composeExtensions ( old.overrides or (_: _: {}) ) (
+            final.lib.composeExtensions (old.overrides or (_: _: {})) (
               self: super: final.cursorPackages
             );
         }

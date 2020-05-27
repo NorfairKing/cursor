@@ -2,21 +2,18 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.List.NonEmpty.Gen
-  ( genNonEmptyCursorBy
-  , nonEmptyElemOf
-  , nonEmptyWithIndex0
-  , nonEmptyWith
-  ) where
+  ( genNonEmptyCursorBy,
+    nonEmptyElemOf,
+    nonEmptyWithIndex0,
+    nonEmptyWith,
+  )
+where
 
 import Control.Monad
-
-import Data.GenValidity
-
-import Test.QuickCheck
-
-import qualified Data.List.NonEmpty as NE
-
 import Cursor.List.NonEmpty
+import Data.GenValidity
+import qualified Data.List.NonEmpty as NE
+import Test.QuickCheck
 
 instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (NonEmptyCursor a b) where
   genUnchecked = genNonEmptyCursorBy genUnchecked genUnchecked
@@ -34,7 +31,7 @@ genNonEmptyCursorBy genA genB =
     part <- arbPartition n
     case part of
       [] -> singletonNonEmptyCursor <$> resize 0 genA
-      (s:ss) -> do
+      (s : ss) -> do
         i <- choose (0, length ss)
         let (as, bs) = splitAt i ss
         nonEmptyCursorPrev <- forM as $ \s_ -> resize s_ genB
@@ -51,9 +48,9 @@ nonEmptyWithIndex0 g = NonEmptyCursor [] <$> g <*> genListOf g
 nonEmptyWith :: a -> Gen a -> Gen (NonEmptyCursor a a)
 nonEmptyWith a g =
   oneof
-    [ NonEmptyCursor <$> listWithA <*> g <*> genListOf g
-    , NonEmptyCursor <$> genListOf g <*> pure a <*> genListOf g
-    , NonEmptyCursor <$> genListOf g <*> g <*> listWithA
+    [ NonEmptyCursor <$> listWithA <*> g <*> genListOf g,
+      NonEmptyCursor <$> genListOf g <*> pure a <*> genListOf g,
+      NonEmptyCursor <$> genListOf g <*> g <*> listWithA
     ]
   where
     listWithA = do

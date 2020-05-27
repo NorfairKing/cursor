@@ -1,22 +1,20 @@
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.Tree.Promote
-  ( treeCursorPromoteElem
-  , PromoteElemResult(..)
-  , treeCursorPromoteSubTree
-  , PromoteResult(..)
-  ) where
-
-import GHC.Generics (Generic)
-
-import Data.Validity
+  ( treeCursorPromoteElem,
+    PromoteElemResult (..),
+    treeCursorPromoteSubTree,
+    PromoteResult (..),
+  )
+where
 
 import Control.DeepSeq
-
 import Cursor.Tree.Base
 import Cursor.Tree.Types
+import Data.Validity
+import GHC.Generics (Generic)
 
 -- | Promotes the current node to the level of its parent.
 --
@@ -46,26 +44,26 @@ import Cursor.Tree.Types
 -- >  |- d <--
 -- >  |- h
 treeCursorPromoteElem ::
-     (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteElemResult (TreeCursor a b)
+  (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteElemResult (TreeCursor a b)
 treeCursorPromoteElem f g tc = do
   ta <- maybe CannotPromoteTopElem pure $ treeAbove tc
-    -- We need to put the below under the above lefts at the end
+  -- We need to put the below under the above lefts at the end
   lefts <-
     case treeBelow tc of
       EmptyCForest -> pure $ treeAboveLefts ta
       _ ->
         case treeAboveLefts ta of
           [] -> NoSiblingsToAdoptChildren
-          (CNode t ls:ts) ->
+          (CNode t ls : ts) ->
             pure $ CNode t (openForest $ unpackCForest ls ++ unpackCForest (treeBelow tc)) : ts
   taa <- maybe NoGrandparentToPromoteElemUnder pure $ treeAboveAbove ta
-  pure $
-    makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) emptyCForest) $
-    Just $
-    taa
+  pure
+    $ makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) emptyCForest)
+    $ Just
+    $ taa
       { treeAboveLefts =
-          CNode (treeAboveNode ta) (openForest $ reverse lefts ++ treeAboveRights ta) :
-          treeAboveLefts taa
+          CNode (treeAboveNode ta) (openForest $ reverse lefts ++ treeAboveRights ta)
+            : treeAboveLefts taa
       }
 
 data PromoteElemResult a
@@ -126,13 +124,13 @@ treeCursorPromoteSubTree :: (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteRes
 treeCursorPromoteSubTree f g tc = do
   ta <- maybe CannotPromoteTopNode pure $ treeAbove tc
   taa <- maybe NoGrandparentToPromoteUnder pure $ treeAboveAbove ta
-  pure $
-    makeTreeCursorWithAbove g (currentTree f tc) $
-    Just $
-    taa
+  pure
+    $ makeTreeCursorWithAbove g (currentTree f tc)
+    $ Just
+    $ taa
       { treeAboveLefts =
-          CNode (treeAboveNode ta) (openForest $ reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
-          treeAboveLefts taa
+          CNode (treeAboveNode ta) (openForest $ reverse (treeAboveLefts ta) ++ treeAboveRights ta)
+            : treeAboveLefts taa
       }
 
 data PromoteResult a

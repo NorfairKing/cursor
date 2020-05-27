@@ -1,5 +1,6 @@
 module Cursor.Simple.Map.KeyValue.Gen
   (
-  ) where
+  )
+where
 
 import Cursor.Map.KeyValue.Gen ()

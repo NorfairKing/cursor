@@ -4,8 +4,9 @@
 {-# LANGUAGE TypeApplications #-}
 
 module Cursor.Simple.Tree.InsertSpec
-  ( spec
-  ) where
+  ( spec,
+  )
+where
 
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
@@ -39,8 +40,9 @@ spec = do
     it "produces valid cursors " $ producesValidsOnValids3 $ treeCursorAddChildAtPosAndSelect @Bool
     it "adds a tree at the given index in theAndSelect children of the current node" pending
   describe "treeCursorAddChildAtStartAndSelect" $ do
-    it "producesAndSelect valid cursors " $
-      producesValidsOnValids2 $ treeCursorAddChildAtStartAndSelect @Bool
+    it "producesAndSelect valid cursors "
+      $ producesValidsOnValids2
+      $ treeCursorAddChildAtStartAndSelect @Bool
     it "adds a tree at the start of the children of the current node" pending
   describe "treeCursorAddChildAtEndAndSelect" $ do
     it "produces valid cursors " $ producesValidsOnValids2 $ treeCursorAddChildAtEndAndSelect @Bool

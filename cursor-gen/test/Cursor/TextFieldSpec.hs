@@ -4,100 +4,111 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.TextFieldSpec
-  ( spec
-  ) where
-
-import Test.Hspec
-
-import Test.QuickCheck
-import Test.Validity
+  ( spec,
+  )
+where
 
 -- import Test.Validity.Optics
-import Text.Show.Pretty (ppShow)
-
-import qualified Data.Text as T
-
-import qualified Data.List.NonEmpty as NE
 
 import Control.Monad
-
 import Cursor.List.NonEmpty
 import Cursor.TextField
 import Cursor.TextField.Gen ()
 import Cursor.Types
+import qualified Data.List.NonEmpty as NE
+import qualified Data.Text as T
+import Test.Hspec
+import Test.QuickCheck
+import Test.Validity
+import Text.Show.Pretty (ppShow)
 
 spec :: Spec
 spec = do
   eqSpecOnValid @TextFieldCursor
   genValidSpec @TextFieldCursor
   describe "Validity TextFieldCursor" $ do
-    it "consider a textfield with a newline in the previous lines invalid" $
-      forAllValid $ \tc ->
+    it "consider a textfield with a newline in the previous lines invalid"
+      $ forAllValid
+      $ \tc ->
         shouldBeInvalid $
-        TextFieldCursor
-          { textFieldCursorNonEmpty =
-              NonEmptyCursor
-                {nonEmptyCursorPrev = ["\n"], nonEmptyCursorCurrent = tc, nonEmptyCursorNext = []}
-          }
-    it "consider a textfield with a newline in the next lines invalid" $
-      forAllValid $ \tc ->
+          TextFieldCursor
+            { textFieldCursorNonEmpty =
+                NonEmptyCursor
+                  { nonEmptyCursorPrev = ["\n"],
+                    nonEmptyCursorCurrent = tc,
+                    nonEmptyCursorNext = []
+                  }
+            }
+    it "consider a textfield with a newline in the next lines invalid"
+      $ forAllValid
+      $ \tc ->
         shouldBeInvalid $
-        TextFieldCursor
-          { textFieldCursorNonEmpty =
-              NonEmptyCursor
-                {nonEmptyCursorPrev = [], nonEmptyCursorCurrent = tc, nonEmptyCursorNext = ["\n"]}
-          }
+          TextFieldCursor
+            { textFieldCursorNonEmpty =
+                NonEmptyCursor
+                  { nonEmptyCursorPrev = [],
+                    nonEmptyCursorCurrent = tc,
+                    nonEmptyCursorNext = ["\n"]
+                  }
+            }
   describe "makeTextFieldCursor" $ do
     it "produces a valid cursor for \"\\n\"" $ shouldBeValid $ makeTextFieldCursor "\n"
     it "produces a valid cursor for \"\\n\\n\"" $ shouldBeValid $ makeTextFieldCursor "\n\n"
     it "produces valid cursors" $ producesValidsOnValids makeTextFieldCursor
   describe "makeTextFieldCursorWithSelection" $ do
-    it "produces a valid cursor for \"\\n\"" $
-      forAllValid $ \x ->
+    it "produces a valid cursor for \"\\n\""
+      $ forAllValid
+      $ \x ->
         forAllValid $ \y -> shouldBeValid $ makeTextFieldCursorWithSelection x y "\n"
-    it "produces a valid cursor for \"\\n\\n\"" $
-      forAllValid $ \x ->
+    it "produces a valid cursor for \"\\n\\n\""
+      $ forAllValid
+      $ \x ->
         forAllValid $ \y -> shouldBeValid $ makeTextFieldCursorWithSelection x y "\n\n"
     it "produces valid cursors" $ producesValidsOnValids3 makeTextFieldCursorWithSelection
-    it "is the inverse of rebuildTextFieldCursor when using the current selection" $
-      forAllValid $ \tfc -> do
+    it "is the inverse of rebuildTextFieldCursor when using the current selection"
+      $ forAllValid
+      $ \tfc -> do
         let (x, y) = textFieldCursorSelection tfc
             t = rebuildTextFieldCursor tfc
         case makeTextFieldCursorWithSelection x y t of
           Nothing -> expectationFailure "makeTextFieldCursorWithSelection should not have failed."
           Just tfc' ->
-            unless (tfc' == tfc) $
-            expectationFailure $
-            unlines
-              [ "expected"
-              , ppShow tfc
-              , "actual"
-              , ppShow tfc'
-              , "The selection of the original (expected) cursor was:"
-              , show (x, y)
-              , "The rebuild text was:"
-              , show t
-              ]
+            unless (tfc' == tfc)
+              $ expectationFailure
+              $ unlines
+                [ "expected",
+                  ppShow tfc,
+                  "actual",
+                  ppShow tfc',
+                  "The selection of the original (expected) cursor was:",
+                  show (x, y),
+                  "The rebuild text was:",
+                  show t
+                ]
   describe "rebuildTextFieldCursorLines" $ do
     it "produces valid lists" $ producesValidsOnValids rebuildTextFieldCursorLines
-    it "produces texts without newlines" $
-      forAllValid $ \tfc -> do
+    it "produces texts without newlines"
+      $ forAllValid
+      $ \tfc -> do
         let ls = NE.toList $ rebuildTextFieldCursorLines tfc
-        unless (all (T.all (/= '\n')) ls) $
-          expectationFailure $
-          unlines $ "Some of the following lines contain a newline:" : map show ls
+        unless (all (T.all (/= '\n')) ls)
+          $ expectationFailure
+          $ unlines
+          $ "Some of the following lines contain a newline:" : map show ls
   describe "rebuildTextFieldCursor" $ do
     it "produces valid texts" $ producesValidsOnValids rebuildTextFieldCursor
     it "is the inverse of makeTextFieldCursor" $
       inverseFunctionsOnValid makeTextFieldCursor rebuildTextFieldCursor
-    it "is the inverse of makeTextFieldCursorWithSelection for integers, for any index" $
-      forAllValid $ \x ->
+    it "is the inverse of makeTextFieldCursorWithSelection for integers, for any index"
+      $ forAllValid
+      $ \x ->
         forAllValid $ \y ->
           inverseFunctionsIfFirstSucceedsOnValid
             (makeTextFieldCursorWithSelection x y)
             rebuildTextFieldCursor
-  describe "textFieldCursorSelection" $
-    it "produces valid tuples" $ producesValidsOnValids textFieldCursorSelection
+  describe "textFieldCursorSelection"
+    $ it "produces valid tuples"
+    $ producesValidsOnValids textFieldCursorSelection
   describe "emptyTextFieldCursor" $ it "is valid" $ shouldBeValid emptyTextFieldCursor
   describe "nullTextFieldCursor" $ it "produces valid" $ producesValidsOnValids nullTextFieldCursor
   describe "textFieldCursorSelectPrevLine" $ do
@@ -132,18 +143,21 @@ spec = do
       producesValidsOnValids2 textFieldCursorSelectIndexOnLine
     it "selects the given index on the current line" pending
   describe "textFieldCursorInsertChar" $ do
-    it "produces valid cursors" $
-      forAllValid $ \d -> producesValidsOnValids (textFieldCursorInsertChar d)
+    it "produces valid cursors"
+      $ forAllValid
+      $ \d -> producesValidsOnValids (textFieldCursorInsertChar d)
     it "inserts a character before the cursor on the current line" pending
   describe "textFieldCursorAppendChar" $ do
-    it "produces valid cursors" $
-      forAllValid $ \d -> producesValidsOnValids (textFieldCursorAppendChar d)
+    it "produces valid cursors"
+      $ forAllValid
+      $ \d -> producesValidsOnValids (textFieldCursorAppendChar d)
     it "inserts a character after the cursor on the currrent line" pending
   describe "textFieldCursorInsertNewline" $ do
     it "produces valid cursors" $ producesValidsOnValids textFieldCursorInsertNewline
     it "inserts a new line" pending
-  describe "textFieldCursorAppendNewline" $
-    it "produces valid cursors" $ producesValidsOnValids textFieldCursorAppendNewline
+  describe "textFieldCursorAppendNewline"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids textFieldCursorAppendNewline
   describe "textFieldCursorRemove" $ do
     it "produces valid cursors" $ producesValidsOnValids textFieldCursorRemove
     it "removes empty text field cursor" $
@@ -169,14 +183,14 @@ isMovementM func =
       Just tfc' ->
         let tf = rebuildTextFieldCursor tfc
             tf' = rebuildTextFieldCursor tfc'
-         in unless (tf == tf') $
-            expectationFailure $
-            unlines
-              [ "Cursor before:\n" ++ show tfc
-              , "TextField before:  \n" ++ show tf
-              , "Cursor after: \n" ++ show tfc'
-              , "TextField after:   \n" ++ show tf'
-              ]
+         in unless (tf == tf')
+              $ expectationFailure
+              $ unlines
+                [ "Cursor before:\n" ++ show tfc,
+                  "TextField before:  \n" ++ show tf,
+                  "Cursor after: \n" ++ show tfc',
+                  "TextField after:   \n" ++ show tf'
+                ]
 
 isMovement :: (TextFieldCursor -> TextFieldCursor) -> Property
 isMovement func =

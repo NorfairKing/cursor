@@ -1,43 +1,42 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Simple.List.NonEmpty
-  ( NonEmptyCursor
-  , NEC.nonEmptyCursorPrev
-  , NEC.nonEmptyCursorCurrent
-  , NEC.nonEmptyCursorNext
-  , makeNonEmptyCursor
-  , makeNonEmptyCursorWithSelection
-  , NEC.singletonNonEmptyCursor
-  , rebuildNonEmptyCursor
-  , mapNonEmptyCursor
-  , NEC.nonEmptyCursorElemL
-  , nonEmptyCursorSelectPrev
-  , nonEmptyCursorSelectNext
-  , nonEmptyCursorSelectFirst
-  , nonEmptyCursorSelectLast
-  , NEC.nonEmptyCursorSelection
-  , nonEmptyCursorSelectIndex
-  , NEC.nonEmptyCursorInsert
-  , NEC.nonEmptyCursorAppend
-  , nonEmptyCursorInsertAndSelect
-  , nonEmptyCursorAppendAndSelect
-  , NEC.nonEmptyCursorInsertAtStart
-  , NEC.nonEmptyCursorAppendAtEnd
-  , nonEmptyCursorInsertAtStartAndSelect
-  , nonEmptyCursorAppendAtEndAndSelect
-  , nonEmptyCursorRemoveElemAndSelectPrev
-  , nonEmptyCursorDeleteElemAndSelectNext
-  , nonEmptyCursorRemoveElem
-  , nonEmptyCursorDeleteElem
-  , nonEmptyCursorSearch
-  , nonEmptyCursorSelectOrAdd
-  ) where
-
-import Data.List.NonEmpty (NonEmpty(..))
-
-import Cursor.Types
+  ( NonEmptyCursor,
+    NEC.nonEmptyCursorPrev,
+    NEC.nonEmptyCursorCurrent,
+    NEC.nonEmptyCursorNext,
+    makeNonEmptyCursor,
+    makeNonEmptyCursorWithSelection,
+    NEC.singletonNonEmptyCursor,
+    rebuildNonEmptyCursor,
+    mapNonEmptyCursor,
+    NEC.nonEmptyCursorElemL,
+    nonEmptyCursorSelectPrev,
+    nonEmptyCursorSelectNext,
+    nonEmptyCursorSelectFirst,
+    nonEmptyCursorSelectLast,
+    NEC.nonEmptyCursorSelection,
+    nonEmptyCursorSelectIndex,
+    NEC.nonEmptyCursorInsert,
+    NEC.nonEmptyCursorAppend,
+    nonEmptyCursorInsertAndSelect,
+    nonEmptyCursorAppendAndSelect,
+    NEC.nonEmptyCursorInsertAtStart,
+    NEC.nonEmptyCursorAppendAtEnd,
+    nonEmptyCursorInsertAtStartAndSelect,
+    nonEmptyCursorAppendAtEndAndSelect,
+    nonEmptyCursorRemoveElemAndSelectPrev,
+    nonEmptyCursorDeleteElemAndSelectNext,
+    nonEmptyCursorRemoveElem,
+    nonEmptyCursorDeleteElem,
+    nonEmptyCursorSearch,
+    nonEmptyCursorSelectOrAdd,
+  )
+where
 
 import qualified Cursor.List.NonEmpty as NEC
+import Cursor.Types
+import Data.List.NonEmpty (NonEmpty (..))
 
 -- | A 'nonempty list' cursor
 type NonEmptyCursor a = NEC.NonEmptyCursor a a
@@ -82,11 +81,11 @@ nonEmptyCursorAppendAtEndAndSelect :: a -> NonEmptyCursor a -> NonEmptyCursor a
 nonEmptyCursorAppendAtEndAndSelect = NEC.nonEmptyCursorAppendAtEndAndSelect id id
 
 nonEmptyCursorRemoveElemAndSelectPrev ::
-     NonEmptyCursor a -> Maybe (DeleteOrUpdate (NonEmptyCursor a))
+  NonEmptyCursor a -> Maybe (DeleteOrUpdate (NonEmptyCursor a))
 nonEmptyCursorRemoveElemAndSelectPrev = NEC.nonEmptyCursorRemoveElemAndSelectPrev id
 
 nonEmptyCursorDeleteElemAndSelectNext ::
-     NonEmptyCursor a -> Maybe (DeleteOrUpdate (NonEmptyCursor a))
+  NonEmptyCursor a -> Maybe (DeleteOrUpdate (NonEmptyCursor a))
 nonEmptyCursorDeleteElemAndSelectNext = NEC.nonEmptyCursorDeleteElemAndSelectNext id
 
 nonEmptyCursorRemoveElem :: NonEmptyCursor a -> DeleteOrUpdate (NonEmptyCursor a)

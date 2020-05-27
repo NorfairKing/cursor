@@ -1,20 +1,18 @@
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.Tree.Swap
-  ( treeCursorSwapPrev
-  , treeCursorSwapNext
-  , SwapResult(..)
-  ) where
-
-import Data.Validity
-
-import GHC.Generics (Generic)
+  ( treeCursorSwapPrev,
+    treeCursorSwapNext,
+    SwapResult (..),
+  )
+where
 
 import Control.DeepSeq
-
 import Cursor.Tree.Types
+import Data.Validity
+import GHC.Generics (Generic)
 
 -- | Swaps the current node with the previous node on the same level
 --
@@ -38,9 +36,9 @@ treeCursorSwapPrev tc =
     Just ta ->
       case treeAboveLefts ta of
         [] -> NoSiblingsToSwapWith
-        (t:ts) ->
+        (t : ts) ->
           Swapped $
-          tc {treeAbove = Just ta {treeAboveLefts = ts, treeAboveRights = t : treeAboveRights ta}}
+            tc {treeAbove = Just ta {treeAboveLefts = ts, treeAboveRights = t : treeAboveRights ta}}
 
 -- | Swaps the current node with the next node on the same level
 --
@@ -64,9 +62,9 @@ treeCursorSwapNext tc =
     Just ta ->
       case treeAboveRights ta of
         [] -> NoSiblingsToSwapWith
-        (t:ts) ->
+        (t : ts) ->
           Swapped $
-          tc {treeAbove = Just ta {treeAboveLefts = t : treeAboveLefts ta, treeAboveRights = ts}}
+            tc {treeAbove = Just ta {treeAboveLefts = t : treeAboveLefts ta, treeAboveRights = ts}}
 
 data SwapResult a
   = SwapperIsTopNode

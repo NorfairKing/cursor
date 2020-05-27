@@ -2,32 +2,33 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Text
-  ( TextCursor(..)
-  , emptyTextCursor
-  , makeTextCursor
-  , makeTextCursorWithSelection
-  , rebuildTextCursor
-  , textCursorNull
-  , textCursorLength
-  , textCursorIndex
-  , textCursorSelectPrev
-  , textCursorSelectNext
-  , textCursorSelectIndex
-  , textCursorSelectStart
-  , textCursorSelectEnd
-  , textCursorPrevChar
-  , textCursorNextChar
-  , textCursorInsert
-  , textCursorAppend
-  , textCursorInsertString
-  , textCursorAppendString
-  , textCursorInsertText
-  , textCursorAppendText
-  , textCursorRemove
-  , textCursorDelete
-  , textCursorSplit
-  , textCursorCombine
-  ) where
+  ( TextCursor (..),
+    emptyTextCursor,
+    makeTextCursor,
+    makeTextCursorWithSelection,
+    rebuildTextCursor,
+    textCursorNull,
+    textCursorLength,
+    textCursorIndex,
+    textCursorSelectPrev,
+    textCursorSelectNext,
+    textCursorSelectIndex,
+    textCursorSelectStart,
+    textCursorSelectEnd,
+    textCursorPrevChar,
+    textCursorNextChar,
+    textCursorInsert,
+    textCursorAppend,
+    textCursorInsertString,
+    textCursorAppendString,
+    textCursorInsertText,
+    textCursorAppendText,
+    textCursorRemove,
+    textCursorDelete,
+    textCursorSplit,
+    textCursorCombine,
+  )
+where
 
 import Control.DeepSeq
 import Cursor.List
@@ -39,20 +40,20 @@ import GHC.Generics (Generic)
 import Lens.Micro
 
 -- | A cursor for single-line texts
-newtype TextCursor =
-  TextCursor
-    { textCursorList :: ListCursor Char
-    }
+newtype TextCursor
+  = TextCursor
+      { textCursorList :: ListCursor Char
+      }
   deriving (Show, Eq, Generic)
 
 instance Validity TextCursor where
   validate (TextCursor lc) =
     mconcat
-      [ genericValidate lc
-      , decorateList (rebuildListCursor lc) $ \c ->
+      [ genericValidate lc,
+        decorateList (rebuildListCursor lc) $ \c ->
           mconcat
-            [ declare "The character is not a newline character" $ c /= '\n'
-            , declare "The character is a safe character" $ isSafeChar c
+            [ declare "The character is not a newline character" $ c /= '\n',
+              declare "The character is a safe character" $ isSafeChar c
             ]
       ]
 
@@ -74,7 +75,7 @@ rebuildTextCursor :: TextCursor -> Text
 rebuildTextCursor = T.pack . rebuildListCursor . textCursorList
 
 textCursorListCursorL ::
-     Functor f => (ListCursor Char -> f (ListCursor Char)) -> TextCursor -> f TextCursor
+  Functor f => (ListCursor Char -> f (ListCursor Char)) -> TextCursor -> f TextCursor
 textCursorListCursorL = lens textCursorList (\tc lc -> tc {textCursorList = lc})
 
 textCursorNull :: TextCursor -> Bool

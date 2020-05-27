@@ -2,15 +2,14 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.List.Gen
-  ( listCursorWithGen
-  , listCursorWithIndex0
-  ) where
-
-import Test.QuickCheck
+  ( listCursorWithGen,
+    listCursorWithIndex0,
+  )
+where
 
 import Cursor.List
-
 import Data.GenValidity
+import Test.QuickCheck
 
 instance GenUnchecked a => GenUnchecked (ListCursor a) where
   genUnchecked =

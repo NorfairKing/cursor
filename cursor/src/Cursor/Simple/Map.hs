@@ -2,45 +2,45 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Simple.Map
-  ( MapCursor
-  , MC.mapCursorList
-  , makeMapCursor
-  , makeMapCursorWithSelection
-  , MC.singletonMapCursorKey
-  , MC.singletonMapCursorValue
-  , rebuildMapCursor
-  , mapMapCursor
-  , MC.mapCursorNonEmptyCursorL
-  , MC.mapCursorElemL
-  , mapCursorSelectKey
-  , mapCursorSelectValue
-  , mapCursorToggleSelected
-  , mapCursorSelectPrev
-  , mapCursorSelectNext
-  , mapCursorSelectFirst
-  , mapCursorSelectLast
-  , MC.mapCursorSelection
-  , mapCursorSelectIndex
-  , MC.mapCursorInsert
-  , MC.mapCursorAppend
-  , mapCursorInsertAndSelectKey
-  , mapCursorAppendAndSelectKey
-  , mapCursorInsertAndSelectValue
-  , mapCursorAppendAndSelectValue
-  , mapCursorRemoveElemAndSelectPrev
-  , mapCursorDeleteElemAndSelectNext
-  , mapCursorRemoveElem
-  , mapCursorDeleteElem
-  , mapCursorSearch
-  , mapCursorSelectOrAdd
-  , module Cursor.Simple.Map.KeyValue
-  ) where
-
-import Data.List.NonEmpty (NonEmpty(..))
+  ( MapCursor,
+    MC.mapCursorList,
+    makeMapCursor,
+    makeMapCursorWithSelection,
+    MC.singletonMapCursorKey,
+    MC.singletonMapCursorValue,
+    rebuildMapCursor,
+    mapMapCursor,
+    MC.mapCursorNonEmptyCursorL,
+    MC.mapCursorElemL,
+    mapCursorSelectKey,
+    mapCursorSelectValue,
+    mapCursorToggleSelected,
+    mapCursorSelectPrev,
+    mapCursorSelectNext,
+    mapCursorSelectFirst,
+    mapCursorSelectLast,
+    MC.mapCursorSelection,
+    mapCursorSelectIndex,
+    MC.mapCursorInsert,
+    MC.mapCursorAppend,
+    mapCursorInsertAndSelectKey,
+    mapCursorAppendAndSelectKey,
+    mapCursorInsertAndSelectValue,
+    mapCursorAppendAndSelectValue,
+    mapCursorRemoveElemAndSelectPrev,
+    mapCursorDeleteElemAndSelectNext,
+    mapCursorRemoveElem,
+    mapCursorDeleteElem,
+    mapCursorSearch,
+    mapCursorSelectOrAdd,
+    module Cursor.Simple.Map.KeyValue,
+  )
+where
 
 import qualified Cursor.Map as MC
 import Cursor.Simple.Map.KeyValue
 import Cursor.Types
+import Data.List.NonEmpty (NonEmpty (..))
 
 type MapCursor k v = MC.MapCursor k v k v
 

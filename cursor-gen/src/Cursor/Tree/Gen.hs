@@ -4,17 +4,15 @@
 
 module Cursor.Tree.Gen
   (
-  ) where
-
-import qualified Data.List.NonEmpty as NE
-import Data.Maybe
-
-import Data.GenValidity
-import Data.GenValidity.Containers ()
-
-import Test.QuickCheck
+  )
+where
 
 import Cursor.Tree
+import Data.GenValidity
+import Data.GenValidity.Containers ()
+import qualified Data.List.NonEmpty as NE
+import Data.Maybe
+import Test.QuickCheck
 
 instance GenUnchecked TreeCursorSelection
 
@@ -96,8 +94,9 @@ instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (TreeCursor a b) where
   shrinkUnchecked tc =
     let opts =
           catMaybes
-            [ do ta <- treeAbove tc
-                 pure $ tc {treeAbove = treeAboveAbove ta}
+            [ do
+                ta <- treeAbove tc
+                pure $ tc {treeAbove = treeAboveAbove ta}
             ]
      in opts ++ genericShrinkUnchecked tc
 

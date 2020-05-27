@@ -1,14 +1,14 @@
 module Cursor.Tree.Collapse
-  ( treeCursorOpenCurrentForest
-  , treeCursorCloseCurrentForest
-  , treeCursorToggleCurrentForest
-  , treeCursorOpenCurrentForestRecursively
-  , treeCursorToggleCurrentForestRecursively
-  ) where
-
-import qualified Data.List.NonEmpty as NE
+  ( treeCursorOpenCurrentForest,
+    treeCursorCloseCurrentForest,
+    treeCursorToggleCurrentForest,
+    treeCursorOpenCurrentForestRecursively,
+    treeCursorToggleCurrentForestRecursively,
+  )
+where
 
 import Cursor.Tree.Types
+import qualified Data.List.NonEmpty as NE
 
 treeCursorOpenCurrentForest :: TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorOpenCurrentForest tc =

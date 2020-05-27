@@ -1,5 +1,6 @@
 module Cursor.Simple.Tree.Gen
   (
-  ) where
+  )
+where
 
 import Cursor.Tree.Gen ()

@@ -1,5 +1,6 @@
 module Cursor.Simple.Forest.Gen
   (
-  ) where
+  )
+where
 
 import Cursor.Forest.Gen ()

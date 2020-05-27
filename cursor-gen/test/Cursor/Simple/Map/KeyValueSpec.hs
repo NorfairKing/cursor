@@ -4,29 +4,30 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Simple.Map.KeyValueSpec
-  ( spec
-  ) where
+  ( spec,
+  )
+where
 
+import Cursor.Simple.Map.KeyValue
+import Cursor.Simple.Map.KeyValue.Gen ()
 import Test.Hspec
 import Test.QuickCheck
 import Test.Validity
 
-import Cursor.Simple.Map.KeyValue
-import Cursor.Simple.Map.KeyValue.Gen ()
-
 spec :: Spec
 spec = do
-  describe "makeKeyValueCursorKey" $
-    it "produces valid cursors" $
-    producesValidsOnValids2 (makeKeyValueCursorKey @Bool @Bool @Bool @Bool)
-  describe "makeKeyValueCursorValue" $
-    it "produces valid cursors" $
-    producesValidsOnValids2 (makeKeyValueCursorValue @Bool @Bool @Bool @Bool)
-  describe "rebuildKeyValueCursor" $
-    it "produces valid tuples" $ producesValidsOnValids (rebuildKeyValueCursor @Bool @Bool)
-  describe "keyValueCursorSelection" $
-    it "produces valid selections" $
-    producesValidsOnValids (keyValueCursorSelection @Bool @Bool @Bool @Bool)
+  describe "makeKeyValueCursorKey"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids2 (makeKeyValueCursorKey @Bool @Bool @Bool @Bool)
+  describe "makeKeyValueCursorValue"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids2 (makeKeyValueCursorValue @Bool @Bool @Bool @Bool)
+  describe "rebuildKeyValueCursor"
+    $ it "produces valid tuples"
+    $ producesValidsOnValids (rebuildKeyValueCursor @Bool @Bool)
+  describe "keyValueCursorSelection"
+    $ it "produces valid selections"
+    $ producesValidsOnValids (keyValueCursorSelection @Bool @Bool @Bool @Bool)
   describe "keyValueCursorSelectKey" $ do
     it "produces valid cursors" $ producesValidsOnValids (keyValueCursorSelectKey @Bool @Bool)
     it "is a movement" $ isMovement keyValueCursorSelectKey
@@ -40,5 +41,5 @@ spec = do
 isMovement :: (forall k v. KeyValueCursor k v -> KeyValueCursor k v) -> Property
 isMovement func =
   forAllValid $ \lec ->
-    rebuildKeyValueCursor (lec :: KeyValueCursor Bool Bool) `shouldBe`
-    rebuildKeyValueCursor (func lec)
+    rebuildKeyValueCursor (lec :: KeyValueCursor Bool Bool)
+      `shouldBe` rebuildKeyValueCursor (func lec)

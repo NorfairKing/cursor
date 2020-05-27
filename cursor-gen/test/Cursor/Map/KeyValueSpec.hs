@@ -1,15 +1,14 @@
 {-# LANGUAGE TypeApplications #-}
 
 module Cursor.Map.KeyValueSpec
-  ( spec
-  ) where
-
-import Test.Hspec
-
-import Test.Validity
+  ( spec,
+  )
+where
 
 import Cursor.Map.KeyValue
 import Cursor.Map.KeyValue.Gen ()
+import Test.Hspec
+import Test.Validity
 
 spec :: Spec
 spec = do

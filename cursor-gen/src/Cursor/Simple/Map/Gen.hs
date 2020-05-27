@@ -1,5 +1,6 @@
 module Cursor.Simple.Map.Gen
   (
-  ) where
+  )
+where
 
 import Cursor.Map.Gen ()

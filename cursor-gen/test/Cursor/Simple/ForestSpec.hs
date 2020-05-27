@@ -4,11 +4,12 @@
 {-# LANGUAGE TypeApplications #-}
 
 module Cursor.Simple.ForestSpec
-  ( spec
-  ) where
+  ( spec,
+  )
+where
 
 import Control.Monad (unless)
-import Cursor.Forest (ForestCursor(..))
+import Cursor.Forest (ForestCursor (..))
 import Cursor.List.NonEmpty
 import Cursor.Simple.Forest hiding (ForestCursor)
 import qualified Cursor.Simple.Forest as SFC (ForestCursor)
@@ -26,10 +27,12 @@ spec :: Spec
 spec = do
   eqSpec @(SFC.ForestCursor Int)
   genValidSpec @(SFC.ForestCursor Bool)
-  modifyMaxSize (`quot` 2) $
-    modifyMaxSuccess (`quot` 2) $ shrinkValidSpecWithLimit @(SFC.ForestCursor Bool) 10
-  describe "makeForestCursor" $
-    it "produces valid cursors" $ producesValidsOnValids (makeForestCursor @Bool)
+  modifyMaxSize (`quot` 2)
+    $ modifyMaxSuccess (`quot` 2)
+    $ shrinkValidSpecWithLimit @(SFC.ForestCursor Bool) 10
+  describe "makeForestCursor"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids (makeForestCursor @Bool)
   describe "rebuildForestCursor" $ do
     it "produces valid forests" $ producesValidsOnValids (rebuildForestCursor @Bool)
     it "is the inverse of makeForestCursor for integers" $
@@ -41,10 +44,11 @@ spec = do
     it "returns the index of the currently selected element" pending
   describe "forestCursorSelectIndex" $ do
     it "produces valid cursors" $ producesValidsOnValids2 (forestCursorSelectIndex @Bool)
-    it "is the identity function when given the current selection" $
-      forAllValid $ \fc ->
-        forestCursorSelectIndex (forestCursorSelection fc) fc `shouldBe`
-        Just (fc :: SFC.ForestCursor Bool)
+    it "is the identity function when given the current selection"
+      $ forAllValid
+      $ \fc ->
+        forestCursorSelectIndex (forestCursorSelection fc) fc
+          `shouldBe` Just (fc :: SFC.ForestCursor Bool)
     it "returns selects the element at the given index" pending
   movementsSpec
   collapseSpec
@@ -80,42 +84,45 @@ movementsSpec = do
       --   > 1
       --     > 2 <- expected end cursor
       --   > 3 <- start cursor
-     do
-      let start =
-            ForestCursor
-              { forestCursorListCursor =
-                  NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 1 $ openForest [CNode 2 emptyCForest]]
-                    , nonEmptyCursorCurrent =
-                        TreeCursor
-                          {treeAbove = Nothing, treeCurrent = 3 :: Int, treeBelow = emptyCForest}
-                    , nonEmptyCursorNext = []
-                    }
-              }
-          expected =
-            ForestCursor
-              { forestCursorListCursor =
-                  NonEmptyCursor
-                    { nonEmptyCursorPrev = []
-                    , nonEmptyCursorCurrent =
-                        TreeCursor
-                          { treeAbove =
-                              Just
-                                TreeAbove
-                                  { treeAboveAbove = Nothing
-                                  , treeAboveLefts = []
-                                  , treeAboveNode = 1
-                                  , treeAboveRights = []
-                                  }
-                          , treeCurrent = 2
-                          , treeBelow = emptyCForest
-                          }
-                    , nonEmptyCursorNext = [CNode 3 emptyCForest]
-                    }
-              }
-      case forestCursorSelectPrev start of
-        Nothing -> expectationFailure "forestCursorSelectPrev should not have failed."
-        Just actual -> actual `forestShouldBe` expected
+      do
+        let start =
+              ForestCursor
+                { forestCursorListCursor =
+                    NonEmptyCursor
+                      { nonEmptyCursorPrev = [CNode 1 $ openForest [CNode 2 emptyCForest]],
+                        nonEmptyCursorCurrent =
+                          TreeCursor
+                            { treeAbove = Nothing,
+                              treeCurrent = 3 :: Int,
+                              treeBelow = emptyCForest
+                            },
+                        nonEmptyCursorNext = []
+                      }
+                }
+            expected =
+              ForestCursor
+                { forestCursorListCursor =
+                    NonEmptyCursor
+                      { nonEmptyCursorPrev = [],
+                        nonEmptyCursorCurrent =
+                          TreeCursor
+                            { treeAbove =
+                                Just
+                                  TreeAbove
+                                    { treeAboveAbove = Nothing,
+                                      treeAboveLefts = [],
+                                      treeAboveNode = 1,
+                                      treeAboveRights = []
+                                    },
+                              treeCurrent = 2,
+                              treeBelow = emptyCForest
+                            },
+                        nonEmptyCursorNext = [CNode 3 emptyCForest]
+                      }
+                }
+        case forestCursorSelectPrev start of
+          Nothing -> expectationFailure "forestCursorSelectPrev should not have failed."
+          Just actual -> actual `forestShouldBe` expected
   describe "forestCursorSelectNext" $ do
     it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectNext @Bool
     it "is a movement" $ isMovementM forestCursorSelectNext
@@ -124,42 +131,45 @@ movementsSpec = do
       --   > 1
       --     > 2 <- start cursor
       --   > 3 <- expected end cursor
-     do
-      let start =
-            ForestCursor
-              { forestCursorListCursor =
-                  NonEmptyCursor
-                    { nonEmptyCursorPrev = []
-                    , nonEmptyCursorCurrent =
-                        TreeCursor
-                          { treeAbove =
-                              Just
-                                TreeAbove
-                                  { treeAboveAbove = Nothing
-                                  , treeAboveLefts = []
-                                  , treeAboveNode = 1
-                                  , treeAboveRights = []
-                                  }
-                          , treeCurrent = 2
-                          , treeBelow = emptyCForest
-                          }
-                    , nonEmptyCursorNext = [CNode 3 emptyCForest]
-                    }
-              }
-          expected =
-            ForestCursor
-              { forestCursorListCursor =
-                  NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 1 $ openForest [CNode 2 emptyCForest]]
-                    , nonEmptyCursorCurrent =
-                        TreeCursor
-                          {treeAbove = Nothing, treeCurrent = 3 :: Int, treeBelow = emptyCForest}
-                    , nonEmptyCursorNext = []
-                    }
-              }
-      case forestCursorSelectNext start of
-        Nothing -> expectationFailure "forestCursorSelectNext should not have failed."
-        Just actual -> actual `forestShouldBe` expected
+      do
+        let start =
+              ForestCursor
+                { forestCursorListCursor =
+                    NonEmptyCursor
+                      { nonEmptyCursorPrev = [],
+                        nonEmptyCursorCurrent =
+                          TreeCursor
+                            { treeAbove =
+                                Just
+                                  TreeAbove
+                                    { treeAboveAbove = Nothing,
+                                      treeAboveLefts = [],
+                                      treeAboveNode = 1,
+                                      treeAboveRights = []
+                                    },
+                              treeCurrent = 2,
+                              treeBelow = emptyCForest
+                            },
+                        nonEmptyCursorNext = [CNode 3 emptyCForest]
+                      }
+                }
+            expected =
+              ForestCursor
+                { forestCursorListCursor =
+                    NonEmptyCursor
+                      { nonEmptyCursorPrev = [CNode 1 $ openForest [CNode 2 emptyCForest]],
+                        nonEmptyCursorCurrent =
+                          TreeCursor
+                            { treeAbove = Nothing,
+                              treeCurrent = 3 :: Int,
+                              treeBelow = emptyCForest
+                            },
+                        nonEmptyCursorNext = []
+                      }
+                }
+        case forestCursorSelectNext start of
+          Nothing -> expectationFailure "forestCursorSelectNext should not have failed."
+          Just actual -> actual `forestShouldBe` expected
   describe "forestCursorSelectPrevOnSameLevel" $ do
     it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectPrevOnSameLevel @Bool
     it "is a movement" $ isMovementM forestCursorSelectPrevOnSameLevel
@@ -190,8 +200,9 @@ movementsSpec = do
     it "selects the parent" pending
   describe "forestCursorSelectBelowAtPos" $ do
     it "produces valid cursors" $ producesValidsOnValids2 $ forestCursorSelectBelowAtPos @Bool
-    it "is a movement for any index" $
-      forAllValid $ \i -> isMovementM $ forestCursorSelectBelowAtPos i
+    it "is a movement for any index"
+      $ forAllValid
+      $ \i -> isMovementM $ forestCursorSelectBelowAtPos i
     it "selects the child of the selected node at the given position" pending
   describe "forestCursorSelectBelowAtStart" $ do
     it "produces valid cursors" $ producesValidsOnValids $ forestCursorSelectBelowAtStart @Bool
@@ -204,20 +215,26 @@ movementsSpec = do
 
 collapseSpec :: Spec
 collapseSpec = do
-  describe "forestCursorOpenCurrentForest" $
-    it "produces valid cursors" $ producesValidsOnValids $ forestCursorOpenCurrentForest @Bool @Bool
-  describe "forestCursorCloseCurrentForest" $
-    it "produces valid cursors" $
-    producesValidsOnValids $ forestCursorCloseCurrentForest @Bool @Bool
-  describe "forestCursorToggleCurrentForest" $
-    it "produces valid cursors" $
-    producesValidsOnValids $ forestCursorToggleCurrentForest @Bool @Bool
-  describe "forestCursorOpenCurrentForestRecursively" $
-    it "produces valid cursors" $
-    producesValidsOnValids $ forestCursorToggleCurrentForest @Bool @Bool
-  describe "forestCursorToggleCurrentForestRecursively" $
-    it "produces valid cursors" $
-    producesValidsOnValids $ forestCursorToggleCurrentForestRecursively @Bool @Bool
+  describe "forestCursorOpenCurrentForest"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids
+    $ forestCursorOpenCurrentForest @Bool @Bool
+  describe "forestCursorCloseCurrentForest"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids
+    $ forestCursorCloseCurrentForest @Bool @Bool
+  describe "forestCursorToggleCurrentForest"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids
+    $ forestCursorToggleCurrentForest @Bool @Bool
+  describe "forestCursorOpenCurrentForestRecursively"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids
+    $ forestCursorToggleCurrentForest @Bool @Bool
+  describe "forestCursorToggleCurrentForestRecursively"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids
+    $ forestCursorToggleCurrentForestRecursively @Bool @Bool
 
 insertSpec :: Spec
 insertSpec = do
@@ -260,52 +277,64 @@ insertSpec = do
     it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAppendAndSelect @Bool)
     it "appends a node after the currently selected node and selects it" pending
   describe "forestCursorAddChildTreeToNodeAtPos" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids3 $ forestCursorAddChildTreeToNodeAtPos @Bool @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids3
+      $ forestCursorAddChildTreeToNodeAtPos @Bool @Bool
     it "adds a child tree to a node at the given position in the children of that node" pending
   describe "forestCursorAddChildTreeToNodeAtStart" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 $ forestCursorAddChildTreeToNodeAtStart @Bool @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids2
+      $ forestCursorAddChildTreeToNodeAtStart @Bool @Bool
     it "adds a child tree to a node at the start the children of that node" pending
   describe "forestCursorAddChildTreeToNodeAtEnd" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 $ forestCursorAddChildTreeToNodeAtEnd @Bool @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids2
+      $ forestCursorAddChildTreeToNodeAtEnd @Bool @Bool
     it "adds a child tree to a node at the end the children of that node" pending
   describe "forestCursorAddChildToNodeAtPos" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids3 $ forestCursorAddChildToNodeAtPos @Bool @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids3
+      $ forestCursorAddChildToNodeAtPos @Bool @Bool
     it "adds a child to a node at the given position in the children of that node" pending
   describe "forestCursorAddChildToNodeAtStart" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 $ forestCursorAddChildToNodeAtStart @Bool @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids2
+      $ forestCursorAddChildToNodeAtStart @Bool @Bool
     it "adds a child to a node at the start the children of that node" pending
   describe "forestCursorAddChildToNodeAtEnd" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 $ forestCursorAddChildToNodeAtEnd @Bool @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids2
+      $ forestCursorAddChildToNodeAtEnd @Bool @Bool
     it "adds a child to a node at the end the children of that node" pending
   describe "forestCursorAddChildTreeToNodeAtPosAndSelect" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids3 $ forestCursorAddChildTreeToNodeAtPosAndSelect @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids3
+      $ forestCursorAddChildTreeToNodeAtPosAndSelect @Bool
     it "adds a child tree to a node at the given position in the children of that node" pending
   describe "forestCursorAddChildTreeToNodeAtStartAndSelect" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 $ forestCursorAddChildTreeToNodeAtStartAndSelect @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids2
+      $ forestCursorAddChildTreeToNodeAtStartAndSelect @Bool
     it "adds a child tree to a node at the start the children of that node" pending
   describe "forestCursorAddChildTreeToNodeAtEndAndSelect" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 $ forestCursorAddChildTreeToNodeAtEndAndSelect @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids2
+      $ forestCursorAddChildTreeToNodeAtEndAndSelect @Bool
     it "adds a child tree to a node at the end the children of that node" pending
   describe "forestCursorAddChildToNodeAtPosAndSelect" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids3 $ forestCursorAddChildToNodeAtPosAndSelect @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids3
+      $ forestCursorAddChildToNodeAtPosAndSelect @Bool
     it "adds a child to a node at the given position in the children of that node" pending
   describe "forestCursorAddChildToNodeAtStartAndSelect" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 $ forestCursorAddChildToNodeAtStartAndSelect @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids2
+      $ forestCursorAddChildToNodeAtStartAndSelect @Bool
     it "adds a child to a node at the start the children of that node" pending
   describe "forestCursorAddChildToNodeAtEndAndSelect" $ do
-    it "produces valid cursors" $
-      producesValidsOnValids2 $ forestCursorAddChildToNodeAtEndAndSelect @Bool
+    it "produces valid cursors"
+      $ producesValidsOnValids2
+      $ forestCursorAddChildToNodeAtEndAndSelect @Bool
     it "adds a child to a node at the end the children of that node" pending
   describe "forestCursorAddRoot" $ do
     it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAddRoot @Bool)
@@ -320,22 +349,28 @@ swapSpec = do
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 'a' emptyCForest]
-                    , nonEmptyCursorCurrent =
+                    { nonEmptyCursorPrev = [CNode 'a' emptyCForest],
+                      nonEmptyCursorCurrent =
                         TreeCursor
-                          {treeAbove = Nothing, treeCurrent = 'b', treeBelow = emptyCForest}
-                    , nonEmptyCursorNext = []
+                          { treeAbove = Nothing,
+                            treeCurrent = 'b',
+                            treeBelow = emptyCForest
+                          },
+                      nonEmptyCursorNext = []
                     }
               }
           end =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
-                    , nonEmptyCursorCurrent =
+                    { nonEmptyCursorPrev = [],
+                      nonEmptyCursorCurrent =
                         TreeCursor
-                          {treeAbove = Nothing, treeCurrent = 'b', treeBelow = emptyCForest}
-                    , nonEmptyCursorNext = [CNode 'a' emptyCForest]
+                          { treeAbove = Nothing,
+                            treeCurrent = 'b',
+                            treeBelow = emptyCForest
+                          },
+                      nonEmptyCursorNext = [CNode 'a' emptyCForest]
                     }
               }
        in case forestCursorSwapPrev start of
@@ -353,22 +388,28 @@ swapSpec = do
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
-                    , nonEmptyCursorCurrent =
+                    { nonEmptyCursorPrev = [],
+                      nonEmptyCursorCurrent =
                         TreeCursor
-                          {treeAbove = Nothing, treeCurrent = 'a', treeBelow = emptyCForest}
-                    , nonEmptyCursorNext = [CNode 'b' emptyCForest]
+                          { treeAbove = Nothing,
+                            treeCurrent = 'a',
+                            treeBelow = emptyCForest
+                          },
+                      nonEmptyCursorNext = [CNode 'b' emptyCForest]
                     }
               }
           end =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 'b' emptyCForest]
-                    , nonEmptyCursorCurrent =
+                    { nonEmptyCursorPrev = [CNode 'b' emptyCForest],
+                      nonEmptyCursorCurrent =
                         TreeCursor
-                          {treeAbove = Nothing, treeCurrent = 'a', treeBelow = emptyCForest}
-                    , nonEmptyCursorNext = []
+                          { treeAbove = Nothing,
+                            treeCurrent = 'a',
+                            treeBelow = emptyCForest
+                          },
+                      nonEmptyCursorNext = []
                     }
               }
        in case forestCursorSwapNext start of
@@ -384,20 +425,21 @@ deleteSpec :: Spec
 deleteSpec = do
   describe "forestCursorRemoveElemAndSelectPrev" $ do
     it "produces valid cursors" $ producesValidsOnValids (forestCursorRemoveElemAndSelectPrev @Bool)
-    it "works for this simple example" $
-      forAllValid $ \fs ->
+    it "works for this simple example"
+      $ forAllValid
+      $ \fs ->
         let simpleDeleteElemStart =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
-                      , nonEmptyCursorCurrent =
+                      { nonEmptyCursorPrev = [],
+                        nonEmptyCursorCurrent =
                           TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 1 :: Int
-                            , treeBelow = closedForest [Node 2 fs]
-                            }
-                      , nonEmptyCursorNext = []
+                            { treeAbove = Nothing,
+                              treeCurrent = 1 :: Int,
+                              treeBelow = closedForest [Node 2 fs]
+                            },
+                        nonEmptyCursorNext = []
                       }
                 }
          in case forestCursorRemoveElemAndSelectPrev simpleDeleteElemStart of
@@ -411,34 +453,35 @@ deleteSpec = do
     it "removes the selected element and selects the previous element" pending
   describe "forestCursorDeleteElemAndSelectNext" $ do
     it "produces valid cursors" $ producesValidsOnValids (forestCursorDeleteElemAndSelectNext @Bool)
-    it "works for this simple example" $
-      forAllValid $ \fs ->
+    it "works for this simple example"
+      $ forAllValid
+      $ \fs ->
         let simpleDeleteElemStart =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
-                      , nonEmptyCursorCurrent =
+                      { nonEmptyCursorPrev = [],
+                        nonEmptyCursorCurrent =
                           TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 1
-                            , treeBelow = closedForest [Node 2 fs]
-                            }
-                      , nonEmptyCursorNext = []
+                            { treeAbove = Nothing,
+                              treeCurrent = 1,
+                              treeBelow = closedForest [Node 2 fs]
+                            },
+                        nonEmptyCursorNext = []
                       }
                 }
             simpleDeleteElemExpected =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
-                      , nonEmptyCursorCurrent =
+                      { nonEmptyCursorPrev = [],
+                        nonEmptyCursorCurrent =
                           TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 2 :: Int
-                            , treeBelow = closedForest fs
-                            }
-                      , nonEmptyCursorNext = []
+                            { treeAbove = Nothing,
+                              treeCurrent = 2 :: Int,
+                              treeBelow = closedForest fs
+                            },
+                        nonEmptyCursorNext = []
                       }
                 }
          in case forestCursorDeleteElemAndSelectNext simpleDeleteElemStart of
@@ -451,34 +494,35 @@ deleteSpec = do
     it "deletes the selected element and selects the next element" pending
   describe "forestCursorRemoveElem" $ do
     it "produces valid cursors" $ producesValidsOnValids (forestCursorRemoveElem @Bool)
-    it "works for this simple example" $
-      forAllValid $ \fs ->
+    it "works for this simple example"
+      $ forAllValid
+      $ \fs ->
         let simpleDeleteElemStart =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
-                      , nonEmptyCursorCurrent =
+                      { nonEmptyCursorPrev = [],
+                        nonEmptyCursorCurrent =
                           TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 1
-                            , treeBelow = closedForest [Node 2 fs]
-                            }
-                      , nonEmptyCursorNext = []
+                            { treeAbove = Nothing,
+                              treeCurrent = 1,
+                              treeBelow = closedForest [Node 2 fs]
+                            },
+                        nonEmptyCursorNext = []
                       }
                 }
             simpleDeleteElemExpected =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
-                      , nonEmptyCursorCurrent =
+                      { nonEmptyCursorPrev = [],
+                        nonEmptyCursorCurrent =
                           TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 2 :: Int
-                            , treeBelow = closedForest fs
-                            }
-                      , nonEmptyCursorNext = []
+                            { treeAbove = Nothing,
+                              treeCurrent = 2 :: Int,
+                              treeBelow = closedForest fs
+                            },
+                        nonEmptyCursorNext = []
                       }
                 }
          in case forestCursorRemoveElem simpleDeleteElemStart of
@@ -489,34 +533,35 @@ deleteSpec = do
     it "removes the selected element" pending
   describe "forestCursorDeleteElem" $ do
     it "produces valid cursors" $ producesValidsOnValids (forestCursorDeleteElem @Bool)
-    it "works for this simple example" $
-      forAllValid $ \fs ->
+    it "works for this simple example"
+      $ forAllValid
+      $ \fs ->
         let simpleDeleteElemStart =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
-                      , nonEmptyCursorCurrent =
+                      { nonEmptyCursorPrev = [],
+                        nonEmptyCursorCurrent =
                           TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 1
-                            , treeBelow = closedForest [Node 2 fs]
-                            }
-                      , nonEmptyCursorNext = []
+                            { treeAbove = Nothing,
+                              treeCurrent = 1,
+                              treeBelow = closedForest [Node 2 fs]
+                            },
+                        nonEmptyCursorNext = []
                       }
                 }
             simpleDeleteElemExpected =
               ForestCursor
                 { forestCursorListCursor =
                     NonEmptyCursor
-                      { nonEmptyCursorPrev = []
-                      , nonEmptyCursorCurrent =
+                      { nonEmptyCursorPrev = [],
+                        nonEmptyCursorCurrent =
                           TreeCursor
-                            { treeAbove = Nothing
-                            , treeCurrent = 2 :: Int
-                            , treeBelow = closedForest fs
-                            }
-                      , nonEmptyCursorNext = []
+                            { treeAbove = Nothing,
+                              treeCurrent = 2 :: Int,
+                              treeBelow = closedForest fs
+                            },
+                        nonEmptyCursorNext = []
                       }
                 }
          in case forestCursorDeleteElem simpleDeleteElemStart of
@@ -549,21 +594,21 @@ shiftingSpec = do
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
-                    , nonEmptyCursorCurrent =
+                    { nonEmptyCursorPrev = [],
+                      nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove =
                               Just
                                 TreeAbove
-                                  { treeAboveLefts = [CNode 'b' $ closedForest [Node 'c' []]]
-                                  , treeAboveAbove = Nothing
-                                  , treeAboveNode = 'a'
-                                  , treeAboveRights = [CNode 'f' $ closedForest [Node 'g' []]]
-                                  }
-                          , treeCurrent = 'd'
-                          , treeBelow = closedForest [Node 'e' []]
-                          }
-                    , nonEmptyCursorNext = [CNode 'h' emptyCForest]
+                                  { treeAboveLefts = [CNode 'b' $ closedForest [Node 'c' []]],
+                                    treeAboveAbove = Nothing,
+                                    treeAboveNode = 'a',
+                                    treeAboveRights = [CNode 'f' $ closedForest [Node 'g' []]]
+                                  },
+                            treeCurrent = 'd',
+                            treeBelow = closedForest [Node 'e' []]
+                          },
+                      nonEmptyCursorNext = [CNode 'h' emptyCForest]
                     }
               }
           expected =
@@ -572,16 +617,19 @@ shiftingSpec = do
                   NonEmptyCursor
                     { nonEmptyCursorPrev =
                         [ CNode 'a' $
-                          openForest
-                            [ CNode 'b' $
-                              openForest [CNode 'c' emptyCForest, CNode 'e' emptyCForest]
-                            , CNode 'f' $ closedForest [Node 'g' []]
-                            ]
-                        ]
-                    , nonEmptyCursorCurrent =
+                            openForest
+                              [ CNode 'b' $
+                                  openForest [CNode 'c' emptyCForest, CNode 'e' emptyCForest],
+                                CNode 'f' $ closedForest [Node 'g' []]
+                              ]
+                        ],
+                      nonEmptyCursorCurrent =
                         TreeCursor
-                          {treeAbove = Nothing, treeCurrent = 'd', treeBelow = emptyCForest}
-                    , nonEmptyCursorNext = [CNode 'h' emptyCForest]
+                          { treeAbove = Nothing,
+                            treeCurrent = 'd',
+                            treeBelow = emptyCForest
+                          },
+                      nonEmptyCursorNext = [CNode 'h' emptyCForest]
                     }
               }
        in case forestCursorPromoteElem start of
@@ -595,35 +643,35 @@ shiftingSpec = do
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 'a' $ closedForest [Node 'b' []]]
-                    , nonEmptyCursorCurrent =
+                    { nonEmptyCursorPrev = [CNode 'a' $ closedForest [Node 'b' []]],
+                      nonEmptyCursorCurrent =
                         TreeCursor
-                          { treeAbove = Nothing
-                          , treeCurrent = 'c'
-                          , treeBelow = closedForest [Node 'd' []]
-                          }
-                    , nonEmptyCursorNext = [CNode 'e' emptyCForest]
+                          { treeAbove = Nothing,
+                            treeCurrent = 'c',
+                            treeBelow = closedForest [Node 'd' []]
+                          },
+                      nonEmptyCursorNext = [CNode 'e' emptyCForest]
                     }
               }
           expected =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
-                    , nonEmptyCursorCurrent =
+                    { nonEmptyCursorPrev = [],
+                      nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove =
                               Just
                                 TreeAbove
-                                  { treeAboveLefts = [CNode 'b' emptyCForest]
-                                  , treeAboveAbove = Nothing
-                                  , treeAboveNode = 'a'
-                                  , treeAboveRights = [CNode 'd' emptyCForest]
-                                  }
-                          , treeCurrent = 'c'
-                          , treeBelow = emptyCForest
-                          }
-                    , nonEmptyCursorNext = [CNode 'e' emptyCForest]
+                                  { treeAboveLefts = [CNode 'b' emptyCForest],
+                                    treeAboveAbove = Nothing,
+                                    treeAboveNode = 'a',
+                                    treeAboveRights = [CNode 'd' emptyCForest]
+                                  },
+                            treeCurrent = 'c',
+                            treeBelow = emptyCForest
+                          },
+                      nonEmptyCursorNext = [CNode 'e' emptyCForest]
                     }
               }
        in case forestCursorDemoteElem start of
@@ -637,21 +685,21 @@ shiftingSpec = do
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
-                    , nonEmptyCursorCurrent =
+                    { nonEmptyCursorPrev = [],
+                      nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove =
                               Just
                                 TreeAbove
-                                  { treeAboveLefts = [CNode 'b' $ closedForest [Node 'c' []]]
-                                  , treeAboveAbove = Nothing
-                                  , treeAboveNode = 'a'
-                                  , treeAboveRights = [CNode 'f' $ closedForest [Node 'g' []]]
-                                  }
-                          , treeCurrent = 'd'
-                          , treeBelow = closedForest [Node 'e' []]
-                          }
-                    , nonEmptyCursorNext = [CNode 'h' emptyCForest]
+                                  { treeAboveLefts = [CNode 'b' $ closedForest [Node 'c' []]],
+                                    treeAboveAbove = Nothing,
+                                    treeAboveNode = 'a',
+                                    treeAboveRights = [CNode 'f' $ closedForest [Node 'g' []]]
+                                  },
+                            treeCurrent = 'd',
+                            treeBelow = closedForest [Node 'e' []]
+                          },
+                      nonEmptyCursorNext = [CNode 'h' emptyCForest]
                     }
               }
           expected =
@@ -660,18 +708,18 @@ shiftingSpec = do
                   NonEmptyCursor
                     { nonEmptyCursorPrev =
                         [ CNode 'a' $
-                          openForest
-                            [ CNode 'b' $ closedForest [Node 'c' []]
-                            , CNode 'f' $ closedForest [Node 'g' []]
-                            ]
-                        ]
-                    , nonEmptyCursorCurrent =
+                            openForest
+                              [ CNode 'b' $ closedForest [Node 'c' []],
+                                CNode 'f' $ closedForest [Node 'g' []]
+                              ]
+                        ],
+                      nonEmptyCursorCurrent =
                         TreeCursor
-                          { treeAbove = Nothing
-                          , treeCurrent = 'd'
-                          , treeBelow = closedForest [Node 'e' []]
-                          }
-                    , nonEmptyCursorNext = [CNode 'h' emptyCForest]
+                          { treeAbove = Nothing,
+                            treeCurrent = 'd',
+                            treeBelow = closedForest [Node 'e' []]
+                          },
+                      nonEmptyCursorNext = [CNode 'h' emptyCForest]
                     }
               }
        in case forestCursorPromoteSubTree start of
@@ -685,35 +733,35 @@ shiftingSpec = do
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = [CNode 'a' $ closedForest [Node 'b' []]]
-                    , nonEmptyCursorCurrent =
+                    { nonEmptyCursorPrev = [CNode 'a' $ closedForest [Node 'b' []]],
+                      nonEmptyCursorCurrent =
                         TreeCursor
-                          { treeAbove = Nothing
-                          , treeCurrent = 'c'
-                          , treeBelow = closedForest [Node 'd' []]
-                          }
-                    , nonEmptyCursorNext = []
+                          { treeAbove = Nothing,
+                            treeCurrent = 'c',
+                            treeBelow = closedForest [Node 'd' []]
+                          },
+                      nonEmptyCursorNext = []
                     }
               }
           expected =
             ForestCursor
               { forestCursorListCursor =
                   NonEmptyCursor
-                    { nonEmptyCursorPrev = []
-                    , nonEmptyCursorCurrent =
+                    { nonEmptyCursorPrev = [],
+                      nonEmptyCursorCurrent =
                         TreeCursor
                           { treeAbove =
                               Just
                                 TreeAbove
-                                  { treeAboveLefts = [CNode 'b' emptyCForest]
-                                  , treeAboveAbove = Nothing
-                                  , treeAboveNode = 'a'
-                                  , treeAboveRights = []
-                                  }
-                          , treeCurrent = 'c'
-                          , treeBelow = closedForest [Node 'd' []]
-                          }
-                    , nonEmptyCursorNext = []
+                                  { treeAboveLefts = [CNode 'b' emptyCForest],
+                                    treeAboveAbove = Nothing,
+                                    treeAboveNode = 'a',
+                                    treeAboveRights = []
+                                  },
+                            treeCurrent = 'c',
+                            treeBelow = closedForest [Node 'd' []]
+                          },
+                      nonEmptyCursorNext = []
                     }
               }
        in case forestCursorDemoteSubTree start of
@@ -721,80 +769,84 @@ shiftingSpec = do
             Just f -> f `forestShouldBe` expected
     it "demotes the current subtree to the level of its children" pending
   describe "forestCursorDemoteElemUnder" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids3 $ forestCursorDemoteElemUnder @Bool @Bool
-    it "Works on the example from the docs" $
-      forAllValid $ \b1 ->
+    it "produces valids on valids"
+      $ producesValidsOnValids3
+      $ forestCursorDemoteElemUnder @Bool @Bool
+    it "Works on the example from the docs"
+      $ forAllValid
+      $ \b1 ->
         forAllValid $ \b2 ->
           let demoteStart =
                 ForestCursor $
-                NonEmptyCursor
-                  { nonEmptyCursorPrev = []
-                  , nonEmptyCursorCurrent =
-                      TreeCursor
-                        { treeAbove = Nothing
-                        , treeCurrent = 'a'
-                        , treeBelow = closedForest [Node 'b' []]
-                        }
-                  , nonEmptyCursorNext = []
-                  }
+                  NonEmptyCursor
+                    { nonEmptyCursorPrev = [],
+                      nonEmptyCursorCurrent =
+                        TreeCursor
+                          { treeAbove = Nothing,
+                            treeCurrent = 'a',
+                            treeBelow = closedForest [Node 'b' []]
+                          },
+                      nonEmptyCursorNext = []
+                    }
               demoteEnd =
                 ForestCursor $
+                  NonEmptyCursor
+                    { nonEmptyCursorPrev = [],
+                      nonEmptyCursorCurrent =
+                        TreeCursor
+                          { treeAbove =
+                              Just
+                                TreeAbove
+                                  { treeAboveLefts = [],
+                                    treeAboveAbove = Nothing,
+                                    treeAboveNode = b1,
+                                    treeAboveRights = []
+                                  },
+                            treeCurrent = 'a',
+                            treeBelow = emptyCForest
+                          },
+                      nonEmptyCursorNext = [CNode b2 $ closedForest [Node 'b' []]]
+                    }
+           in forestCursorDemoteElemUnder b1 b2 demoteStart `forestShouldBe` demoteEnd
+    it "demotes the current node to the level of its children" pending
+  describe "forestCursorDemoteSubTreeUnder" $ do
+    it "produces valids on valids"
+      $ producesValidsOnValids2
+      $ forestCursorDemoteSubTreeUnder @Bool @Bool
+    it "Works on the example from the docs"
+      $ forAllValid
+      $ \v -> do
+        let demoteStart =
+              ForestCursor $
                 NonEmptyCursor
-                  { nonEmptyCursorPrev = []
-                  , nonEmptyCursorCurrent =
+                  { nonEmptyCursorPrev = [],
+                    nonEmptyCursorCurrent =
+                      TreeCursor
+                        { treeAbove = Nothing,
+                          treeCurrent = 'a',
+                          treeBelow = closedForest [Node 'b' []]
+                        },
+                    nonEmptyCursorNext = []
+                  }
+            demoteEnd =
+              ForestCursor $
+                NonEmptyCursor
+                  { nonEmptyCursorPrev = [],
+                    nonEmptyCursorCurrent =
                       TreeCursor
                         { treeAbove =
                             Just
                               TreeAbove
-                                { treeAboveLefts = []
-                                , treeAboveAbove = Nothing
-                                , treeAboveNode = b1
-                                , treeAboveRights = []
-                                }
-                        , treeCurrent = 'a'
-                        , treeBelow = emptyCForest
-                        }
-                  , nonEmptyCursorNext = [CNode b2 $ closedForest [Node 'b' []]]
+                                { treeAboveLefts = [],
+                                  treeAboveAbove = Nothing,
+                                  treeAboveNode = v,
+                                  treeAboveRights = []
+                                },
+                          treeCurrent = 'a',
+                          treeBelow = closedForest [Node 'b' []]
+                        },
+                    nonEmptyCursorNext = []
                   }
-           in forestCursorDemoteElemUnder b1 b2 demoteStart `forestShouldBe` demoteEnd
-    it "demotes the current node to the level of its children" pending
-  describe "forestCursorDemoteSubTreeUnder" $ do
-    it "produces valids on valids" $
-      producesValidsOnValids2 $ forestCursorDemoteSubTreeUnder @Bool @Bool
-    it "Works on the example from the docs" $
-      forAllValid $ \v -> do
-        let demoteStart =
-              ForestCursor $
-              NonEmptyCursor
-                { nonEmptyCursorPrev = []
-                , nonEmptyCursorCurrent =
-                    TreeCursor
-                      { treeAbove = Nothing
-                      , treeCurrent = 'a'
-                      , treeBelow = closedForest [Node 'b' []]
-                      }
-                , nonEmptyCursorNext = []
-                }
-            demoteEnd =
-              ForestCursor $
-              NonEmptyCursor
-                { nonEmptyCursorPrev = []
-                , nonEmptyCursorCurrent =
-                    TreeCursor
-                      { treeAbove =
-                          Just
-                            TreeAbove
-                              { treeAboveLefts = []
-                              , treeAboveAbove = Nothing
-                              , treeAboveNode = v
-                              , treeAboveRights = []
-                              }
-                      , treeCurrent = 'a'
-                      , treeBelow = closedForest [Node 'b' []]
-                      }
-                , nonEmptyCursorNext = []
-                }
         forestCursorDemoteSubTreeUnder v demoteStart `forestShouldBe` demoteEnd
     it "demotes the current subtree to the level of its children, by adding a root" pending
 
@@ -806,14 +858,14 @@ isMovementM func =
       Just lec' ->
         let ne = rebuildForestCursor lec
             ne' = rebuildForestCursor lec'
-         in unless (ne == ne') $
-            expectationFailure $
-            unlines
-              [ "Cursor before:\n" ++ show lec
-              , "Forest before:  \n" ++ show ne
-              , "Cursor after: \n" ++ show lec'
-              , "Forest after:   \n" ++ show ne'
-              ]
+         in unless (ne == ne')
+              $ expectationFailure
+              $ unlines
+                [ "Cursor before:\n" ++ show lec,
+                  "Forest before:  \n" ++ show ne,
+                  "Cursor after: \n" ++ show lec',
+                  "Forest after:   \n" ++ show ne'
+                ]
 
 isMovement :: (forall a. SFC.ForestCursor a -> SFC.ForestCursor a) -> Property
 isMovement func =
@@ -822,12 +874,12 @@ isMovement func =
 
 forestShouldBe :: (Show a, Eq a) => SFC.ForestCursor a -> SFC.ForestCursor a -> Expectation
 forestShouldBe actual expected =
-  unless (actual == expected) $
-  expectationFailure $
-  unlines
-    [ "The following should have been equal."
-    , "actual:"
-    , drawForestCursor actual
-    , "expected:"
-    , drawForestCursor expected
-    ]
+  unless (actual == expected)
+    $ expectationFailure
+    $ unlines
+      [ "The following should have been equal.",
+        "actual:",
+        drawForestCursor actual,
+        "expected:",
+        drawForestCursor expected
+      ]

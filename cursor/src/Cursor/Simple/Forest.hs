@@ -1,86 +1,87 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Simple.Forest
-  ( ForestCursor
-  , makeForestCursor
-  , rebuildForestCursor
-  , FC.drawForestCursor
-  , mapForestCursor
-  , FC.forestCursorListCursorL
-  , FC.forestCursorSelectedTreeL
-  , forestCursorSelectPrevTreeCursor
-  , forestCursorSelectNextTreeCursor
-  , forestCursorSelectFirstTreeCursor
-  , forestCursorSelectLastTreeCursor
-  , forestCursorSelectPrev
-  , forestCursorSelectNext
-  , forestCursorSelectPrevOnSameLevel
-  , forestCursorSelectNextOnSameLevel
-  , forestCursorSelectFirst
-  , forestCursorSelectLast
-  , forestCursorSelectFirstOnSameLevel
-  , forestCursorSelectLastOnSameLevel
-  , forestCursorSelectAbove
-  , forestCursorSelectBelowAtPos
-  , forestCursorSelectBelowAtStart
-  , forestCursorSelectBelowAtEnd
-  , FC.forestCursorOpenCurrentForest
-  , FC.forestCursorCloseCurrentForest
-  , FC.forestCursorToggleCurrentForest
-  , FC.forestCursorOpenCurrentForestRecursively
-  , FC.forestCursorToggleCurrentForestRecursively
-  , FC.forestCursorSelection
-  , forestCursorSelectIndex
-  , FC.forestCursorInsertEntireTree
-  , forestCursorInsertAndSelectTreeCursor
-  , FC.forestCursorAppendEntireTree
-  , forestCursorAppendAndSelectTreeCursor
-  , FC.forestCursorInsertTree
-  , FC.forestCursorAppendTree
-  , forestCursorInsertAndSelectTree
-  , forestCursorAppendAndSelectTree
-  , FC.forestCursorInsert
-  , FC.forestCursorAppend
-  , forestCursorInsertAndSelect
-  , forestCursorAppendAndSelect
-  , FC.forestCursorAddChildTreeToNodeAtPos
-  , FC.forestCursorAddChildTreeToNodeAtStart
-  , FC.forestCursorAddChildTreeToNodeAtEnd
-  , FC.forestCursorAddChildToNodeAtPos
-  , FC.forestCursorAddChildToNodeAtStart
-  , FC.forestCursorAddChildToNodeAtEnd
-  , forestCursorAddChildTreeToNodeAtPosAndSelect
-  , forestCursorAddChildTreeToNodeAtStartAndSelect
-  , forestCursorAddChildTreeToNodeAtEndAndSelect
-  , forestCursorAddChildToNodeAtPosAndSelect
-  , forestCursorAddChildToNodeAtStartAndSelect
-  , forestCursorAddChildToNodeAtEndAndSelect
-  , forestCursorRemoveElemAndSelectPrev
-  , forestCursorDeleteElemAndSelectNext
-  , forestCursorRemoveElem
-  , forestCursorDeleteElem
-  , forestCursorRemoveSubTreeAndSelectPrev
-  , forestCursorDeleteSubTreeAndSelectNext
-  , forestCursorRemoveSubTree
-  , forestCursorDeleteSubTree
-  , forestCursorAddRoot
-  , FC.forestCursorSwapPrev
-  , FC.forestCursorSwapNext
-  , forestCursorPromoteElem
-  , forestCursorPromoteSubTree
-  , forestCursorDemoteElem
-  , forestCursorDemoteSubTree
-  , FC.forestCursorDemoteElemUnder
-  , FC.forestCursorDemoteSubTreeUnder
-  , FC.CTree(..)
-  , FC.makeCTree
-  , FC.cTree
-  , FC.rebuildCTree
-  , FC.CForest(..)
-  , FC.makeCForest
-  , FC.cForest
-  , FC.rebuildCForest
-  ) where
+  ( ForestCursor,
+    makeForestCursor,
+    rebuildForestCursor,
+    FC.drawForestCursor,
+    mapForestCursor,
+    FC.forestCursorListCursorL,
+    FC.forestCursorSelectedTreeL,
+    forestCursorSelectPrevTreeCursor,
+    forestCursorSelectNextTreeCursor,
+    forestCursorSelectFirstTreeCursor,
+    forestCursorSelectLastTreeCursor,
+    forestCursorSelectPrev,
+    forestCursorSelectNext,
+    forestCursorSelectPrevOnSameLevel,
+    forestCursorSelectNextOnSameLevel,
+    forestCursorSelectFirst,
+    forestCursorSelectLast,
+    forestCursorSelectFirstOnSameLevel,
+    forestCursorSelectLastOnSameLevel,
+    forestCursorSelectAbove,
+    forestCursorSelectBelowAtPos,
+    forestCursorSelectBelowAtStart,
+    forestCursorSelectBelowAtEnd,
+    FC.forestCursorOpenCurrentForest,
+    FC.forestCursorCloseCurrentForest,
+    FC.forestCursorToggleCurrentForest,
+    FC.forestCursorOpenCurrentForestRecursively,
+    FC.forestCursorToggleCurrentForestRecursively,
+    FC.forestCursorSelection,
+    forestCursorSelectIndex,
+    FC.forestCursorInsertEntireTree,
+    forestCursorInsertAndSelectTreeCursor,
+    FC.forestCursorAppendEntireTree,
+    forestCursorAppendAndSelectTreeCursor,
+    FC.forestCursorInsertTree,
+    FC.forestCursorAppendTree,
+    forestCursorInsertAndSelectTree,
+    forestCursorAppendAndSelectTree,
+    FC.forestCursorInsert,
+    FC.forestCursorAppend,
+    forestCursorInsertAndSelect,
+    forestCursorAppendAndSelect,
+    FC.forestCursorAddChildTreeToNodeAtPos,
+    FC.forestCursorAddChildTreeToNodeAtStart,
+    FC.forestCursorAddChildTreeToNodeAtEnd,
+    FC.forestCursorAddChildToNodeAtPos,
+    FC.forestCursorAddChildToNodeAtStart,
+    FC.forestCursorAddChildToNodeAtEnd,
+    forestCursorAddChildTreeToNodeAtPosAndSelect,
+    forestCursorAddChildTreeToNodeAtStartAndSelect,
+    forestCursorAddChildTreeToNodeAtEndAndSelect,
+    forestCursorAddChildToNodeAtPosAndSelect,
+    forestCursorAddChildToNodeAtStartAndSelect,
+    forestCursorAddChildToNodeAtEndAndSelect,
+    forestCursorRemoveElemAndSelectPrev,
+    forestCursorDeleteElemAndSelectNext,
+    forestCursorRemoveElem,
+    forestCursorDeleteElem,
+    forestCursorRemoveSubTreeAndSelectPrev,
+    forestCursorDeleteSubTreeAndSelectNext,
+    forestCursorRemoveSubTree,
+    forestCursorDeleteSubTree,
+    forestCursorAddRoot,
+    FC.forestCursorSwapPrev,
+    FC.forestCursorSwapNext,
+    forestCursorPromoteElem,
+    forestCursorPromoteSubTree,
+    forestCursorDemoteElem,
+    forestCursorDemoteSubTree,
+    FC.forestCursorDemoteElemUnder,
+    FC.forestCursorDemoteSubTreeUnder,
+    FC.CTree (..),
+    FC.makeCTree,
+    FC.cTree,
+    FC.rebuildCTree,
+    FC.CForest (..),
+    FC.makeCForest,
+    FC.cForest,
+    FC.rebuildCForest,
+  )
+where
 
 import qualified Cursor.Forest as FC
 import Cursor.Simple.Tree

@@ -4,44 +4,45 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.List
-  ( ListCursor(..)
-  , emptyListCursor
-  , makeListCursor
-  , makeListCursorWithSelection
-  , rebuildListCursor
-  , listCursorNull
-  , listCursorLength
-  , listCursorIndex
-  , listCursorSelectPrev
-  , listCursorSelectNext
-  , listCursorSelectIndex
-  , listCursorSelectStart
-  , listCursorSelectEnd
-  , listCursorPrevItem
-  , listCursorNextItem
-  , listCursorInsert
-  , listCursorAppend
-  , listCursorInsertList
-  , listCursorAppendList
-  , listCursorRemove
-  , listCursorDelete
-  , listCursorSplit
-  , listCursorCombine
-  , traverseListCursor
-  , foldListCursor
-  ) where
+  ( ListCursor (..),
+    emptyListCursor,
+    makeListCursor,
+    makeListCursorWithSelection,
+    rebuildListCursor,
+    listCursorNull,
+    listCursorLength,
+    listCursorIndex,
+    listCursorSelectPrev,
+    listCursorSelectNext,
+    listCursorSelectIndex,
+    listCursorSelectStart,
+    listCursorSelectEnd,
+    listCursorPrevItem,
+    listCursorNextItem,
+    listCursorInsert,
+    listCursorAppend,
+    listCursorInsertList,
+    listCursorAppendList,
+    listCursorRemove,
+    listCursorDelete,
+    listCursorSplit,
+    listCursorCombine,
+    traverseListCursor,
+    foldListCursor,
+  )
+where
 
 import Control.DeepSeq
 import Cursor.Types
 import Data.Validity
 import GHC.Generics (Generic)
 
-data ListCursor a =
-  ListCursor
-        -- | In reverse order
-    { listCursorPrev :: [a]
-    , listCursorNext :: [a]
-    }
+data ListCursor a
+  = ListCursor
+      { -- | In reverse order
+        listCursorPrev :: [a],
+        listCursorNext :: [a]
+      }
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (ListCursor a)
@@ -76,13 +77,13 @@ listCursorSelectPrev :: ListCursor a -> Maybe (ListCursor a)
 listCursorSelectPrev tc =
   case listCursorPrev tc of
     [] -> Nothing
-    (c:cs) -> Just ListCursor {listCursorPrev = cs, listCursorNext = c : listCursorNext tc}
+    (c : cs) -> Just ListCursor {listCursorPrev = cs, listCursorNext = c : listCursorNext tc}
 
 listCursorSelectNext :: ListCursor a -> Maybe (ListCursor a)
 listCursorSelectNext tc =
   case listCursorNext tc of
     [] -> Nothing
-    (c:cs) -> Just ListCursor {listCursorPrev = c : listCursorPrev tc, listCursorNext = cs}
+    (c : cs) -> Just ListCursor {listCursorPrev = c : listCursorPrev tc, listCursorNext = cs}
 
 listCursorSelectIndex :: Int -> ListCursor a -> ListCursor a
 listCursorSelectIndex ix_ lc =
@@ -106,13 +107,13 @@ listCursorPrevItem :: ListCursor a -> Maybe a
 listCursorPrevItem lc =
   case listCursorPrev lc of
     [] -> Nothing
-    (c:_) -> Just c
+    (c : _) -> Just c
 
 listCursorNextItem :: ListCursor a -> Maybe a
 listCursorNextItem lc =
   case listCursorNext lc of
     [] -> Nothing
-    (c:_) -> Just c
+    (c : _) -> Just c
 
 listCursorInsert :: a -> ListCursor a -> ListCursor a
 listCursorInsert c lc = lc {listCursorPrev = c : listCursorPrev lc}
@@ -133,7 +134,7 @@ listCursorRemove tc =
       case listCursorNext tc of
         [] -> Just Deleted
         _ -> Nothing
-    (_:prev) -> Just $ Updated $ tc {listCursorPrev = prev}
+    (_ : prev) -> Just $ Updated $ tc {listCursorPrev = prev}
 
 listCursorDelete :: ListCursor a -> Maybe (DeleteOrUpdate (ListCursor a))
 listCursorDelete tc =
@@ -142,17 +143,20 @@ listCursorDelete tc =
       case listCursorPrev tc of
         [] -> Just Deleted
         _ -> Nothing
-    (_:next) -> Just $ Updated $ tc {listCursorNext = next}
+    (_ : next) -> Just $ Updated $ tc {listCursorNext = next}
 
 listCursorSplit :: ListCursor a -> (ListCursor a, ListCursor a)
 listCursorSplit ListCursor {..} =
-  ( ListCursor {listCursorPrev = listCursorPrev, listCursorNext = []}
-  , ListCursor {listCursorPrev = [], listCursorNext = listCursorNext})
+  ( ListCursor {listCursorPrev = listCursorPrev, listCursorNext = []},
+    ListCursor {listCursorPrev = [], listCursorNext = listCursorNext}
+  )
 
 listCursorCombine :: ListCursor a -> ListCursor a -> ListCursor a
 listCursorCombine lc1 lc2 =
   ListCursor
-    {listCursorPrev = reverse $ rebuildListCursor lc1, listCursorNext = rebuildListCursor lc2}
+    { listCursorPrev = reverse $ rebuildListCursor lc1,
+      listCursorNext = rebuildListCursor lc2
+    }
 
 traverseListCursor :: ([a] -> [a] -> f b) -> ListCursor a -> f b
 traverseListCursor = foldListCursor

@@ -1,22 +1,22 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.Map.Gen
-  ( genMapCursorBy
-  , genMapCursorByDependent
-  ) where
-
-import Data.GenValidity
-import Data.GenValidity.Containers ()
-
-import Test.QuickCheck
-
-import Cursor.Map
+  ( genMapCursorBy,
+    genMapCursorByDependent,
+  )
+where
 
 import Cursor.List.NonEmpty.Gen
+import Cursor.Map
 import Cursor.Map.KeyValue.Gen
+import Data.GenValidity
+import Data.GenValidity.Containers ()
+import Test.QuickCheck
 
-instance (GenUnchecked kc, GenUnchecked vc, GenUnchecked k, GenUnchecked v) =>
-         GenUnchecked (MapCursor kc vc k v) where
+instance
+  (GenUnchecked kc, GenUnchecked vc, GenUnchecked k, GenUnchecked v) =>
+  GenUnchecked (MapCursor kc vc k v)
+  where
   genUnchecked = genMapCursorBy genUnchecked genUnchecked genUnchecked genUnchecked
 
 instance (GenValid kc, GenValid vc, GenValid k, GenValid v) => GenValid (MapCursor kc vc k v) where
@@ -25,8 +25,8 @@ instance (GenValid kc, GenValid vc, GenValid k, GenValid v) => GenValid (MapCurs
 
 genMapCursorBy :: Gen kc -> Gen vc -> Gen k -> Gen v -> Gen (MapCursor kc vc k v)
 genMapCursorBy genKC genVC genK genV =
-  MapCursor <$>
-  genNonEmptyCursorBy (genKeyValueCursorBy genKC genVC genK genV) ((,) <$> genK <*> genV)
+  MapCursor
+    <$> genNonEmptyCursorBy (genKeyValueCursorBy genKC genVC genK genV) ((,) <$> genK <*> genV)
 
 genMapCursorByDependent :: Gen (kc, v) -> Gen (k, vc) -> Gen (k, v) -> Gen (MapCursor kc vc k v)
 genMapCursorByDependent genKVCK genKVCV genKV =

@@ -1,23 +1,21 @@
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.Tree.Demote
-  ( treeCursorDemoteElem
-  , treeCursorDemoteSubTree
-  , DemoteResult(..)
-  , treeCursorDemoteElemUnder
-  , treeCursorDemoteSubTreeUnder
-  ) where
-
-import GHC.Generics (Generic)
-
-import Data.Validity
+  ( treeCursorDemoteElem,
+    treeCursorDemoteSubTree,
+    DemoteResult (..),
+    treeCursorDemoteElemUnder,
+    treeCursorDemoteSubTreeUnder,
+  )
+where
 
 import Control.DeepSeq
-
 import Cursor.Tree.Base
 import Cursor.Tree.Types
+import Data.Validity
+import GHC.Generics (Generic)
 
 -- | Demotes the current node to the level of its children.
 --
@@ -47,16 +45,16 @@ treeCursorDemoteElem f g tc =
     Just ta ->
       case treeAboveLefts ta of
         [] -> NoSiblingsToDemoteUnder
-        (CNode t ls:ts) ->
-          Demoted $
-          makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) emptyCForest) $
-          Just
-            TreeAbove
-              { treeAboveLefts = reverse $ unpackCForest ls
-              , treeAboveAbove = Just ta {treeAboveLefts = ts}
-              , treeAboveNode = t
-              , treeAboveRights = unpackCForest $ treeBelow tc
-              }
+        (CNode t ls : ts) ->
+          Demoted
+            $ makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) emptyCForest)
+            $ Just
+              TreeAbove
+                { treeAboveLefts = reverse $ unpackCForest ls,
+                  treeAboveAbove = Just ta {treeAboveLefts = ts},
+                  treeAboveNode = t,
+                  treeAboveRights = unpackCForest $ treeBelow tc
+                }
 
 -- | Demotes the current subtree to the level of its children.
 --
@@ -86,16 +84,16 @@ treeCursorDemoteSubTree f g tc =
     Just ta ->
       case treeAboveLefts ta of
         [] -> NoSiblingsToDemoteUnder
-        (CNode t ls:ts) ->
-          Demoted $
-          makeTreeCursorWithAbove g (currentTree f tc) $
-          Just
-            TreeAbove
-              { treeAboveLefts = reverse $ unpackCForest ls
-              , treeAboveAbove = Just ta {treeAboveLefts = ts}
-              , treeAboveNode = t
-              , treeAboveRights = []
-              }
+        (CNode t ls : ts) ->
+          Demoted
+            $ makeTreeCursorWithAbove g (currentTree f tc)
+            $ Just
+              TreeAbove
+                { treeAboveLefts = reverse $ unpackCForest ls,
+                  treeAboveAbove = Just ta {treeAboveLefts = ts},
+                  treeAboveNode = t,
+                  treeAboveRights = []
+                }
 
 data DemoteResult a
   = CannotDemoteTopNode
@@ -134,12 +132,12 @@ treeCursorDemoteElemUnder b1 b2 tc = do
       { treeAbove =
           Just
             TreeAbove
-              { treeAboveLefts = []
-              , treeAboveAbove = Just ta'
-              , treeAboveNode = b1
-              , treeAboveRights = []
-              }
-      , treeBelow = emptyCForest
+              { treeAboveLefts = [],
+                treeAboveAbove = Just ta',
+                treeAboveNode = b1,
+                treeAboveRights = []
+              },
+        treeBelow = emptyCForest
       }
 
 -- | Demotes the current subtree to the level of its children, by adding a root.
@@ -162,9 +160,9 @@ treeCursorDemoteSubTreeUnder b tc =
     { treeAbove =
         Just
           TreeAbove
-            { treeAboveLefts = []
-            , treeAboveAbove = treeAbove tc
-            , treeAboveNode = b
-            , treeAboveRights = []
+            { treeAboveLefts = [],
+              treeAboveAbove = treeAbove tc,
+              treeAboveNode = b,
+              treeAboveRights = []
             }
     }

@@ -1,20 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.Tree.TypesSpec
-  ( spec
-  ) where
-
-import Test.Hspec
-
-import Test.Validity
-import Test.Validity.Optics
+  ( spec,
+  )
+where
 
 import Cursor.Tree
 import Cursor.Tree.Gen ()
+import Test.Hspec
+import Test.Validity
+import Test.Validity.Optics
 
 spec :: Spec
 spec = do

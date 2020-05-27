@@ -3,8 +3,9 @@
 {-# LANGUAGE TypeApplications #-}
 
 module Cursor.ListSpec
-  ( spec
-  ) where
+  ( spec,
+  )
+where
 
 import Control.Monad
 import Cursor.List
@@ -19,23 +20,29 @@ spec = do
   functorSpec @ListCursor
   genValidSpec @(ListCursor Bool)
   describe "emptyListCursor" $ it "is valid" $ shouldBeValid (emptyListCursor @Bool)
-  describe "makeListCursor" $
-    it "produces valid list cursors" $ producesValidsOnValids (makeListCursor @Bool)
-  describe "makeListCursorWithSelection" $
-    it "produces valid list cursors" $ producesValidsOnValids2 (makeListCursorWithSelection @Bool)
+  describe "makeListCursor"
+    $ it "produces valid list cursors"
+    $ producesValidsOnValids (makeListCursor @Bool)
+  describe "makeListCursorWithSelection"
+    $ it "produces valid list cursors"
+    $ producesValidsOnValids2 (makeListCursorWithSelection @Bool)
   describe "rebuildListCursor" $ do
     it "produces valid lists" $ producesValidsOnValids (rebuildListCursor @Bool)
     it "is the inverse of makeListCursor" $
       inverseFunctions (makeListCursor @Bool) rebuildListCursor
-    it "is the inverse of makeListCursorWithSelection for any index" $
-      forAllUnchecked $ \i ->
+    it "is the inverse of makeListCursorWithSelection for any index"
+      $ forAllUnchecked
+      $ \i ->
         inverseFunctionsIfFirstSucceeds (makeListCursorWithSelection @Bool i) rebuildListCursor
-  describe "listCursorNull" $
-    it "produces valid bools" $ producesValidsOnValids (listCursorNull @Bool)
-  describe "listCursorLength" $
-    it "produces valid bools" $ producesValidsOnValids (listCursorLength @Bool)
-  describe "listCursorIndex" $
-    it "produces valid indices" $ producesValidsOnValids (listCursorIndex @Bool)
+  describe "listCursorNull"
+    $ it "produces valid bools"
+    $ producesValidsOnValids (listCursorNull @Bool)
+  describe "listCursorLength"
+    $ it "produces valid bools"
+    $ producesValidsOnValids (listCursorLength @Bool)
+  describe "listCursorIndex"
+    $ it "produces valid indices"
+    $ producesValidsOnValids (listCursorIndex @Bool)
   describe "listCursorSelectPrev" $ do
     it "produces valid cursors" $ producesValidsOnValids (listCursorSelectPrev @Bool)
     it "is a movement" $ isMovementM listCursorSelectPrev
@@ -70,10 +77,14 @@ spec = do
   describe "listCursorAppend" $ do
     it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (listCursorAppend @Bool d)
     it "inserts an item after the cursor" pending
-  describe "listCursorInsertList" $
-    it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (listCursorInsertList @Bool d)
-  describe "listCursorAppendList" $
-    it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (listCursorAppendList @Bool d)
+  describe "listCursorInsertList"
+    $ it "produces valids"
+    $ forAllValid
+    $ \d -> producesValidsOnValids (listCursorInsertList @Bool d)
+  describe "listCursorAppendList"
+    $ it "produces valids"
+    $ forAllValid
+    $ \d -> producesValidsOnValids (listCursorAppendList @Bool d)
   describe "listCursorRemove" $ do
     it "produces valids" $ validIfSucceedsOnValid (listCursorRemove @Bool)
     it "removes an item before the cursor" pending
@@ -82,14 +93,16 @@ spec = do
     it "removes an item before the cursor" pending
   describe "listCursorSplit" $ do
     it "produces valids" $ producesValidsOnValids (listCursorSplit @Bool)
-    it "produces two list cursors that rebuild to the rebuilding of the original" $
-      forAllValid $ \lc ->
+    it "produces two list cursors that rebuild to the rebuilding of the original"
+      $ forAllValid
+      $ \lc ->
         let (lc1, lc2) = listCursorSplit (lc :: ListCursor Bool)
          in (rebuildListCursor lc1 ++ rebuildListCursor lc2) `shouldBe` rebuildListCursor lc
   describe "listCursorCombine" $ do
     it "produces valids" $ producesValidsOnValids2 (listCursorCombine @Bool)
-    it "produces a list that rebuilds to the rebuilding of the original two cursors" $
-      forAllValid $ \lc1 ->
+    it "produces a list that rebuilds to the rebuilding of the original two cursors"
+      $ forAllValid
+      $ \lc1 ->
         forAllValid $ \lc2 ->
           let lc = listCursorCombine lc1 (lc2 :: ListCursor Bool)
            in rebuildListCursor lc `shouldBe` (rebuildListCursor lc1 ++ rebuildListCursor lc2)
@@ -102,14 +115,14 @@ isMovementM func =
       Just lec' ->
         let ne = rebuildListCursor lec
             ne' = rebuildListCursor lec'
-         in unless (ne == ne') $
-            expectationFailure $
-            unlines
-              [ "Cursor before:\n" ++ show lec
-              , "List before:  \n" ++ show ne
-              , "Cursor after: \n" ++ show lec'
-              , "List after:   \n" ++ show ne'
-              ]
+         in unless (ne == ne')
+              $ expectationFailure
+              $ unlines
+                [ "Cursor before:\n" ++ show lec,
+                  "List before:  \n" ++ show ne,
+                  "Cursor after: \n" ++ show lec',
+                  "List after:   \n" ++ show ne'
+                ]
 
 isMovement :: (forall a. ListCursor a -> ListCursor a) -> Property
 isMovement func =

@@ -1,21 +1,19 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.Text.Gen
-  ( genSafeChar
-  , genTextCursorChar
-  , textCursorWithGen
-  , textCursorWithIndex0
-  ) where
-
-import Test.QuickCheck
-
-import Data.GenValidity
-import Data.GenValidity.Text ()
-
-import Cursor.Text
-import Cursor.Types
+  ( genSafeChar,
+    genTextCursorChar,
+    textCursorWithGen,
+    textCursorWithIndex0,
+  )
+where
 
 import Cursor.List.Gen
+import Cursor.Text
+import Cursor.Types
+import Data.GenValidity
+import Data.GenValidity.Text ()
+import Test.QuickCheck
 
 instance GenUnchecked TextCursor
 

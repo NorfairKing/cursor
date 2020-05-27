@@ -2,16 +2,13 @@
 
 module Cursor.TextField.Gen where
 
-import Data.GenValidity
-import Data.GenValidity.Text
-
-import Test.QuickCheck
-
 import Cursor.List.NonEmpty
-import Cursor.TextField
-
 import Cursor.List.NonEmpty.Gen ()
 import Cursor.Text.Gen
+import Cursor.TextField
+import Data.GenValidity
+import Data.GenValidity.Text
+import Test.QuickCheck
 
 instance GenValid TextFieldCursor where
   genValid =

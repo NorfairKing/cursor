@@ -1,19 +1,20 @@
 {-# LANGUAGE PatternSynonyms #-}
 
 module Cursor.Simple.Map.KeyValue
-  ( KeyValueCursor
-  , pattern KVC.KeyValueCursorKey
-  , pattern KVC.KeyValueCursorValue
-  , KVC.makeKeyValueCursorKey
-  , KVC.makeKeyValueCursorValue
-  , rebuildKeyValueCursor
-  , KVC.keyValueCursorSelection
-  , mapKeyValueCursor
-  , keyValueCursorSelectKey
-  , keyValueCursorSelectValue
-  , keyValueCursorToggleSelected
-  , KVC.KeyValueToggle(..)
-  ) where
+  ( KeyValueCursor,
+    pattern KVC.KeyValueCursorKey,
+    pattern KVC.KeyValueCursorValue,
+    KVC.makeKeyValueCursorKey,
+    KVC.makeKeyValueCursorValue,
+    rebuildKeyValueCursor,
+    KVC.keyValueCursorSelection,
+    mapKeyValueCursor,
+    keyValueCursorSelectKey,
+    keyValueCursorSelectValue,
+    keyValueCursorToggleSelected,
+    KVC.KeyValueToggle (..),
+  )
+where
 
 import qualified Cursor.Map.KeyValue as KVC
 

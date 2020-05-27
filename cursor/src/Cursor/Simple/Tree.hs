@@ -1,87 +1,88 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Simple.Tree
-  ( TreeCursor
-  , TreeAbove(..)
-  , singletonTreeCursor
-  , makeTreeCursor
-  , makeTreeCursorWithSelection
-  , rebuildTreeCursor
-  , TC.drawTreeCursor
-  , mapTreeCursor
-  , TC.treeCursorAboveL
-  , TC.treeCursorCurrentL
-  , TC.treeCursorBelowL
-  , TC.treeAboveLeftsL
-  , TC.treeAboveAboveL
-  , TC.treeAboveNodeL
-  , TC.treeAboveRightsL
-  , TC.treeCursorWithPointer
-  , TC.treeCursorSelection
-  , TC.TreeCursorSelection(..)
-  , treeCursorSelect
-  , treeCursorSelectPrev
-  , treeCursorSelectNext
-  , treeCursorSelectFirst
-  , treeCursorSelectLast
-  , treeCursorSelectAbove
-  , treeCursorSelectBelowAtPos
-  , treeCursorSelectBelowAtStart
-  , treeCursorSelectBelowAtEnd
-  , treeCursorSelectBelowAtStartRecursively
-  , treeCursorSelectBelowAtEndRecursively
-  , treeCursorSelectPrevOnSameLevel
-  , treeCursorSelectNextOnSameLevel
-  , treeCursorSelectFirstOnSameLevel
-  , treeCursorSelectLastOnSameLevel
-  , treeCursorSelectAbovePrev
-  , treeCursorSelectAboveNext
-  , TC.treeCursorOpenCurrentForest
-  , TC.treeCursorCloseCurrentForest
-  , TC.treeCursorToggleCurrentForest
-  , TC.treeCursorOpenCurrentForestRecursively
-  , TC.treeCursorToggleCurrentForestRecursively
-  , TC.treeCursorInsert
-  , treeCursorInsertAndSelect
-  , TC.treeCursorAppend
-  , treeCursorAppendAndSelect
-  , TC.treeCursorAddChildAtPos
-  , TC.treeCursorAddChildAtStart
-  , TC.treeCursorAddChildAtEnd
-  , treeCursorAddChildAtPosAndSelect
-  , treeCursorAddChildAtStartAndSelect
-  , treeCursorAddChildAtEndAndSelect
-  , treeCursorDeleteSubTreeAndSelectPrevious
-  , treeCursorDeleteSubTreeAndSelectNext
-  , treeCursorDeleteSubTreeAndSelectAbove
-  , treeCursorRemoveSubTree
-  , treeCursorDeleteSubTree
-  , treeCursorDeleteElemAndSelectPrevious
-  , treeCursorDeleteElemAndSelectNext
-  , treeCursorDeleteElemAndSelectAbove
-  , treeCursorRemoveElem
-  , treeCursorDeleteElem
-  , TC.treeCursorSwapPrev
-  , TC.treeCursorSwapNext
-  , TC.SwapResult(..)
-  , treeCursorPromoteElem
-  , TC.PromoteElemResult(..)
-  , treeCursorPromoteSubTree
-  , TC.PromoteResult(..)
-  , treeCursorDemoteElem
-  , treeCursorDemoteSubTree
-  , TC.DemoteResult(..)
-  , TC.treeCursorDemoteElemUnder
-  , TC.treeCursorDemoteSubTreeUnder
-  , TC.CTree(..)
-  , TC.CForest
-  , TC.makeCTree
-  , TC.cTree
-  , TC.rebuildCTree
-  ) where
+  ( TreeCursor,
+    TreeAbove (..),
+    singletonTreeCursor,
+    makeTreeCursor,
+    makeTreeCursorWithSelection,
+    rebuildTreeCursor,
+    TC.drawTreeCursor,
+    mapTreeCursor,
+    TC.treeCursorAboveL,
+    TC.treeCursorCurrentL,
+    TC.treeCursorBelowL,
+    TC.treeAboveLeftsL,
+    TC.treeAboveAboveL,
+    TC.treeAboveNodeL,
+    TC.treeAboveRightsL,
+    TC.treeCursorWithPointer,
+    TC.treeCursorSelection,
+    TC.TreeCursorSelection (..),
+    treeCursorSelect,
+    treeCursorSelectPrev,
+    treeCursorSelectNext,
+    treeCursorSelectFirst,
+    treeCursorSelectLast,
+    treeCursorSelectAbove,
+    treeCursorSelectBelowAtPos,
+    treeCursorSelectBelowAtStart,
+    treeCursorSelectBelowAtEnd,
+    treeCursorSelectBelowAtStartRecursively,
+    treeCursorSelectBelowAtEndRecursively,
+    treeCursorSelectPrevOnSameLevel,
+    treeCursorSelectNextOnSameLevel,
+    treeCursorSelectFirstOnSameLevel,
+    treeCursorSelectLastOnSameLevel,
+    treeCursorSelectAbovePrev,
+    treeCursorSelectAboveNext,
+    TC.treeCursorOpenCurrentForest,
+    TC.treeCursorCloseCurrentForest,
+    TC.treeCursorToggleCurrentForest,
+    TC.treeCursorOpenCurrentForestRecursively,
+    TC.treeCursorToggleCurrentForestRecursively,
+    TC.treeCursorInsert,
+    treeCursorInsertAndSelect,
+    TC.treeCursorAppend,
+    treeCursorAppendAndSelect,
+    TC.treeCursorAddChildAtPos,
+    TC.treeCursorAddChildAtStart,
+    TC.treeCursorAddChildAtEnd,
+    treeCursorAddChildAtPosAndSelect,
+    treeCursorAddChildAtStartAndSelect,
+    treeCursorAddChildAtEndAndSelect,
+    treeCursorDeleteSubTreeAndSelectPrevious,
+    treeCursorDeleteSubTreeAndSelectNext,
+    treeCursorDeleteSubTreeAndSelectAbove,
+    treeCursorRemoveSubTree,
+    treeCursorDeleteSubTree,
+    treeCursorDeleteElemAndSelectPrevious,
+    treeCursorDeleteElemAndSelectNext,
+    treeCursorDeleteElemAndSelectAbove,
+    treeCursorRemoveElem,
+    treeCursorDeleteElem,
+    TC.treeCursorSwapPrev,
+    TC.treeCursorSwapNext,
+    TC.SwapResult (..),
+    treeCursorPromoteElem,
+    TC.PromoteElemResult (..),
+    treeCursorPromoteSubTree,
+    TC.PromoteResult (..),
+    treeCursorDemoteElem,
+    treeCursorDemoteSubTree,
+    TC.DemoteResult (..),
+    TC.treeCursorDemoteElemUnder,
+    TC.treeCursorDemoteSubTreeUnder,
+    TC.CTree (..),
+    TC.CForest,
+    TC.makeCTree,
+    TC.cTree,
+    TC.rebuildCTree,
+  )
+where
 
 import qualified Cursor.Tree as TC
-import Cursor.Tree (CTree, TreeAbove(..))
+import Cursor.Tree (CTree, TreeAbove (..))
 import Cursor.Types
 import Data.Tree
 

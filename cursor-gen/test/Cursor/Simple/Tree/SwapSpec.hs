@@ -1,21 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Cursor.Simple.Tree.SwapSpec
-  ( spec
-  ) where
-
-import Test.Hspec
-
-import Test.Validity
+  ( spec,
+  )
+where
 
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
-import Cursor.Tree (TreeAbove(..), TreeCursor(..), emptyCForest)
-
 import Cursor.Simple.Tree.TestUtils
+import Cursor.Tree (TreeAbove (..), TreeCursor (..), emptyCForest)
+import Test.Hspec
+import Test.Validity
 
 spec :: Spec
 spec = do
@@ -28,26 +26,26 @@ spec = do
               { treeAbove =
                   Just
                     TreeAbove
-                      { treeAboveLefts = [node 'a' []]
-                      , treeAboveAbove = Nothing
-                      , treeAboveNode = 'p'
-                      , treeAboveRights = []
-                      }
-              , treeCurrent = 'b'
-              , treeBelow = emptyCForest
+                      { treeAboveLefts = [node 'a' []],
+                        treeAboveAbove = Nothing,
+                        treeAboveNode = 'p',
+                        treeAboveRights = []
+                      },
+                treeCurrent = 'b',
+                treeBelow = emptyCForest
               }
           end =
             TreeCursor
               { treeAbove =
                   Just
                     TreeAbove
-                      { treeAboveLefts = []
-                      , treeAboveAbove = Nothing
-                      , treeAboveNode = 'p'
-                      , treeAboveRights = [node 'a' []]
-                      }
-              , treeCurrent = 'b'
-              , treeBelow = emptyCForest
+                      { treeAboveLefts = [],
+                        treeAboveAbove = Nothing,
+                        treeAboveNode = 'p',
+                        treeAboveRights = [node 'a' []]
+                      },
+                treeCurrent = 'b',
+                treeBelow = emptyCForest
               }
        in case treeCursorSwapPrev start of
             Swapped r -> r `treeShouldBe` end
@@ -65,26 +63,26 @@ spec = do
               { treeAbove =
                   Just
                     TreeAbove
-                      { treeAboveLefts = []
-                      , treeAboveAbove = Nothing
-                      , treeAboveNode = 'p'
-                      , treeAboveRights = [node 'b' []]
-                      }
-              , treeCurrent = 'a'
-              , treeBelow = emptyCForest
+                      { treeAboveLefts = [],
+                        treeAboveAbove = Nothing,
+                        treeAboveNode = 'p',
+                        treeAboveRights = [node 'b' []]
+                      },
+                treeCurrent = 'a',
+                treeBelow = emptyCForest
               }
           end =
             TreeCursor
               { treeAbove =
                   Just
                     TreeAbove
-                      { treeAboveLefts = [node 'b' []]
-                      , treeAboveAbove = Nothing
-                      , treeAboveNode = 'p'
-                      , treeAboveRights = []
-                      }
-              , treeCurrent = 'a'
-              , treeBelow = emptyCForest
+                      { treeAboveLefts = [node 'b' []],
+                        treeAboveAbove = Nothing,
+                        treeAboveNode = 'p',
+                        treeAboveRights = []
+                      },
+                treeCurrent = 'a',
+                treeBelow = emptyCForest
               }
        in case treeCursorSwapNext start of
             Swapped r -> r `treeShouldBe` end
