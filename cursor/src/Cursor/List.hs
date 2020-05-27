@@ -1,7 +1,7 @@
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE DeriveFunctor #-}
 
 module Cursor.List
   ( ListCursor(..)
@@ -21,6 +21,8 @@ module Cursor.List
   , listCursorNextItem
   , listCursorInsert
   , listCursorAppend
+  , listCursorInsertList
+  , listCursorAppendList
   , listCursorRemove
   , listCursorDelete
   , listCursorSplit
@@ -29,17 +31,15 @@ module Cursor.List
   , foldListCursor
   ) where
 
-import GHC.Generics (Generic)
-
-import Data.Validity
-
 import Control.DeepSeq
-
 import Cursor.Types
+import Data.Validity
+import GHC.Generics (Generic)
 
 data ListCursor a =
   ListCursor
-    { listCursorPrev :: [a] -- ^ In reverse order
+        -- | In reverse order
+    { listCursorPrev :: [a]
     , listCursorNext :: [a]
     }
   deriving (Show, Eq, Generic, Functor)
@@ -119,6 +119,12 @@ listCursorInsert c lc = lc {listCursorPrev = c : listCursorPrev lc}
 
 listCursorAppend :: a -> ListCursor a -> ListCursor a
 listCursorAppend c lc = lc {listCursorNext = c : listCursorNext lc}
+
+listCursorInsertList :: [a] -> ListCursor a -> ListCursor a
+listCursorInsertList l lc = lc {listCursorPrev = reverse l ++ listCursorPrev lc}
+
+listCursorAppendList :: [a] -> ListCursor a -> ListCursor a
+listCursorAppendList l lc = lc {listCursorNext = l ++ listCursorNext lc}
 
 listCursorRemove :: ListCursor a -> Maybe (DeleteOrUpdate (ListCursor a))
 listCursorRemove tc =

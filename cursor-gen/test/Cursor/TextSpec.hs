@@ -1,20 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Cursor.TextSpec
   ( spec
   ) where
 
-import Test.Hspec
-import Test.QuickCheck
-import Test.Validity
-
 import Control.Monad
-
 import Cursor.List
 import Cursor.Text
 import Cursor.Text.Gen ()
+import Test.Hspec
+import Test.QuickCheck
+import Test.Validity
 
 spec :: Spec
 spec = do
@@ -86,6 +84,17 @@ spec = do
   describe "textCursorAppend" $ do
     it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorAppend d)
     it "inserts an item after the cursor" pending
+  describe "textCursorInsertString" $ do
+    it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorInsertString d)
+    it "works for this example" $
+      (makeTextCursor "hello" >>= textCursorInsertString " world") `shouldBe`
+      makeTextCursor "hello world"
+  describe "textCursorAppendString" $
+    it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorAppendString d)
+  describe "textCursorInsertText" $
+    it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorInsertText d)
+  describe "textCursorAppendText" $
+    it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorAppendText d)
   describe "textCursorRemove" $ do
     it "produces valids" $ validIfSucceedsOnValid textCursorRemove
     it "removes an item before the cursor" pending

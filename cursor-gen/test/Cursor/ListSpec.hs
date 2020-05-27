@@ -1,19 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Cursor.ListSpec
   ( spec
   ) where
 
+import Control.Monad
+import Cursor.List
+import Cursor.List.Gen ()
 import Test.Hspec
 import Test.QuickCheck
 import Test.Validity
-
-import Control.Monad
-
-import Cursor.List
-import Cursor.List.Gen ()
 
 spec :: Spec
 spec = do
@@ -72,6 +70,10 @@ spec = do
   describe "listCursorAppend" $ do
     it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (listCursorAppend @Bool d)
     it "inserts an item after the cursor" pending
+  describe "listCursorInsertList" $
+    it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (listCursorInsertList @Bool d)
+  describe "listCursorAppendList" $
+    it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (listCursorAppendList @Bool d)
   describe "listCursorRemove" $ do
     it "produces valids" $ validIfSucceedsOnValid (listCursorRemove @Bool)
     it "removes an item before the cursor" pending

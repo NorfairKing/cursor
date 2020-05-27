@@ -19,24 +19,24 @@ module Cursor.Text
   , textCursorNextChar
   , textCursorInsert
   , textCursorAppend
+  , textCursorInsertString
+  , textCursorAppendString
+  , textCursorInsertText
+  , textCursorAppendText
   , textCursorRemove
   , textCursorDelete
   , textCursorSplit
   , textCursorCombine
   ) where
 
-import Data.Validity
-import GHC.Generics (Generic)
-
-import qualified Data.Text as T
-import Data.Text (Text)
-
 import Control.DeepSeq
-
-import Lens.Micro
-
 import Cursor.List
 import Cursor.Types
+import qualified Data.Text as T
+import Data.Text (Text)
+import Data.Validity
+import GHC.Generics (Generic)
+import Lens.Micro
 
 -- | A cursor for single-line texts
 newtype TextCursor =
@@ -120,6 +120,24 @@ textCursorAppend c tc =
   if isSafeChar c
     then Just (tc & textCursorListCursorL %~ listCursorAppend c)
     else Nothing
+
+textCursorInsertString :: String -> TextCursor -> Maybe TextCursor
+textCursorInsertString s tc =
+  if any (\c -> c == '\n' || not (isSafeChar c)) s
+    then Nothing
+    else Just $ tc & textCursorListCursorL %~ listCursorInsertList s
+
+textCursorAppendString :: String -> TextCursor -> Maybe TextCursor
+textCursorAppendString s tc =
+  if any (\c -> c == '\n' || not (isSafeChar c)) s
+    then Nothing
+    else Just $ tc & textCursorListCursorL %~ listCursorAppendList s
+
+textCursorInsertText :: Text -> TextCursor -> Maybe TextCursor
+textCursorInsertText = textCursorInsertString . T.unpack
+
+textCursorAppendText :: Text -> TextCursor -> Maybe TextCursor
+textCursorAppendText = textCursorAppendString . T.unpack
 
 textCursorRemove :: TextCursor -> Maybe (DeleteOrUpdate TextCursor)
 textCursorRemove = focusPossibleDeleteOrUpdate textCursorListCursorL listCursorRemove
