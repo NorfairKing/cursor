@@ -155,10 +155,7 @@ treeCursorSelectAboveNext f g tc =
       case treeBelow tc of
         EmptyCForest -> go tc
         ClosedForest _ -> go tc
-        OpenForest ts ->
-          if null ts
-            then go tc
-            else Nothing
+        OpenForest _ -> Nothing
   where
     go tc_ = do
       tc' <- treeCursorSelectAbove f g tc_
