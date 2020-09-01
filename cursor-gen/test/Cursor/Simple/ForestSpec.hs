@@ -336,6 +336,12 @@ insertSpec = do
       $ producesValidsOnValids2
       $ forestCursorAddChildToNodeAtEndAndSelect @Bool
     it "adds a child to a node at the end the children of that node" pending
+  describe "forestCursorAddChildNodeSingleToNodeAtPosAndSelect" $ it "produces valid cursors" $ producesValidsOnValids3 (forestCursorAddChildNodeSingleToNodeAtPosAndSelect @Bool)
+  describe "forestCursorAddChildNodeSingleToNodeAtStartAndSelect" $ it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAddChildNodeSingleToNodeAtStartAndSelect @Bool)
+  describe "forestCursorAddChildNodeSingleToNodeAtEndAndSelect" $ it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAddChildNodeSingleToNodeAtEndAndSelect @Bool)
+  describe "forestCursorAddChildNodeToNodeAtPosAndSelect" $ it "produces valid cursors" $ forAllValid $ producesValidsOnValids3 . (forestCursorAddChildNodeToNodeAtPosAndSelect @Bool)
+  describe "forestCursorAddChildNodeToNodeAtStartAndSelect" $ it "produces valid cursors" $ producesValidsOnValids3 (forestCursorAddChildNodeToNodeAtStartAndSelect @Bool)
+  describe "forestCursorAddChildNodeToNodeAtEndAndSelect" $ it "produces valid cursors" $ producesValidsOnValids3 (forestCursorAddChildNodeToNodeAtEndAndSelect @Bool)
   describe "forestCursorAddRoot" $ do
     it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAddRoot @Bool)
     it "houses the entire forest under the given node" pending

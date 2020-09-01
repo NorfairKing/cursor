@@ -57,6 +57,12 @@ module Cursor.Forest
     forestCursorAddChildToNodeAtPosAndSelect,
     forestCursorAddChildToNodeAtStartAndSelect,
     forestCursorAddChildToNodeAtEndAndSelect,
+    forestCursorAddChildNodeSingleToNodeAtPosAndSelect,
+    forestCursorAddChildNodeSingleToNodeAtStartAndSelect,
+    forestCursorAddChildNodeSingleToNodeAtEndAndSelect,
+    forestCursorAddChildNodeToNodeAtPosAndSelect,
+    forestCursorAddChildNodeToNodeAtStartAndSelect,
+    forestCursorAddChildNodeToNodeAtEndAndSelect,
     forestCursorRemoveElemAndSelectPrev,
     forestCursorDeleteElemAndSelectNext,
     forestCursorRemoveElem,
@@ -343,6 +349,30 @@ forestCursorAddChildToNodeAtEndAndSelect ::
   (a -> b) -> (b -> a) -> b -> ForestCursor a b -> ForestCursor a b
 forestCursorAddChildToNodeAtEndAndSelect f g b =
   forestCursorAddChildTreeToNodeAtEndAndSelect f g $ Node b []
+
+forestCursorAddChildNodeSingleToNodeAtPosAndSelect ::
+  (a -> b) -> Int -> a -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildNodeSingleToNodeAtPosAndSelect f i t = forestCursorSelectedTreeL %~ treeCursorAddChildNodeSingleAtPosAndSelect f i t
+
+forestCursorAddChildNodeSingleToNodeAtStartAndSelect ::
+  (a -> b) -> a -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildNodeSingleToNodeAtStartAndSelect f t = forestCursorSelectedTreeL %~ treeCursorAddChildNodeSingleAtStartAndSelect f t
+
+forestCursorAddChildNodeSingleToNodeAtEndAndSelect ::
+  (a -> b) -> a -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildNodeSingleToNodeAtEndAndSelect f t = forestCursorSelectedTreeL %~ treeCursorAddChildNodeSingleAtEndAndSelect f t
+
+forestCursorAddChildNodeToNodeAtPosAndSelect ::
+  (a -> b) -> Int -> a -> Forest b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildNodeToNodeAtPosAndSelect f i t ts = forestCursorSelectedTreeL %~ treeCursorAddChildNodeAtPosAndSelect f i t ts
+
+forestCursorAddChildNodeToNodeAtStartAndSelect ::
+  (a -> b) -> a -> Forest b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildNodeToNodeAtStartAndSelect f t ts = forestCursorSelectedTreeL %~ treeCursorAddChildNodeAtStartAndSelect f t ts
+
+forestCursorAddChildNodeToNodeAtEndAndSelect ::
+  (a -> b) -> a -> Forest b -> ForestCursor a b -> ForestCursor a b
+forestCursorAddChildNodeToNodeAtEndAndSelect f t ts = forestCursorSelectedTreeL %~ treeCursorAddChildNodeAtEndAndSelect f t ts
 
 forestCursorRemoveElemAndSelectPrev ::
   (b -> a) -> ForestCursor a b -> Maybe (DeleteOrUpdate (ForestCursor a b))

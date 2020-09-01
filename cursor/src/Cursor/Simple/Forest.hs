@@ -55,6 +55,12 @@ module Cursor.Simple.Forest
     forestCursorAddChildToNodeAtPosAndSelect,
     forestCursorAddChildToNodeAtStartAndSelect,
     forestCursorAddChildToNodeAtEndAndSelect,
+    forestCursorAddChildNodeSingleToNodeAtPosAndSelect,
+    forestCursorAddChildNodeSingleToNodeAtStartAndSelect,
+    forestCursorAddChildNodeSingleToNodeAtEndAndSelect,
+    forestCursorAddChildNodeToNodeAtPosAndSelect,
+    forestCursorAddChildNodeToNodeAtStartAndSelect,
+    forestCursorAddChildNodeToNodeAtEndAndSelect,
     forestCursorRemoveElemAndSelectPrev,
     forestCursorDeleteElemAndSelectNext,
     forestCursorRemoveElem,
@@ -188,6 +194,24 @@ forestCursorAddChildToNodeAtStartAndSelect = FC.forestCursorAddChildToNodeAtStar
 
 forestCursorAddChildToNodeAtEndAndSelect :: a -> ForestCursor a -> ForestCursor a
 forestCursorAddChildToNodeAtEndAndSelect = FC.forestCursorAddChildToNodeAtEndAndSelect id id
+
+forestCursorAddChildNodeSingleToNodeAtPosAndSelect :: Int -> a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildNodeSingleToNodeAtPosAndSelect = FC.forestCursorAddChildNodeSingleToNodeAtPosAndSelect id
+
+forestCursorAddChildNodeSingleToNodeAtStartAndSelect :: a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildNodeSingleToNodeAtStartAndSelect = FC.forestCursorAddChildNodeSingleToNodeAtStartAndSelect id
+
+forestCursorAddChildNodeSingleToNodeAtEndAndSelect :: a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildNodeSingleToNodeAtEndAndSelect = FC.forestCursorAddChildNodeSingleToNodeAtEndAndSelect id
+
+forestCursorAddChildNodeToNodeAtPosAndSelect :: Int -> a -> Forest a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildNodeToNodeAtPosAndSelect = FC.forestCursorAddChildNodeToNodeAtPosAndSelect id
+
+forestCursorAddChildNodeToNodeAtStartAndSelect :: a -> Forest a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildNodeToNodeAtStartAndSelect = FC.forestCursorAddChildNodeToNodeAtStartAndSelect id
+
+forestCursorAddChildNodeToNodeAtEndAndSelect :: a -> Forest a -> ForestCursor a -> ForestCursor a
+forestCursorAddChildNodeToNodeAtEndAndSelect = FC.forestCursorAddChildNodeToNodeAtEndAndSelect id
 
 forestCursorRemoveElemAndSelectPrev :: ForestCursor a -> Maybe (DeleteOrUpdate (ForestCursor a))
 forestCursorRemoveElemAndSelectPrev = FC.forestCursorRemoveElemAndSelectPrev id
