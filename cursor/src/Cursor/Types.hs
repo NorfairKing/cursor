@@ -35,6 +35,11 @@ instance Alternative DeleteOrUpdate where
   Updated a <|> _ = Updated a
   Deleted <|> doua = doua
 
+instance Monad DeleteOrUpdate where
+  dou >>= f = case dou of
+    Updated a -> f a
+    Deleted -> Deleted
+
 joinDeletes :: Maybe (DeleteOrUpdate a) -> Maybe (DeleteOrUpdate a) -> DeleteOrUpdate a
 joinDeletes m1 m2 =
   case (m1, m2) of

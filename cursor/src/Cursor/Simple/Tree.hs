@@ -51,6 +51,12 @@ module Cursor.Simple.Tree
     treeCursorAddChildAtPosAndSelect,
     treeCursorAddChildAtStartAndSelect,
     treeCursorAddChildAtEndAndSelect,
+    treeCursorAddChildNodeSingleAtPosAndSelect,
+    treeCursorAddChildNodeSingleAtStartAndSelect,
+    treeCursorAddChildNodeSingleAtEndAndSelect,
+    treeCursorAddChildNodeAtPosAndSelect,
+    treeCursorAddChildNodeAtStartAndSelect,
+    treeCursorAddChildNodeAtEndAndSelect,
     treeCursorDeleteSubTreeAndSelectPrevious,
     treeCursorDeleteSubTreeAndSelectNext,
     treeCursorDeleteSubTreeAndSelectAbove,
@@ -172,6 +178,24 @@ treeCursorAddChildAtStartAndSelect = TC.treeCursorAddChildAtStartAndSelect id id
 
 treeCursorAddChildAtEndAndSelect :: Tree a -> TreeCursor a -> TreeCursor a
 treeCursorAddChildAtEndAndSelect = TC.treeCursorAddChildAtEndAndSelect id id
+
+treeCursorAddChildNodeSingleAtPosAndSelect :: Int -> a -> TreeCursor a -> TreeCursor a
+treeCursorAddChildNodeSingleAtPosAndSelect = TC.treeCursorAddChildNodeSingleAtPosAndSelect id
+
+treeCursorAddChildNodeSingleAtStartAndSelect :: a -> TreeCursor a -> TreeCursor a
+treeCursorAddChildNodeSingleAtStartAndSelect = TC.treeCursorAddChildNodeSingleAtStartAndSelect id
+
+treeCursorAddChildNodeSingleAtEndAndSelect :: a -> TreeCursor a -> TreeCursor a
+treeCursorAddChildNodeSingleAtEndAndSelect = TC.treeCursorAddChildNodeSingleAtEndAndSelect id
+
+treeCursorAddChildNodeAtPosAndSelect :: Int -> a -> Forest a -> TreeCursor a -> TreeCursor a
+treeCursorAddChildNodeAtPosAndSelect = TC.treeCursorAddChildNodeAtPosAndSelect id
+
+treeCursorAddChildNodeAtStartAndSelect :: a -> Forest a -> TreeCursor a -> TreeCursor a
+treeCursorAddChildNodeAtStartAndSelect = TC.treeCursorAddChildNodeAtStartAndSelect id
+
+treeCursorAddChildNodeAtEndAndSelect :: a -> Forest a -> TreeCursor a -> TreeCursor a
+treeCursorAddChildNodeAtEndAndSelect = TC.treeCursorAddChildNodeAtEndAndSelect id
 
 treeCursorDeleteSubTreeAndSelectPrevious :: TreeCursor a -> Maybe (DeleteOrUpdate (TreeCursor a))
 treeCursorDeleteSubTreeAndSelectPrevious = TC.treeCursorDeleteSubTreeAndSelectPrevious id

@@ -40,10 +40,14 @@ spec = do
     it "produces valid cursors " $ producesValidsOnValids3 $ treeCursorAddChildAtPosAndSelect @Bool
     it "adds a tree at the given index in theAndSelect children of the current node" pending
   describe "treeCursorAddChildAtStartAndSelect" $ do
-    it "producesAndSelect valid cursors "
-      $ producesValidsOnValids2
-      $ treeCursorAddChildAtStartAndSelect @Bool
+    it "producesAndSelect valid cursors " $ producesValidsOnValids2 $ treeCursorAddChildAtStartAndSelect @Bool
     it "adds a tree at the start of the children of the current node" pending
   describe "treeCursorAddChildAtEndAndSelect" $ do
     it "produces valid cursors " $ producesValidsOnValids2 $ treeCursorAddChildAtEndAndSelect @Bool
     it "adds a tree at the end of the children of the current node" pending
+  describe "treeCursorAddChildNodeSingleAtPosAndSelect" $ it "produces valid cursors" $ producesValidsOnValids3 (treeCursorAddChildNodeSingleAtPosAndSelect @Bool)
+  describe "treeCursorAddChildNodeSingleAtStartAndSelect" $ it "produces valid cursors" $ producesValidsOnValids2 (treeCursorAddChildNodeSingleAtStartAndSelect @Bool)
+  describe "treeCursorAddChildNodeSingleAtEndAndSelect" $ it "produces valid cursors" $ producesValidsOnValids2 (treeCursorAddChildNodeSingleAtEndAndSelect @Bool)
+  describe "treeCursorAddChildNodeAtPosAndSelect" $ it "produces valid cursors" $ forAllValid $ producesValidsOnValids3 . (treeCursorAddChildNodeAtPosAndSelect @Bool)
+  describe "treeCursorAddChildNodeAtStartAndSelect" $ it "produces valid cursors" $ producesValidsOnValids3 (treeCursorAddChildNodeAtStartAndSelect @Bool)
+  describe "treeCursorAddChildNodeAtEndAndSelect" $ it "produces valid cursors" $ producesValidsOnValids3 (treeCursorAddChildNodeAtEndAndSelect @Bool)

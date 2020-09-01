@@ -12,6 +12,12 @@ module Cursor.Tree.Insert
     treeCursorAddChildAtPosAndSelect,
     treeCursorAddChildAtStartAndSelect,
     treeCursorAddChildAtEndAndSelect,
+    treeCursorAddChildNodeSingleAtPosAndSelect,
+    treeCursorAddChildNodeSingleAtStartAndSelect,
+    treeCursorAddChildNodeSingleAtEndAndSelect,
+    treeCursorAddChildNodeAtPosAndSelect,
+    treeCursorAddChildNodeAtStartAndSelect,
+    treeCursorAddChildNodeAtEndAndSelect,
   )
 where
 
@@ -75,7 +81,31 @@ treeCursorAddChildAtEnd t tc =
 
 treeCursorAddChildAtPosAndSelect ::
   (a -> b) -> (b -> a) -> Int -> Tree b -> TreeCursor a b -> TreeCursor a b
-treeCursorAddChildAtPosAndSelect f g i (Node t ts) tc =
+treeCursorAddChildAtPosAndSelect f g i (Node t ts) = treeCursorAddChildNodeAtPosAndSelect f i (g t) ts
+
+treeCursorAddChildAtStartAndSelect ::
+  (a -> b) -> (b -> a) -> Tree b -> TreeCursor a b -> TreeCursor a b
+treeCursorAddChildAtStartAndSelect f g (Node t ts) = treeCursorAddChildNodeAtStartAndSelect f (g t) ts
+
+treeCursorAddChildAtEndAndSelect ::
+  (a -> b) -> (b -> a) -> Tree b -> TreeCursor a b -> TreeCursor a b
+treeCursorAddChildAtEndAndSelect f g (Node t ts) = treeCursorAddChildNodeAtEndAndSelect f (g t) ts
+
+treeCursorAddChildNodeSingleAtPosAndSelect ::
+  (a -> b) -> Int -> a -> TreeCursor a b -> TreeCursor a b
+treeCursorAddChildNodeSingleAtPosAndSelect f i a = treeCursorAddChildNodeAtPosAndSelect f i a []
+
+treeCursorAddChildNodeSingleAtStartAndSelect ::
+  (a -> b) -> a -> TreeCursor a b -> TreeCursor a b
+treeCursorAddChildNodeSingleAtStartAndSelect f a = treeCursorAddChildNodeAtStartAndSelect f a []
+
+treeCursorAddChildNodeSingleAtEndAndSelect ::
+  (a -> b) -> a -> TreeCursor a b -> TreeCursor a b
+treeCursorAddChildNodeSingleAtEndAndSelect f a = treeCursorAddChildNodeAtEndAndSelect f a []
+
+treeCursorAddChildNodeAtPosAndSelect ::
+  (a -> b) -> Int -> a -> Forest b -> TreeCursor a b -> TreeCursor a b
+treeCursorAddChildNodeAtPosAndSelect f i t ts tc =
   let (before, after) = splitAt i $ unpackCForest $ treeBelow tc
    in TreeCursor
         { treeAbove =
@@ -86,13 +116,13 @@ treeCursorAddChildAtPosAndSelect f g i (Node t ts) tc =
                   treeAboveNode = f (treeCurrent tc),
                   treeAboveRights = after
                 },
-          treeCurrent = g t,
+          treeCurrent = t,
           treeBelow = makeCForest ts
         }
 
-treeCursorAddChildAtStartAndSelect ::
-  (a -> b) -> (b -> a) -> Tree b -> TreeCursor a b -> TreeCursor a b
-treeCursorAddChildAtStartAndSelect f g (Node t ts) tc =
+treeCursorAddChildNodeAtStartAndSelect ::
+  (a -> b) -> a -> Forest b -> TreeCursor a b -> TreeCursor a b
+treeCursorAddChildNodeAtStartAndSelect f t ts tc =
   TreeCursor
     { treeAbove =
         Just
@@ -102,13 +132,13 @@ treeCursorAddChildAtStartAndSelect f g (Node t ts) tc =
               treeAboveNode = f (treeCurrent tc),
               treeAboveRights = unpackCForest $ treeBelow tc
             },
-      treeCurrent = g t,
+      treeCurrent = t,
       treeBelow = makeCForest ts
     }
 
-treeCursorAddChildAtEndAndSelect ::
-  (a -> b) -> (b -> a) -> Tree b -> TreeCursor a b -> TreeCursor a b
-treeCursorAddChildAtEndAndSelect f g (Node t ts) tc =
+treeCursorAddChildNodeAtEndAndSelect ::
+  (a -> b) -> a -> Forest b -> TreeCursor a b -> TreeCursor a b
+treeCursorAddChildNodeAtEndAndSelect f t ts tc =
   TreeCursor
     { treeAbove =
         Just
@@ -118,6 +148,6 @@ treeCursorAddChildAtEndAndSelect f g (Node t ts) tc =
               treeAboveNode = f (treeCurrent tc),
               treeAboveRights = []
             },
-      treeCurrent = g t,
+      treeCurrent = t,
       treeBelow = makeCForest ts
     }
