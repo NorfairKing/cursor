@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -10,6 +9,8 @@ where
 
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
+import Cursor.Tree.Types
+import Data.Tree
 import Test.Hspec
 import Test.Validity
 
@@ -49,5 +50,77 @@ spec = do
   describe "treeCursorAddChildNodeSingleAtStartAndSelect" $ it "produces valid cursors" $ producesValidsOnValids2 (treeCursorAddChildNodeSingleAtStartAndSelect @Bool)
   describe "treeCursorAddChildNodeSingleAtEndAndSelect" $ it "produces valid cursors" $ producesValidsOnValids2 (treeCursorAddChildNodeSingleAtEndAndSelect @Bool)
   describe "treeCursorAddChildNodeAtPosAndSelect" $ it "produces valid cursors" $ forAllValid $ producesValidsOnValids3 . (treeCursorAddChildNodeAtPosAndSelect @Bool)
-  describe "treeCursorAddChildNodeAtStartAndSelect" $ it "produces valid cursors" $ producesValidsOnValids3 (treeCursorAddChildNodeAtStartAndSelect @Bool)
-  describe "treeCursorAddChildNodeAtEndAndSelect" $ it "produces valid cursors" $ producesValidsOnValids3 (treeCursorAddChildNodeAtEndAndSelect @Bool)
+  describe "treeCursorAddChildNodeAtStartAndSelect" $ do
+    it "produces valid cursors" $ producesValidsOnValids3 (treeCursorAddChildNodeAtStartAndSelect @Bool)
+    it "works for this example" $
+      let tc =
+            TreeCursor
+              { treeAbove =
+                  Just
+                    TreeAbove
+                      { treeAboveLefts = map makeCTree [Node "1" [], Node "2" []],
+                        treeAboveAbove = Nothing,
+                        treeAboveNode = "bar",
+                        treeAboveRights = map makeCTree [Node "3" [], Node "4" []]
+                      },
+                treeCurrent = "baz",
+                treeBelow = makeCForest [Node "a" [], Node "b" []]
+              }
+          tc' =
+            TreeCursor
+              { treeAbove =
+                  Just
+                    TreeAbove
+                      { treeAboveLefts = [],
+                        treeAboveAbove =
+                          Just
+                            TreeAbove
+                              { treeAboveLefts = map makeCTree [Node "1" [], Node "2" []],
+                                treeAboveAbove = Nothing,
+                                treeAboveNode = "bar",
+                                treeAboveRights = map makeCTree [Node "3" [], Node "4" []]
+                              },
+                        treeAboveNode = "baz",
+                        treeAboveRights = map makeCTree [Node "a" [], Node "b" []]
+                      },
+                treeCurrent = "new",
+                treeBelow = makeCForest []
+              }
+       in treeCursorAddChildNodeAtStartAndSelect "new" [] tc `shouldBe` tc'
+  describe "treeCursorAddChildNodeAtEndAndSelect" $ do
+    it "produces valid cursors" $ producesValidsOnValids3 (treeCursorAddChildNodeAtEndAndSelect @Bool)
+    it "works for this example" $
+      let tc =
+            TreeCursor
+              { treeAbove =
+                  Just
+                    TreeAbove
+                      { treeAboveLefts = map makeCTree [Node "1" [], Node "2" []],
+                        treeAboveAbove = Nothing,
+                        treeAboveNode = "bar",
+                        treeAboveRights = map makeCTree [Node "3" [], Node "4" []]
+                      },
+                treeCurrent = "baz",
+                treeBelow = makeCForest [Node "a" [], Node "b" []]
+              }
+          tc' =
+            TreeCursor
+              { treeAbove =
+                  Just
+                    TreeAbove
+                      { treeAboveLefts = map makeCTree [Node "b" [], Node "a" []],
+                        treeAboveAbove =
+                          Just
+                            TreeAbove
+                              { treeAboveLefts = map makeCTree [Node "1" [], Node "2" []],
+                                treeAboveAbove = Nothing,
+                                treeAboveNode = "bar",
+                                treeAboveRights = map makeCTree [Node "3" [], Node "4" []]
+                              },
+                        treeAboveNode = "baz",
+                        treeAboveRights = []
+                      },
+                treeCurrent = "new",
+                treeBelow = makeCForest []
+              }
+       in treeCursorAddChildNodeAtEndAndSelect "new" [] tc `shouldBe` tc'
