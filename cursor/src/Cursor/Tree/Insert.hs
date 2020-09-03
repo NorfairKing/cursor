@@ -111,7 +111,7 @@ treeCursorAddChildNodeAtPosAndSelect f i t ts tc =
         { treeAbove =
             Just
               TreeAbove
-                { treeAboveLefts = before,
+                { treeAboveLefts = reverse before,
                   treeAboveAbove = treeAbove tc,
                   treeAboveNode = f (treeCurrent tc),
                   treeAboveRights = after
@@ -143,7 +143,7 @@ treeCursorAddChildNodeAtEndAndSelect f t ts tc =
     { treeAbove =
         Just
           TreeAbove
-            { treeAboveLefts = unpackCForest $ treeBelow tc,
+            { treeAboveLefts = reverse $ unpackCForest $ treeBelow tc,
               treeAboveAbove = treeAbove tc,
               treeAboveNode = f (treeCurrent tc),
               treeAboveRights = []
