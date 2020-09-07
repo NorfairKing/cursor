@@ -45,6 +45,10 @@ module Cursor.Forest
     forestCursorAppend,
     forestCursorInsertAndSelect,
     forestCursorAppendAndSelect,
+    forestCursorInsertNodeSingleAndSelect,
+    forestCursorAppendNodeSingleAndSelect,
+    forestCursorInsertNodeAndSelect,
+    forestCursorAppendNodeAndSelect,
     forestCursorAddChildTreeToNodeAtPos,
     forestCursorAddChildTreeToNodeAtStart,
     forestCursorAddChildTreeToNodeAtEnd,
@@ -274,9 +278,8 @@ forestCursorInsertTree t fc =
 
 forestCursorInsertAndSelectTree ::
   (a -> b) -> (b -> a) -> Tree b -> ForestCursor a b -> ForestCursor a b
-forestCursorInsertAndSelectTree f g t fc =
-  fromMaybe (forestCursorInsertAndSelectTreeCursor f (makeTreeCursor g $ makeCTree t) fc) $
-    fc & forestCursorSelectedTreeL (treeCursorInsertAndSelect f g t)
+forestCursorInsertAndSelectTree f g (Node value forest) =
+  forestCursorInsertNodeAndSelect f (g value) (makeCForest forest)
 
 forestCursorAppendTree :: Tree b -> ForestCursor a b -> ForestCursor a b
 forestCursorAppendTree t fc =
@@ -285,9 +288,8 @@ forestCursorAppendTree t fc =
 
 forestCursorAppendAndSelectTree ::
   (a -> b) -> (b -> a) -> Tree b -> ForestCursor a b -> ForestCursor a b
-forestCursorAppendAndSelectTree f g t fc =
-  fromMaybe (forestCursorAppendAndSelectTreeCursor f (makeTreeCursor g $ makeCTree t) fc) $
-    fc & forestCursorSelectedTreeL (treeCursorAppendAndSelect f g t)
+forestCursorAppendAndSelectTree f g (Node value forest) =
+  forestCursorAppendNodeAndSelect f (g value) (makeCForest forest)
 
 forestCursorInsert :: b -> ForestCursor a b -> ForestCursor a b
 forestCursorInsert b = forestCursorInsertTree $ Node b []
@@ -295,11 +297,27 @@ forestCursorInsert b = forestCursorInsertTree $ Node b []
 forestCursorInsertAndSelect :: (a -> b) -> (b -> a) -> b -> ForestCursor a b -> ForestCursor a b
 forestCursorInsertAndSelect f g b = forestCursorInsertAndSelectTree f g $ Node b []
 
+forestCursorInsertNodeSingleAndSelect :: (a -> b) -> a -> ForestCursor a b -> ForestCursor a b
+forestCursorInsertNodeSingleAndSelect f value = forestCursorInsertNodeAndSelect f value EmptyCForest
+
+forestCursorInsertNodeAndSelect :: (a -> b) -> a -> CForest b -> ForestCursor a b -> ForestCursor a b
+forestCursorInsertNodeAndSelect f value forest fc =
+  fromMaybe (forestCursorInsertAndSelectTreeCursor f (makeNodeTreeCursor value forest) fc) $
+    fc & forestCursorSelectedTreeL (treeCursorInsertNodeAndSelect f value forest)
+
 forestCursorAppend :: b -> ForestCursor a b -> ForestCursor a b
 forestCursorAppend b = forestCursorAppendTree $ Node b []
 
 forestCursorAppendAndSelect :: (a -> b) -> (b -> a) -> b -> ForestCursor a b -> ForestCursor a b
 forestCursorAppendAndSelect f g b = forestCursorAppendAndSelectTree f g $ Node b []
+
+forestCursorAppendNodeSingleAndSelect :: (a -> b) -> a -> ForestCursor a b -> ForestCursor a b
+forestCursorAppendNodeSingleAndSelect f value = forestCursorAppendNodeAndSelect f value EmptyCForest
+
+forestCursorAppendNodeAndSelect :: (a -> b) -> a -> CForest b -> ForestCursor a b -> ForestCursor a b
+forestCursorAppendNodeAndSelect f value forest fc =
+  fromMaybe (forestCursorAppendAndSelectTreeCursor f (makeNodeTreeCursor value forest) fc) $
+    fc & forestCursorSelectedTreeL (treeCursorAppendNodeAndSelect f value forest)
 
 forestCursorAddChildTreeToNodeAtPos :: Int -> Tree b -> ForestCursor a b -> ForestCursor a b
 forestCursorAddChildTreeToNodeAtPos i t = forestCursorSelectedTreeL %~ treeCursorAddChildAtPos i t

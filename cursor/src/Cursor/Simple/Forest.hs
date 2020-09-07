@@ -43,6 +43,10 @@ module Cursor.Simple.Forest
     FC.forestCursorAppend,
     forestCursorInsertAndSelect,
     forestCursorAppendAndSelect,
+    forestCursorInsertNodeSingleAndSelect,
+    forestCursorAppendNodeSingleAndSelect,
+    forestCursorInsertNodeAndSelect,
+    forestCursorAppendNodeAndSelect,
     FC.forestCursorAddChildTreeToNodeAtPos,
     FC.forestCursorAddChildTreeToNodeAtStart,
     FC.forestCursorAddChildTreeToNodeAtEnd,
@@ -173,8 +177,20 @@ forestCursorAppendAndSelectTree = FC.forestCursorAppendAndSelectTree id id
 forestCursorInsertAndSelect :: a -> ForestCursor a -> ForestCursor a
 forestCursorInsertAndSelect = FC.forestCursorInsertAndSelect id id
 
+forestCursorInsertNodeSingleAndSelect :: a -> ForestCursor a -> ForestCursor a
+forestCursorInsertNodeSingleAndSelect = FC.forestCursorInsertNodeSingleAndSelect id
+
+forestCursorInsertNodeAndSelect :: a -> CForest a -> ForestCursor a -> ForestCursor a
+forestCursorInsertNodeAndSelect = FC.forestCursorInsertNodeAndSelect id
+
 forestCursorAppendAndSelect :: a -> ForestCursor a -> ForestCursor a
 forestCursorAppendAndSelect = FC.forestCursorAppendAndSelect id id
+
+forestCursorAppendNodeSingleAndSelect :: a -> ForestCursor a -> ForestCursor a
+forestCursorAppendNodeSingleAndSelect = FC.forestCursorAppendNodeSingleAndSelect id
+
+forestCursorAppendNodeAndSelect :: a -> CForest a -> ForestCursor a -> ForestCursor a
+forestCursorAppendNodeAndSelect = FC.forestCursorAppendNodeAndSelect id
 
 forestCursorAddChildTreeToNodeAtPosAndSelect :: Int -> Tree a -> ForestCursor a -> ForestCursor a
 forestCursorAddChildTreeToNodeAtPosAndSelect = FC.forestCursorAddChildTreeToNodeAtPosAndSelect id id

@@ -23,6 +23,9 @@ spec = do
   describe "makeTreeCursor"
     $ it "produces valid cursors"
     $ producesValidsOnValids (makeTreeCursor @Bool)
+  describe "makeNodeTreeCursor"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids2 (makeNodeTreeCursor @Bool @Bool)
   describe "makeTreeCursorWithSelection"
     $ it "produces valid cursors"
     $ producesValidsOnValids2 (makeTreeCursorWithSelection @Bool)

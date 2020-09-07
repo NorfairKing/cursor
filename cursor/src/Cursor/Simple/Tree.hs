@@ -5,6 +5,7 @@ module Cursor.Simple.Tree
     TreeAbove (..),
     singletonTreeCursor,
     makeTreeCursor,
+    TC.makeNodeTreeCursor,
     makeTreeCursorWithSelection,
     rebuildTreeCursor,
     TC.drawTreeCursor,
@@ -43,8 +44,12 @@ module Cursor.Simple.Tree
     TC.treeCursorToggleCurrentForestRecursively,
     TC.treeCursorInsert,
     treeCursorInsertAndSelect,
+    treeCursorInsertNodeSingleAndSelect,
+    treeCursorInsertNodeAndSelect,
     TC.treeCursorAppend,
     treeCursorAppendAndSelect,
+    treeCursorAppendNodeSingleAndSelect,
+    treeCursorAppendNodeAndSelect,
     TC.treeCursorAddChildAtPos,
     TC.treeCursorAddChildAtStart,
     TC.treeCursorAddChildAtEnd,
@@ -88,7 +93,7 @@ module Cursor.Simple.Tree
 where
 
 import qualified Cursor.Tree as TC
-import Cursor.Tree (CTree, TreeAbove (..))
+import Cursor.Tree (CForest (..), CTree, TreeAbove (..))
 import Cursor.Types
 import Data.Tree
 
@@ -167,8 +172,20 @@ treeCursorSelectAboveNext = TC.treeCursorSelectAboveNext id id
 treeCursorInsertAndSelect :: Tree a -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorInsertAndSelect = TC.treeCursorInsertAndSelect id id
 
+treeCursorInsertNodeSingleAndSelect :: a -> TreeCursor a -> Maybe (TreeCursor a)
+treeCursorInsertNodeSingleAndSelect = TC.treeCursorInsertNodeSingleAndSelect id
+
+treeCursorInsertNodeAndSelect :: a -> CForest a -> TreeCursor a -> Maybe (TreeCursor a)
+treeCursorInsertNodeAndSelect = TC.treeCursorInsertNodeAndSelect id
+
 treeCursorAppendAndSelect :: Tree a -> TreeCursor a -> Maybe (TreeCursor a)
 treeCursorAppendAndSelect = TC.treeCursorAppendAndSelect id id
+
+treeCursorAppendNodeSingleAndSelect :: a -> TreeCursor a -> Maybe (TreeCursor a)
+treeCursorAppendNodeSingleAndSelect = TC.treeCursorAppendNodeSingleAndSelect id
+
+treeCursorAppendNodeAndSelect :: a -> CForest a -> TreeCursor a -> Maybe (TreeCursor a)
+treeCursorAppendNodeAndSelect = TC.treeCursorAppendNodeAndSelect id
 
 treeCursorAddChildAtPosAndSelect :: Int -> Tree a -> TreeCursor a -> TreeCursor a
 treeCursorAddChildAtPosAndSelect = TC.treeCursorAddChildAtPosAndSelect id id

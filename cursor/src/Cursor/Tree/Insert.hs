@@ -4,8 +4,12 @@
 module Cursor.Tree.Insert
   ( treeCursorInsert,
     treeCursorInsertAndSelect,
+    treeCursorInsertNodeSingleAndSelect,
+    treeCursorInsertNodeAndSelect,
     treeCursorAppend,
     treeCursorAppendAndSelect,
+    treeCursorAppendNodeSingleAndSelect,
+    treeCursorAppendNodeAndSelect,
     treeCursorAddChildAtPos,
     treeCursorAddChildAtStart,
     treeCursorAddChildAtEnd,
@@ -35,10 +39,19 @@ treeCursorInsert tree tc@TreeCursor {..} = do
 
 treeCursorInsertAndSelect ::
   (a -> b) -> (b -> a) -> Tree b -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorInsertAndSelect f g tree tc@TreeCursor {..} = do
-  ta <- treeAbove
-  let newTreeAbove = ta {treeAboveRights = currentTree f tc : treeAboveRights ta}
-  pure $ makeTreeCursorWithAbove g (makeCTree tree) $ Just newTreeAbove
+treeCursorInsertAndSelect f g (Node value forest) = treeCursorInsertNodeAndSelect f (g value) (makeCForest forest)
+
+treeCursorInsertNodeSingleAndSelect ::
+  (a -> b) -> a -> TreeCursor a b -> Maybe (TreeCursor a b)
+treeCursorInsertNodeSingleAndSelect f a = treeCursorInsertNodeAndSelect f a EmptyCForest
+
+treeCursorInsertNodeAndSelect ::
+  (a -> b) -> a -> CForest b -> TreeCursor a b -> Maybe (TreeCursor a b)
+treeCursorInsertNodeAndSelect f value forest tc = do
+  ta <- treeAbove tc
+  let ta' = ta {treeAboveRights = CNode (f (treeCurrent tc)) (treeBelow tc) : treeAboveRights ta}
+      tc' = tc {treeAbove = Just ta', treeCurrent = value, treeBelow = forest}
+  pure tc'
 
 treeCursorAppend :: Tree b -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorAppend tree tc@TreeCursor {..} = do
@@ -48,10 +61,19 @@ treeCursorAppend tree tc@TreeCursor {..} = do
 
 treeCursorAppendAndSelect ::
   (a -> b) -> (b -> a) -> Tree b -> TreeCursor a b -> Maybe (TreeCursor a b)
-treeCursorAppendAndSelect f g tree tc@TreeCursor {..} = do
-  ta <- treeAbove
-  let newTreeAbove = ta {treeAboveLefts = currentTree f tc : treeAboveLefts ta}
-  pure $ makeTreeCursorWithAbove g (makeCTree tree) $ Just newTreeAbove
+treeCursorAppendAndSelect f g (Node value forest) = treeCursorAppendNodeAndSelect f (g value) (makeCForest forest)
+
+treeCursorAppendNodeSingleAndSelect ::
+  (a -> b) -> a -> TreeCursor a b -> Maybe (TreeCursor a b)
+treeCursorAppendNodeSingleAndSelect f a = treeCursorAppendNodeAndSelect f a EmptyCForest
+
+treeCursorAppendNodeAndSelect ::
+  (a -> b) -> a -> CForest b -> TreeCursor a b -> Maybe (TreeCursor a b)
+treeCursorAppendNodeAndSelect f value forest tc = do
+  ta <- treeAbove tc
+  let ta' = ta {treeAboveLefts = CNode (f (treeCurrent tc)) (treeBelow tc) : treeAboveLefts ta}
+      tc' = tc {treeAbove = Just ta', treeCurrent = value, treeBelow = forest}
+  pure tc'
 
 -- TODO make this fail if the position doesn't make sense
 treeCursorAddChildAtPos :: Int -> Tree b -> TreeCursor a b -> TreeCursor a b

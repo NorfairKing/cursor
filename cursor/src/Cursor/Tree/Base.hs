@@ -5,6 +5,7 @@
 module Cursor.Tree.Base
   ( singletonTreeCursor,
     makeTreeCursor,
+    makeNodeTreeCursor,
     makeTreeCursorWithSelection,
     rebuildTreeCursor,
     mapTreeCursor,
@@ -23,6 +24,9 @@ singletonTreeCursor v = TreeCursor {treeAbove = Nothing, treeCurrent = v, treeBe
 
 makeTreeCursor :: (b -> a) -> CTree b -> TreeCursor a b
 makeTreeCursor g (CNode v fs) = TreeCursor {treeAbove = Nothing, treeCurrent = g v, treeBelow = fs}
+
+makeNodeTreeCursor :: a -> CForest b -> TreeCursor a b
+makeNodeTreeCursor v fs = TreeCursor {treeAbove = Nothing, treeCurrent = v, treeBelow = fs}
 
 makeTreeCursorWithSelection ::
   (a -> b) -> (b -> a) -> TreeCursorSelection -> CTree b -> Maybe (TreeCursor a b)

@@ -22,11 +22,23 @@ spec = do
   describe "treeCursorInsertAndSelect" $ do
     it "produces valids on valids" $ producesValidsOnValids2 $ treeCursorInsertAndSelect @Bool
     it "inserts and select the element" pending
+  describe "treeCursorInsertNodeSingleAndSelect" $ do
+    it "produces valids on valids" $ producesValidsOnValids2 $ treeCursorInsertNodeSingleAndSelect @Bool
+    it "inserts and select the element" pending
+  describe "treeCursorInsertNodeAndSelect" $ do
+    it "produces valids on valids" $ producesValidsOnValids3 $ treeCursorInsertNodeAndSelect @Bool
+    it "inserts and select the element" pending
   describe "treeCursorAppend" $ do
     it "produces valids on valids" $ producesValidsOnValids2 $ treeCursorAppend @Bool @Bool
     it "appends the element" pending
   describe "treeCursorAppendAndSelect" $ do
     it "produces valids on valids" $ producesValidsOnValids2 $ treeCursorAppendAndSelect @Bool
+    it "appends and select the element" pending
+  describe "treeCursorAppendNodeSingleAndSelect" $ do
+    it "produces valids on valids" $ producesValidsOnValids2 $ treeCursorAppendNodeSingleAndSelect @Bool
+    it "appends and select the element" pending
+  describe "treeCursorAppendNodeAndSelect" $ do
+    it "produces valids on valids" $ producesValidsOnValids3 $ treeCursorAppendNodeAndSelect @Bool
     it "appends and select the element" pending
   describe "treeCursorAddChildAtPos" $ do
     it "produces valid cursors " $ producesValidsOnValids3 $ treeCursorAddChildAtPos @Bool @Bool

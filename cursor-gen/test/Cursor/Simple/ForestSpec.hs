@@ -270,11 +270,23 @@ insertSpec = do
   describe "forestCursorInsertAndSelect" $ do
     it "produces valid cursors" $ producesValidsOnValids2 (forestCursorInsertAndSelect @Bool)
     it "inserts a node before the currently selected node and selects it" pending
+  describe "forestCursorInsertNodeSingleAndSelect" $ do
+    it "produces valid cursors" $ producesValidsOnValids2 (forestCursorInsertNodeSingleAndSelect @Bool)
+    it "inserts a node before the currently selected node and selects it" pending
+  describe "forestCursorInsertNodeAndSelect" $ do
+    it "produces valid cursors" $ producesValidsOnValids3 (forestCursorInsertNodeAndSelect @Bool)
+    it "inserts a node before the currently selected node and selects it" pending
   describe "forestCursorAppend" $ do
     it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAppend @Bool @Bool)
     it "appends a node after the currently selected node" pending
   describe "forestCursorAppendAndSelect" $ do
     it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAppendAndSelect @Bool)
+    it "appends a node after the currently selected node and selects it" pending
+  describe "forestCursorAppendNodeSingleAndSelect" $ do
+    it "produces valid cursors" $ producesValidsOnValids2 (forestCursorAppendNodeSingleAndSelect @Bool)
+    it "appends a node after the currently selected node and selects it" pending
+  describe "forestCursorAppendNodeAndSelect" $ do
+    it "produces valid cursors" $ producesValidsOnValids3 (forestCursorAppendNodeAndSelect @Bool)
     it "appends a node after the currently selected node and selects it" pending
   describe "forestCursorAddChildTreeToNodeAtPos" $ do
     it "produces valid cursors"
