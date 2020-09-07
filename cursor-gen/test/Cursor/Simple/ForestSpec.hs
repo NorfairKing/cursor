@@ -30,6 +30,9 @@ spec = do
   modifyMaxSize (`quot` 2)
     $ modifyMaxSuccess (`quot` 2)
     $ shrinkValidSpecWithLimit @(SFC.ForestCursor Bool) 10
+  describe "singletonForestCursor"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids (singletonForestCursor @Bool @Bool)
   describe "makeForestCursor"
     $ it "produces valid cursors"
     $ producesValidsOnValids (makeForestCursor @Bool)

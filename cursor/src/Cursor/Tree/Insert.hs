@@ -25,7 +25,6 @@ module Cursor.Tree.Insert
   )
 where
 
-import Cursor.Tree.Base
 import Cursor.Tree.Types
 import qualified Data.List.NonEmpty as NE
 import Data.List.NonEmpty ((<|))

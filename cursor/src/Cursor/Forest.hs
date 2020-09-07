@@ -4,6 +4,7 @@
 
 module Cursor.Forest
   ( ForestCursor (..),
+    singletonForestCursor,
     makeForestCursor,
     rebuildForestCursor,
     drawForestCursor,
@@ -119,6 +120,9 @@ newtype ForestCursor a b
 instance (Validity a, Validity b) => Validity (ForestCursor a b)
 
 instance (NFData a, NFData b) => NFData (ForestCursor a b)
+
+singletonForestCursor :: a -> ForestCursor a b
+singletonForestCursor = ForestCursor . singletonNonEmptyCursor . singletonTreeCursor
 
 makeForestCursor :: (b -> a) -> NonEmpty (CTree b) -> ForestCursor a b
 makeForestCursor g = ForestCursor . makeNonEmptyCursor (makeTreeCursor g)

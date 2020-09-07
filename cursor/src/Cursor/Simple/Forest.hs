@@ -2,6 +2,7 @@
 
 module Cursor.Simple.Forest
   ( ForestCursor,
+    FC.singletonForestCursor,
     makeForestCursor,
     rebuildForestCursor,
     FC.drawForestCursor,
