@@ -1,10 +1,11 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.Text.Gen
-  ( genSafeChar,
-    genTextCursorChar,
-    textCursorWithGen,
-    textCursorWithIndex0,
+  ( genSafeChar
+  , genTextCursorChar
+  , textCursorSentenceGen
+  , textCursorWithGen
+  , textCursorWithIndex0
   )
 where
 
@@ -24,6 +25,9 @@ instance GenValid TextCursor where
 genSafeChar :: Gen Char
 genSafeChar = choose (minBound, maxBound) `suchThat` isSafeChar
 
+genSpaceChar :: Gen Char
+genSpaceChar = elements [' ', '\t', '\v']
+
 genTextCursorChar :: Gen Char
 genTextCursorChar = genSafeChar `suchThat` (/= '\n')
 
@@ -32,3 +36,9 @@ textCursorWithGen gen = TextCursor <$> listCursorWithGen gen
 
 textCursorWithIndex0 :: Gen Char -> Gen TextCursor
 textCursorWithIndex0 gen = TextCursor <$> listCursorWithIndex0 gen
+
+textCursorSentenceGen :: Gen TextCursor
+textCursorSentenceGen = TextCursor <$> listCursorWithGen sentenceGen
+  where
+    sentenceGen :: Gen Char
+    sentenceGen = frequency [(1, genSpaceChar), (9, genSafeChar)]

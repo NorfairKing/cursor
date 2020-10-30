@@ -2,37 +2,42 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Text
-  ( TextCursor (..),
-    emptyTextCursor,
-    makeTextCursor,
-    makeTextCursorWithSelection,
-    rebuildTextCursor,
-    textCursorNull,
-    textCursorLength,
-    textCursorIndex,
-    textCursorSelectPrev,
-    textCursorSelectNext,
-    textCursorSelectIndex,
-    textCursorSelectStart,
-    textCursorSelectEnd,
-    textCursorPrevChar,
-    textCursorNextChar,
-    textCursorInsert,
-    textCursorAppend,
-    textCursorInsertString,
-    textCursorAppendString,
-    textCursorInsertText,
-    textCursorAppendText,
-    textCursorRemove,
-    textCursorDelete,
-    textCursorSplit,
-    textCursorCombine,
+  ( TextCursor(..)
+  , emptyTextCursor
+  , makeTextCursor
+  , makeTextCursorWithSelection
+  , rebuildTextCursor
+  , textCursorNull
+  , textCursorLength
+  , textCursorIndex
+  , textCursorSelectPrev
+  , textCursorSelectNext
+  , textCursorSelectIndex
+  , textCursorSelectStart
+  , textCursorSelectEnd
+  , textCursorPrevChar
+  , textCursorNextChar
+  , textCursorBeginWord
+  , textCursorEndWord
+  , textCursorNextWord
+  , textCursorPrevWord
+  , textCursorInsert
+  , textCursorAppend
+  , textCursorInsertString
+  , textCursorAppendString
+  , textCursorInsertText
+  , textCursorAppendText
+  , textCursorRemove
+  , textCursorDelete
+  , textCursorSplit
+  , textCursorCombine
   )
 where
 
 import Control.DeepSeq
 import Cursor.List
 import Cursor.Types
+import Data.Char
 import qualified Data.Text as T
 import Data.Text (Text)
 import Data.Validity
@@ -107,6 +112,62 @@ textCursorPrevChar = listCursorPrevItem . textCursorList
 
 textCursorNextChar :: TextCursor -> Maybe Char
 textCursorNextChar = listCursorNextItem . textCursorList
+
+textCursorBeginWord :: TextCursor -> TextCursor
+textCursorBeginWord tc =
+  case (textCursorPrevChar tc, textCursorNextChar tc) of
+    (Nothing, _) -> tc
+    (Just p, Just n) ->
+      case (isSpace p, isSpace n) of
+        (True, True) -> textCursorBeginWord . TextCursor $ listCursorPrevUntil (not . isSpace) lc
+        (True, False) -> tc
+        _ -> TextCursor $ listCursorPrevUntil isSpace lc
+    (Just _, _) ->
+      case textCursorSelectPrev tc of
+        Nothing -> tc
+        Just tc' -> textCursorBeginWord tc'
+  where
+    lc = textCursorList tc
+
+textCursorEndWord :: TextCursor -> TextCursor
+textCursorEndWord tc =
+  case (textCursorPrevChar tc, textCursorNextChar tc) of
+    (_, Nothing) -> tc
+    (Just p, Just n) ->
+      case (isSpace p, isSpace n) of
+        (True, True) -> textCursorEndWord . TextCursor $ listCursorNextUntil (not . isSpace) lc
+        (False, True) -> tc
+        _ -> TextCursor $ listCursorNextUntil isSpace lc
+    (_, Just _) ->
+      case textCursorSelectNext tc of
+        Nothing -> tc
+        Just tc' -> textCursorEndWord tc'
+  where
+    lc = textCursorList tc
+
+textCursorNextWord :: TextCursor -> TextCursor
+textCursorNextWord tc =
+  case (textCursorPrevChar tc, textCursorNextChar tc) of
+    (_, Nothing) -> tc
+    (Just p, Just n) ->
+      case (isSpace p, isSpace n) of
+        (_, True) -> TextCursor $ listCursorNextUntil (not . isSpace) lc
+        _ -> textCursorNextWord . TextCursor $ listCursorNextUntil isSpace lc
+    _ -> textCursorNextWord $ TextCursor $ listCursorNextUntil isSpace lc
+  where
+    lc = textCursorList tc
+
+textCursorPrevWord :: TextCursor -> TextCursor
+textCursorPrevWord tc =
+  case (textCursorPrevChar tc, textCursorNextChar tc) of
+    (Nothing, _) -> tc
+    (Just p, Just n) ->
+      case (isSpace p, isSpace n) of
+        (True, _) -> TextCursor $ listCursorPrevUntil (not . isSpace) lc
+        _ -> textCursorPrevWord . TextCursor $ listCursorPrevUntil isSpace lc
+    _ -> textCursorPrevWord . TextCursor $ listCursorPrevUntil isSpace lc
+  where
+    lc = textCursorList tc
 
 textCursorInsert :: Char -> TextCursor -> Maybe TextCursor
 textCursorInsert '\n' _ = Nothing

@@ -10,7 +10,9 @@ where
 import Control.Monad
 import Cursor.List
 import Cursor.Text
-import Cursor.Text.Gen ()
+import Cursor.Text.Gen (textCursorSentenceGen)
+import Data.Char
+import qualified Data.Text as T
 import Test.Hspec
 import Test.QuickCheck
 import Test.Validity
@@ -83,6 +85,40 @@ spec = do
   describe "textCursorNextChar" $ do
     it "produces valid items" $ producesValidsOnValids textCursorNextChar
     it "returns the item after the position" pending
+  describe "textCursorBeginWord" $ do
+    it "produces valid items" $ producesValidsOnValids textCursorBeginWord
+    it "is idempotent" $ isMovementIdempotent textCursorBeginWord
+  describe "textCursorEndWord" $ do
+    it "produces valid items" $ producesValidsOnValids textCursorEndWord
+    it "is idempotent" $ isMovementIdempotent textCursorEndWord
+  describe "textCursorPrevWord" $ do
+    it "produces valid items" $ producesValidsOnValids textCursorPrevWord
+    it "goes to the beginning of the cursor" $
+      let
+        input = TextCursor {textCursorList = ListCursor {listCursorPrev = "a", listCursorNext = "\vb"}}
+        outp = TextCursor {textCursorList = ListCursor {listCursorPrev = "", listCursorNext = "a\vb"}}
+      in
+        textCursorPrevWord input `shouldBe` outp
+    it "chooses the previous word correctly" $
+      let
+        input = TextCursor {textCursorList = ListCursor {listCursorPrev = "b a", listCursorNext = " c"}}
+        outp = TextCursor {textCursorList = ListCursor {listCursorPrev = "a", listCursorNext = " b c"}}
+      in
+        textCursorPrevWord input `shouldBe` outp
+  describe "textCursorNextWord" $ do
+    it "produces valid items" $ producesValidsOnValids textCursorNextWord
+    it "goes to the end of the cursor" $
+      let
+        input = TextCursor {textCursorList = ListCursor {listCursorPrev = "\va", listCursorNext = "b"}}
+        outp = TextCursor {textCursorList = ListCursor {listCursorPrev = "b\va", listCursorNext = ""}}
+      in
+        textCursorNextWord input `shouldBe` outp
+    it "chooses the next word correctly" $
+      let
+        input = TextCursor {textCursorList = ListCursor {listCursorPrev = "a", listCursorNext = " b c"}}
+        outp = TextCursor {textCursorList = ListCursor {listCursorPrev = " a", listCursorNext = "b c"}}
+      in
+        textCursorNextWord input `shouldBe` outp
   describe "textCursorInsert" $ do
     it "produces valids" $ forAllValid $ \d -> producesValidsOnValids (textCursorInsert d)
     it "inserts an item before the cursor" pending
@@ -148,3 +184,14 @@ isMovementM func =
 isMovement :: (TextCursor -> TextCursor) -> Property
 isMovement func =
   forAllValid $ \lec -> rebuildTextCursor lec `shouldBe` rebuildTextCursor (func lec)
+
+prop_idempotent :: Eq a => (a -> a) -> a -> Bool
+prop_idempotent f x = f (f x) == f x
+
+isMovementIdempotent :: (TextCursor -> TextCursor) -> Property
+isMovementIdempotent f =
+  forAll textCursorSentenceGen $ \tc ->
+    let txt = rebuildTextCursor tc
+        numChars = T.length txt
+        numSpaces = T.length . T.filter isSpace $ txt
+     in numSpaces >= 1 ==> cover 90 (numChars > 2) "non trivial" (prop_idempotent f tc)
