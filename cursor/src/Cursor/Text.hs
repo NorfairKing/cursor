@@ -17,6 +17,10 @@ module Cursor.Text
     textCursorSelectEnd,
     textCursorPrevChar,
     textCursorNextChar,
+    textCursorSelectBeginWord,
+    textCursorSelectEndWord,
+    textCursorSelectNextWord,
+    textCursorSelectPrevWord,
     textCursorInsert,
     textCursorAppend,
     textCursorInsertString,
@@ -33,6 +37,7 @@ where
 import Control.DeepSeq
 import Cursor.List
 import Cursor.Types
+import Data.Char
 import qualified Data.Text as T
 import Data.Text (Text)
 import Data.Validity
@@ -107,6 +112,80 @@ textCursorPrevChar = listCursorPrevItem . textCursorList
 
 textCursorNextChar :: TextCursor -> Maybe Char
 textCursorNextChar = listCursorNextItem . textCursorList
+
+-- | Move to the beginning of the word
+--
+-- * @"hell|o"@ -> @"|hello"@
+-- * @"hello   | world"@ -> @"|hello    world"@
+-- * @"hello |world"@ -> @"hello |world"@
+-- * @"| hello"@ -> @"| hello"@
+textCursorSelectBeginWord :: TextCursor -> TextCursor
+textCursorSelectBeginWord tc =
+  let goLeft = maybe tc textCursorSelectBeginWord (textCursorSelectPrev tc)
+   in case textCursorPrevChar tc of
+        Nothing -> tc
+        Just p
+          | isSpace p -> case textCursorNextChar tc of
+            Nothing -> goLeft
+            Just n
+              | isSpace n -> goLeft
+              | otherwise -> tc
+          | otherwise -> goLeft
+
+-- | Move to the end of the word
+--
+-- * @"hell|o"@ -> @"hello|"@
+-- * @"hello   | world"@ -> @"hello    world|"@
+-- * @"hello| world"@ -> @"hello| world"@
+-- * @"hello |"@ -> @"hello |"@
+textCursorSelectEndWord :: TextCursor -> TextCursor
+textCursorSelectEndWord tc =
+  let goRight = maybe tc textCursorSelectEndWord (textCursorSelectNext tc)
+   in case textCursorNextChar tc of
+        Nothing -> tc
+        Just p
+          | isSpace p -> case textCursorPrevChar tc of
+            Nothing -> goRight
+            Just n
+              | isSpace n -> goRight
+              | otherwise -> tc
+          | otherwise -> goRight
+
+-- | Move to the beginning of the next word
+--
+-- * @"|hello"@ -> @"hello|"@
+-- * @"hell|o world"@ -> @"hello |world"@
+-- * @"hello| world"@ -> @"hello |world"@
+-- * @"hello |"@ -> @"hello |"@
+textCursorSelectNextWord :: TextCursor -> TextCursor
+textCursorSelectNextWord tc =
+  case (textCursorPrevChar tc, textCursorNextChar tc) of
+    (_, Nothing) -> tc
+    (Just p, Just n) ->
+      case (isSpace p, isSpace n) of
+        (_, True) -> TextCursor $ listCursorNextUntil (not . isSpace) lc
+        _ -> textCursorSelectNextWord . TextCursor $ listCursorNextUntil isSpace lc
+    _ -> textCursorSelectNextWord $ TextCursor $ listCursorNextUntil isSpace lc
+  where
+    lc = textCursorList tc
+
+-- | Move to the end of the previous word
+--
+-- * @"hello|"@ -> @"|hello"@
+-- * @"hello w|orld"@ -> @"hello| world"@
+-- * @"hello |world"@ -> @"hello| world"@
+-- * @" h|ello"@ -> @"| hello"@
+textCursorSelectPrevWord :: TextCursor -> TextCursor
+textCursorSelectPrevWord tc =
+  case (textCursorPrevChar tc, textCursorNextChar tc) of
+    (Nothing, _) -> tc
+    (Just p, Just n) ->
+      case (isSpace p, isSpace n) of
+        (True, _) -> TextCursor $ listCursorPrevUntil (not . isSpace) lc
+        _ -> textCursorSelectPrevWord . TextCursor $ listCursorPrevUntil isSpace lc
+    _ -> textCursorSelectPrevWord . TextCursor $ listCursorPrevUntil isSpace lc
+  where
+    lc = textCursorList tc
 
 textCursorInsert :: Char -> TextCursor -> Maybe TextCursor
 textCursorInsert '\n' _ = Nothing

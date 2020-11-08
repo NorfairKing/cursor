@@ -19,6 +19,8 @@ module Cursor.List
     listCursorSelectEnd,
     listCursorPrevItem,
     listCursorNextItem,
+    listCursorPrevUntil,
+    listCursorNextUntil,
     listCursorInsert,
     listCursorAppend,
     listCursorInsertList,
@@ -114,6 +116,26 @@ listCursorNextItem lc =
   case listCursorNext lc of
     [] -> Nothing
     (c : _) -> Just c
+
+listCursorPrevUntil :: (a -> Bool) -> ListCursor a -> ListCursor a
+listCursorPrevUntil p = go
+  where
+    go lc =
+      case listCursorPrev lc of
+        [] -> lc
+        (c : _)
+          | p c -> lc
+        _ -> maybe lc go (listCursorSelectPrev lc)
+
+listCursorNextUntil :: (a -> Bool) -> ListCursor a -> ListCursor a
+listCursorNextUntil p = go
+  where
+    go lc =
+      case listCursorNext lc of
+        [] -> lc
+        (c : _)
+          | p c -> lc
+        _ -> maybe lc go (listCursorSelectNext lc)
 
 listCursorInsert :: a -> ListCursor a -> ListCursor a
 listCursorInsert c lc = lc {listCursorPrev = c : listCursorPrev lc}
