@@ -8,8 +8,6 @@ module Cursor.TextFieldSpec
   )
 where
 
--- import Test.Validity.Optics
-
 import Control.Monad
 import Cursor.List.NonEmpty
 import Cursor.TextField
@@ -135,6 +133,18 @@ spec = do
   describe "textFieldCursorSelectNextChar" $ do
     it "produces valid cursors" $ producesValidsOnValids textFieldCursorSelectNextChar
     it "selects the previous character on the current line" pending
+  describe "textFieldCursorSelectBeginWord"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids textFieldCursorSelectBeginWord
+  describe "textFieldCursorSelectEndWord"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids textFieldCursorSelectEndWord
+  describe "textFieldCursorSelectPrevWord"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids textFieldCursorSelectPrevWord
+  describe "textFieldCursorSelectNextWord"
+    $ it "produces valid cursors"
+    $ producesValidsOnValids textFieldCursorSelectNextWord
   describe "textFieldCursorIndexOnLine" $ do
     it "produces valid indices" $ producesValidsOnValids textFieldCursorIndexOnLine
     it "returns the index on the current line" pending

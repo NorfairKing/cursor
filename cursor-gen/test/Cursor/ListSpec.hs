@@ -61,6 +61,22 @@ spec = do
   describe "listCursorNextItem" $ do
     it "produces valid items" $ producesValidsOnValids (listCursorNextItem @Bool)
     it "returns the item after the position" pending
+  describe "listCursorPrevUntil" $ do
+    it "produces valid cursors" $ producesValidsOnValids (listCursorPrevUntil @Bool id)
+    it "produces a cursor where the previous item either satisfies the predicate or is empty" $ forAllValid $ \cursor -> do
+      let predicate = id
+          result = listCursorPrevUntil @Bool predicate cursor
+      case listCursorPrevItem result of
+        Just item -> item `shouldSatisfy` predicate
+        Nothing -> pure ()
+  describe "listCursorNextUntil" $ do
+    it "produces valid cursors" $ producesValidsOnValids (listCursorNextUntil @Bool id)
+    it "produces a cursor where the previous item either satisfies the predicate or is empty" $ forAllValid $ \cursor -> do
+      let predicate = id
+          result = listCursorNextUntil @Bool predicate cursor
+      case listCursorNextItem result of
+        Just item -> item `shouldSatisfy` predicate
+        Nothing -> pure ()
   describe "listCursorSelectStart" $ do
     it "produces valid cursors" $ producesValidsOnValids (listCursorSelectStart @Bool)
     it "is a movement" $ isMovement listCursorSelectStart

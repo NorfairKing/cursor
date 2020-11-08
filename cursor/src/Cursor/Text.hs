@@ -2,35 +2,35 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Text
-  ( TextCursor(..)
-  , emptyTextCursor
-  , makeTextCursor
-  , makeTextCursorWithSelection
-  , rebuildTextCursor
-  , textCursorNull
-  , textCursorLength
-  , textCursorIndex
-  , textCursorSelectPrev
-  , textCursorSelectNext
-  , textCursorSelectIndex
-  , textCursorSelectStart
-  , textCursorSelectEnd
-  , textCursorPrevChar
-  , textCursorNextChar
-  , textCursorBeginWord
-  , textCursorEndWord
-  , textCursorNextWord
-  , textCursorPrevWord
-  , textCursorInsert
-  , textCursorAppend
-  , textCursorInsertString
-  , textCursorAppendString
-  , textCursorInsertText
-  , textCursorAppendText
-  , textCursorRemove
-  , textCursorDelete
-  , textCursorSplit
-  , textCursorCombine
+  ( TextCursor (..),
+    emptyTextCursor,
+    makeTextCursor,
+    makeTextCursorWithSelection,
+    rebuildTextCursor,
+    textCursorNull,
+    textCursorLength,
+    textCursorIndex,
+    textCursorSelectPrev,
+    textCursorSelectNext,
+    textCursorSelectIndex,
+    textCursorSelectStart,
+    textCursorSelectEnd,
+    textCursorPrevChar,
+    textCursorNextChar,
+    textCursorSelectBeginWord,
+    textCursorSelectEndWord,
+    textCursorSelectNextWord,
+    textCursorSelectPrevWord,
+    textCursorInsert,
+    textCursorAppend,
+    textCursorInsertString,
+    textCursorAppendString,
+    textCursorInsertText,
+    textCursorAppendText,
+    textCursorRemove,
+    textCursorDelete,
+    textCursorSplit,
+    textCursorCombine,
   )
 where
 
@@ -113,59 +113,77 @@ textCursorPrevChar = listCursorPrevItem . textCursorList
 textCursorNextChar :: TextCursor -> Maybe Char
 textCursorNextChar = listCursorNextItem . textCursorList
 
-textCursorBeginWord :: TextCursor -> TextCursor
-textCursorBeginWord tc =
-  case (textCursorPrevChar tc, textCursorNextChar tc) of
-    (Nothing, _) -> tc
-    (Just p, Just n) ->
-      case (isSpace p, isSpace n) of
-        (True, True) -> textCursorBeginWord . TextCursor $ listCursorPrevUntil (not . isSpace) lc
-        (True, False) -> tc
-        _ -> TextCursor $ listCursorPrevUntil isSpace lc
-    (Just _, _) ->
-      case textCursorSelectPrev tc of
+-- | Move to the beginning of the word
+--
+-- * @"hell|o"@ -> @"|hello"@
+-- * @"hello   | world"@ -> @"|hello    world"@
+-- * @"hello |world"@ -> @"hello |world"@
+-- * @"| hello"@ -> @"| hello"@
+textCursorSelectBeginWord :: TextCursor -> TextCursor
+textCursorSelectBeginWord tc =
+  let goLeft = maybe tc textCursorSelectBeginWord (textCursorSelectPrev tc)
+   in case textCursorPrevChar tc of
         Nothing -> tc
-        Just tc' -> textCursorBeginWord tc'
-  where
-    lc = textCursorList tc
+        Just p
+          | isSpace p -> case textCursorNextChar tc of
+            Nothing -> goLeft
+            Just n
+              | isSpace n -> goLeft
+              | otherwise -> tc
+          | otherwise -> goLeft
 
-textCursorEndWord :: TextCursor -> TextCursor
-textCursorEndWord tc =
-  case (textCursorPrevChar tc, textCursorNextChar tc) of
-    (_, Nothing) -> tc
-    (Just p, Just n) ->
-      case (isSpace p, isSpace n) of
-        (True, True) -> textCursorEndWord . TextCursor $ listCursorNextUntil (not . isSpace) lc
-        (False, True) -> tc
-        _ -> TextCursor $ listCursorNextUntil isSpace lc
-    (_, Just _) ->
-      case textCursorSelectNext tc of
+-- | Move to the end of the word
+--
+-- * @"hell|o"@ -> @"hello|"@
+-- * @"hello   | world"@ -> @"hello    world|"@
+-- * @"hello| world"@ -> @"hello| world"@
+-- * @"hello |"@ -> @"hello |"@
+textCursorSelectEndWord :: TextCursor -> TextCursor
+textCursorSelectEndWord tc =
+  let goRight = maybe tc textCursorSelectEndWord (textCursorSelectNext tc)
+   in case textCursorNextChar tc of
         Nothing -> tc
-        Just tc' -> textCursorEndWord tc'
-  where
-    lc = textCursorList tc
+        Just p
+          | isSpace p -> case textCursorPrevChar tc of
+            Nothing -> goRight
+            Just n
+              | isSpace n -> goRight
+              | otherwise -> tc
+          | otherwise -> goRight
 
-textCursorNextWord :: TextCursor -> TextCursor
-textCursorNextWord tc =
+-- | Move to the beginning of the next word
+--
+-- * @"|hello"@ -> @"hello|"@
+-- * @"hell|o world"@ -> @"hello |world"@
+-- * @"hello| world"@ -> @"hello |world"@
+-- * @"hello |"@ -> @"hello |"@
+textCursorSelectNextWord :: TextCursor -> TextCursor
+textCursorSelectNextWord tc =
   case (textCursorPrevChar tc, textCursorNextChar tc) of
     (_, Nothing) -> tc
     (Just p, Just n) ->
       case (isSpace p, isSpace n) of
         (_, True) -> TextCursor $ listCursorNextUntil (not . isSpace) lc
-        _ -> textCursorNextWord . TextCursor $ listCursorNextUntil isSpace lc
-    _ -> textCursorNextWord $ TextCursor $ listCursorNextUntil isSpace lc
+        _ -> textCursorSelectNextWord . TextCursor $ listCursorNextUntil isSpace lc
+    _ -> textCursorSelectNextWord $ TextCursor $ listCursorNextUntil isSpace lc
   where
     lc = textCursorList tc
 
-textCursorPrevWord :: TextCursor -> TextCursor
-textCursorPrevWord tc =
+-- | Move to the end of the previous word
+--
+-- * @"hello|"@ -> @"|hello"@
+-- * @"hello w|orld"@ -> @"hello| world"@
+-- * @"hello |world"@ -> @"hello| world"@
+-- * @" h|ello"@ -> @"| hello"@
+textCursorSelectPrevWord :: TextCursor -> TextCursor
+textCursorSelectPrevWord tc =
   case (textCursorPrevChar tc, textCursorNextChar tc) of
     (Nothing, _) -> tc
     (Just p, Just n) ->
       case (isSpace p, isSpace n) of
         (True, _) -> TextCursor $ listCursorPrevUntil (not . isSpace) lc
-        _ -> textCursorPrevWord . TextCursor $ listCursorPrevUntil isSpace lc
-    _ -> textCursorPrevWord . TextCursor $ listCursorPrevUntil isSpace lc
+        _ -> textCursorSelectPrevWord . TextCursor $ listCursorPrevUntil isSpace lc
+    _ -> textCursorSelectPrevWord . TextCursor $ listCursorPrevUntil isSpace lc
   where
     lc = textCursorList tc
 

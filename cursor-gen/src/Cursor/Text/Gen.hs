@@ -1,17 +1,20 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Cursor.Text.Gen
-  ( genSafeChar
-  , genTextCursorChar
-  , textCursorSentenceGen
-  , textCursorWithGen
-  , textCursorWithIndex0
+  ( genSafeChar,
+    genTextCursorChar,
+    textCursorSentenceGen,
+    textCursorWithGen,
+    textCursorWithIndex0,
+    shrinkSentence,
   )
 where
 
+import Cursor.List
 import Cursor.List.Gen
 import Cursor.Text
 import Cursor.Types
+import Data.Char (isSpace)
 import Data.GenValidity
 import Data.GenValidity.Text ()
 import Test.QuickCheck
@@ -38,7 +41,16 @@ textCursorWithIndex0 :: Gen Char -> Gen TextCursor
 textCursorWithIndex0 gen = TextCursor <$> listCursorWithIndex0 gen
 
 textCursorSentenceGen :: Gen TextCursor
-textCursorSentenceGen = TextCursor <$> listCursorWithGen sentenceGen
+textCursorSentenceGen = textCursorWithGen sentenceGen
   where
     sentenceGen :: Gen Char
-    sentenceGen = frequency [(1, genSpaceChar), (9, genSafeChar)]
+    sentenceGen = frequency [(1, genSpaceChar), (5, genSafeChar)]
+
+shrinkSentence :: TextCursor -> [TextCursor]
+shrinkSentence tc@(TextCursor (ListCursor before after)) =
+  filter (/= tc) [TextCursor (ListCursor (map f before) (map f after))]
+  where
+    f :: Char -> Char
+    f x
+      | isSpace x = ' '
+      | otherwise = 'a'

@@ -4,33 +4,33 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.List
-  ( ListCursor(..)
-  , emptyListCursor
-  , makeListCursor
-  , makeListCursorWithSelection
-  , rebuildListCursor
-  , listCursorNull
-  , listCursorLength
-  , listCursorIndex
-  , listCursorSelectPrev
-  , listCursorSelectNext
-  , listCursorSelectIndex
-  , listCursorSelectStart
-  , listCursorSelectEnd
-  , listCursorPrevItem
-  , listCursorNextItem
-  , listCursorPrevUntil
-  , listCursorNextUntil
-  , listCursorInsert
-  , listCursorAppend
-  , listCursorInsertList
-  , listCursorAppendList
-  , listCursorRemove
-  , listCursorDelete
-  , listCursorSplit
-  , listCursorCombine
-  , traverseListCursor
-  , foldListCursor
+  ( ListCursor (..),
+    emptyListCursor,
+    makeListCursor,
+    makeListCursorWithSelection,
+    rebuildListCursor,
+    listCursorNull,
+    listCursorLength,
+    listCursorIndex,
+    listCursorSelectPrev,
+    listCursorSelectNext,
+    listCursorSelectIndex,
+    listCursorSelectStart,
+    listCursorSelectEnd,
+    listCursorPrevItem,
+    listCursorNextItem,
+    listCursorPrevUntil,
+    listCursorNextUntil,
+    listCursorInsert,
+    listCursorAppend,
+    listCursorInsertList,
+    listCursorAppendList,
+    listCursorRemove,
+    listCursorDelete,
+    listCursorSplit,
+    listCursorCombine,
+    traverseListCursor,
+    foldListCursor,
   )
 where
 
@@ -118,26 +118,24 @@ listCursorNextItem lc =
     (c : _) -> Just c
 
 listCursorPrevUntil :: (a -> Bool) -> ListCursor a -> ListCursor a
-listCursorPrevUntil p' = go p'
+listCursorPrevUntil p = go
   where
-    go :: (a -> Bool) -> ListCursor a -> ListCursor a
-    go p lc =
+    go lc =
       case listCursorPrev lc of
         [] -> lc
-        (c:_)
+        (c : _)
           | p c -> lc
-        _ -> maybe lc (go p) (listCursorSelectPrev lc)
+        _ -> maybe lc go (listCursorSelectPrev lc)
 
 listCursorNextUntil :: (a -> Bool) -> ListCursor a -> ListCursor a
-listCursorNextUntil p' = go p'
+listCursorNextUntil p = go
   where
-    go :: (a -> Bool) -> ListCursor a -> ListCursor a
-    go p lc =
+    go lc =
       case listCursorNext lc of
         [] -> lc
-        (c:_)
+        (c : _)
           | p c -> lc
-        _ -> maybe lc (go p) (listCursorSelectNext lc)
+        _ -> maybe lc go (listCursorSelectNext lc)
 
 listCursorInsert :: a -> ListCursor a -> ListCursor a
 listCursorInsert c lc = lc {listCursorPrev = c : listCursorPrev lc}
