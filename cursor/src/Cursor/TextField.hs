@@ -20,6 +20,10 @@ module Cursor.TextField
     textFieldCursorSelectLastLine,
     textFieldCursorSelectPrevChar,
     textFieldCursorSelectNextChar,
+    textFieldCursorSelectPrevWord,
+    textFieldCursorSelectNextWord,
+    textFieldCursorSelectBeginWord,
+    textFieldCursorSelectEndWord,
     textFieldCursorIndexOnLine,
     textFieldCursorSelectIndexOnLine,
     textFieldCursorInsertChar,
@@ -146,6 +150,18 @@ textFieldCursorSelectPrevChar = textFieldCursorSelectedL textCursorSelectPrev
 
 textFieldCursorSelectNextChar :: TextFieldCursor -> Maybe TextFieldCursor
 textFieldCursorSelectNextChar = textFieldCursorSelectedL textCursorSelectNext
+
+textFieldCursorSelectBeginWord :: TextFieldCursor -> TextFieldCursor
+textFieldCursorSelectBeginWord = textFieldCursorSelectedL %~ textCursorSelectBeginWord
+
+textFieldCursorSelectEndWord :: TextFieldCursor -> TextFieldCursor
+textFieldCursorSelectEndWord = textFieldCursorSelectedL %~ textCursorSelectEndWord
+
+textFieldCursorSelectPrevWord :: TextFieldCursor -> TextFieldCursor
+textFieldCursorSelectPrevWord = textFieldCursorSelectedL %~ textCursorSelectPrevWord
+
+textFieldCursorSelectNextWord :: TextFieldCursor -> TextFieldCursor
+textFieldCursorSelectNextWord = textFieldCursorSelectedL %~ textCursorSelectNextWord
 
 textFieldCursorIndexOnLine :: TextFieldCursor -> Int
 textFieldCursorIndexOnLine tfc = textCursorIndex $ tfc ^. textFieldCursorSelectedL
