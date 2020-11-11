@@ -1,0 +1,66 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: eb21207b1fb477978ab67b054e6cadf6a1d4b7ccfc60a7dea2f0e206586eb33f
+
+name:           cursor
+version:        0.3.0.0
+synopsis:       Purely Functional Cursors
+description:    Purely Functional Cursors for common data structures
+                .
+                See https://cs-syd.eu/tags/cursors for more information.
+category:       Editor
+homepage:       https://github.com/NorfairKing/cursor
+author:         Tom Sydney Kerckhove
+maintainer:     syd@cs-syd.eu
+copyright:      Copyright: (c) 2018 Tom Sydney Kerckhove
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    CHANGELOG.md
+
+library
+  exposed-modules:
+      Cursor.Forest
+      Cursor.List
+      Cursor.List.NonEmpty
+      Cursor.Map
+      Cursor.Map.KeyValue
+      Cursor.Simple.Forest
+      Cursor.Simple.List.NonEmpty
+      Cursor.Simple.Map
+      Cursor.Simple.Map.KeyValue
+      Cursor.Simple.Tree
+      Cursor.Text
+      Cursor.TextField
+      Cursor.Tree
+      Cursor.Tree.Base
+      Cursor.Tree.Collapse
+      Cursor.Tree.Delete
+      Cursor.Tree.Demote
+      Cursor.Tree.Draw
+      Cursor.Tree.Insert
+      Cursor.Tree.Movement
+      Cursor.Tree.Promote
+      Cursor.Tree.Swap
+      Cursor.Tree.Types
+      Cursor.Types
+  other-modules:
+      Paths_cursor
+  hs-source-dirs:
+      src/
+  ghc-options: -Wall
+  build-depends:
+      base <5
+    , containers
+    , deepseq
+    , microlens
+    , text
+    , validity >=0.8.0.0
+    , validity-containers
+    , validity-text
+  default-language: Haskell2010

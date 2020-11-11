@@ -1,0 +1,111 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: ca8f0d880d4a2aa40bc3c0de55b6c000b047b412f701f38af7d0da3f5c4346a2
+
+name:           cursor-gen
+version:        0.3.0.0
+synopsis:       Generators for Purely Functional Cursors
+description:    Generators for Purely Functional Cursors for common data structures
+category:       Cursor
+homepage:       https://github.com/NorfairKing/cursor
+author:         Tom Sydney Kerckhove
+maintainer:     syd@cs-syd.eu
+copyright:      Copyright: (c) 2018 Tom Sydney Kerckhove
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    CHANGELOG.md
+
+library
+  exposed-modules:
+      Cursor.Forest.Gen
+      Cursor.List.Gen
+      Cursor.List.NonEmpty.Gen
+      Cursor.Map.Gen
+      Cursor.Map.KeyValue.Gen
+      Cursor.Simple.Forest.Gen
+      Cursor.Simple.List.NonEmpty.Gen
+      Cursor.Simple.Map.Gen
+      Cursor.Simple.Map.KeyValue.Gen
+      Cursor.Simple.Tree.Gen
+      Cursor.Text.Gen
+      Cursor.TextField.Gen
+      Cursor.Tree.Gen
+  other-modules:
+      Paths_cursor_gen
+  hs-source-dirs:
+      src/
+  ghc-options: -Wall
+  build-depends:
+      QuickCheck
+    , base <5
+    , containers
+    , cursor >=0.2
+    , genvalidity >=0.8
+    , genvalidity-containers
+    , genvalidity-text >=0.6
+    , text
+  default-language: Haskell2010
+
+test-suite cursor-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Cursor.List.NonEmptySpec
+      Cursor.ListSpec
+      Cursor.Map.KeyValueSpec
+      Cursor.MapSpec
+      Cursor.Simple.ForestSpec
+      Cursor.Simple.List.NonEmptySpec
+      Cursor.Simple.Map.KeyValueSpec
+      Cursor.Simple.MapSpec
+      Cursor.Simple.Tree.BaseSpec
+      Cursor.Simple.Tree.CollapseSpec
+      Cursor.Simple.Tree.DeleteSpec
+      Cursor.Simple.Tree.DemoteSpec
+      Cursor.Simple.Tree.InsertSpec
+      Cursor.Simple.Tree.MovementSpec
+      Cursor.Simple.Tree.PromoteSpec
+      Cursor.Simple.Tree.SwapSpec
+      Cursor.Simple.Tree.TestUtils
+      Cursor.TextFieldSpec
+      Cursor.TextSpec
+      Cursor.Tree.TypesSpec
+      Paths_cursor_gen
+  hs-source-dirs:
+      test/
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
+  build-depends:
+      QuickCheck
+    , base <5
+    , containers
+    , cursor
+    , cursor-gen
+    , genvalidity-hspec
+    , genvalidity-hspec-optics
+    , hspec
+    , microlens
+    , pretty-show
+    , text
+  default-language: Haskell2010
+
+benchmark cursor-bench
+  type: exitcode-stdio-1.0
+  main-is: Bench.hs
+  other-modules:
+      Paths_cursor_gen
+  hs-source-dirs:
+      bench/
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
+  build-depends:
+      base <5
+    , criterion
+    , cursor
+    , cursor-gen
+    , genvalidity-criterion
+  default-language: Haskell2010
