@@ -10,7 +10,7 @@ import Control.Monad (unless)
 import Cursor.Simple.Tree hiding (TreeCursor)
 import qualified Cursor.Simple.Tree as STC (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
-import Cursor.Tree (CTree (..), closedForest)
+import Cursor.Tree (closedForest)
 import Data.Tree
 import Test.Hspec
 import Test.QuickCheck

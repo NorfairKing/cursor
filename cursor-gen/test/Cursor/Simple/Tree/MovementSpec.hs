@@ -12,7 +12,7 @@ import Control.Monad (unless)
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
 import Cursor.Simple.Tree.TestUtils
-import Cursor.Tree (CTree (..), TreeAbove (..), TreeCursor (..), emptyCForest, openForest)
+import Cursor.Tree (TreeCursor (..), emptyCForest, openForest)
 import Test.Hspec
 import Test.Validity
 import Text.Show.Pretty

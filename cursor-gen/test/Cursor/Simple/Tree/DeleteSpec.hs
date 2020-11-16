@@ -11,7 +11,7 @@ where
 import Cursor.Simple.Tree hiding (TreeCursor)
 import Cursor.Simple.Tree.Gen ()
 import Cursor.Simple.Tree.TestUtils
-import Cursor.Tree (CTree (..), TreeCursor (..), closedForest, openForest)
+import Cursor.Tree (TreeCursor (..), closedForest, openForest)
 import Cursor.Types
 import Data.Tree
 import Test.Hspec
