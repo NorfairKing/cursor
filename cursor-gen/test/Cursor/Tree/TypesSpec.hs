@@ -41,14 +41,14 @@ spec = do
   eqSpec @(TreeAbove Bool)
   genValidSpec @(TreeAbove Bool)
   shrinkValidSpecWithLimit @(TreeAbove Bool) 10
-  describe "treeAboveLeftsL" $ lensSpecOnValid $ treeAboveLeftsL @Bool
-  describe "treeAboveAboveL" $ lensSpecOnValid $ treeAboveAboveL @Bool
-  describe "treeAboveNodeL" $ lensSpecOnValid $ treeAboveNodeL @Bool
-  describe "treeAboveRightsL" $ lensSpecOnValid $ treeAboveRightsL @Bool
+  describe "treeAboveLeftsL" $ lensSpec $ treeAboveLeftsL @Bool
+  describe "treeAboveAboveL" $ lensSpec $ treeAboveAboveL @Bool
+  describe "treeAboveNodeL" $ lensSpec $ treeAboveNodeL @Bool
+  describe "treeAboveRightsL" $ lensSpec $ treeAboveRightsL @Bool
   eqSpec @(TreeCursor Bool Word)
   genValidSpec @(TreeCursor Bool Bool)
   shrinkValidSpecWithLimit @(TreeCursor Word Bool) 10
-  describe "treeCursorAboveL" $ lensSpecOnValid $ treeCursorAboveL @Bool @Bool
-  describe "treeCursorCurrentL" $ lensSpecOnValid $ treeCursorCurrentL @Bool @Bool
-  describe "treeCursorBelowL" $ lensSpecOnValid $ treeCursorBelowL @Bool @Bool
-  describe "treeCursorCurrentSubTreeL" $ lensSpecOnValid $ treeCursorCurrentSubTreeL @Bool @Bool
+  describe "treeCursorAboveL" $ lensSpec $ treeCursorAboveL @Bool @Bool
+  describe "treeCursorCurrentL" $ lensSpec $ treeCursorCurrentL @Bool @Bool
+  describe "treeCursorBelowL" $ lensSpec $ treeCursorBelowL @Bool @Bool
+  describe "treeCursorCurrentSubTreeL" $ lensSpec $ treeCursorCurrentSubTreeL @Bool @Bool

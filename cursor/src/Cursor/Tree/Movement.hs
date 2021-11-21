@@ -77,15 +77,15 @@ treeCursorSelectBelowAtPos f g pos TreeCursor {..} =
       case splitAt pos $ NE.toList ts of
         (_, []) -> Nothing
         (lefts, current : rights) ->
-          Just
-            $ makeTreeCursorWithAbove g current
-            $ Just
-            $ TreeAbove
-              { treeAboveLefts = reverse lefts,
-                treeAboveAbove = treeAbove,
-                treeAboveNode = f treeCurrent,
-                treeAboveRights = rights
-              }
+          Just $
+            makeTreeCursorWithAbove g current $
+              Just $
+                TreeAbove
+                  { treeAboveLefts = reverse lefts,
+                    treeAboveAbove = treeAbove,
+                    treeAboveNode = f treeCurrent,
+                    treeAboveRights = rights
+                  }
 
 treeCursorSelectBelowAtStart :: (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorSelectBelowAtStart f g = treeCursorSelectBelowAtPos f g 0

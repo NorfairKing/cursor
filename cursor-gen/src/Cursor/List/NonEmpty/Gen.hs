@@ -15,11 +15,6 @@ import Data.GenValidity
 import qualified Data.List.NonEmpty as NE
 import Test.QuickCheck
 
-instance (GenUnchecked a, GenUnchecked b) => GenUnchecked (NonEmptyCursor a b) where
-  genUnchecked = genNonEmptyCursorBy genUnchecked genUnchecked
-  shrinkUnchecked (NonEmptyCursor prev cur next) =
-    [NonEmptyCursor prev' cur' next' | (prev', cur', next') <- shrinkUnchecked (prev, cur, next)]
-
 instance (GenValid a, GenValid b) => GenValid (NonEmptyCursor a b) where
   genValid = genNonEmptyCursorBy genValid genValid
   shrinkValid (NonEmptyCursor prev cur next) =

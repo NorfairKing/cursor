@@ -13,12 +13,6 @@ import Data.GenValidity
 import Data.GenValidity.Containers ()
 import Test.QuickCheck
 
-instance
-  (GenUnchecked kc, GenUnchecked vc, GenUnchecked k, GenUnchecked v) =>
-  GenUnchecked (MapCursor kc vc k v)
-  where
-  genUnchecked = genMapCursorBy genUnchecked genUnchecked genUnchecked genUnchecked
-
 instance (GenValid kc, GenValid vc, GenValid k, GenValid v) => GenValid (MapCursor kc vc k v) where
   genValid = genMapCursorBy genValid genValid genValid genValid
   shrinkValid = shrinkValidStructurallyWithoutExtraFiltering

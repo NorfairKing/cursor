@@ -26,8 +26,8 @@ module Cursor.Tree.Insert
 where
 
 import Cursor.Tree.Types
-import qualified Data.List.NonEmpty as NE
 import Data.List.NonEmpty ((<|))
+import qualified Data.List.NonEmpty as NE
 import Data.Tree
 
 treeCursorInsert :: Tree b -> TreeCursor a b -> Maybe (TreeCursor a b)

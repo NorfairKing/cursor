@@ -27,7 +27,7 @@ spec = do
   applicativeSpec @PromoteElemResult
   monadSpec @PromoteElemResult
   describe "treeCursorPromoteElem" $ do
-    it "produces valids on valids" $ producesValidsOnValids $ treeCursorPromoteElem @Bool
+    it "produces valids on valids" $ producesValid $ treeCursorPromoteElem @Bool
     it "Works on the example from the docs" $
       let promoteStart =
             TreeCursor
@@ -77,7 +77,7 @@ spec = do
   applicativeSpec @PromoteResult
   monadSpec @PromoteResult
   describe "treeCursorPromoteSubTree" $ do
-    it "produces valids on valids" $ producesValidsOnValids $ treeCursorPromoteSubTree @Bool
+    it "produces valids on valids" $ producesValid $ treeCursorPromoteSubTree @Bool
     it "Works on the example from the docs" $
       let promoteStart =
             TreeCursor

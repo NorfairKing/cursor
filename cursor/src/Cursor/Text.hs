@@ -38,17 +38,16 @@ import Control.DeepSeq
 import Cursor.List
 import Cursor.Types
 import Data.Char
-import qualified Data.Text as T
 import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Validity
 import GHC.Generics (Generic)
 import Lens.Micro
 
 -- | A cursor for single-line texts
-newtype TextCursor
-  = TextCursor
-      { textCursorList :: ListCursor Char
-      }
+newtype TextCursor = TextCursor
+  { textCursorList :: ListCursor Char
+  }
   deriving (Show, Eq, Generic)
 
 instance Validity TextCursor where

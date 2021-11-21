@@ -39,12 +39,11 @@ import Cursor.Types
 import Data.Validity
 import GHC.Generics (Generic)
 
-data ListCursor a
-  = ListCursor
-      { -- | In reverse order
-        listCursorPrev :: [a],
-        listCursorNext :: [a]
-      }
+data ListCursor a = ListCursor
+  { -- | In reverse order
+    listCursorPrev :: [a],
+    listCursorNext :: [a]
+  }
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity a => Validity (ListCursor a)

@@ -92,8 +92,8 @@ module Cursor.Simple.Tree
   )
 where
 
-import qualified Cursor.Tree as TC
 import Cursor.Tree (CForest (..), CTree, TreeAbove (..))
+import qualified Cursor.Tree as TC
 import Cursor.Types
 import Data.Tree
 

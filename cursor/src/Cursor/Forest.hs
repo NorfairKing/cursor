@@ -111,10 +111,9 @@ import Data.Validity.Tree ()
 import GHC.Generics (Generic)
 import Lens.Micro
 
-newtype ForestCursor a b
-  = ForestCursor
-      { forestCursorListCursor :: NonEmptyCursor (TreeCursor a b) (CTree b)
-      }
+newtype ForestCursor a b = ForestCursor
+  { forestCursorListCursor :: NonEmptyCursor (TreeCursor a b) (CTree b)
+  }
   deriving (Show, Eq, Generic)
 
 instance (Validity a, Validity b) => Validity (ForestCursor a b)
@@ -572,13 +571,13 @@ forestCursorPromoteElem f g fc@(ForestCursor ne) =
         case treeCursorDeleteSubTree g tc' of
           Deleted -> Nothing -- Cannot happen, otherwise we would have gotten 'CannotPromoteTopNode'.
           Updated tc'' -> pure tc''
-      pure
-        $ ForestCursor
-        $ ne
-          { nonEmptyCursorPrev = rebuildTreeCursor f tc'' : nonEmptyCursorPrev ne,
-            nonEmptyCursorCurrent =
-              singletonTreeCursor $ treeCurrent $ fc ^. forestCursorSelectedTreeL
-          }
+      pure $
+        ForestCursor $
+          ne
+            { nonEmptyCursorPrev = rebuildTreeCursor f tc'' : nonEmptyCursorPrev ne,
+              nonEmptyCursorCurrent =
+                singletonTreeCursor $ treeCurrent $ fc ^. forestCursorSelectedTreeL
+            }
 
 -- | Promotes the current node to the level of its parent.
 --
@@ -615,12 +614,12 @@ forestCursorPromoteSubTree f g fc@(ForestCursor ne) =
       case treeCursorDeleteSubTree g $ fc ^. forestCursorSelectedTreeL of
         Deleted -> Nothing -- Cannot happen, otherwise we would have gotten 'CannotPromoteTopNode'.
         Updated tc' ->
-          pure
-            $ ForestCursor
-            $ ne
-              { nonEmptyCursorPrev = rebuildTreeCursor f tc' : nonEmptyCursorPrev ne,
-                nonEmptyCursorCurrent = (fc ^. forestCursorSelectedTreeL) {treeAbove = Nothing}
-              }
+          pure $
+            ForestCursor $
+              ne
+                { nonEmptyCursorPrev = rebuildTreeCursor f tc' : nonEmptyCursorPrev ne,
+                  nonEmptyCursorCurrent = (fc ^. forestCursorSelectedTreeL) {treeAbove = Nothing}
+                }
 
 -- | Demotes the current node to the level of its children.
 --
@@ -651,9 +650,9 @@ forestCursorDemoteElem f g fc@(ForestCursor ne) =
         (CNode v vts : ts) -> do
           let CNode v' vts' = rebuildTreeCursor f (fc ^. forestCursorSelectedTreeL)
           let n' =
-                CNode v
-                  $ openForest
-                  $ unpackCForest vts ++ CNode v' emptyCForest : unpackCForest vts'
+                CNode v $
+                  openForest $
+                    unpackCForest vts ++ CNode v' emptyCForest : unpackCForest vts'
           tc <- makeTreeCursorWithSelection f g (SelectChild (lengthCForest vts) SelectNode) n'
           pure $ ForestCursor ne {nonEmptyCursorPrev = ts, nonEmptyCursorCurrent = tc}
     NoSiblingsToDemoteUnder -> Nothing
@@ -684,9 +683,9 @@ forestCursorDemoteSubTree f g fc@(ForestCursor ne) =
         [] -> Nothing
         (CNode v vts : ts) -> do
           let n' =
-                CNode v
-                  $ openForest
-                  $ unpackCForest vts ++ [rebuildTreeCursor f (fc ^. forestCursorSelectedTreeL)]
+                CNode v $
+                  openForest $
+                    unpackCForest vts ++ [rebuildTreeCursor f (fc ^. forestCursorSelectedTreeL)]
           tc <- makeTreeCursorWithSelection f g (SelectChild (lengthCForest vts) SelectNode) n'
           pure $ ForestCursor ne {nonEmptyCursorPrev = ts, nonEmptyCursorCurrent = tc}
     NoSiblingsToDemoteUnder -> Nothing

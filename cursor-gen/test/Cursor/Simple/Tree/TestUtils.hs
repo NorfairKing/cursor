@@ -18,12 +18,12 @@ import Test.Validity
 
 testMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Spec
 testMovement func = do
-  it "produces valids on valids" $ producesValidsOnValids $ func @Bool
+  it "produces valids on valids" $ producesValid $ func @Bool
   it "is a movement" $ isMovement func
 
 testMovementM :: (forall a. STC.TreeCursor a -> Maybe (STC.TreeCursor a)) -> Spec
 testMovementM func = do
-  it "produces valids on valids" $ producesValidsOnValids $ func @Bool
+  it "produces valids on valids" $ producesValid $ func @Bool
   it "is a movement" $ isMovementM func
 
 isMovementM :: (forall a. STC.TreeCursor a -> Maybe (STC.TreeCursor a)) -> Property
@@ -34,14 +34,14 @@ isMovementM func =
       Just lec' ->
         let ne = rebuildCTree $ rebuildTreeCursor lec
             ne' = rebuildCTree $ rebuildTreeCursor lec'
-         in unless (ne == ne')
-              $ expectationFailure
-              $ unlines
-                [ "Cursor before:\n" ++ drawTreeCursor lec,
-                  "Tree before:  \n" ++ drawTree (fmap show ne),
-                  "Cursor after: \n" ++ drawTreeCursor lec',
-                  "Tree after:   \n" ++ drawTree (fmap show ne')
-                ]
+         in unless (ne == ne') $
+              expectationFailure $
+                unlines
+                  [ "Cursor before:\n" ++ drawTreeCursor lec,
+                    "Tree before:  \n" ++ drawTree (fmap show ne),
+                    "Cursor after: \n" ++ drawTreeCursor lec',
+                    "Tree after:   \n" ++ drawTree (fmap show ne')
+                  ]
 
 isMovement :: (forall a. STC.TreeCursor a -> STC.TreeCursor a) -> Property
 isMovement func =
@@ -50,15 +50,15 @@ isMovement func =
 
 treeShouldBe :: (Show a, Eq a) => STC.TreeCursor a -> STC.TreeCursor a -> Expectation
 treeShouldBe actual expected =
-  unless (actual == expected)
-    $ expectationFailure
-    $ unlines
-      [ "The following should have been equal.",
-        "actual:",
-        drawTreeCursor actual,
-        "expected:",
-        drawTreeCursor expected
-      ]
+  unless (actual == expected) $
+    expectationFailure $
+      unlines
+        [ "The following should have been equal.",
+          "actual:",
+          drawTreeCursor actual,
+          "expected:",
+          drawTreeCursor expected
+        ]
 
 instance CanFail SwapResult where
   hasFailed (Swapped _) = False

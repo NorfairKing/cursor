@@ -42,7 +42,7 @@ where
 import Control.DeepSeq
 import Control.Monad
 import Cursor.Types
-import Data.List.NonEmpty ((<|), NonEmpty (..))
+import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe
 import Data.Validity
@@ -50,12 +50,11 @@ import GHC.Generics (Generic)
 import Lens.Micro
 
 -- | A 'nonempty list' cursor
-data NonEmptyCursor a b
-  = NonEmptyCursor
-      { nonEmptyCursorPrev :: [b], -- In reverse order
-        nonEmptyCursorCurrent :: a,
-        nonEmptyCursorNext :: [b]
-      }
+data NonEmptyCursor a b = NonEmptyCursor
+  { nonEmptyCursorPrev :: [b], -- In reverse order
+    nonEmptyCursorCurrent :: a,
+    nonEmptyCursorNext :: [b]
+  }
   deriving (Show, Eq, Generic, Functor)
 
 instance (Validity a, Validity b) => Validity (NonEmptyCursor a b)

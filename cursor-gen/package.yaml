@@ -1,13 +1,14 @@
 name: cursor-gen
-version: '0.3.0.0'
+version: '0.4.0.0'
 author: Tom Sydney Kerckhove
 maintainer: syd@cs-syd.eu
-copyright: ! 'Copyright: (c) 2018 Tom Sydney Kerckhove'
+copyright: ! 'Copyright: (c) 2018-2021 Tom Sydney Kerckhove'
 license: MIT
 homepage: https://github.com/NorfairKing/cursor
 category: Cursor
 synopsis: Generators for Purely Functional Cursors
 description: Generators for Purely Functional Cursors for common data structures
+
 extra-source-files:
 - CHANGELOG.md
 

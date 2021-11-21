@@ -20,7 +20,7 @@ spec :: Spec
 spec = do
   functorSpec @DemoteResult
   describe "treeCursorDemoteElem" $ do
-    it "produces valids on valids" $ producesValidsOnValids $ treeCursorDemoteElem @Bool
+    it "produces valids on valids" $ producesValid $ treeCursorDemoteElem @Bool
     it "Works on the example from the docs" $
       let promoteStart =
             TreeCursor
@@ -60,7 +60,7 @@ spec = do
             _ -> expectationFailure "treeCursorDemoteElem should not have failed"
     it "demotes the current node to the level of its children" pending
   describe "treeCursorDemoteSubTree" $ do
-    it "produces valids on valids" $ producesValidsOnValids $ treeCursorDemoteSubTree @Bool
+    it "produces valids on valids" $ producesValid $ treeCursorDemoteSubTree @Bool
     it "Works on the example from the docs" $
       let promoteStart =
             TreeCursor
@@ -100,21 +100,58 @@ spec = do
             _ -> expectationFailure "treeCursorDemoteSubTree should not have failed"
     it "demotes the current subtree to the level of its children" pending
   describe "treeCursorDemoteElemUnder" $ do
-    it "produces valids on valids" $ producesValidsOnValids3 $ treeCursorDemoteElemUnder @Bool @Bool
-    it "Works on the example from the docs"
-      $ forAllValid
-      $ \b1 ->
-        forAllValid $ \b2 ->
+    it "produces valids on valids" $ producesValid3 $ treeCursorDemoteElemUnder @Bool @Bool
+    it "Works on the example from the docs" $
+      forAllValid $
+        \b1 ->
+          forAllValid $ \b2 ->
+            let demoteStart =
+                  TreeCursor
+                    { treeAbove =
+                        Just
+                          TreeAbove
+                            { treeAboveLefts = [],
+                              treeAboveAbove = Nothing,
+                              treeAboveNode = 'p',
+                              treeAboveRights = []
+                            },
+                      treeCurrent = 'a',
+                      treeBelow = closedForest [Node 'b' []]
+                    }
+                demoteEnd =
+                  TreeCursor
+                    { treeAbove =
+                        Just
+                          TreeAbove
+                            { treeAboveLefts = [],
+                              treeAboveAbove =
+                                Just
+                                  TreeAbove
+                                    { treeAboveLefts = [],
+                                      treeAboveAbove = Nothing,
+                                      treeAboveNode = 'p',
+                                      treeAboveRights = [node b2 [node 'b' []]]
+                                    },
+                              treeAboveNode = b1,
+                              treeAboveRights = []
+                            },
+                      treeCurrent = 'a',
+                      treeBelow = emptyCForest
+                    }
+             in case treeCursorDemoteElemUnder b1 b2 demoteStart of
+                  Just tc' -> tc' `treeShouldBe` demoteEnd
+                  _ -> expectationFailure "treeCursorDemoteElemUnder should not have failed"
+    it "demotes the current node to the level of its children" pending
+  describe "treeCursorDemoteSubTreeUnder" $ do
+    it "produces valids on valids" $
+      producesValid2 $
+        treeCursorDemoteSubTreeUnder @Bool @Bool
+    it "Works on the example from the docs" $
+      forAllValid $
+        \v -> do
           let demoteStart =
                 TreeCursor
-                  { treeAbove =
-                      Just
-                        TreeAbove
-                          { treeAboveLefts = [],
-                            treeAboveAbove = Nothing,
-                            treeAboveNode = 'p',
-                            treeAboveRights = []
-                          },
+                  { treeAbove = Nothing,
                     treeCurrent = 'a',
                     treeBelow = closedForest [Node 'b' []]
                   }
@@ -124,49 +161,12 @@ spec = do
                       Just
                         TreeAbove
                           { treeAboveLefts = [],
-                            treeAboveAbove =
-                              Just
-                                TreeAbove
-                                  { treeAboveLefts = [],
-                                    treeAboveAbove = Nothing,
-                                    treeAboveNode = 'p',
-                                    treeAboveRights = [node b2 [node 'b' []]]
-                                  },
-                            treeAboveNode = b1,
+                            treeAboveAbove = Nothing,
+                            treeAboveNode = v,
                             treeAboveRights = []
                           },
                     treeCurrent = 'a',
-                    treeBelow = emptyCForest
+                    treeBelow = closedForest [Node 'b' []]
                   }
-           in case treeCursorDemoteElemUnder b1 b2 demoteStart of
-                Just tc' -> tc' `treeShouldBe` demoteEnd
-                _ -> expectationFailure "treeCursorDemoteElemUnder should not have failed"
-    it "demotes the current node to the level of its children" pending
-  describe "treeCursorDemoteSubTreeUnder" $ do
-    it "produces valids on valids"
-      $ producesValidsOnValids2
-      $ treeCursorDemoteSubTreeUnder @Bool @Bool
-    it "Works on the example from the docs"
-      $ forAllValid
-      $ \v -> do
-        let demoteStart =
-              TreeCursor
-                { treeAbove = Nothing,
-                  treeCurrent = 'a',
-                  treeBelow = closedForest [Node 'b' []]
-                }
-            demoteEnd =
-              TreeCursor
-                { treeAbove =
-                    Just
-                      TreeAbove
-                        { treeAboveLefts = [],
-                          treeAboveAbove = Nothing,
-                          treeAboveNode = v,
-                          treeAboveRights = []
-                        },
-                  treeCurrent = 'a',
-                  treeBelow = closedForest [Node 'b' []]
-                }
-        treeCursorDemoteSubTreeUnder v demoteStart `treeShouldBe` demoteEnd
+          treeCursorDemoteSubTreeUnder v demoteStart `treeShouldBe` demoteEnd
     it "demotes the current subtree to the level of its children, by adding a root" pending

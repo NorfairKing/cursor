@@ -2,7 +2,7 @@ name: cursor
 version: '0.3.0.0'
 author: Tom Sydney Kerckhove
 maintainer: syd@cs-syd.eu
-copyright: ! 'Copyright: (c) 2018 Tom Sydney Kerckhove'
+copyright: ! 'Copyright: (c) 2018-2021 Tom Sydney Kerckhove'
 license: MIT
 homepage: https://github.com/NorfairKing/cursor
 category: Editor

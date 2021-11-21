@@ -41,12 +41,11 @@ import Data.Validity.Tree ()
 import GHC.Generics (Generic)
 import Lens.Micro
 
-data TreeCursor a b
-  = TreeCursor
-      { treeAbove :: !(Maybe (TreeAbove b)),
-        treeCurrent :: !a,
-        treeBelow :: !(CForest b)
-      }
+data TreeCursor a b = TreeCursor
+  { treeAbove :: !(Maybe (TreeAbove b)),
+    treeCurrent :: !a,
+    treeBelow :: !(CForest b)
+  }
   deriving (Show, Eq, Generic)
 
 instance (Validity a, Validity b) => Validity (TreeCursor a b)
@@ -66,13 +65,12 @@ treeCursorCurrentSubTreeL :: Lens (TreeCursor a b) (TreeCursor a' b) (a, CForest
 treeCursorCurrentSubTreeL =
   lens (\tc -> (treeCurrent tc, treeBelow tc)) (\tc (a, cf) -> tc {treeCurrent = a, treeBelow = cf})
 
-data TreeAbove b
-  = TreeAbove
-      { treeAboveLefts :: ![CTree b], -- In reverse order
-        treeAboveAbove :: !(Maybe (TreeAbove b)),
-        treeAboveNode :: !b,
-        treeAboveRights :: ![CTree b]
-      }
+data TreeAbove b = TreeAbove
+  { treeAboveLefts :: ![CTree b], -- In reverse order
+    treeAboveAbove :: !(Maybe (TreeAbove b)),
+    treeAboveNode :: !b,
+    treeAboveRights :: ![CTree b]
+  }
   deriving (Show, Eq, Generic, Functor)
 
 instance Validity b => Validity (TreeAbove b)

@@ -1,26 +1,32 @@
+version: 1.0.0
+value:
 - entry:
     header: Tree
     state-history:
-    - new-state: TODO
-      timestamp: 2018-11-17 18:14:26.497439501000+0000
+    - state: TODO
+      time: 2018-11-17 18:14:26.497439501000
   forest:
   - header: Make aboveNext and abovePrev symmetric
     state-history:
-    - new-state: TODO
-      timestamp: 2018-11-17 18:14:26.497439501000+0000
+    - state: TODO
+      time: 2018-11-17 18:14:26.497439501000
   - header: Make promote and demote symmetric
     state-history:
-    - new-state: TODO
-      timestamp: 2018-11-17 18:14:26.497439501000+0000
+    - state: TODO
+      time: 2018-11-17 18:14:26.497439501000
   - header: split up deleteAndSelectPrev
     state-history:
-    - new-state: TODO
-      timestamp: 2018-11-17 18:14:26.497439501000+0000
+    - state: TODO
+      time: 2018-11-17 18:14:26.497439501000
   - header: make forestCursorDemoteElemUnder and treeCursorDemoteElemUnder symmetric
     state-history:
-    - new-state: TODO
-      timestamp: 2018-11-17 18:14:26.497439501000+0000
+    - state: TODO
+      time: 2018-11-17 18:14:26.497439501000
   - header: A countercursor for integers, to count up, down, etc
     state-history:
-    - new-state: TODO
-      timestamp: 2019-09-23 22:00:26.730651092000+0000
+    - state: TODO
+      time: 2019-09-23 22:00:26.730651092000
+  - header: rename tree cursor fields to be completely prefix-named
+    state-history:
+    - state: TODO
+      time: 2021-11-21 12:07:15.330806974000

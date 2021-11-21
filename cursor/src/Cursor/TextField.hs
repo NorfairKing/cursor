@@ -45,27 +45,26 @@ import Cursor.Types
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe
-import qualified Data.Text as T
 import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Validity
 import Data.Validity.Text ()
 import GHC.Generics (Generic)
 import Lens.Micro
 
-newtype TextFieldCursor
-  = TextFieldCursor
-      { textFieldCursorNonEmpty :: NonEmptyCursor TextCursor Text
-      }
+newtype TextFieldCursor = TextFieldCursor
+  { textFieldCursorNonEmpty :: NonEmptyCursor TextCursor Text
+  }
   deriving (Show, Eq, Generic)
 
 instance Validity TextFieldCursor where
   validate tfc@TextFieldCursor {..} =
     mconcat
       [ genericValidate tfc,
-        decorate "None of the texts contain newlines"
-          $ decorateList (NE.toList $ rebuildNonEmptyCursor rebuildTextCursor textFieldCursorNonEmpty)
-          $ \tc ->
-            declare "The text of this line does not contain any newlines" $ T.all (/= '\n') tc
+        decorate "None of the texts contain newlines" $
+          decorateList (NE.toList $ rebuildNonEmptyCursor rebuildTextCursor textFieldCursorNonEmpty) $
+            \tc ->
+              declare "The text of this line does not contain any newlines" $ T.all (/= '\n') tc
       ]
 
 instance NFData TextFieldCursor
@@ -237,13 +236,13 @@ textFieldCursorRemove tfc =
                 case nonEmptyCursorPrev of
                   [] -> Nothing
                   (pl : pls) ->
-                    Just
-                      $ Updated
-                      $ lec
-                        { nonEmptyCursorPrev = pls,
-                          nonEmptyCursorCurrent =
-                            textCursorCombine (unsafeMakeTextCursor pl) nonEmptyCursorCurrent
-                        }
+                    Just $
+                      Updated $
+                        lec
+                          { nonEmptyCursorPrev = pls,
+                            nonEmptyCursorCurrent =
+                              textCursorCombine (unsafeMakeTextCursor pl) nonEmptyCursorCurrent
+                          }
         )
         tfc
 
@@ -261,13 +260,13 @@ textFieldCursorDelete tfc =
                 case nonEmptyCursorNext of
                   [] -> Nothing
                   (pl : pls) ->
-                    Just
-                      $ Updated
-                      $ lec
-                        { nonEmptyCursorCurrent =
-                            textCursorCombine nonEmptyCursorCurrent (unsafeMakeTextCursor pl),
-                          nonEmptyCursorNext = pls
-                        }
+                    Just $
+                      Updated $
+                        lec
+                          { nonEmptyCursorCurrent =
+                              textCursorCombine nonEmptyCursorCurrent (unsafeMakeTextCursor pl),
+                            nonEmptyCursorNext = pls
+                          }
         )
         tfc
 

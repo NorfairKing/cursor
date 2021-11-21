@@ -19,8 +19,6 @@ import Data.GenValidity
 import Data.GenValidity.Text ()
 import Test.QuickCheck
 
-instance GenUnchecked TextCursor
-
 instance GenValid TextCursor where
   genValid = TextCursor <$> listCursorWithGen genTextCursorChar
   shrinkValid = shrinkValidStructurally

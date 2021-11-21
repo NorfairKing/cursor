@@ -25,9 +25,9 @@ treeCursorWithPointer TreeCursor {..} =
     wrapAbove :: (Show b) => Maybe (TreeAbove b) -> Tree String -> Tree String
     wrapAbove Nothing t = t
     wrapAbove (Just TreeAbove {..}) t =
-      wrapAbove treeAboveAbove
-        $ Node (show treeAboveNode)
-        $ concat [map showCTree $ reverse treeAboveLefts, [t], map showCTree treeAboveRights]
+      wrapAbove treeAboveAbove $
+        Node (show treeAboveNode) $
+          concat [map showCTree $ reverse treeAboveLefts, [t], map showCTree treeAboveRights]
 
 showCForest :: Show a => CForest a -> Forest String
 showCForest EmptyCForest = []

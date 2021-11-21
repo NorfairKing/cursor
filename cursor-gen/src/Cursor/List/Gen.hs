@@ -11,16 +11,6 @@ import Cursor.List
 import Data.GenValidity
 import Test.QuickCheck
 
-instance GenUnchecked a => GenUnchecked (ListCursor a) where
-  genUnchecked =
-    sized $ \n -> do
-      (a, b) <- genSplit n
-      listCursorPrev <- resize a genUnchecked
-      listCursorNext <- resize b genUnchecked
-      pure ListCursor {..}
-  shrinkUnchecked (ListCursor prev next) =
-    [ListCursor prev' next' | (prev', next') <- shrinkUnchecked (prev, next)]
-
 instance GenValid a => GenValid (ListCursor a) where
   genValid =
     sized $ \n -> do

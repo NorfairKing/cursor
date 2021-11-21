@@ -136,14 +136,14 @@ treeCursorDeleteElemAndSelectAbove g TreeCursor {..} =
         EmptyCForest -> Just Deleted
         _ -> Nothing
     Just TreeAbove {..} ->
-      Just
-        $ Updated
-        $ TreeCursor
-          { treeAbove = treeAboveAbove,
-            treeCurrent = g treeAboveNode,
-            treeBelow =
-              openForest $ reverse treeAboveLefts ++ unpackCForest treeBelow ++ treeAboveRights
-          }
+      Just $
+        Updated $
+          TreeCursor
+            { treeAbove = treeAboveAbove,
+              treeCurrent = g treeAboveNode,
+              treeBelow =
+                openForest $ reverse treeAboveLefts ++ unpackCForest treeBelow ++ treeAboveRights
+            }
 
 treeCursorRemoveElem :: (b -> a) -> TreeCursor a b -> DeleteOrUpdate (TreeCursor a b)
 treeCursorRemoveElem g tc =

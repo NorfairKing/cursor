@@ -8,24 +8,25 @@ with final.haskell.lib;
     let
       cursorPkg =
         name:
-          (
-            failOnAllWarnings (
-              final.haskellPackages.callCabal2nix name (final.gitignoreSource (../. + "/${name}")) {}
-            )
-          );
+        (
+          buildStrictly (
+            final.haskellPackages.callCabal2nixWithOptions name (final.gitignoreSource (../. + "/${name}")) "--no-hpack" { }
+          )
+        );
     in
-      final.lib.genAttrs [
-        "cursor"
-        "cursor-gen"
-      ] cursorPkg;
+    final.lib.genAttrs [
+      "cursor"
+      "cursor-gen"
+    ]
+      cursorPkg;
   haskellPackages =
     previous.haskellPackages.override (
       old:
-        {
-          overrides =
-            final.lib.composeExtensions (old.overrides or (_: _: {})) (
-              self: super: final.cursorPackages
-            );
-        }
+      {
+        overrides =
+          final.lib.composeExtensions (old.overrides or (_: _: { })) (
+            self: super: final.cursorPackages
+          );
+      }
     );
 }

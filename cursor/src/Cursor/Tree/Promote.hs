@@ -57,14 +57,14 @@ treeCursorPromoteElem f g tc = do
           (CNode t ls : ts) ->
             pure $ CNode t (openForest $ unpackCForest ls ++ unpackCForest (treeBelow tc)) : ts
   taa <- maybe NoGrandparentToPromoteElemUnder pure $ treeAboveAbove ta
-  pure
-    $ makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) emptyCForest)
-    $ Just
-    $ taa
-      { treeAboveLefts =
-          CNode (treeAboveNode ta) (openForest $ reverse lefts ++ treeAboveRights ta)
-            : treeAboveLefts taa
-      }
+  pure $
+    makeTreeCursorWithAbove g (CNode (f $ treeCurrent tc) emptyCForest) $
+      Just $
+        taa
+          { treeAboveLefts =
+              CNode (treeAboveNode ta) (openForest $ reverse lefts ++ treeAboveRights ta) :
+              treeAboveLefts taa
+          }
 
 data PromoteElemResult a
   = CannotPromoteTopElem
@@ -124,14 +124,14 @@ treeCursorPromoteSubTree :: (a -> b) -> (b -> a) -> TreeCursor a b -> PromoteRes
 treeCursorPromoteSubTree f g tc = do
   ta <- maybe CannotPromoteTopNode pure $ treeAbove tc
   taa <- maybe NoGrandparentToPromoteUnder pure $ treeAboveAbove ta
-  pure
-    $ makeTreeCursorWithAbove g (currentTree f tc)
-    $ Just
-    $ taa
-      { treeAboveLefts =
-          CNode (treeAboveNode ta) (openForest $ reverse (treeAboveLefts ta) ++ treeAboveRights ta)
-            : treeAboveLefts taa
-      }
+  pure $
+    makeTreeCursorWithAbove g (currentTree f tc) $
+      Just $
+        taa
+          { treeAboveLefts =
+              CNode (treeAboveNode ta) (openForest $ reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
+              treeAboveLefts taa
+          }
 
 data PromoteResult a
   = CannotPromoteTopNode

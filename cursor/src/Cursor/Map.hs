@@ -53,10 +53,9 @@ import Data.Validity.Tree ()
 import GHC.Generics (Generic)
 import Lens.Micro
 
-newtype MapCursor kc vc k v
-  = MapCursor
-      { mapCursorList :: NonEmptyCursor (KeyValueCursor kc vc k v) (k, v)
-      }
+newtype MapCursor kc vc k v = MapCursor
+  { mapCursorList :: NonEmptyCursor (KeyValueCursor kc vc k v) (k, v)
+  }
   deriving (Show, Eq, Generic)
 
 instance (Validity kc, Validity vc, Validity k, Validity v) => Validity (MapCursor kc vc k v)
@@ -87,13 +86,17 @@ mapMapCursor a b c d =
   mapCursorNonEmptyCursorL %~ mapNonEmptyCursor (mapKeyValueCursor a b c d) (\(k, v) -> (c k, d v))
 
 mapCursorNonEmptyCursorL ::
-  Lens (MapCursor kc vc k v) (MapCursor lc wc l w)
-    ( NonEmptyCursor (KeyValueCursor kc vc k v)
+  Lens
+    (MapCursor kc vc k v)
+    (MapCursor lc wc l w)
+    ( NonEmptyCursor
+        (KeyValueCursor kc vc k v)
         ( k,
           v
         )
     )
-    ( NonEmptyCursor (KeyValueCursor lc wc l w)
+    ( NonEmptyCursor
+        (KeyValueCursor lc wc l w)
         ( l,
           w
         )
