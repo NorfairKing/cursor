@@ -1,6 +1,13 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.1.0] - 2021-11-23
+
+### Added
+
+- `listCursorPrevUntil`
+- `listCursorNextUntil`
+- `listCursorInsertList`
+- `listCursorAppendList`
 
 ## [0.3.0.0] - 2020-02-14
 

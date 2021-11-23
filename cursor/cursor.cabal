@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 16c61a4f4465ccff1d4adf2c43926960605b95dfd12a95cc53a03ee524c518a2
+-- hash: 295467a341ff6e00d4d214636b3656ec0c9a1e9edbd8a56c8801ff54b64d7445
 
 name:           cursor
-version:        0.3.0.0
+version:        0.3.1.0
 synopsis:       Purely Functional Cursors
 description:    Purely Functional Cursors for common data structures
                 .
