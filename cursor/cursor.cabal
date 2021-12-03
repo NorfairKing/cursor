@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.34.5.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 295467a341ff6e00d4d214636b3656ec0c9a1e9edbd8a56c8801ff54b64d7445
+-- hash: 6fe2aa234542609cd72561ea24a95b4c776348d851658752b61fdff8c0c80542
 
 name:           cursor
-version:        0.3.1.0
+version:        0.3.2.0
 synopsis:       Purely Functional Cursors
 description:    Purely Functional Cursors for common data structures
                 .

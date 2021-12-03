@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeFamilies #-}
 
 module Cursor.Tree.Types
@@ -106,6 +107,12 @@ instance Validity a => Validity (CTree a)
 
 instance NFData a => NFData (CTree a)
 
+instance Foldable CTree where
+  foldMap f (CNode a cf) = f a `mappend` foldMap f cf
+
+instance Traversable CTree where
+  traverse f (CNode a cf) = CNode <$> f a <*> traverse f cf
+
 makeCTree :: Tree a -> CTree a
 makeCTree = cTree False
 
@@ -124,6 +131,18 @@ data CForest a
 instance Validity a => Validity (CForest a)
 
 instance NFData a => NFData (CForest a)
+
+instance Foldable CForest where
+  foldMap f = \case
+    EmptyCForest -> mempty
+    ClosedForest ne -> foldMap (foldMap f) ne
+    OpenForest ne -> foldMap (foldMap f) ne
+
+instance Traversable CForest where
+  traverse f = \case
+    EmptyCForest -> pure EmptyCForest
+    ClosedForest ne -> ClosedForest <$> traverse (traverse f) ne
+    OpenForest ne -> OpenForest <$> traverse (traverse f) ne
 
 makeCForest :: Forest a -> CForest a
 makeCForest = cForest True

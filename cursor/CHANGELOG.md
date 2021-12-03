@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2.0] - 2021-12-03
+
+### Added
+
+* `Foldable` and `Traversable` instance for `CTree`
+* `Foldable` and `Traversable` instance for `CForest`
+
 ## [0.3.1.0] - 2021-11-23
 
 ### Added
@@ -11,9 +18,9 @@
 
 ## [0.3.0.0] - 2020-02-14
 
-### Changed
+### Added
 
-- NFData instances for benchmarks
+- `NFData` instances for benchmarks
 
 ## [0.2.0.0] - 2019-09-23
 
