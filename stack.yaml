@@ -1,4 +1,4 @@
-resolver: lts-16.12
+resolver: lts-19.6
 packages:
 - cursor
 - cursor-gen
@@ -37,5 +37,7 @@ extra-deps:
   - validity-unordered-containers
   - validity-uuid
   - validity-vector
+system-ghc: true
 nix:
-  shell-file: shell.nix
+  enable: false
+with-hpack: hpack

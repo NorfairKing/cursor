@@ -3,3 +3,4 @@ result*
 *.yaml.lock
 .pre-commit-hooks/
 .pre-commit-config.yaml
+dist-newstyle/
