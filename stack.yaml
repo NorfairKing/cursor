@@ -1,42 +1,7 @@
-resolver: lts-19.6
+resolver: lts-20.23
 packages:
 - cursor
 - cursor-gen
-extra-deps:
-- github: NorfairKing/validity
-  commit: 35bc8d45b27e6c21429e4b681b16e46ccd541b3b
-  subdirs:
-  - genvalidity
-  - genvalidity-aeson
-  - genvalidity-bytestring
-  - genvalidity-containers
-  - genvalidity-criterion
-  - genvalidity-hspec
-  - genvalidity-hspec-aeson
-  - genvalidity-hspec-binary
-  - genvalidity-hspec-cereal
-  - genvalidity-hspec-hashable
-  - genvalidity-hspec-optics
-  - genvalidity-path
-  - genvalidity-property
-  - genvalidity-scientific
-  - genvalidity-text
-  - genvalidity-time
-  - genvalidity-unordered-containers
-  - genvalidity-uuid
-  - genvalidity-vector
-  - validity
-  - validity-aeson
-  - validity-bytestring
-  - validity-containers
-  - validity-path
-  - validity-primitive
-  - validity-scientific
-  - validity-text
-  - validity-time
-  - validity-unordered-containers
-  - validity-uuid
-  - validity-vector
 system-ghc: true
 nix:
   enable: false

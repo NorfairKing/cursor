@@ -8,7 +8,6 @@ import Data.Functor.Compose
 import qualified Data.Text.Internal as T
 import Data.Validity
 import GHC.Generics (Generic)
-import Lens.Micro
 
 isSafeChar :: Char -> Bool
 isSafeChar c = T.safe c == c
@@ -64,7 +63,10 @@ joinPossibleDeletes ::
 joinPossibleDeletes d1 d2 = getCompose $ Compose d1 <|> Compose d2
 
 focusPossibleDeleteOrUpdate ::
-  Lens' b a -> (a -> Maybe (DeleteOrUpdate a)) -> b -> Maybe (DeleteOrUpdate b)
+  ((a -> Compose Maybe DeleteOrUpdate a) -> (b -> Compose Maybe DeleteOrUpdate b)) ->
+  (a -> Maybe (DeleteOrUpdate a)) ->
+  b ->
+  Maybe (DeleteOrUpdate b)
 focusPossibleDeleteOrUpdate l func = getCompose . l (Compose . func)
 
 dullMDelete :: Maybe (DeleteOrUpdate a) -> Maybe a

@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.35.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 22ff370fec49a2935a5592601cfd45bcdce55a0343352c14841cc1d09ceb9de8
+-- hash: ee4620b2c86a02acfddae788eb1060f0b78687a1af5e543307ff491734120642
 
 name:           cursor-gen
 version:        0.4.0.0
@@ -14,7 +14,7 @@ category:       Cursor
 homepage:       https://github.com/NorfairKing/cursor
 author:         Tom Sydney Kerckhove
 maintainer:     syd@cs-syd.eu
-copyright:      Copyright: (c) 2018-2021 Tom Sydney Kerckhove
+copyright:      Copyright: (c) 2018-2022 Tom Sydney Kerckhove
 license:        MIT
 license-file:   LICENSE
 build-type:     Simple
