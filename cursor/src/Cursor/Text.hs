@@ -125,10 +125,10 @@ textCursorSelectBeginWord tc =
         Nothing -> tc
         Just p
           | isSpace p -> case textCursorNextChar tc of
-            Nothing -> goLeft
-            Just n
-              | isSpace n -> goLeft
-              | otherwise -> tc
+              Nothing -> goLeft
+              Just n
+                | isSpace n -> goLeft
+                | otherwise -> tc
           | otherwise -> goLeft
 
 -- | Move to the end of the word
@@ -144,10 +144,10 @@ textCursorSelectEndWord tc =
         Nothing -> tc
         Just p
           | isSpace p -> case textCursorPrevChar tc of
-            Nothing -> goRight
-            Just n
-              | isSpace n -> goRight
-              | otherwise -> tc
+              Nothing -> goRight
+              Just n
+                | isSpace n -> goRight
+                | otherwise -> tc
           | otherwise -> goRight
 
 -- | Move to the beginning of the next word

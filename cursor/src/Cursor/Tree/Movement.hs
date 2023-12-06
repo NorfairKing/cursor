@@ -44,12 +44,14 @@ treeCursorSelect f g sel = makeTreeCursorWithSelection f g sel . rebuildTreeCurs
 
 treeCursorSelectPrev :: (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorSelectPrev f g tc =
-  treeCursorSelectAbovePrev f g tc <|> treeCursorSelectPrevOnSameLevel f g tc
+  treeCursorSelectAbovePrev f g tc
+    <|> treeCursorSelectPrevOnSameLevel f g tc
     <|> treeCursorSelectAbove f g tc
 
 treeCursorSelectNext :: (a -> b) -> (b -> a) -> TreeCursor a b -> Maybe (TreeCursor a b)
 treeCursorSelectNext f g tc =
-  treeCursorSelectBelowAtStart f g tc <|> treeCursorSelectNextOnSameLevel f g tc
+  treeCursorSelectBelowAtStart f g tc
+    <|> treeCursorSelectNextOnSameLevel f g tc
     <|> treeCursorSelectAboveNext f g tc
 
 treeCursorSelectFirst :: (a -> b) -> (b -> a) -> TreeCursor a b -> TreeCursor a b

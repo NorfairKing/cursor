@@ -5,18 +5,20 @@
     extra-trusted-public-keys = "cursor.cachix.org-1:1mqR0v1xbBZm08uXByCpaCm/zom3/HZkP4NXevS+kv8=";
   };
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-23.05";
-    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
-    validity.url = "github:NorfairKing/validity";
-    validity.flake = false;
+    nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-23.11";
+    nixpkgs-23_05.url = "github:NixOS/nixpkgs?ref=nixos-23.05";
     nixpkgs-22_11.url = "github:NixOS/nixpkgs?ref=nixos-22.11";
     nixpkgs-22_05.url = "github:NixOS/nixpkgs?ref=nixos-22.05";
     nixpkgs-21_11.url = "github:NixOS/nixpkgs?ref=nixos-21.11";
+    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
+    validity.url = "github:NorfairKing/validity";
+    validity.flake = false;
   };
 
   outputs =
     { self
     , nixpkgs
+    , nixpkgs-23_05
     , nixpkgs-22_11
     , nixpkgs-22_05
     , nixpkgs-21_11
@@ -44,6 +46,7 @@
             in pkgs'.cursorRelease;
           allNixpkgs = {
             inherit
+              nixpkgs-23_05
               nixpkgs-22_11
               nixpkgs-22_05
               nixpkgs-21_11;
@@ -82,6 +85,10 @@
             cabal2nix
           ]);
         shellHook = self.checks.${system}.pre-commit.shellHook;
+      };
+      nix-ci.cachix = {
+        name = "cursor";
+        public-key = "cursor.cachix.org-1:1mqR0v1xbBZm08uXByCpaCm/zom3/HZkP4NXevS+kv8=";
       };
     };
 }

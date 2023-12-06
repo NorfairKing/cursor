@@ -79,9 +79,9 @@ makeNonEmptyCursorWithSelection g i ne = do
       | i_ < 0 = Nothing
       | i_ == 0 = Just ([], c, rest)
       | otherwise = do
-        ne_ <- NE.nonEmpty rest
-        (l, m, r) <- applyNonEmptySelection ne_ (i_ - 1)
-        pure (c : l, m, r)
+          ne_ <- NE.nonEmpty rest
+          (l, m, r) <- applyNonEmptySelection ne_ (i_ - 1)
+          pure (c : l, m, r)
 
 singletonNonEmptyCursor :: a -> NonEmptyCursor a b
 singletonNonEmptyCursor a =
@@ -145,9 +145,9 @@ nonEmptyCursorSelectIndex ::
   (a -> b) -> (b -> a) -> Int -> NonEmptyCursor a b -> Maybe (NonEmptyCursor a b)
 nonEmptyCursorSelectIndex f g i nec
   | i < nonEmptyCursorSelection nec =
-    nonEmptyCursorSelectPrev f g nec >>= nonEmptyCursorSelectIndex f g i
+      nonEmptyCursorSelectPrev f g nec >>= nonEmptyCursorSelectIndex f g i
   | i > nonEmptyCursorSelection nec =
-    nonEmptyCursorSelectNext f g nec >>= nonEmptyCursorSelectIndex f g i
+      nonEmptyCursorSelectNext f g nec >>= nonEmptyCursorSelectIndex f g i
   | otherwise = Just nec
 
 nonEmptyCursorInsert :: b -> NonEmptyCursor a b -> NonEmptyCursor a b

@@ -62,8 +62,8 @@ treeCursorPromoteElem f g tc = do
       Just $
         taa
           { treeAboveLefts =
-              CNode (treeAboveNode ta) (openForest $ reverse lefts ++ treeAboveRights ta) :
-              treeAboveLefts taa
+              CNode (treeAboveNode ta) (openForest $ reverse lefts ++ treeAboveRights ta)
+                : treeAboveLefts taa
           }
 
 data PromoteElemResult a
@@ -129,8 +129,8 @@ treeCursorPromoteSubTree f g tc = do
       Just $
         taa
           { treeAboveLefts =
-              CNode (treeAboveNode ta) (openForest $ reverse (treeAboveLefts ta) ++ treeAboveRights ta) :
-              treeAboveLefts taa
+              CNode (treeAboveNode ta) (openForest $ reverse (treeAboveLefts ta) ++ treeAboveRights ta)
+                : treeAboveLefts taa
           }
 
 data PromoteResult a
