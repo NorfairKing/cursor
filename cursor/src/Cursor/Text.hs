@@ -79,7 +79,7 @@ rebuildTextCursor :: TextCursor -> Text
 rebuildTextCursor = T.pack . rebuildListCursor . textCursorList
 
 textCursorListCursorL ::
-  Functor f => (ListCursor Char -> f (ListCursor Char)) -> TextCursor -> f TextCursor
+  (Functor f) => (ListCursor Char -> f (ListCursor Char)) -> TextCursor -> f TextCursor
 textCursorListCursorL = lens textCursorList (\tc lc -> tc {textCursorList = lc})
 
 textCursorNull :: TextCursor -> Bool

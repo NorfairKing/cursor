@@ -234,11 +234,11 @@ traverseMapCursor ::
 traverseMapCursor combFunc = foldNonEmptyCursor combFunc . mapCursorList
 
 mapCursorTraverseKeyCase ::
-  Applicative f => (kc -> v -> f (kc', v)) -> MapCursor kc vc k v -> f (MapCursor kc' vc k v)
+  (Applicative f) => (kc -> v -> f (kc', v)) -> MapCursor kc vc k v -> f (MapCursor kc' vc k v)
 mapCursorTraverseKeyCase func = mapCursorElemL $ keyValueCursorTraverseKeyCase func
 
 mapCursorTraverseValueCase ::
-  Applicative f => (k -> vc -> f (k, vc')) -> MapCursor kc vc k v -> f (MapCursor kc vc' k v)
+  (Applicative f) => (k -> vc -> f (k, vc')) -> MapCursor kc vc k v -> f (MapCursor kc vc' k v)
 mapCursorTraverseValueCase func = mapCursorElemL $ keyValueCursorTraverseValueCase func
 
 foldMapCursor :: ([(k, v)] -> KeyValueCursor kc vc k v -> [(k, v)] -> c) -> MapCursor kc vc k v -> c

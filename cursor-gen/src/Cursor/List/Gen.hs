@@ -11,7 +11,7 @@ import Cursor.List
 import Data.GenValidity
 import Test.QuickCheck
 
-instance GenValid a => GenValid (ListCursor a) where
+instance (GenValid a) => GenValid (ListCursor a) where
   genValid =
     sized $ \n -> do
       (a, b) <- genSplit n

@@ -101,9 +101,9 @@ data DemoteResult a
   | Demoted a
   deriving (Show, Eq, Generic, Functor)
 
-instance Validity a => Validity (DemoteResult a)
+instance (Validity a) => Validity (DemoteResult a)
 
-instance NFData a => NFData (DemoteResult a)
+instance (NFData a) => NFData (DemoteResult a)
 
 -- | Demotes the current node to the level of its children, by adding two roots.
 -- One for the current node and one for its children that are left behind.

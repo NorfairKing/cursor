@@ -74,9 +74,9 @@ data TreeAbove b = TreeAbove
   }
   deriving (Show, Eq, Generic, Functor)
 
-instance Validity b => Validity (TreeAbove b)
+instance (Validity b) => Validity (TreeAbove b)
 
-instance NFData b => NFData (TreeAbove b)
+instance (NFData b) => NFData (TreeAbove b)
 
 treeAboveLeftsL :: Lens' (TreeAbove b) [CTree b]
 treeAboveLeftsL = lens treeAboveLefts $ \ta tal -> ta {treeAboveLefts = tal}
@@ -103,9 +103,9 @@ data CTree a
   = CNode !a (CForest a)
   deriving (Show, Eq, Generic, Functor)
 
-instance Validity a => Validity (CTree a)
+instance (Validity a) => Validity (CTree a)
 
-instance NFData a => NFData (CTree a)
+instance (NFData a) => NFData (CTree a)
 
 instance Foldable CTree where
   foldMap f (CNode a cf) = f a `mappend` foldMap f cf
@@ -128,9 +128,9 @@ data CForest a
   | OpenForest !(NonEmpty (CTree a))
   deriving (Show, Eq, Generic, Functor)
 
-instance Validity a => Validity (CForest a)
+instance (Validity a) => Validity (CForest a)
 
-instance NFData a => NFData (CForest a)
+instance (NFData a) => NFData (CForest a)
 
 instance Foldable CForest where
   foldMap f = \case

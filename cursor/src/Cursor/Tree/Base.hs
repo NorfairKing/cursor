@@ -75,7 +75,7 @@ makeTreeCursorWithAbove g (CNode a forest) mta =
 
 traverseTreeCursor ::
   forall a b m c.
-  Monad m =>
+  (Monad m) =>
   ([CTree b] -> b -> [CTree b] -> c -> m c) ->
   (a -> CForest b -> m c) ->
   TreeCursor a b ->

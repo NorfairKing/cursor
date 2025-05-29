@@ -99,7 +99,7 @@ traverseKeyValueCursor :: (kc -> v -> f c) -> (k -> vc -> f c) -> KeyValueCursor
 traverseKeyValueCursor = foldKeyValueCursor
 
 keyValueCursorTraverseKeyCase ::
-  Applicative f =>
+  (Applicative f) =>
   (kc -> v -> f (kc', v')) ->
   KeyValueCursor kc vc k v ->
   f (KeyValueCursor kc' vc k v')
@@ -109,7 +109,7 @@ keyValueCursorTraverseKeyCase func =
     KeyValueCursorValue k vc -> pure (KeyValueCursorValue k vc)
 
 keyValueCursorTraverseValueCase ::
-  Applicative f =>
+  (Applicative f) =>
   (k -> vc -> f (k', vc')) ->
   KeyValueCursor kc vc k v ->
   f (KeyValueCursor kc vc' k' v)

@@ -29,16 +29,16 @@ treeCursorWithPointer TreeCursor {..} =
         Node (show treeAboveNode) $
           concat [map showCTree $ reverse treeAboveLefts, [t], map showCTree treeAboveRights]
 
-showCForest :: Show a => CForest a -> Forest String
+showCForest :: (Show a) => CForest a -> Forest String
 showCForest EmptyCForest = []
 showCForest (ClosedForest ts) = map (fmap ("hidden: " ++) . showTree) $ NE.toList ts
 showCForest (OpenForest ts) = map showCTree $ NE.toList ts
 
-showCTree :: Show a => CTree a -> Tree String
+showCTree :: (Show a) => CTree a -> Tree String
 showCTree (CNode n fs) = Node (show n) $ showCForest fs
 
-showForest :: Show a => Forest a -> Forest String
+showForest :: (Show a) => Forest a -> Forest String
 showForest = map showTree
 
-showTree :: Show a => Tree a -> Tree String
+showTree :: (Show a) => Tree a -> Tree String
 showTree = fmap show

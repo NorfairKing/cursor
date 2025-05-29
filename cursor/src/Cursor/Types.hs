@@ -17,7 +17,7 @@ data DeleteOrUpdate a
   | Updated a
   deriving (Show, Eq, Generic)
 
-instance Validity a => Validity (DeleteOrUpdate a)
+instance (Validity a) => Validity (DeleteOrUpdate a)
 
 instance Functor DeleteOrUpdate where
   fmap _ Deleted = Deleted

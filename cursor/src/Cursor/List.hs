@@ -46,9 +46,9 @@ data ListCursor a = ListCursor
   }
   deriving (Show, Eq, Generic, Functor)
 
-instance Validity a => Validity (ListCursor a)
+instance (Validity a) => Validity (ListCursor a)
 
-instance NFData a => NFData (ListCursor a)
+instance (NFData a) => NFData (ListCursor a)
 
 emptyListCursor :: ListCursor a
 emptyListCursor = ListCursor {listCursorPrev = [], listCursorNext = []}

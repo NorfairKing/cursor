@@ -72,6 +72,6 @@ data SwapResult a
   | Swapped a
   deriving (Show, Eq, Generic, Functor)
 
-instance Validity a => Validity (SwapResult a)
+instance (Validity a) => Validity (SwapResult a)
 
-instance NFData a => NFData (SwapResult a)
+instance (NFData a) => NFData (SwapResult a)

@@ -73,9 +73,9 @@ data PromoteElemResult a
   | PromotedElem a
   deriving (Show, Eq, Generic, Functor)
 
-instance Validity a => Validity (PromoteElemResult a)
+instance (Validity a) => Validity (PromoteElemResult a)
 
-instance NFData a => NFData (PromoteElemResult a)
+instance (NFData a) => NFData (PromoteElemResult a)
 
 instance Applicative PromoteElemResult where
   pure = PromotedElem
@@ -139,9 +139,9 @@ data PromoteResult a
   | Promoted a
   deriving (Show, Eq, Generic, Functor)
 
-instance Validity a => Validity (PromoteResult a)
+instance (Validity a) => Validity (PromoteResult a)
 
-instance NFData a => NFData (PromoteResult a)
+instance (NFData a) => NFData (PromoteResult a)
 
 instance Applicative PromoteResult where
   pure = Promoted

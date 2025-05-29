@@ -17,23 +17,23 @@ instance GenValid TreeCursorSelection where
   genValid = genValidStructurallyWithoutExtraChecking
   shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
-instance GenValid a => GenValid (SwapResult a) where
+instance (GenValid a) => GenValid (SwapResult a) where
   genValid = genValidStructurallyWithoutExtraChecking
   shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
-instance GenValid a => GenValid (PromoteElemResult a) where
+instance (GenValid a) => GenValid (PromoteElemResult a) where
   genValid = genValidStructurallyWithoutExtraChecking
   shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
-instance GenValid a => GenValid (PromoteResult a) where
+instance (GenValid a) => GenValid (PromoteResult a) where
   genValid = genValidStructurallyWithoutExtraChecking
   shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
-instance GenValid a => GenValid (DemoteResult a) where
+instance (GenValid a) => GenValid (DemoteResult a) where
   genValid = genValidStructurallyWithoutExtraChecking
   shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
-instance GenValid a => GenValid (CTree a) where
+instance (GenValid a) => GenValid (CTree a) where
   genValid =
     sized $ \n -> do
       (a, b) <- genSplit n
@@ -42,7 +42,7 @@ instance GenValid a => GenValid (CTree a) where
       pure $ CNode val for
   shrinkValid (CNode a cf) = [CNode a' cf' | (a', cf') <- shrinkValid (a, cf)]
 
-instance GenValid a => GenValid (CForest a) where
+instance (GenValid a) => GenValid (CForest a) where
   genValid =
     sized $ \case
       0 -> pure EmptyCForest
@@ -63,7 +63,7 @@ instance (GenValid a, GenValid b) => GenValid (TreeCursor a b) where
       pure TreeCursor {..}
   shrinkValid = shrinkValidStructurallyWithoutExtraFiltering
 
-instance GenValid b => GenValid (TreeAbove b) where
+instance (GenValid b) => GenValid (TreeAbove b) where
   genValid =
     sized $ \n -> do
       s <- upTo n
