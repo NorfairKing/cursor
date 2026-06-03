@@ -5,17 +5,15 @@
     extra-trusted-public-keys = "cursor.cachix.org-1:1mqR0v1xbBZm08uXByCpaCm/zom3/HZkP4NXevS+kv8=";
   };
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-25.05";
-    nixpkgs-24_11.url = "github:NixOS/nixpkgs?ref=nixos-24.11";
-    nixpkgs-24_05.url = "github:NixOS/nixpkgs?ref=nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-26.05";
+    nixpkgs-25_11.url = "github:NixOS/nixpkgs?ref=nixos-25.11";
     pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
   };
 
   outputs =
     { self
     , nixpkgs
-    , nixpkgs-24_11
-    , nixpkgs-24_05
+    , nixpkgs-25_11
     , pre-commit-hooks
     }:
     let
@@ -38,8 +36,7 @@
             in pkgs'.cursorRelease;
           allNixpkgs = {
             inherit
-              nixpkgs-24_11
-              nixpkgs-24_05;
+              nixpkgs-25_11;
           };
           backwardCompatibilityChecks = pkgs.lib.mapAttrs (_: nixpkgs: backwardCompatibilityCheckFor nixpkgs) allNixpkgs;
         in
